@@ -1,0 +1,12 @@
+{
+  "name": "@tharros/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./next": "./next.js"
+  },
+  "dependencies": {
+    "eslint-config-prettier": "^9.1.0"
+  }
+}

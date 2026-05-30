@@ -1,0 +1,8 @@
+node_modules
+.next
+out
+dist
+build
+.turbo
+pnpm-lock.yaml
+docs/Tharros-Launch-Roadmap.html

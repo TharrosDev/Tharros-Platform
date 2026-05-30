@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tharros — Launch Roadmap</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --panel2:#eef1f5; --ink:#1c2128; --muted:#5b6470;
+    --line:#dce0e6; --accent:#2563eb; --done:#16a34a; --risk:#b45309; --risk-bg:#fff7ed;
+    --milestone:#f0fdf4; --milestone-line:#bbf7d0;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:980px;margin:0 auto;padding:32px 20px 120px}
+  header{position:sticky;top:0;background:linear-gradient(180deg,var(--bg) 70%,transparent);padding:18px 0 14px;z-index:5}
+  h1{margin:0 0 4px;font-size:28px;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:14px;margin:0}
+  .bar{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
+  .progress{flex:1;min-width:220px;height:10px;background:var(--panel2);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .progress > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--done));transition:width .25s ease}
+  .pct{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);min-width:130px;text-align:right}
+  .controls{display:flex;gap:8px;flex-wrap:wrap}
+  button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  .intro{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:18px 0;color:var(--muted);font-size:14.5px}
+  .intro b{color:var(--ink)}
+  h2{margin:38px 0 4px;font-size:20px;letter-spacing:-.01em}
+  .phase-meta{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .phasebar{height:6px;background:var(--panel2);border-radius:99px;overflow:hidden;border:1px solid var(--line);margin:0 0 14px}
+  .phasebar > i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+  ul{list-style:none;margin:0;padding:0}
+  li.task{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin:8px 0;transition:.15s}
+  li.task:hover{border-color:#3a4150}
+  li.task.risk{background:var(--risk-bg);border-color:#fed7aa}
+  li.done{opacity:.55}
+  li.done .txt{text-decoration:line-through;text-decoration-color:var(--muted)}
+  input[type=checkbox]{appearance:none;-webkit-appearance:none;width:20px;height:20px;border:2px solid var(--line);border-radius:6px;cursor:pointer;flex:0 0 auto;margin-top:2px;position:relative;background:var(--panel2)}
+  input[type=checkbox]:checked{background:var(--done);border-color:var(--done)}
+  input[type=checkbox]:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid #0f1115;border-width:0 2px 2px 0;transform:rotate(45deg)}
+  .txt{flex:1}
+  .day{font-weight:700;color:var(--accent)}
+  li.risk .day{color:var(--risk)}
+  .flag{display:inline-block;background:#fef3c7;color:var(--risk);border:1px solid #fcd34d;border-radius:5px;font-size:11px;font-weight:700;padding:1px 6px;margin-left:6px;vertical-align:middle}
+  .milestone{background:var(--milestone);border:1px solid var(--milestone-line);border-left:4px solid var(--done);border-radius:8px;padding:11px 14px;margin:12px 0 6px;font-size:14.5px;color:#14532d}
+  .milestone b{color:var(--done)}
+  .checklist h2{color:var(--risk)}
+  .cl-group{margin:14px 0}
+  .cl-group h3{margin:0 0 8px;font-size:15px;color:var(--ink)}
+  .risks li{display:list-item;margin:6px 0;color:var(--muted)}
+  .risks{list-style:decimal;padding-left:22px}
+  .risks b{color:var(--ink)}
+  footer{margin-top:50px;color:var(--muted);font-size:12.5px;text-align:center}
+  @media print{header{position:static}.controls{display:none}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Tharros — Launch Roadmap</h1>
+  <p class="sub">Solo-dev, full-time · 95 working days (~19 weeks / ~4.5 months) · Day 1 → public launch</p>
+  <div class="bar">
+    <div class="progress"><i id="globalBar"></i></div>
+    <div class="pct" id="globalPct">0 / 0 · 0%</div>
+  </div>
+  <div class="bar">
+    <div class="controls">
+      <button onclick="setAll(true)">Check all</button>
+      <button onclick="setAll(false)">Reset all</button>
+      <button onclick="window.print()">Print / Save PDF</button>
+    </div>
+  </div>
+</header>
+
+<div class="intro">
+  <b>How to use:</b> Tick a day to mark it done — progress saves automatically in this browser (localStorage), so close and reopen anytime.
+  Items marked <span class="flag">⚠ RISK</span> carry significant complexity. <b>Biggest scoping risk:</b> shipping three products at once.
+  Products 2 &amp; 3 share the n8n + connector layer (sequenced before them). If the timeline slips, the clean cut is to launch
+  P1 (Assistant) + P2 (Lead Follow-Up) and fast-follow P3 (Workflow Hub).
+</div>
+
+<main id="content"></main>
+
+<section class="checklist">
+<h2>Launch Checklist — Gates Before Going Live</h2>
+<div id="checklist"></div>
+</section>
+
+<section>
+<h2>Top Timeline Risks</h2>
+<ol class="risks">
+<li><b>Self-hosted n8n</b> — your one stateful piece of infra to operate (networking, cred isolation, backups, multi-tenant concurrency). Consider n8n Cloud if ops drag.</li>
+<li><b>"No-n8n-UI" abstraction (P3)</b> — translating plain-language config into provisioned n8n workflows is hard. Keep V1 to parameterized templates.</li>
+<li><b>RAG groundedness (P1)</b> — one confident wrong answer loses non-technical trust. Citations + "I don't know" are non-negotiable.</li>
+<li><b>Unit economics</b> — three Claude-heavy products on a flat subscription. Measure cost-per-active-org before launch; cap by plan.</li>
+<li><b>Compliance (PIPEDA/CASL)</b> — legal gates, not nice-to-haves. Don't launch P2 messaging without CASL.</li>
+<li><b>Scope (three products solo)</b> — pressure valve: launch P1 + P2, fast-follow P3 (shared infra = clean cut).</li>
+</ol>
+</section>
+
+<footer>Generated 2026-05-29 · Tharros AI operating layer for small businesses · "Keep it Local, Keep it Canadian."</footer>
+</div>
+
+<script>
+const DATA = [
+ {phase:"Phase 0 — Foundation & Infrastructure", range:"Days 1–8",
+  tasks:[
+   ["1","Repo + tooling skeleton","Next.js 16 (App Router) + TS strict + Tailwind v4 + shadcn/ui, ESLint/Prettier, pnpm, path aliases, husky + lint-staged.",false],
+   ["2","Vercel + environments","Connect repo, Preview/Prod env scoping, custom domain + DNS + SSL, hello-world deploy.",false],
+   ["3","Supabase provisioning","Create project (Canada ca-central region for data residency), enable pgvector + pg_cron, wire @supabase/ssr.",true],
+   ["4","Accounts + secrets vault","Stripe, Anthropic, Nango, self-hosted n8n (Docker on Railway/Fly/Hetzner). Keys in Vercel env + .env.example + SECRETS.md.",true],
+   ["5","Design system + tokens","Tailwind theme tokens, dark/light, base shadcn components, brand primitives, SMB-friendly voice.",false],
+   ["6","App shell + layout","Authed layout: sidebar (3 products + Settings + Billing), top bar, command palette stub, responsive collapse, marketing/app route split.",false],
+   ["7","Observability baseline","Sentry, structured logging, global error boundary, /health, Vercel Analytics, DB-backed feature flags.",false],
+   ["8","Buffer / infra hardening","n8n HTTPS + API auth behind key + IP allowlist; smoke-test Claude + Nango sandbox from server routes.",true],
+  ],
+  milestone:"Deployed app shell on real domain, theming, sidebar nav, all external services authenticated and reachable, error tracking live."},
+
+ {phase:"Phase 1 — Auth, Multi-Tenancy & Billing", range:"Days 9–20",
+  tasks:[
+   ["9","Auth flows","Email/password + Google OAuth, verification, password reset, SSR cookie sessions, protected middleware.",false],
+   ["10","Multi-tenant data model","organizations, org_members (owner/admin/staff), profiles; org_id on every table; current_org_id() helper.",true],
+   ["11","Row-Level Security","Highest-risk security task. RLS on every table, membership/role helpers, test harness proving cross-tenant isolation.",true],
+   ["12","Org onboarding","Create org, business name/industry/size, owner role, org switcher, seed default settings.",false],
+   ["13","Team management","Tokenized email invites + expiry, accept flow, role assignment, member removal, pending list.",false],
+   ["14","Stripe products + pricing","Flat monthly per business, Stripe Tax (GST/HST), customer portal, 14-day trial.",true],
+   ["15","Stripe Checkout","Session tied to org_id, success/cancel handling, redirect into onboarding.",false],
+   ["16","Stripe webhooks","Reliability-critical. checkout/subscription/payment_failed events, idempotent, signature-verified, persist to subscriptions.",true],
+   ["17","Plan gating + entitlements","Subscription status → access, guards on expiry/failed payment, grace-period + dunning banners.",false],
+   ["18","Billing settings page","Plan, renewal, invoices, manage-billing portal, cancel/reactivate.",false],
+   ["19","Account & org settings","Profile, business profile, notif prefs, danger zone (cascading delete for PIPEDA).",true],
+   ["20","Buffer / E2E auth+billing","Signup → org → invite → subscribe → gated → cancel → revoked. Playwright spine.",false],
+  ],
+  milestone:"Business self-serves zero → paying subscriber with isolated tenant + team. RLS verified. Live Stripe test-mode subscription end to end."},
+
+ {phase:"Phase 2 — Product 1: AI Business Assistant / RAG", range:"Days 21–34",
+  tasks:[
+   ["21","Document storage + model","Org-scoped Storage buckets (RLS), documents, document_chunks (vector), ingestion_jobs.",false],
+   ["22","Upload UI","Drag-drop multi-file (PDF/DOCX/TXT/MD), progress, status list, delete, re-index.",false],
+   ["23","Text extraction","Parse PDF/DOCX/TXT; handle scanned/garbage PDFs gracefully (flag for OCR or reject clearly).",true],
+   ["24","Chunking + embedding job","Token-aware chunking + overlap + metadata; embed + store vectors; background job (Edge Function/queue), not request thread.",true],
+   ["25","Vector retrieval","pgvector similarity (HNSW/IVFFlat), org-scoped top-k + metadata filter; tune recall on test corpus.",false],
+   ["26","RAG query pipeline","Retrieve → context → Claude grounded prompt (cite sources, 'I don't know'); prompt caching on system prompt + static context.",true],
+   ["27","Chat UI","Streaming, history, source citations (click to view), conversation list, persistence per org/user.",false],
+   ["28","Citations + trust UX","Inline citation chips, 'based on N documents,' confidence/empty states.",false],
+   ["29","Generation templates","Draft email / write SOP / summarize policy quick-actions, editable output, copy/export.",false],
+   ["30","Knowledge management","Tagging, library search, usage stats (which docs cited), re-index controls.",false],
+   ["31","Cost + rate controls","Per-org token metering, plan-tied caps, Claude rate-limit handling + backoff, admin cost dashboard.",true],
+   ["32","Quality eval pass","Q&A eval set, measure groundedness/citation accuracy, tune chunk size/top-k/prompts.",false],
+   ["33","Assistant polish","Empty states, 'upload first 3 docs' onboarding, skeletons, mobile chat, error recovery.",false],
+   ["34","Buffer / Assistant E2E","Upload → ingest → query → cited answer → draft email. Playwright happy path.",false],
+  ],
+  milestone:"Business uploads real SOPs, gets accurate cited answers + drafted emails. Demo: ingest 20-page handbook, 5 questions, citations, generated customer email."},
+
+ {phase:"Phase 3 — Connector Foundation (Nango + n8n)", range:"Days 35–43",
+  tasks:[
+   ["35","Nango setup + model","Provider configs (Google, CRM, Calendly), org-scoped connections table; decide self-hosted vs Nango Cloud.",true],
+   ["36","OAuth connect flow","Connect UI → Nango auth → store + health status → disconnect/reconnect; token-refresh + scope-error handling.",true],
+   ["37","Google Workspace connector","Gmail send/read, Calendar read/create, Drive/Docs read via Nango proxy; typed GoogleConnector service.",false],
+   ["38","CRM connector","Pick ONE for V1 (HubSpot recommended for SMB free tier). Contacts/deals create/update/search; typed wrapper.",true],
+   ["39","Calendly connector","Event types, availability, scheduling links, booking webhooks; typed wrapper.",false],
+   ["40","Email (SMTP/IMAP) + web forms","Generic SMTP/IMAP for non-Gmail; native embeddable form → webhook; Typeform/Jotform webhook ingestion.",false],
+   ["41","n8n REST integration layer","Keystone for P2 & P3. Create/activate/trigger workflows via REST, inject org-scoped creds, read execution status, org→workflow namespacing.",true],
+   ["42","Connector health + webhooks intake","Unified signed webhook endpoint, health badges, reconnect prompts, connector event audit log.",false],
+   ["43","Buffer / connector hardening","Token refresh edge cases, scope revocation, per-provider rate limits, webhook retry/dead-letter.",false],
+  ],
+  milestone:"Business connects Google + CRM + Calendly; healthy, survive token refresh; Tharros reads/writes each and triggers an n8n workflow."},
+
+ {phase:"Phase 4 — Product 2: Lead Capture + AI Follow-Up Agent", range:"Days 44–58",
+  tasks:[
+   ["44","Lead data model","Org-scoped leads, lead_messages, lead_events, conversations; status pipeline; source attribution.",false],
+   ["45","Lead intake","Capture from native form + Typeform/Jotform + inbound email; normalize; dedup.",true],
+   ["46","Conversation engine","Core IP. Claude qualifying conversation, configurable questions, intent detection, on-brand guardrails.",true],
+   ["47","Channel delivery","Send/receive over email (Gmail/SMTP), thread tracking, reply parsing. (SMS via Twilio = fast-follow.)",false],
+   ["48","Booking automation","Offer Calendly slots / create event when qualified, confirm, write to CRM + calendar, handle reschedule/cancel.",false],
+   ["49","Follow-up + reminders","Time-based sequences via n8n + pg_cron: no-reply nudges, pre-appt reminders, no-show re-engage; stop conditions, quiet hours, caps.",true],
+   ["50","CRM sync","Auto create/update contact + deal per stage, log transcript, bidirectional status, idempotent.",true],
+   ["51","Agent configuration UI","Plain-language business context, qualifying questions, tone, booking rules, escalation triggers — no JSON.",false],
+   ["52","Lead inbox / human-in-the-loop","Live conversation view, AI-handling/take-over toggle, manual reply, won/lost, notes.",true],
+   ["53","Notifications","Owner alerts on new lead/booking/escalation (email + in-app), daily digest.",false],
+   ["54","Lead pipeline dashboard","Kanban + list, conversion metrics, response-time stats, source performance.",false],
+   ["55","Opt-out + compliance","CASL-required. Unsubscribe, consent tracking, suppression list, sender ID in messages.",true],
+   ["56","Cost/rate controls + reliability","Per-org metering, send rate limits, n8n execution monitoring, failure alerts + retries.",false],
+   ["57","Agent quality eval","Simulate 10–15 lead conversations (eager/hesitant/off-topic/hostile), tune prompts + guardrails.",false],
+   ["58","Buffer / Product 2 E2E","Form → qualify → book → CRM → reminder → owner takeover. Playwright + manual scenarios.",false],
+  ],
+  milestone:"Submit a lead, AI converses, qualifies, books a real slot, updates CRM, schedules reminder — owner can take over."},
+
+ {phase:"Phase 5 — Product 3: Workflow Automation Hub", range:"Days 59–70",
+  tasks:[
+   ["59","Workflow model + n8n mapping","workflows, workflow_runs, workflow_templates; map to n8n workflows; org cred injection; run-status sync.",true],
+   ["60","Template library","6–10 prebuilt SMB templates (lead→CRM+Slack+welcome, form→task→notify, booking→prep doc+reminder), parameterized n8n workflows.",false],
+   ["61","Template install flow","The hard 'no-n8n-UI' abstraction. Pick template → map accounts in plain language → activate → provision n8n behind scenes.",true],
+   ["62","Trigger management","Webhook/schedule/event triggers surfaced simply, enable/disable, per-org trigger URLs.",false],
+   ["63","AI summary + routing nodes","Claude steps: summarize thread, classify/route inbound message, extract structured fields downstream.",false],
+   ["64","Run history + observability","Per-workflow run log, step success/failure, redacted I/O, re-run, plain-language errors.",true],
+   ["65","Light visual editor (scoped)","Scope risk — minimal. Parameter config + step toggles only; do NOT rebuild n8n canvas. Linear step view.",true],
+   ["66","Cross-product wiring","Let P2 leads + P1 assistant be steps/triggers (new lead → assistant drafts reply → owner approves → send).",false],
+   ["67","Failure handling + alerts","Retries, dead-letter, owner notify on failure, n8n health monitoring.",true],
+   ["68","Workflow dashboard","Active automations, runs today, time-saved estimate, errors needing attention.",false],
+   ["69","Workflow quality + load test","Run all templates on real accounts, concurrency-test n8n across orgs, fix mapping/cred bugs.",true],
+   ["70","Buffer / Product 3 E2E","Install → map → trigger → multi-step run with AI summary → side effects → run history.",false],
+  ],
+  milestone:"Owner installs a template, maps own tools in plain language, runs multi-step automations with AI summaries — never touching n8n."},
+
+ {phase:"Phase 6 — Dashboard Polish & Cross-Cutting", range:"Days 71–78",
+  tasks:[
+   ["71","Unified home dashboard","Leads this week, questions answered, automations run, time saved, connection health, 'needs attention' feed.",false],
+   ["72","Onboarding wizard","Activation-critical. First-run: org → connect 1 tool → upload 1 doc → install 1 workflow; progress checklist + nudges.",true],
+   ["73","Global search + command palette","Search leads/docs/workflows, quick actions, keyboard + mobile.",false],
+   ["74","Notifications center","Unified in-app + email, preferences, digest scheduling.",false],
+   ["75","Empty/loading/error states","Audit every screen for non-technical users: plain language, no stack traces, clear next actions.",false],
+   ["76","Responsive + mobile pass","Full responsive audit of all three products + dashboard.",false],
+   ["77","Accessibility + performance","Keyboard nav, ARIA, contrast, focus; Lighthouse/CWV; lazy-load, image opt, code splitting.",false],
+   ["78","Settings consolidation + help","Unified settings IA, in-app help/tooltips, contextual docs, support widget.",false],
+  ],
+  milestone:"One polished product with guided onboarding, meaningful home dashboard, consistent UX across all three products on desktop + mobile."},
+
+ {phase:"Phase 7 — Security, Compliance & Hardening", range:"Days 79–86",
+  tasks:[
+   ["79","RLS + authz audit","Re-verify every policy, attempt cross-tenant access on every endpoint, storage isolation, role permissions.",true],
+   ["80","Secrets + connector security","Rotate/scope keys, verify Nango token storage, per-org n8n cred isolation, webhook signatures, lock n8n admin.",false],
+   ["81","PIPEDA + CASL compliance","Legal gate. Privacy policy, terms, DPA, consent + export + deletion flows, CASL messaging, data residency. (Lawyer review.)",true],
+   ["82","Rate limiting + abuse prevention","Per-org API quotas, Claude/n8n spend caps, auth brute-force protection, input validation, upload scanning/limits.",false],
+   ["83","Backup + DR","Supabase backups + restore test, n8n backup/rebuild runbook (weak point — test from scratch), incident runbook.",true],
+   ["84","Load + cost testing","Simulate N concurrent orgs, measure Claude/embedding/n8n/Supabase cost per active org vs subscription price, tune caching + caps.",true],
+   ["85","Monitoring + alerting","Uptime, error-rate, cost, connector-failure, n8n-health alerts to phone/email.",false],
+   ["86","Full regression E2E","Run complete Playwright suite, manual exploratory across all three products together, fix critical bugs.",false],
+  ],
+  milestone:"Verified tenant isolation, compliant legal + consent flows, tested backups, known unit economics, live monitoring."},
+
+ {phase:"Phase 8 — Beta & Pre-Launch", range:"Days 87–92",
+  tasks:[
+   ["87","Closed beta deploy","Final prod config, seed onboarding content, live-mode Stripe restricted access, onboard 3–5 friendly Ottawa SMBs.",false],
+   ["88","Beta onboarding + support","Hand-hold first businesses, watch where they stick, instrument funnel analytics.",false],
+   ["89","Beta fixes round 1","Triage + fix highest-impact usability + reliability issues.",false],
+   ["90","Beta fixes round 2 + content","Second fix pass; finalize marketing site, pricing page, demo video, help docs.",false],
+   ["91","Billing lifecycle verification","Live-mode subscribe, tax, invoice, dunning, cancel, refund with real cards; trial→paid path.",true],
+   ["92","Launch-readiness review","Run full launch checklist, fix blockers, freeze scope.",false],
+  ],
+  milestone:"3–5 real businesses in production, at least one paying converted customer."},
+
+ {phase:"Phase 9 — Launch", range:"Days 93–95",
+  tasks:[
+   ["93","Final pre-flight","All gates green, status page live, support inbox ready, rollback plan documented.",false],
+   ["94","Go live","Open public signup, marketing site live, announce (network, Ottawa SMB channels, LinkedIn), monitor in real time, be at keyboard all day.",true],
+   ["95","Day-1 ops + hotfix buffer","Watch errors/costs/conversions, hotfix, respond to support, collect post-launch backlog.",false],
+  ],
+  milestone:"LAUNCH — Public, paid, self-serve signup live; landing → subscribed → using all three products unaided; monitoring + support operational."},
+];
+
+const CHECKLIST = [
+ ["Security & Tenancy",[
+   "RLS verified on every table; cross-tenant access attempts fail",
+   "Storage buckets org-isolated; file access authorized",
+   "All webhooks verify signatures; n8n admin locked + IP-restricted",
+   "Secrets rotated, scoped, absent from client bundle/logs",
+   "Input validation + file-upload limits/scanning",
+ ]],
+ ["Auth & Billing",[
+   "Signup, login, OAuth, verification, password reset work",
+   "Live Stripe: subscribe, trial→paid, cancel, reactivate, refund tested",
+   "Tax (GST/HST) correct; invoices generate; customer portal works",
+   "Failed-payment dunning + access revocation verified",
+   "Plan gating blocks access on expiry",
+ ]],
+ ["Products",[
+   "P1: upload → ingest → cited grounded answers; generation templates",
+   "P2: lead → qualify → book → CRM sync → reminder → human takeover",
+   "P3: install → map tools → multi-step run → AI summary → run history",
+   "P1 hallucination guardrails + P2 conversation guardrails verified",
+   "All V1 connectors connect + survive token refresh",
+ ]],
+ ["Compliance (Canada)",[
+   "Privacy policy, terms, DPA published (lawyer-reviewed)",
+   "PIPEDA: data export + deletion work; data residency confirmed",
+   "CASL: consent tracking, unsubscribe, sender ID in all messages",
+   "Consent recorded at signup",
+ ]],
+ ["Reliability & Cost",[
+   "Supabase backups verified + restore tested",
+   "n8n rebuild-from-scratch runbook tested",
+   "Per-org cost < subscription margin (unit economics positive)",
+   "Spend caps + rate limits on Claude, embeddings, n8n, messaging",
+   "Uptime, error, cost, connector-failure alerts firing",
+ ]],
+ ["Quality & Ops",[
+   "Full E2E Playwright suite green",
+   "Mobile + accessibility + Lighthouse pass",
+   "Onboarding wizard completes for a brand-new user",
+   "Every screen has plain-language empty/loading/error states",
+   "Status page, support inbox, rollback plan ready",
+   "At least one real beta customer using all three products",
+ ]],
+];
+
+const KEY="tharros-roadmap-v1";
+let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+function save(){localStorage.setItem(KEY, JSON.stringify(state));}
+
+function makeTask(id, label){
+  const li=document.createElement("li");
+  li.className="task";
+  const cb=document.createElement("input");
+  cb.type="checkbox"; cb.id=id; cb.checked=!!state[id];
+  if(cb.checked) li.classList.add("done");
+  cb.addEventListener("change",()=>{
+    state[id]=cb.checked; save();
+    li.classList.toggle("done",cb.checked);
+    render();
+  });
+  const lab=document.createElement("label");
+  lab.className="txt"; lab.htmlFor=id; lab.innerHTML=label;
+  li.appendChild(cb); li.appendChild(lab);
+  return {li,cb};
+}
+
+function build(){
+  const root=document.getElementById("content");
+  DATA.forEach((ph,pi)=>{
+    const h=document.createElement("h2"); h.textContent=ph.phase; root.appendChild(h);
+    const m=document.createElement("p"); m.className="phase-meta"; m.textContent=ph.range; root.appendChild(m);
+    const pbWrap=document.createElement("div"); pbWrap.className="phasebar";
+    const pb=document.createElement("i"); pb.id="pbar-"+pi; pbWrap.appendChild(pb); root.appendChild(pbWrap);
+    const ul=document.createElement("ul");
+    ph.tasks.forEach(t=>{
+      const [day,title,desc,risk]=t;
+      const id="d"+day;
+      const label=`<span class="day">Day ${day} — ${title}</span>${risk?'<span class="flag">⚠ RISK</span>':''}<br><span style="color:var(--muted);font-size:14px">${desc}</span>`;
+      const {li}=makeTask(id,label);
+      if(risk) li.classList.add("risk");
+      ul.appendChild(li);
+    });
+    root.appendChild(ul);
+    const ms=document.createElement("div"); ms.className="milestone";
+    ms.innerHTML=`<b>✅ Milestone:</b> ${ph.milestone}`; root.appendChild(ms);
+  });
+
+  const cl=document.getElementById("checklist");
+  CHECKLIST.forEach((g,gi)=>{
+    const div=document.createElement("div"); div.className="cl-group";
+    const h=document.createElement("h3"); h.textContent=g[0]; div.appendChild(h);
+    const ul=document.createElement("ul");
+    g[1].forEach((item,ii)=>{
+      const id="cl"+gi+"_"+ii;
+      const {li}=makeTask(id,`<span style="font-size:14.5px">${item}</span>`);
+      ul.appendChild(li);
+    });
+    div.appendChild(ul); cl.appendChild(div);
+  });
+}
+
+function render(){
+  let total=0,done=0;
+  DATA.forEach((ph,pi)=>{
+    let pt=0,pd=0;
+    ph.tasks.forEach(t=>{pt++;total++;if(state["d"+t[0]]){pd++;done++;}});
+    const bar=document.getElementById("pbar-"+pi);
+    if(bar) bar.style.width=(pt?Math.round(pd/pt*100):0)+"%";
+  });
+  CHECKLIST.forEach((g,gi)=>g[1].forEach((_,ii)=>{total++;if(state["cl"+gi+"_"+ii])done++;}));
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById("globalBar").style.width=pct+"%";
+  document.getElementById("globalPct").textContent=`${done} / ${total} · ${pct}%`;
+}
+
+function setAll(v){
+  document.querySelectorAll('input[type=checkbox]').forEach(cb=>{
+    cb.checked=v; state[cb.id]=v;
+    cb.closest("li").classList.toggle("done",v);
+  });
+  save(); render();
+}
+
+build(); render();
+</script>
+</body>
+</html>
