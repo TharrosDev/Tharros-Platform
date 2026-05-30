@@ -60,5 +60,11 @@ environments, or the next deploy will fail validation.
   `MSYS_NO_PATHCONV=1 vercel api "/v10/projects/<id>/env?teamId=<team>" -X POST --input body.json`
   where `body.json` is `{"key":...,"value":...,"type":"encrypted","target":["preview"]}`.
   Production and Development add fine via `printf %s "$value" | vercel env add NAME <env>`.
+- **Turborepo strict env mode:** any var read at **build time** (e.g. via
+  `src/env.ts`, which `next.config.ts` imports) must be listed in the `build`
+  task's `env` array in `turbo.json`, or Turbo strips it from the build and
+  validation fails on Vercel with "received undefined". `NEXT_PUBLIC_*` vars are
+  auto-inferred but are listed explicitly there too. Add new build-time keys to
+  both `env.ts` and `turbo.json`.
 - **Never paste a secret into a committed file, a log, or a PR.** `.env.example`
   carries placeholders only.
