@@ -98,7 +98,7 @@
 </ol>
 </section>
 
-<footer>Generated 2026-05-29 · Tharros AI operating layer for small businesses · "Keep it Local, Keep it Canadian."</footer>
+<footer>Generated 2026-05-29 · updated 2026-05-30 (through Day 4) · Tharros AI operating layer for small businesses · "Keep it Local, Keep it Canadian."</footer>
 </div>
 
 <script>
@@ -108,7 +108,7 @@ const DATA = [
    ["1","Repo + tooling skeleton","Next.js 16 (App Router) + TS strict + Tailwind v4 + shadcn/ui, ESLint/Prettier, pnpm, path aliases, husky + lint-staged.",false],
    ["2","Vercel + environments","Connect repo, Preview/Prod env scoping, custom domain + DNS + SSL, hello-world deploy.",false],
    ["3","Supabase provisioning","Create project (Canada ca-central region for data residency), enable pgvector + pg_cron, wire @supabase/ssr.",true],
-   ["4","Accounts + secrets vault","Stripe, Anthropic, Nango, self-hosted n8n (Docker on Railway/Fly/Hetzner). Keys in Vercel env + .env.example + SECRETS.md.",true],
+   ["4","Accounts + secrets vault","Stripe (test) + Anthropic + Supabase secret key vaulted to Vercel env (prod/preview/dev) + .env.example + SECRETS.md, behind a validated zod env module (fails build on missing keys). Nango deferred to Day 35, self-hosted n8n deferred to Day 41.",false],
    ["5","Design system + tokens","Tailwind theme tokens, dark/light, base shadcn components, brand primitives, SMB-friendly voice.",false],
    ["6","App shell + layout","Authed layout: sidebar (3 products + Settings + Billing), top bar, command palette stub, responsive collapse, marketing/app route split.",false],
    ["7","Observability baseline","Sentry, structured logging, global error boundary, /health, Vercel Analytics, DB-backed feature flags.",false],
@@ -154,13 +154,13 @@ const DATA = [
 
  {phase:"Phase 3 — Connector Foundation (Nango + n8n)", range:"Days 35–43",
   tasks:[
-   ["35","Nango setup + model","Provider configs (Google, CRM, Calendly), org-scoped connections table; decide self-hosted vs Nango Cloud.",true],
+   ["35","Nango setup + model","Create Nango account + keys here (deferred from Day 4). Provider configs (Google, CRM, Calendly), org-scoped connections table; decide self-hosted vs Nango Cloud.",true],
    ["36","OAuth connect flow","Connect UI → Nango auth → store + health status → disconnect/reconnect; token-refresh + scope-error handling.",true],
    ["37","Google Workspace connector","Gmail send/read, Calendar read/create, Drive/Docs read via Nango proxy; typed GoogleConnector service.",false],
    ["38","CRM connector","Pick ONE for V1 (HubSpot recommended for SMB free tier). Contacts/deals create/update/search; typed wrapper.",true],
    ["39","Calendly connector","Event types, availability, scheduling links, booking webhooks; typed wrapper.",false],
    ["40","Email (SMTP/IMAP) + web forms","Generic SMTP/IMAP for non-Gmail; native embeddable form → webhook; Typeform/Jotform webhook ingestion.",false],
-   ["41","n8n REST integration layer","Keystone for P2 & P3. Create/activate/trigger workflows via REST, inject org-scoped creds, read execution status, org→workflow namespacing.",true],
+   ["41","n8n REST integration layer","Keystone for P2 & P3. Provision/host n8n here (deferred from Day 4). Create/activate/trigger workflows via REST, inject org-scoped creds, read execution status, org→workflow namespacing.",true],
    ["42","Connector health + webhooks intake","Unified signed webhook endpoint, health badges, reconnect prompts, connector event audit log.",false],
    ["43","Buffer / connector hardening","Token refresh edge cases, scope revocation, per-provider rate limits, webhook retry/dead-letter.",false],
   ],
@@ -295,7 +295,9 @@ const CHECKLIST = [
 ];
 
 const KEY="tharros-roadmap-v1";
-let state = JSON.parse(localStorage.getItem(KEY) || "{}");
+// On first open (no saved progress yet), seed the days completed so far. Once you
+// tick/untick anything it saves to localStorage and this seed is no longer used.
+let state = JSON.parse(localStorage.getItem(KEY) || "null") || {d1:true,d2:true,d3:true,d4:true};
 function save(){localStorage.setItem(KEY, JSON.stringify(state));}
 
 function makeTask(id, label){
