@@ -21,6 +21,9 @@ export async function register() {
     // Performance tracing sampled low — pre-launch traffic is tiny and traces
     // count against quota. Raise once we actually need latency data.
     tracesSampleRate: 0.1,
+    // Capture local variables in server stack traces (Node-only; ignored on
+    // Edge). Negligible cost, much richer debugging.
+    includeLocalVariables: true,
   });
 }
 

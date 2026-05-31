@@ -25,4 +25,7 @@ export default withSentryConfig(nextConfig, {
   authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: !process.env.CI,
   widenClientFileUpload: true,
+  // Proxy Sentry events through our own domain so ad-blockers don't drop
+  // client-side errors. Excluded from the proxy.ts matcher.
+  tunnelRoute: "/monitoring",
 });
