@@ -36,6 +36,8 @@ create table if not exists public.organizations (
 
 alter table public.organizations enable row level security;
 
+create index if not exists organizations_created_by_idx on public.organizations (created_by);
+
 comment on table public.organizations is
   'Day 10. The tenant. Every domain table carries org_id. RLS on; policies are Day 11.';
 
