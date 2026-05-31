@@ -3,54 +3,99 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+  Tharros Platform — "Maple Pure" design system.
+  Warm-grey canvas, near-white cards that lift on soft shadow, one maple accent.
+  Tokens reuse shadcn variable names so every component inherits. OKLCH only.
+  Neutrals sit in a warm hue (~60–80); the maple accent lives near hue 38.
+*/
+
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 0.875rem;
+
+  /* Surfaces */
+  --background: oklch(0.965 0.008 75); /* warm-grey canvas */
+  --foreground: oklch(0.26 0.02 55); /* warm ink */
+  --card: oklch(0.995 0.004 80); /* near-white, lifts above canvas */
+  --card-foreground: oklch(0.26 0.02 55);
+  --popover: oklch(0.995 0.004 80);
+  --popover-foreground: oklch(0.26 0.02 55);
+
+  /* Maple accent — used sparingly */
+  --primary: oklch(0.57 0.165 38);
+  --primary-foreground: oklch(0.99 0.01 80);
+  --primary-soft: oklch(0.95 0.04 42); /* soft maple wash (badges, subtle fills) */
+  --primary-soft-foreground: oklch(0.47 0.15 38);
+
+  /* Quiet neutrals */
+  --secondary: oklch(0.94 0.008 75);
+  --secondary-foreground: oklch(0.3 0.02 55);
+  --muted: oklch(0.945 0.007 75);
+  --muted-foreground: oklch(0.53 0.018 60);
+  --accent: oklch(0.945 0.012 60); /* hover background */
+  --accent-foreground: oklch(0.3 0.02 55);
+
+  /* Semantics */
+  --destructive: oklch(0.58 0.2 27);
+  --success: oklch(0.62 0.14 150);
+  --warning: oklch(0.76 0.15 75);
+  --info: oklch(0.6 0.12 240);
+
+  /* Lines & focus */
+  --border: oklch(0.9 0.006 75);
+  --input: oklch(0.9 0.006 75);
+  --ring: oklch(0.57 0.165 38);
+
+  /* Soft, low-contrast card depth (no harsh borders) */
+  --shadow-card: 0 1px 2px oklch(0.3 0.02 55 / 0.04), 0 4px 14px oklch(0.3 0.02 55 / 0.06);
+  --shadow-card-hover: 0 2px 4px oklch(0.3 0.02 55 / 0.05), 0 10px 28px oklch(0.3 0.02 55 / 0.1);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  /* Surfaces */
+  --background: oklch(0.205 0.012 60);
+  --foreground: oklch(0.96 0.006 80);
+  --card: oklch(0.245 0.012 60);
+  --card-foreground: oklch(0.96 0.006 80);
+  --popover: oklch(0.245 0.012 60);
+  --popover-foreground: oklch(0.96 0.006 80);
+
+  /* Maple accent — brightened for dark */
+  --primary: oklch(0.67 0.16 40);
+  --primary-foreground: oklch(0.2 0.02 50);
+  --primary-soft: oklch(0.32 0.05 40);
+  --primary-soft-foreground: oklch(0.82 0.1 45);
+
+  /* Quiet neutrals */
+  --secondary: oklch(0.28 0.012 60);
+  --secondary-foreground: oklch(0.96 0.006 80);
+  --muted: oklch(0.28 0.012 60);
+  --muted-foreground: oklch(0.7 0.015 70);
+  --accent: oklch(0.3 0.014 55);
+  --accent-foreground: oklch(0.96 0.006 80);
+
+  /* Semantics */
+  --destructive: oklch(0.7 0.19 25);
+  --success: oklch(0.7 0.14 150);
+  --warning: oklch(0.8 0.14 80);
+  --info: oklch(0.7 0.12 240);
+
+  /* Lines & focus */
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.67 0.16 40);
+
+  /* Depth */
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 14px oklch(0 0 0 / 0.35);
+  --shadow-card-hover: 0 2px 4px oklch(0 0 0 / 0.35), 0 10px 28px oklch(0 0 0 / 0.45);
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 6px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -59,6 +104,8 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -66,9 +113,18 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 @layer base {
@@ -77,5 +133,53 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Warm-Canadian type scale — friendly, generous. */
+  .type-display {
+    font-size: clamp(2rem, 1.4rem + 2.4vw, 2.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  .type-h1 {
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.875rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+  }
+  .type-h2 {
+    font-size: 1.25rem;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    font-weight: 600;
+  }
+  .type-body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .type-small {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  .type-meta {
+    font-family: var(--font-geist-mono);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+}
+
+@layer utilities {
+  /* Tabular mono numerals for stats and metadata. */
+  .num {
+    font-family: var(--font-geist-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 }
