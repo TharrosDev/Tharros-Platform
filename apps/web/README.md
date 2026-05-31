@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# @tharros/web
 
-## Getting Started
+The Tharros web app: the AI operating layer for small businesses. Next.js 16
+(App Router) + React 19 + TypeScript (strict) + Tailwind v4, deployed on Vercel.
+This is the `apps/web` workspace of the `Tharros-Platform` pnpm + Turborepo
+monorepo.
 
-First, run the development server:
+> **Heads up:** this Next.js 16 build is modified. Read `AGENTS.md` and the local
+> guides in `node_modules/next/dist/docs/` before changing routing or middleware.
+> Notably, middleware is `src/proxy.ts` exporting a `proxy()` function, and
+> `cookies()` from `next/headers` is async.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install          # from the repo root
+pnpm --filter @tharros/web dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Useful checks (run from the repo root):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm --filter @tharros/web typecheck
+pnpm --filter @tharros/web lint
+pnpm --filter @tharros/web build
+node scripts/contrast-check.mjs    # WCAG contrast over the design tokens
+```
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/
+    layout.tsx          root layout: fonts + next-themes provider
+    (marketing)/        public surface — / landing placeholder
+    (app)/              authed product shell
+      layout.tsx        sidebar + top bar + toast/tooltip providers
+      dashboard/        the dashboard
+      assistant/ leads/ automations/ settings/ billing/   stubs
+  components/
+    ui/                 design-system primitives (Maple Pure + Base UI overlays)
+    shell/              sidebar, top bar, mobile nav, command palette
+    brand/              logo mark + wordmark
+  lib/supabase/         @supabase/ssr clients
+  proxy.ts              Next 16 middleware (Supabase session refresh)
+  env.ts                build-time env validation (@t3-oss/env-nextjs + zod)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Docs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `docs/DESIGN.md` — the "Maple Pure" design system, components, shell, theming.
+- `docs/SECRETS.md` — environment variables and where they live.
+- Root `PRODUCT.md` — product register, users, principles, anti-references.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The day-by-day build roadmap lives outside the repo (founder's notes).

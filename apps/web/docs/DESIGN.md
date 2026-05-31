@@ -1,8 +1,9 @@
 # Tharros Platform — Design System ("Maple Pure")
 
-The look every screen inherits. Established Day 5. Goal: a calm, warm, trustworthy
-dashboard for non-technical small-business owners. Cards lead, lots of air, one
-maple accent used sparingly.
+The look every screen inherits. Established Day 5; extended Day 6 with the app
+shell, overlay primitives, and theming. Goal: a calm, warm, trustworthy dashboard
+for non-technical small-business owners. Cards lead, lots of air, one maple accent
+used sparingly.
 
 ## Principles
 
@@ -48,25 +49,61 @@ it), with a ~1.25+ ratio between steps: `.type-display` 36px, `.type-h1` 24px,
 `.type-h2` 19px, `.type-body` 15px, `.type-small` 13px, `.type-meta` 11px (mono,
 uppercase, tracked). Use `.num` for tabular mono numerals on any stat or figure.
 
-## Components (Day 5)
+## Components
 
 Hand-authored under `src/components/ui/` (the shadcn CLI does not run in this
-monorepo), skinned to the tokens above:
+monorepo), skinned to the tokens above.
 
-- `card` (the hero primitive), `button` (maple `default` + `soft` variant),
-  `badge` (incl. `solid`/`success`/`warning`/`info`), `separator`, `input`,
-  `textarea`, `label`, `skeleton`, `avatar`.
-- Brand: `components/brand/logo.tsx` — `TharrosMark` (original rounded maple tile
-  with a cut-out "T", single-colour via `currentColor`) and `TharrosWordmark`.
-- Layout: `components/page-header.tsx`, `components/stat-card.tsx`,
-  `components/theme-toggle.tsx`.
-- Proof screen: `src/app/page.tsx` renders the full dashboard showcase.
+**Base primitives (Day 5):** `card` (the hero primitive), `button` (maple
+`default` + `soft` variant), `badge` (incl. `solid`/`success`/`warning`/`info`),
+`separator`, `input`, `textarea`, `label`, `skeleton`, `avatar`.
 
-### Deferred to Day 6 (when first used)
+**Overlay primitives (Day 6):** `dialog`, `sheet`, `dropdown-menu`, `tooltip`,
+`tabs`, `toast`, plus a `kbd` helper. All built on **Base UI** (`@base-ui/react`,
+the "base-nova" layer) rather than adding Radix / Sonner / cmdk — Base UI ships
+every part natively, including `toast` (manager pattern:
+`useToast().add({ title, description })`) and the mobile drawer (a `dialog`
+styled as a left `sheet`). Each wrapper styles the Base UI parts to the tokens
+and animates enter/exit via Base UI's `data-[starting-style]` /
+`data-[ending-style]` / `data-[open]` state attributes.
 
-Overlay/interactive primitives — Dialog, DropdownMenu, Tooltip, Tabs, Sonner —
-build on the repo's Base UI (`base-nova`) layer and aren't needed until the authed
-app shell exists. They are intentionally not added yet.
+**Brand:** `components/brand/logo.tsx` — `TharrosMark` (original rounded maple
+tile with a cut-out "T", single-colour via `currentColor`) and `TharrosWordmark`.
+
+**Layout helpers:** `components/page-header.tsx`, `components/stat-card.tsx`,
+`components/theme-toggle.tsx`.
+
+## App shell & routes (Day 6)
+
+The app is split into two route groups under `src/app/`:
+
+- **`(marketing)`** — public surface. `(marketing)/page.tsx` is the `/` landing
+  placeholder; the full marketing site comes in a later phase.
+- **`(app)`** — the authed product shell. `(app)/layout.tsx` mounts the toast and
+  tooltip providers, the desktop sidebar, and the sticky top bar, then renders
+  each page in a centred content column. Pages: `/dashboard` plus stubs for
+  `/assistant`, `/leads`, `/automations`, `/settings`, `/billing`.
+
+Shell components live in `src/components/shell/`:
+
+- `nav.ts` — single source of truth for the nav items and the demo user,
+  consumed by the sidebar, the mobile drawer, and the command palette.
+- `sidebar.tsx` — `next/link` nav with `usePathname` active state.
+- `topbar.tsx` — mobile menu trigger, ⌘K search affordance, "Local & Canadian"
+  badge, theme toggle, and the user dropdown.
+- `mobile-nav.tsx` — the sidebar inside a `sheet` drawer below the `lg` breakpoint.
+- `command-palette.tsx` — ⌘K / Ctrl+K palette (stub: filters the nav list with
+  ↑/↓ + Enter keyboard navigation).
+- `coming-soon.tsx`, `new-automation-button.tsx` — the shared empty state and the
+  toast-demo action island.
+
+## Theming
+
+Light/dark is handled by **next-themes** (`components/theme-provider.tsx`, mounted
+in the root layout): `system` default, persisted to storage, with a pre-hydration
+script so there is no dark-mode flash. `theme-toggle.tsx` flips it via
+`useTheme()`; its icon stays pure-CSS (a `dark:` variant) so there is no state to
+hydrate.
 
 ## Voice — Warm Canadian
 
