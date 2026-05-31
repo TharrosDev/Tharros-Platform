@@ -1,0 +1,51 @@
+"use client";
+
+import * as React from "react";
+import { Toast as ToastPrimitive } from "@base-ui/react/toast";
+import { X } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+
+const ToastProvider = ToastPrimitive.Provider;
+
+/** Hook for raising toasts: `useToast().add({ title, description })`. */
+const useToast = ToastPrimitive.useToastManager;
+
+function ToastList() {
+  const { toasts } = useToast();
+
+  return toasts.map((toast) => (
+    <ToastPrimitive.Root
+      key={toast.id}
+      toast={toast}
+      className={cn(
+        "bg-popover text-popover-foreground shadow-popover relative flex flex-col gap-1 rounded-lg border border-border/60 p-4 pr-9 outline-none",
+        "transition-all duration-300 ease-out",
+        "data-[starting-style]:translate-x-full data-[starting-style]:opacity-0",
+        "data-[ending-style]:translate-x-full data-[ending-style]:opacity-0",
+      )}
+    >
+      <ToastPrimitive.Title className="text-sm font-medium" />
+      <ToastPrimitive.Description className="text-muted-foreground text-sm" />
+      <ToastPrimitive.Close
+        className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-2 top-2 inline-flex size-6 items-center justify-center rounded-md transition-colors outline-none"
+        aria-label="Close"
+      >
+        <X className="size-3.5" />
+      </ToastPrimitive.Close>
+    </ToastPrimitive.Root>
+  ));
+}
+
+/** Renders the toast viewport. Must be mounted inside a `<ToastProvider>`. */
+function Toaster() {
+  return (
+    <ToastPrimitive.Portal>
+      <ToastPrimitive.Viewport className="fixed bottom-0 right-0 z-[100] flex w-full max-w-sm flex-col gap-2 p-4 sm:bottom-4 sm:right-4">
+        <ToastList />
+      </ToastPrimitive.Viewport>
+    </ToastPrimitive.Portal>
+  );
+}
+
+export { ToastProvider, Toaster, useToast };

@@ -1,26 +1,25 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 
 /**
- * Lightweight light/dark toggle for the Day 5 proof screen — flips the `dark`
- * class on <html>. Both icons render; the `dark:` variant shows the right one,
- * so there is no state to hydrate. A persistent, system-aware theme provider
- * lands in Day 6.
+ * Light/dark toggle. The icon is pure CSS (Moon in light, Sun in dark via the
+ * `dark:` variant) so there is no state to hydrate and no flash — this also
+ * sidesteps the `react-hooks/set-state-in-effect` lint rule. The actual switch
+ * is driven by next-themes, which persists the choice and respects the OS.
  */
 function ThemeToggle({ className }: { className?: string }) {
-  function toggle() {
-    document.documentElement.classList.toggle("dark");
-  }
+  const { resolvedTheme, setTheme } = useTheme();
 
   return (
     <Button
       type="button"
       variant="ghost"
       size="icon"
-      onClick={toggle}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       aria-label="Toggle light or dark mode"
       className={className}
     >
