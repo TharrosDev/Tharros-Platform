@@ -2,11 +2,10 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronDown, CreditCard, LogOut, Search, Settings } from "lucide-react";
+import { ChevronDown, CreditCard, LogOut, Search, Settings, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Kbd } from "@/components/ui/kbd";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -53,10 +52,6 @@ function Topbar() {
       </button>
 
       <div className="ml-auto flex items-center gap-2">
-        <Badge variant="default" className="hidden gap-1.5 sm:flex">
-          <span className="bg-primary size-1.5 rounded-full" />
-          Local &amp; Canadian
-        </Badge>
         <ThemeToggle />
 
         <DropdownMenu>
@@ -82,6 +77,10 @@ function Topbar() {
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem render={<Link href="/profile" />}>
+              <User />
+              Profile
+            </DropdownMenuItem>
             <DropdownMenuItem render={<Link href="/settings" />}>
               <Settings />
               Settings

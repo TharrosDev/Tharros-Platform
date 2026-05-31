@@ -69,7 +69,7 @@ function CommandPalette({
       <DialogPortal>
         <DialogBackdrop />
         <DialogPrimitive.Viewport className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-[12vh]">
-          <DialogPrimitive.Popup className="bg-popover text-popover-foreground shadow-popover w-full max-w-xl overflow-hidden rounded-xl border border-border/60 outline-none transition-all duration-200 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0">
+          <DialogPrimitive.Popup className="bg-popover text-popover-foreground shadow-popover w-full max-w-xl overflow-hidden rounded-lg border border-border outline-none transition-all duration-200 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0">
             <DialogPrimitive.Title className="sr-only">
               Command menu
             </DialogPrimitive.Title>

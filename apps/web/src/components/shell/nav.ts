@@ -4,6 +4,7 @@ import {
   LayoutGrid,
   Settings,
   Sparkles,
+  User,
   Users,
   Workflow,
 } from "lucide-react";
@@ -27,6 +28,7 @@ export const primaryNav: NavItem[] = [
 
 /** Account-level navigation, pinned to the bottom of the sidebar. */
 export const footerNav: NavItem[] = [
+  { label: "Profile", href: "/profile", icon: User },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Billing", href: "/billing", icon: CreditCard },
 ];

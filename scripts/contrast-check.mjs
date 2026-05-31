@@ -36,11 +36,10 @@ function contrast(fg, bg) {
 const T = {
   // light
   background: [0.94, 0.006, 40],
-  sidebar: [0.965, 0.005, 40],
   card: [0.99, 0.003, 40],
   foreground: [0.26, 0.014, 40],
   mutedFg: [0.49, 0.02, 40],
-  primary: [0.53, 0.17, 40],
+  primary: [0.5, 0.18, 38],
   primaryFg: [0.99, 0.01, 80],
   primarySoftFg: [0.46, 0.15, 40],
   primarySoft: [0.93, 0.05, 45],
@@ -48,6 +47,12 @@ const T = {
   warning: [0.52, 0.11, 70],
   info: [0.52, 0.13, 250],
   destructive: [0.53, 0.2, 27],
+  // light — grounded dark sidebar
+  sidebar: [0.27, 0.015, 40],
+  sidebarFg: [0.95, 0.006, 80],
+  sidebarMutedFg: [0.72, 0.012, 70],
+  sidebarAccent: [0.42, 0.12, 42],
+  sidebarAccentFg: [0.96, 0.03, 70],
   // dark
   dBg: [0.205, 0.01, 40],
   dCard: [0.245, 0.01, 40],
@@ -55,6 +60,12 @@ const T = {
   dMutedFg: [0.71, 0.015, 70],
   dPrimary: [0.7, 0.16, 45],
   dPrimaryFg: [0.2, 0.02, 50],
+  // dark — sidebar
+  dSidebar: [0.225, 0.01, 40],
+  dSidebarFg: [0.96, 0.006, 80],
+  dSidebarMutedFg: [0.71, 0.015, 70],
+  dSidebarAccent: [0.4, 0.11, 42],
+  dSidebarAccentFg: [0.95, 0.04, 70],
 };
 
 const need = (v, min, label) =>
@@ -63,10 +74,8 @@ const need = (v, min, label) =>
 console.log("LIGHT");
 console.log(need(contrast(T.foreground, T.card), 4.5, "ink on card"));
 console.log(need(contrast(T.foreground, T.background), 4.5, "ink on canvas"));
-console.log(need(contrast(T.foreground, T.sidebar), 4.5, "ink on sidebar"));
 console.log(need(contrast(T.mutedFg, T.card), 4.5, "muted on card"));
 console.log(need(contrast(T.mutedFg, T.background), 4.5, "muted on canvas"));
-console.log(need(contrast(T.mutedFg, T.sidebar), 4.5, "muted on sidebar"));
 console.log(need(contrast(T.primaryFg, T.primary), 4.5, "white on maple (btn text)"));
 console.log(need(contrast(T.primary, T.card), 3, "maple on card (large/icon)"));
 console.log(need(contrast(T.primarySoftFg, T.primarySoft), 4.5, "soft-maple text on soft fill"));
@@ -75,6 +84,12 @@ console.log(need(contrast(T.warning, T.card), 4.5, "warning text on card"));
 console.log(need(contrast(T.info, T.card), 4.5, "info text on card"));
 console.log(need(contrast(T.destructive, T.card), 4.5, "destructive text on card"));
 
+console.log("\nLIGHT — grounded dark sidebar");
+console.log(need(contrast(T.sidebarFg, T.sidebar), 4.5, "sidebar text on sidebar"));
+console.log(need(contrast(T.sidebarMutedFg, T.sidebar), 4.5, "sidebar muted on sidebar"));
+console.log(need(contrast(T.sidebarAccentFg, T.sidebarAccent), 4.5, "active-nav text on accent"));
+console.log(need(contrast(T.primaryFg, T.primary), 4.5, "badge text on maple chip"));
+
 console.log("\nDARK");
 console.log(need(contrast(T.dFg, T.dCard), 4.5, "ink on card"));
 console.log(need(contrast(T.dFg, T.dBg), 4.5, "ink on canvas"));
@@ -82,3 +97,8 @@ console.log(need(contrast(T.dMutedFg, T.dCard), 4.5, "muted on card"));
 console.log(need(contrast(T.dMutedFg, T.dBg), 4.5, "muted on canvas"));
 console.log(need(contrast(T.dPrimaryFg, T.dPrimary), 4.5, "ink on maple (btn text)"));
 console.log(need(contrast(T.dPrimary, T.dCard), 3, "maple on card (large)"));
+
+console.log("\nDARK — sidebar");
+console.log(need(contrast(T.dSidebarFg, T.dSidebar), 4.5, "sidebar text on sidebar"));
+console.log(need(contrast(T.dSidebarMutedFg, T.dSidebar), 4.5, "sidebar muted on sidebar"));
+console.log(need(contrast(T.dSidebarAccentFg, T.dSidebarAccent), 4.5, "active-nav text on accent"));

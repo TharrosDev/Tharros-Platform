@@ -29,7 +29,7 @@ function Sidebar({
         ))}
 
         <div className="mt-auto flex flex-col gap-1">
-          <Separator className="my-3" />
+          <Separator className="my-3 bg-sidebar-border" />
           {footerNav.map((item) => (
             <NavLink key={item.href} item={item} onNavigate={onNavigate} />
           ))}
@@ -43,7 +43,7 @@ function Sidebar({
         </Avatar>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{demoUser.name}</p>
-          <p className="text-muted-foreground truncate text-xs">{demoUser.company}</p>
+          <p className="text-sidebar-muted-foreground truncate text-xs">{demoUser.company}</p>
         </div>
       </div>
     </div>
@@ -70,14 +70,14 @@ function NavLink({
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         active
           ? "bg-sidebar-accent text-sidebar-accent-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+          : "text-sidebar-muted-foreground hover:bg-white/5 hover:text-sidebar-foreground",
       )}
     >
       <Icon className="size-4.5 shrink-0" />
       <span className="flex-1">{item.label}</span>
       {item.badge ? (
         <Badge
-          variant={active ? "solid" : "secondary"}
+          variant="solid"
           className="px-2 py-0 text-[0.625rem]"
         >
           {item.badge}

@@ -6,21 +6,23 @@
 /*
   Tharros Platform — "Maple Pure" design system.
 
-  A calm, warm, trustworthy workspace for small-business owners. Three rules hold
-  it together:
+  An inviting, confident workspace for small-business owners — warm, but with
+  backbone. Three rules hold it together:
     1. Warmth comes from the brand, not from beige. The neutral ramp is tinted
        toward maple's own hue (~40) at very low chroma — a warm stone, never the
        cream/parchment SaaS default (which lives at hue ~75).
-    2. One accent: maple. Primary actions, current selection, and state only.
-    3. Depth by layering: canvas -> sidebar -> card, each a step lighter, cards
-       lifting on a soft warm-tinted shadow. No harsh borders, no glass.
+    2. One accent: maple, used decisively. Primary actions, current selection,
+       and state only — never a soft decorative wash.
+    3. Grounded chrome: a warm dark sidebar anchors the app; content sits light
+       above it on crisp, seated surfaces. Confident, never cold-grey — every
+       neutral (including the dark chrome) keeps maple's warm hue ~40.
 
   Tokens are OKLCH and reuse shadcn variable names so every component inherits.
   All text pairs are verified to WCAG AA (see scripts/contrast-check.mjs history).
 */
 
 :root {
-  --radius: 0.875rem;
+  --radius: 0.5rem;
 
   /* Surfaces — warm-stone ramp (canvas < sidebar < card) */
   --background: oklch(0.94 0.006 40); /* warm light stone, the app canvas */
@@ -30,8 +32,8 @@
   --popover: oklch(0.99 0.003 40);
   --popover-foreground: oklch(0.26 0.014 40);
 
-  /* Maple accent — used sparingly */
-  --primary: oklch(0.53 0.17 40); /* deep enough for AA white text */
+  /* Maple accent — deep and decisive */
+  --primary: oklch(0.5 0.18 38); /* deeper, more saturated; AA white text */
   --primary-foreground: oklch(0.99 0.01 80);
   --primary-soft: oklch(0.93 0.05 45); /* soft maple wash */
   --primary-soft-foreground: oklch(0.46 0.15 40);
@@ -50,24 +52,25 @@
   --warning: oklch(0.52 0.11 70);
   --info: oklch(0.52 0.13 250);
 
-  /* Lines & focus */
-  --border: oklch(0.89 0.006 40);
-  --input: oklch(0.89 0.006 40);
-  --ring: oklch(0.53 0.17 40);
+  /* Lines & focus — crisper hairlines */
+  --border: oklch(0.86 0.006 40);
+  --input: oklch(0.86 0.006 40);
+  --ring: oklch(0.5 0.18 38);
 
-  /* Second neutral layer: the sidebar/app chrome */
-  --sidebar: oklch(0.965 0.005 40);
-  --sidebar-foreground: oklch(0.26 0.014 40);
-  --sidebar-accent: oklch(0.93 0.05 45);
-  --sidebar-accent-foreground: oklch(0.46 0.15 40);
-  --sidebar-border: oklch(0.89 0.006 40);
-  --sidebar-ring: oklch(0.53 0.17 40);
+  /* Grounded chrome: a warm dark sidebar anchors the app (keeps hue ~40) */
+  --sidebar: oklch(0.27 0.015 40);
+  --sidebar-foreground: oklch(0.95 0.006 80);
+  --sidebar-muted-foreground: oklch(0.72 0.012 70);
+  --sidebar-accent: oklch(0.42 0.12 42);
+  --sidebar-accent-foreground: oklch(0.96 0.03 70);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.7 0.16 45);
 
-  /* Warm-tinted elevation scale */
-  --shadow-xs: 0 1px 2px oklch(0.26 0.02 40 / 0.05);
-  --shadow-card: 0 1px 2px oklch(0.26 0.02 40 / 0.04), 0 4px 12px oklch(0.26 0.02 40 / 0.07);
-  --shadow-card-hover: 0 2px 4px oklch(0.26 0.02 40 / 0.05), 0 12px 28px oklch(0.26 0.02 40 / 0.11);
-  --shadow-popover: 0 4px 8px oklch(0.26 0.02 40 / 0.06), 0 16px 36px oklch(0.26 0.02 40 / 0.14);
+  /* Seated warm-tinted elevation (crisp, not floating) */
+  --shadow-xs: 0 1px 2px oklch(0.26 0.02 40 / 0.06);
+  --shadow-card: 0 1px 1px oklch(0.26 0.02 40 / 0.05), 0 2px 4px oklch(0.26 0.02 40 / 0.06);
+  --shadow-card-hover: 0 2px 4px oklch(0.26 0.02 40 / 0.07), 0 6px 14px oklch(0.26 0.02 40 / 0.1);
+  --shadow-popover: 0 6px 16px oklch(0.26 0.02 40 / 0.12), 0 12px 28px oklch(0.26 0.02 40 / 0.12);
 }
 
 .dark {
@@ -107,8 +110,9 @@
   /* Sidebar layer */
   --sidebar: oklch(0.225 0.01 40);
   --sidebar-foreground: oklch(0.96 0.006 80);
-  --sidebar-accent: oklch(0.33 0.05 42);
-  --sidebar-accent-foreground: oklch(0.84 0.1 50);
+  --sidebar-muted-foreground: oklch(0.71 0.015 70);
+  --sidebar-accent: oklch(0.4 0.11 42);
+  --sidebar-accent-foreground: oklch(0.95 0.04 70);
   --sidebar-border: oklch(1 0 0 / 9%);
   --sidebar-ring: oklch(0.7 0.16 45);
 
@@ -151,6 +155,7 @@
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted-foreground: var(--sidebar-muted-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
@@ -187,22 +192,22 @@
     don't serve it). ~1.25+ ratio between steps for clear hierarchy.
   */
   .type-display {
-    font-size: 2.25rem; /* 36px */
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    font-weight: 600;
+    font-size: 2.5rem; /* 40px */
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    font-weight: 700;
   }
   .type-h1 {
-    font-size: 1.5rem; /* 24px */
-    line-height: 1.2;
-    letter-spacing: -0.015em;
-    font-weight: 600;
+    font-size: 1.625rem; /* 26px */
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
   .type-h2 {
     font-size: 1.1875rem; /* 19px */
     line-height: 1.3;
     letter-spacing: -0.01em;
-    font-weight: 600;
+    font-weight: 700;
   }
   .type-body {
     font-size: 0.9375rem; /* 15px */

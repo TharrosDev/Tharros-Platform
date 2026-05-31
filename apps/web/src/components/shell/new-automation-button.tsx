@@ -18,7 +18,7 @@ function NewAutomationButton() {
       onClick={() =>
         toast.add({
           title: "Coming soon",
-          description: "Building automations lands in a later phase.",
+          description: "Automation building is on the way.",
         })
       }
     >

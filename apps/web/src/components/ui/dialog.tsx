@@ -41,7 +41,7 @@ function DialogContent({
       <DialogPrimitive.Viewport className="fixed inset-0 z-50 flex min-h-full items-center justify-center overflow-y-auto p-4">
         <DialogPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover relative w-full max-w-lg rounded-xl border border-border/60 p-6 outline-none",
+            "bg-popover text-popover-foreground shadow-popover relative w-full max-w-lg rounded-lg border border-border p-6 outline-none",
             "transition-all duration-200 ease-out",
             "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",

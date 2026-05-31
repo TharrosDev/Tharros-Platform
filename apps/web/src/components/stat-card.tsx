@@ -31,7 +31,7 @@ function StatCard({
         {icon ? <span className="text-muted-foreground/80 [&>svg]:size-4">{icon}</span> : null}
       </div>
       <div className="px-5">
-        <span className="num text-foreground text-3xl font-semibold tracking-tight">{value}</span>
+        <span className="num text-foreground text-3xl font-bold tracking-tight">{value}</span>
         {hint ? <p className="text-muted-foreground type-small mt-1">{hint}</p> : null}
       </div>
       {children ? <div className="px-5">{children}</div> : null}

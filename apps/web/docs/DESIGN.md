@@ -1,9 +1,10 @@
 # Tharros Platform — Design System ("Maple Pure")
 
 The look every screen inherits. Established Day 5; extended Day 6 with the app
-shell, overlay primitives, and theming. Goal: a calm, warm, trustworthy dashboard
-for non-technical small-business owners. Cards lead, lots of air, one maple accent
-used sparingly.
+shell, overlay primitives, and theming; the tone was sharpened (Day 6.5) from
+warm-and-cozy toward **inviting + confident**. Goal: a dashboard a non-technical
+owner trusts on sight — warm, but with backbone. Generous air, crisp surfaces,
+one maple accent used decisively.
 
 ## Principles
 
@@ -11,17 +12,21 @@ used sparingly.
   maple's own hue (~40) at very low chroma, so it reads as a warm stone, never
   the cream / parchment near-white that hue ~75 produces (the SaaS-cream default
   we explicitly avoid). Warmth is carried by the accent, copy, and this tint.
-- **Depth by layering.** Three surface steps, each a shade lighter: canvas
-  (`--background`) -> sidebar (`--sidebar`) -> card (`--card`). Cards lift on a
-  soft, warm-tinted shadow. No harsh borders, no glassmorphism.
-- **One accent: maple.** A warm red-orange for the primary action, current
-  selection, and state only, never decoration. Never more than one maple CTA
-  competing in a view. Soft maple (`--primary-soft`) carries badges and quiet fills.
-- **Generous and rounded.** Large radius (`--radius: 0.875rem`), roomy padding,
-  friendly type. Nothing cramped.
+- **Grounded chrome.** A warm **dark** sidebar (`--sidebar`, still hue ~40, not
+  grey) anchors the app and gives it weight; the top bar and content sit light
+  above it. This is the "strength" lever — confident, never cold-grey.
+- **Crisp, seated surfaces.** Cards sit on a tight, low shadow with a defined
+  border (`--border`), not a soft floating glow. Radius is a confident
+  `--radius: 0.5rem`, not pillowy. No glassmorphism.
+- **One accent: maple, decisive.** A deep warm red-orange for the primary action,
+  current selection, and state only — never a soft decorative wash. Never more
+  than one maple CTA competing in a view.
+- **Confident, not cozy.** Strength reads through typographic authority (heavier,
+  tighter headings) and restraint, not through cute garnish. Inviting, with
+  backbone.
 - **Light and dark, both AA.** Both ship from the same tokens; dark is a warm
-  near-black. Every text pair meets WCAG AA (verified by computing OKLCH ->
-  WCAG contrast over the ramp).
+  near-black. Every text pair (including the dark-sidebar pairs) meets WCAG AA,
+  verified by `scripts/contrast-check.mjs` (OKLCH -> WCAG over the ramp).
 
 ## Tokens
 
@@ -32,22 +37,23 @@ accent share hue ~40 (maple's family); change a token and the app re-skins.
 | Token | Role |
 | --- | --- |
 | `--background` / `--foreground` | warm-stone canvas / warm ink |
-| `--sidebar` (+ `-foreground` / `-accent` / `-border`) | second neutral layer: app chrome |
-| `--card` / `--popover` | near-white surfaces that lift on `--shadow-card` |
-| `--primary` / `--primary-foreground` | maple action colour / text on it |
-| `--primary-soft` / `--primary-soft-foreground` | soft maple wash / text on it |
+| `--sidebar` (+ `-foreground` / `-muted-foreground` / `-accent` / `-border`) | grounded **dark** chrome anchor; `-muted-foreground` is the on-dark muted text for inactive nav |
+| `--card` / `--popover` | near-white surfaces that sit on `--shadow-card` |
+| `--primary` / `--primary-foreground` | deep maple action colour / text on it |
+| `--primary-soft` / `--primary-soft-foreground` | soft maple wash / text on it (used sparingly) |
 | `--secondary` `--muted` `--accent` | quiet warm neutrals (hover, fills) |
 | `--success` `--warning` `--info` `--destructive` | semantics, tuned to read AA as text |
-| `--border` `--input` `--ring` | hairlines and maple focus ring |
-| `--shadow-xs` `--shadow-card` `--shadow-card-hover` `--shadow-popover` | warm elevation scale |
+| `--border` `--input` `--ring` | crisp hairlines and maple focus ring |
+| `--shadow-xs` `--shadow-card` `--shadow-card-hover` `--shadow-popover` | seated warm elevation scale |
 
 ## Type scale
 
 Geist Sans for UI, Geist Mono for numerals and metadata. The scale is **fixed
 rem, not fluid** (product UI views at consistent DPI; clamp headings don't serve
-it), with a ~1.25+ ratio between steps: `.type-display` 36px, `.type-h1` 24px,
-`.type-h2` 19px, `.type-body` 15px, `.type-small` 13px, `.type-meta` 11px (mono,
-uppercase, tracked). Use `.num` for tabular mono numerals on any stat or figure.
+it), with a ~1.25+ ratio between steps. Headings are **bold (700) and tightly
+tracked** for authority: `.type-display` 40px, `.type-h1` 26px, `.type-h2` 19px;
+body stays regular: `.type-body` 15px, `.type-small` 13px, `.type-meta` 11px
+(mono, uppercase, tracked). Use `.num` for tabular mono numerals on any stat.
 
 ## Components
 
@@ -89,8 +95,8 @@ Shell components live in `src/components/shell/`:
 - `nav.ts` — single source of truth for the nav items and the demo user,
   consumed by the sidebar, the mobile drawer, and the command palette.
 - `sidebar.tsx` — `next/link` nav with `usePathname` active state.
-- `topbar.tsx` — mobile menu trigger, ⌘K search affordance, "Local & Canadian"
-  badge, theme toggle, and the user dropdown.
+- `topbar.tsx` — mobile menu trigger, ⌘K search affordance, theme toggle, and the
+  user dropdown.
 - `mobile-nav.tsx` — the sidebar inside a `sheet` drawer below the `lg` breakpoint.
 - `command-palette.tsx` — ⌘K / Ctrl+K palette (stub: filters the nav list with
   ↑/↓ + Enter keyboard navigation).
@@ -105,12 +111,15 @@ script so there is no dark-mode flash. `theme-toggle.tsx` flips it via
 `useTheme()`; its icon stays pure-CSS (a `dark:` variant) so there is no state to
 hydrate.
 
-## Voice — Warm Canadian
+## Voice — Warm Canadian, with backbone
 
-All UI copy is warm, plain, and human. It leans into the local/Canadian identity
-("Local & Canadian") and talks to a busy owner, not an enterprise buyer.
+All UI copy is warm, plain, and human, but **confident** — inviting with backbone,
+not cozy or cute. It talks to a busy owner, not an enterprise buyer.
 
-- Warm and reassuring: "Nothing needs you right this second."
-- Plain words over jargon. Short sentences. Concrete nouns.
+- Confident and specific: "Here's what Tharros handled while you were out." Avoid
+  soft hedging ("nothing needs you right this second") and cutesy garnish (no emoji).
+- Plain words over jargon. Short, declarative sentences. Concrete nouns.
 - **No em-dashes in UI copy** (founder preference; commas or periods instead).
-- Speak to the person ("Hey Magnus"), name the outcome, never the plumbing.
+- Speak to the person ("Welcome back, Magnus"), name the outcome, never the plumbing.
+- The "Local & Canadian" identity lives in the brand surfaces (sidebar wordmark,
+  marketing, footer), not as a sticker in the working chrome.

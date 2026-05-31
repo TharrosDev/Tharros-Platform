@@ -22,10 +22,11 @@ the busywork and only surfacing what actually needs them.
 
 ## Brand Personality
 
-Warm Canadian. Warm, plain, human, and local. It speaks to the person ("Hey
-Magnus"), names outcomes rather than plumbing, and never hides behind jargon.
-Three words: warm, trustworthy, capable. The interface should feel like a calm,
-well-kept workspace, not a control panel.
+Warm Canadian, with backbone. Warm, plain, human, and local, but confident: it
+speaks to the person ("Welcome back, Magnus"), names outcomes rather than plumbing,
+and never hides behind jargon. Three words: warm, confident, capable. The interface
+should feel inviting but assured: a grounded, well-kept workspace a busy owner
+trusts on sight, not a cozy cottage and not a cold control panel.
 
 ## Anti-references
 

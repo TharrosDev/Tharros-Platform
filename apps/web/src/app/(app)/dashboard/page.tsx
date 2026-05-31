@@ -49,12 +49,8 @@ export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        title={
-          <span>
-            Hey Magnus <span aria-hidden>👋</span>
-          </span>
-        }
-        description="Here is what Tharros looked after for you. Nothing needs you right this second, but a couple of things are waiting when you have a minute."
+        title="Welcome back, Magnus"
+        description="Here's what Tharros handled while you were out. A few things are waiting on your call."
         actions={<NewAutomationButton />}
       />
 
@@ -63,14 +59,14 @@ export default function DashboardPage() {
         <StatCard
           label="New leads this week"
           value="24"
-          hint="Up from 16 last week"
+          hint="Up 50% from last week"
           icon={<Users />}
         >
           <div className="flex h-12 items-end gap-1.5">
             {sparkline.map((n, i) => (
               <span
                 key={i}
-                className="bg-primary/25 hover:bg-primary/45 flex-1 rounded-sm transition-colors"
+                className="bg-primary/35 flex-1 rounded-sm"
                 style={{ height: `${(n / 24) * 100}%` }}
               />
             ))}
@@ -89,7 +85,7 @@ export default function DashboardPage() {
                 key={i}
                 className={cn(
                   "size-2.5 rounded-full",
-                  i < 8 ? "bg-primary" : "bg-muted",
+                  i < 8 ? "bg-primary" : "bg-border",
                 )}
               />
             ))}
@@ -135,13 +131,13 @@ export default function DashboardPage() {
                 href={p.href}
                 className="group hover:bg-accent focus-visible:ring-ring/40 flex w-full items-start gap-3 rounded-lg p-2.5 text-left outline-none transition-colors focus-visible:ring-[3px]"
               >
-                <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg [&>svg]:size-4.5">
+                <span className="bg-secondary text-foreground flex size-9 shrink-0 items-center justify-center rounded-md border border-border [&>svg]:size-4.5">
                   <p.icon />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1 text-sm font-medium">
                     {p.name}
-                    <ArrowUpRight className="text-muted-foreground size-3.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                    <ArrowUpRight className="text-muted-foreground/70 size-3.5" />
                   </span>
                   <span className="text-muted-foreground type-small block">{p.blurb}</span>
                 </span>
