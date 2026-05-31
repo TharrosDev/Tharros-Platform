@@ -16,7 +16,11 @@
         "STRIPE_WEBHOOK_SECRET",
         "NANGO_SECRET_KEY",
         "N8N_BASE_URL",
-        "N8N_API_KEY"
+        "N8N_API_KEY",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "SENTRY_AUTH_TOKEN",
+        "SENTRY_ORG",
+        "SENTRY_PROJECT"
       ]
     },
     "dev": {

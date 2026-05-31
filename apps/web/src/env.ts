@@ -24,11 +24,19 @@ export const env = createEnv({
     NANGO_SECRET_KEY: z.string().min(1).optional(),
     N8N_BASE_URL: z.url().optional(),
     N8N_API_KEY: z.string().min(1).optional(),
+    // Sentry build-time source-map upload (optional). Without these the build
+    // skips upload — runtime error reporting still works from the DSN alone.
+    SENTRY_AUTH_TOKEN: z.string().min(1).optional(),
+    SENTRY_ORG: z.string().min(1).optional(),
+    SENTRY_PROJECT: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.url(),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
+    // Sentry DSN — browser-safe by design. When unset, Sentry init no-ops
+    // (no reporting, no cost). See instrumentation*.ts.
+    NEXT_PUBLIC_SENTRY_DSN: z.url().optional(),
     // Deferred — optional until Day 35.
     NEXT_PUBLIC_NANGO_PUBLIC_KEY: z.string().min(1).optional(),
   },
@@ -41,6 +49,10 @@ export const env = createEnv({
     NANGO_SECRET_KEY: process.env.NANGO_SECRET_KEY,
     N8N_BASE_URL: process.env.N8N_BASE_URL,
     N8N_API_KEY: process.env.N8N_API_KEY,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+    SENTRY_ORG: process.env.SENTRY_ORG,
+    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
