@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/shell/sidebar";
+import type { DisplayUser } from "@/lib/auth/user";
 
-function MobileNav() {
+function MobileNav({ user }: { user: DisplayUser }) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -23,7 +24,7 @@ function MobileNav() {
         <Menu className="size-5" />
       </SheetTrigger>
       <SheetContent side="left" className="p-0">
-        <Sidebar onNavigate={() => setOpen(false)} />
+        <Sidebar user={user} onNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );

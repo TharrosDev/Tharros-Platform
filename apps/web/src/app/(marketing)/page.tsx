@@ -23,9 +23,17 @@ export default function MarketingHome() {
         </p>
       </div>
 
-      <Link href="/dashboard" className={cn(buttonVariants({ size: "lg" }))}>
-        Open the dashboard
-      </Link>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <Link href="/signup" className={cn(buttonVariants({ size: "lg" }))}>
+          Get started
+        </Link>
+        <Link
+          href="/login"
+          className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+        >
+          Sign in
+        </Link>
+      </div>
     </main>
   );
 }

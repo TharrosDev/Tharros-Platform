@@ -4,12 +4,35 @@ import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/env";
 
 /**
- * Refreshes the Supabase auth session on every request and keeps the auth
- * cookies in sync between the request and response. Called from `proxy.ts`
- * (the Next.js 16 successor to middleware).
+ * Public path prefixes that never require an authenticated session. Everything
+ * else is treated as protected and bounced to /login when signed out.
+ */
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/auth", // /auth/confirm callback
+  "/monitoring", // Sentry tunnel (also excluded by the proxy matcher)
+];
+
+function isPublicPath(pathname: string): boolean {
+  if (pathname === "/") return true; // marketing home
+  return PUBLIC_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+}
+
+/**
+ * Refreshes the Supabase auth session on every request, keeps the auth cookies
+ * in sync between request and response, and optimistically redirects signed-out
+ * users away from protected routes. Called from `proxy.ts` (the Next.js 16
+ * successor to middleware).
  *
- * Do not add logic between `createServerClient` and `supabase.auth.getUser()`
- * — it can cause hard-to-debug session refresh issues.
+ * This redirect is UX-only — the authoritative gate is `getUser()` in the
+ * `(app)` layout. Do not add logic between `createServerClient` and
+ * `supabase.auth.getUser()`; it can cause hard-to-debug session refresh issues.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -35,8 +58,18 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Refresh the session. Auth-gating / redirects are added in Day 9.
-  await supabase.auth.getUser();
+  // IMPORTANT: keep getUser() immediately after createServerClient.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Signed out and heading somewhere protected → send to /login.
+  if (!user && !isPublicPath(request.nextUrl.pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }

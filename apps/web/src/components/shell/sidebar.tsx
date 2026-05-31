@@ -8,12 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TharrosWordmark } from "@/components/brand/logo";
-import { primaryNav, footerNav, demoUser, type NavItem } from "@/components/shell/nav";
+import { primaryNav, footerNav, type NavItem } from "@/components/shell/nav";
+import type { DisplayUser } from "@/lib/auth/user";
 
 function Sidebar({
+  user,
   onNavigate,
   className,
 }: {
+  user: DisplayUser;
   onNavigate?: () => void;
   className?: string;
 }) {
@@ -39,11 +42,13 @@ function Sidebar({
       <Separator className="my-3" />
       <div className="flex items-center gap-3 px-2 py-1">
         <Avatar>
-          <AvatarFallback>{demoUser.initials}</AvatarFallback>
+          <AvatarFallback>{user.initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{demoUser.name}</p>
-          <p className="text-sidebar-muted-foreground truncate text-xs">{demoUser.company}</p>
+          <p className="truncate text-sm font-medium">{user.name}</p>
+          <p className="text-sidebar-muted-foreground truncate text-xs">
+            {user.company ?? "Personal workspace"}
+          </p>
         </div>
       </div>
     </div>

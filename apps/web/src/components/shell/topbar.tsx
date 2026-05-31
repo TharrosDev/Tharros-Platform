@@ -9,7 +9,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Kbd } from "@/components/ui/kbd";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useToast } from "@/components/ui/toast";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -20,11 +19,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { CommandPalette } from "@/components/shell/command-palette";
-import { demoUser } from "@/components/shell/nav";
+import { signOut } from "@/lib/auth/actions";
+import type { DisplayUser } from "@/lib/auth/user";
 
-function Topbar() {
+function Topbar({ user }: { user: DisplayUser }) {
   const [cmdOpen, setCmdOpen] = React.useState(false);
-  const toast = useToast();
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -39,7 +38,7 @@ function Topbar() {
 
   return (
     <header className="bg-background/80 sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 px-4 backdrop-blur sm:px-6">
-      <MobileNav />
+      <MobileNav user={user} />
 
       <button
         type="button"
@@ -64,16 +63,16 @@ function Topbar() {
           >
             <Avatar className="size-7">
               <AvatarFallback className="text-xs">
-                {demoUser.initials}
+                {user.initials}
               </AvatarFallback>
             </Avatar>
             <ChevronDown className="text-muted-foreground hidden size-4 sm:block" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>
-              {demoUser.name}
-              <span className="text-muted-foreground block text-xs font-normal">
-                {demoUser.company}
+              {user.name}
+              <span className="text-muted-foreground block truncate text-xs font-normal">
+                {user.email}
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -90,17 +89,14 @@ function Topbar() {
               Billing
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() =>
-                toast.add({
-                  title: "Sign-in lands soon",
-                  description: "Accounts arrive in a later phase.",
-                })
-              }
-            >
-              <LogOut />
-              Sign out
-            </DropdownMenuItem>
+            <form action={signOut}>
+              <DropdownMenuItem
+                render={<button type="submit" className="w-full" />}
+              >
+                <LogOut />
+                Sign out
+              </DropdownMenuItem>
+            </form>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -35,10 +35,3 @@ export const footerNav: NavItem[] = [
 
 /** Flat list for the command palette. */
 export const allNav: NavItem[] = [...primaryNav, ...footerNav];
-
-/** Demo identity carried over from the Day 5 proof screen. */
-export const demoUser = {
-  name: "Magnus Abdelnour",
-  company: "Glebe Candle Co.",
-  initials: "MA",
-};
