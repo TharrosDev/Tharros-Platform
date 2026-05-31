@@ -5,89 +5,118 @@
 
 /*
   Tharros Platform — "Maple Pure" design system.
-  Warm-grey canvas, near-white cards that lift on soft shadow, one maple accent.
-  Tokens reuse shadcn variable names so every component inherits. OKLCH only.
-  Neutrals sit in a warm hue (~60–80); the maple accent lives near hue 38.
+
+  A calm, warm, trustworthy workspace for small-business owners. Three rules hold
+  it together:
+    1. Warmth comes from the brand, not from beige. The neutral ramp is tinted
+       toward maple's own hue (~40) at very low chroma — a warm stone, never the
+       cream/parchment SaaS default (which lives at hue ~75).
+    2. One accent: maple. Primary actions, current selection, and state only.
+    3. Depth by layering: canvas -> sidebar -> card, each a step lighter, cards
+       lifting on a soft warm-tinted shadow. No harsh borders, no glass.
+
+  Tokens are OKLCH and reuse shadcn variable names so every component inherits.
+  All text pairs are verified to WCAG AA (see scripts/contrast-check.mjs history).
 */
 
 :root {
   --radius: 0.875rem;
 
-  /* Surfaces */
-  --background: oklch(0.965 0.008 75); /* warm-grey canvas */
-  --foreground: oklch(0.26 0.02 55); /* warm ink */
-  --card: oklch(0.995 0.004 80); /* near-white, lifts above canvas */
-  --card-foreground: oklch(0.26 0.02 55);
-  --popover: oklch(0.995 0.004 80);
-  --popover-foreground: oklch(0.26 0.02 55);
+  /* Surfaces — warm-stone ramp (canvas < sidebar < card) */
+  --background: oklch(0.94 0.006 40); /* warm light stone, the app canvas */
+  --foreground: oklch(0.26 0.014 40); /* warm near-black ink */
+  --card: oklch(0.99 0.003 40); /* near-white, lifts above the canvas */
+  --card-foreground: oklch(0.26 0.014 40);
+  --popover: oklch(0.99 0.003 40);
+  --popover-foreground: oklch(0.26 0.014 40);
 
   /* Maple accent — used sparingly */
-  --primary: oklch(0.57 0.165 38);
+  --primary: oklch(0.53 0.17 40); /* deep enough for AA white text */
   --primary-foreground: oklch(0.99 0.01 80);
-  --primary-soft: oklch(0.95 0.04 42); /* soft maple wash (badges, subtle fills) */
-  --primary-soft-foreground: oklch(0.47 0.15 38);
+  --primary-soft: oklch(0.93 0.05 45); /* soft maple wash */
+  --primary-soft-foreground: oklch(0.46 0.15 40);
 
   /* Quiet neutrals */
-  --secondary: oklch(0.94 0.008 75);
-  --secondary-foreground: oklch(0.3 0.02 55);
-  --muted: oklch(0.945 0.007 75);
-  --muted-foreground: oklch(0.53 0.018 60);
-  --accent: oklch(0.945 0.012 60); /* hover background */
-  --accent-foreground: oklch(0.3 0.02 55);
+  --secondary: oklch(0.93 0.006 40);
+  --secondary-foreground: oklch(0.3 0.014 40);
+  --muted: oklch(0.935 0.006 40);
+  --muted-foreground: oklch(0.49 0.02 40); /* AA on canvas + card */
+  --accent: oklch(0.925 0.012 45); /* hover surface */
+  --accent-foreground: oklch(0.3 0.014 40);
 
-  /* Semantics */
-  --destructive: oklch(0.58 0.2 27);
-  --success: oklch(0.62 0.14 150);
-  --warning: oklch(0.76 0.15 75);
-  --info: oklch(0.6 0.12 240);
+  /* Semantics — tuned to read AA as text on light surfaces */
+  --destructive: oklch(0.53 0.2 27);
+  --success: oklch(0.52 0.13 150);
+  --warning: oklch(0.52 0.11 70);
+  --info: oklch(0.52 0.13 250);
 
   /* Lines & focus */
-  --border: oklch(0.9 0.006 75);
-  --input: oklch(0.9 0.006 75);
-  --ring: oklch(0.57 0.165 38);
+  --border: oklch(0.89 0.006 40);
+  --input: oklch(0.89 0.006 40);
+  --ring: oklch(0.53 0.17 40);
 
-  /* Soft, low-contrast card depth (no harsh borders) */
-  --shadow-card: 0 1px 2px oklch(0.3 0.02 55 / 0.04), 0 4px 14px oklch(0.3 0.02 55 / 0.06);
-  --shadow-card-hover: 0 2px 4px oklch(0.3 0.02 55 / 0.05), 0 10px 28px oklch(0.3 0.02 55 / 0.1);
+  /* Second neutral layer: the sidebar/app chrome */
+  --sidebar: oklch(0.965 0.005 40);
+  --sidebar-foreground: oklch(0.26 0.014 40);
+  --sidebar-accent: oklch(0.93 0.05 45);
+  --sidebar-accent-foreground: oklch(0.46 0.15 40);
+  --sidebar-border: oklch(0.89 0.006 40);
+  --sidebar-ring: oklch(0.53 0.17 40);
+
+  /* Warm-tinted elevation scale */
+  --shadow-xs: 0 1px 2px oklch(0.26 0.02 40 / 0.05);
+  --shadow-card: 0 1px 2px oklch(0.26 0.02 40 / 0.04), 0 4px 12px oklch(0.26 0.02 40 / 0.07);
+  --shadow-card-hover: 0 2px 4px oklch(0.26 0.02 40 / 0.05), 0 12px 28px oklch(0.26 0.02 40 / 0.11);
+  --shadow-popover: 0 4px 8px oklch(0.26 0.02 40 / 0.06), 0 16px 36px oklch(0.26 0.02 40 / 0.14);
 }
 
 .dark {
-  /* Surfaces */
-  --background: oklch(0.205 0.012 60);
+  /* Surfaces — warm near-black ramp */
+  --background: oklch(0.205 0.01 40);
   --foreground: oklch(0.96 0.006 80);
-  --card: oklch(0.245 0.012 60);
+  --card: oklch(0.245 0.01 40);
   --card-foreground: oklch(0.96 0.006 80);
-  --popover: oklch(0.245 0.012 60);
+  --popover: oklch(0.245 0.01 40);
   --popover-foreground: oklch(0.96 0.006 80);
 
   /* Maple accent — brightened for dark */
-  --primary: oklch(0.67 0.16 40);
+  --primary: oklch(0.7 0.16 45);
   --primary-foreground: oklch(0.2 0.02 50);
-  --primary-soft: oklch(0.32 0.05 40);
-  --primary-soft-foreground: oklch(0.82 0.1 45);
+  --primary-soft: oklch(0.33 0.05 42);
+  --primary-soft-foreground: oklch(0.84 0.1 50);
 
   /* Quiet neutrals */
-  --secondary: oklch(0.28 0.012 60);
+  --secondary: oklch(0.28 0.01 40);
   --secondary-foreground: oklch(0.96 0.006 80);
-  --muted: oklch(0.28 0.012 60);
-  --muted-foreground: oklch(0.7 0.015 70);
-  --accent: oklch(0.3 0.014 55);
+  --muted: oklch(0.28 0.01 40);
+  --muted-foreground: oklch(0.71 0.015 70);
+  --accent: oklch(0.3 0.012 45);
   --accent-foreground: oklch(0.96 0.006 80);
 
-  /* Semantics */
+  /* Semantics — brightened for dark surfaces */
   --destructive: oklch(0.7 0.19 25);
-  --success: oklch(0.7 0.14 150);
-  --warning: oklch(0.8 0.14 80);
-  --info: oklch(0.7 0.12 240);
+  --success: oklch(0.72 0.14 150);
+  --warning: oklch(0.8 0.13 80);
+  --info: oklch(0.72 0.13 250);
 
   /* Lines & focus */
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.67 0.16 40);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: oklch(0.7 0.16 45);
+
+  /* Sidebar layer */
+  --sidebar: oklch(0.225 0.01 40);
+  --sidebar-foreground: oklch(0.96 0.006 80);
+  --sidebar-accent: oklch(0.33 0.05 42);
+  --sidebar-accent-foreground: oklch(0.84 0.1 50);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.7 0.16 45);
 
   /* Depth */
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 14px oklch(0 0 0 / 0.35);
-  --shadow-card-hover: 0 2px 4px oklch(0 0 0 / 0.35), 0 10px 28px oklch(0 0 0 / 0.45);
+  --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 12px oklch(0 0 0 / 0.36);
+  --shadow-card-hover: 0 2px 4px oklch(0 0 0 / 0.36), 0 12px 28px oklch(0 0 0 / 0.46);
+  --shadow-popover: 0 4px 8px oklch(0 0 0 / 0.4), 0 16px 36px oklch(0 0 0 / 0.55);
 }
 
 @theme inline {
@@ -120,8 +149,17 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --shadow-xs: var(--shadow-xs);
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-popover: var(--shadow-popover);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -135,40 +173,48 @@
     @apply bg-background text-foreground;
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--primary-soft);
+    color: var(--primary-soft-foreground);
   }
 }
 
 @layer components {
-  /* Warm-Canadian type scale — friendly, generous. */
+  /*
+    Fixed-rem type scale (product UI views at consistent DPI; fluid headings
+    don't serve it). ~1.25+ ratio between steps for clear hierarchy.
+  */
   .type-display {
-    font-size: clamp(2rem, 1.4rem + 2.4vw, 2.75rem);
-    line-height: 1.05;
+    font-size: 2.25rem; /* 36px */
+    line-height: 1.1;
     letter-spacing: -0.02em;
     font-weight: 600;
   }
   .type-h1 {
-    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.875rem);
-    line-height: 1.15;
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.2;
     letter-spacing: -0.015em;
     font-weight: 600;
   }
   .type-h2 {
-    font-size: 1.25rem;
+    font-size: 1.1875rem; /* 19px */
     line-height: 1.3;
     letter-spacing: -0.01em;
     font-weight: 600;
   }
   .type-body {
-    font-size: 0.9375rem;
+    font-size: 0.9375rem; /* 15px */
     line-height: 1.6;
   }
   .type-small {
-    font-size: 0.8125rem;
+    font-size: 0.8125rem; /* 13px */
     line-height: 1.5;
   }
   .type-meta {
     font-family: var(--font-geist-mono);
-    font-size: 0.6875rem;
+    font-size: 0.6875rem; /* 11px */
     line-height: 1.4;
     letter-spacing: 0.06em;
     text-transform: uppercase;

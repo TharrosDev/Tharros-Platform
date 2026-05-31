@@ -6,40 +6,47 @@ maple accent used sparingly.
 
 ## Principles
 
-- **Warm-grey canvas, cards that lift.** The page is a warm off-grey; cards are
-  near-white and float on a soft shadow (no harsh borders). Depth comes from the
-  shadow, not from lines or glassmorphism.
-- **One accent: maple.** A warm red-orange, used for the primary action, the
-  active nav item, and small highlights. Never more than one maple call-to-action
-  competing in a view. Soft maple (`primary-soft`) carries badges and quiet fills.
+- **Warmth from the brand, not from beige.** The neutral ramp is tinted toward
+  maple's own hue (~40) at very low chroma, so it reads as a warm stone, never
+  the cream / parchment near-white that hue ~75 produces (the SaaS-cream default
+  we explicitly avoid). Warmth is carried by the accent, copy, and this tint.
+- **Depth by layering.** Three surface steps, each a shade lighter: canvas
+  (`--background`) -> sidebar (`--sidebar`) -> card (`--card`). Cards lift on a
+  soft, warm-tinted shadow. No harsh borders, no glassmorphism.
+- **One accent: maple.** A warm red-orange for the primary action, current
+  selection, and state only, never decoration. Never more than one maple CTA
+  competing in a view. Soft maple (`--primary-soft`) carries badges and quiet fills.
 - **Generous and rounded.** Large radius (`--radius: 0.875rem`), roomy padding,
   friendly type. Nothing cramped.
-- **Light and dark.** Both ship from the same tokens. Dark is a warm near-black,
-  not pure grey; maple brightens so it stays legible.
+- **Light and dark, both AA.** Both ship from the same tokens; dark is a warm
+  near-black. Every text pair meets WCAG AA (verified by computing OKLCH ->
+  WCAG contrast over the ramp).
 
 ## Tokens
 
 All tokens are OKLCH CSS variables in `src/app/globals.css`, reusing shadcn
-variable names so every component inherits them. Neutrals sit in a warm hue
-(~60–80); maple lives near hue 38. Change a token and the whole app re-skins.
+variable names so every component inherits them. The whole neutral ramp and the
+accent share hue ~40 (maple's family); change a token and the app re-skins.
 
 | Token | Role |
 | --- | --- |
-| `--background` / `--foreground` | warm-grey canvas / warm ink |
+| `--background` / `--foreground` | warm-stone canvas / warm ink |
+| `--sidebar` (+ `-foreground` / `-accent` / `-border`) | second neutral layer: app chrome |
 | `--card` / `--popover` | near-white surfaces that lift on `--shadow-card` |
 | `--primary` / `--primary-foreground` | maple action colour / text on it |
 | `--primary-soft` / `--primary-soft-foreground` | soft maple wash / text on it |
 | `--secondary` `--muted` `--accent` | quiet warm neutrals (hover, fills) |
-| `--success` `--warning` `--info` `--destructive` | semantics |
+| `--success` `--warning` `--info` `--destructive` | semantics, tuned to read AA as text |
 | `--border` `--input` `--ring` | hairlines and maple focus ring |
-| `--shadow-card` / `--shadow-card-hover` | soft card depth |
+| `--shadow-xs` `--shadow-card` `--shadow-card-hover` `--shadow-popover` | warm elevation scale |
 
 ## Type scale
 
-Geist Sans for UI, Geist Mono for numerals and metadata. Utility classes in
-`globals.css`: `.type-display`, `.type-h1`, `.type-h2`, `.type-body`,
-`.type-small`, `.type-meta` (mono, uppercase, tracked). Use `.num` for tabular
-mono numerals on any stat or figure.
+Geist Sans for UI, Geist Mono for numerals and metadata. The scale is **fixed
+rem, not fluid** (product UI views at consistent DPI; clamp headings don't serve
+it), with a ~1.25+ ratio between steps: `.type-display` 36px, `.type-h1` 24px,
+`.type-h2` 19px, `.type-body` 15px, `.type-small` 13px, `.type-meta` 11px (mono,
+uppercase, tracked). Use `.num` for tabular mono numerals on any stat or figure.
 
 ## Components (Day 5)
 

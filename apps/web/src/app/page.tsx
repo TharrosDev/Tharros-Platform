@@ -63,7 +63,7 @@ export default function Home() {
   return (
     <div className="bg-background flex min-h-screen">
       {/* Sidebar */}
-      <aside className="bg-card/60 hidden w-64 shrink-0 flex-col border-r border-border/60 px-3 py-5 lg:flex">
+      <aside className="bg-sidebar text-sidebar-foreground hidden w-64 shrink-0 flex-col border-r border-sidebar-border px-3 py-5 lg:flex">
         <div className="px-2">
           <TharrosWordmark />
         </div>
