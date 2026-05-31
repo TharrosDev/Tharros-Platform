@@ -1,6 +1,12 @@
 packages:
   - "apps/*"
   - "packages/*"
+overrides:
+  # Force the patched postcss everywhere. next pulls in 8.4.31 transitively,
+  # which carries a moderate XSS-in-CSS-stringify advisory (GHSA-qx2v-qp2m-jg93).
+  # Build-time, trusted-input only here, but the patch bump is free. Remove once
+  # next ships a postcss >= 8.5.10 on its own.
+  postcss: ">=8.5.10"
 allowBuilds:
   '@sentry/cli': true
   msw: false

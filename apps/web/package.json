@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "@base-ui/react": "^1.5.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@sentry/nextjs": "^10.55.0",
