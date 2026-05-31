@@ -69,4 +69,4 @@ All UI copy is warm, plain, and human. It leans into the local/Canadian identity
 - Warm and reassuring: "Nothing needs you right this second."
 - Plain words over jargon. Short sentences. Concrete nouns.
 - **No em-dashes in UI copy** (founder preference; commas or periods instead).
-- Speak to the person ("Hey Bronwyn"), name the outcome, never the plumbing.
+- Speak to the person ("Hey Magnus"), name the outcome, never the plumbing.

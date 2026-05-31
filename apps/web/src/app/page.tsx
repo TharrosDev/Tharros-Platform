@@ -54,7 +54,7 @@ const activity = [
   { who: "Capital Plumbing", what: "booked a callback for Thursday", when: "2m ago", initials: "CP" },
   { who: "Rideau Dental", what: "got an after-hours reply from your assistant", when: "1h ago", initials: "RD" },
   { who: "Maverick Coffee", what: "added 3 new leads from the contact form", when: "3h ago", initials: "MC" },
-  { who: "Bronwyn Candles", what: "finished the welcome follow-up", when: "Yesterday", initials: "BC" },
+  { who: "Hintonburg Bakery", what: "finished the welcome follow-up", when: "Yesterday", initials: "HB" },
 ];
 
 const sparkline = [5, 8, 6, 11, 9, 14, 18, 24];
@@ -84,11 +84,11 @@ export default function Home() {
         <Separator className="my-3" />
         <div className="flex items-center gap-3 px-2 py-1">
           <Avatar>
-            <AvatarFallback>BC</AvatarFallback>
+            <AvatarFallback>MA</AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">Bronwyn Clarke</p>
-            <p className="text-muted-foreground truncate text-xs">Bronwyn Candles</p>
+            <p className="truncate text-sm font-medium">Magnus Abdelnour</p>
+            <p className="text-muted-foreground truncate text-xs">Glebe Candle Co.</p>
           </div>
         </div>
       </aside>
@@ -104,7 +104,7 @@ export default function Home() {
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <Avatar className="size-8 lg:hidden">
-              <AvatarFallback className="text-xs">BC</AvatarFallback>
+              <AvatarFallback className="text-xs">MA</AvatarFallback>
             </Avatar>
           </div>
         </header>
@@ -114,7 +114,7 @@ export default function Home() {
           <PageHeader
             title={
               <span>
-                Hey Bronwyn <span aria-hidden>👋</span>
+                Hey Magnus <span aria-hidden>👋</span>
               </span>
             }
             description="Here is what Tharros looked after for you. Nothing needs you right this second, but a couple of things are waiting when you have a minute."
