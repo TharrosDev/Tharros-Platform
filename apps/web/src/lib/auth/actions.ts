@@ -26,6 +26,15 @@ function fieldErrors(error: z.ZodError) {
   return z.flattenError(error).fieldErrors as Record<string, string[] | undefined>;
 }
 
+/**
+ * Accept only same-origin relative paths as a post-auth redirect target, so the
+ * `next` param (used by the team-invite accept flow) can't be an open redirect.
+ * Rejects protocol-relative `//host` too.
+ */
+function sanitizeNext(value: string): string | undefined {
+  return value.startsWith("/") && !value.startsWith("//") ? value : undefined;
+}
+
 export async function signUp(
   _prev: AuthFormState,
   formData: FormData,
@@ -40,13 +49,15 @@ export async function signUp(
     return { errors: fieldErrors(parsed.error), values: { fullName: raw.fullName, email: raw.email } };
   }
 
+  const next = sanitizeNext(String(formData.get("next") ?? "")) ?? "/dashboard";
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName },
-      emailRedirectTo: `${getURL()}/auth/confirm?next=/dashboard`,
+      emailRedirectTo: `${getURL()}/auth/confirm?next=${encodeURIComponent(next)}`,
     },
   });
 
@@ -54,7 +65,10 @@ export async function signUp(
     return { message: error.message, values: { fullName: raw.fullName, email: raw.email } };
   }
 
-  redirect(`/verify-email?email=${encodeURIComponent(parsed.data.email)}`);
+  const verifyUrl =
+    `/verify-email?email=${encodeURIComponent(parsed.data.email)}` +
+    (next !== "/dashboard" ? `&next=${encodeURIComponent(next)}` : "");
+  redirect(verifyUrl);
 }
 
 export async function logIn(
@@ -70,6 +84,8 @@ export async function logIn(
     return { errors: fieldErrors(parsed.error), values: { email: raw.email } };
   }
 
+  const next = sanitizeNext(String(formData.get("next") ?? ""));
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
@@ -84,7 +100,7 @@ export async function logIn(
     return { message: "That email or password doesn't match our records.", values: { email: raw.email } };
   }
 
-  redirect("/dashboard");
+  redirect(next ?? "/dashboard");
 }
 
 export async function requestPasswordReset(
@@ -135,11 +151,13 @@ export async function resendVerification(
   const email = String(formData.get("email") ?? "").trim();
   if (!email) return { message: "Missing email address." };
 
+  const next = sanitizeNext(String(formData.get("next") ?? "")) ?? "/dashboard";
+
   const supabase = await createClient();
   await supabase.auth.resend({
     type: "signup",
     email,
-    options: { emailRedirectTo: `${getURL()}/auth/confirm?next=/dashboard` },
+    options: { emailRedirectTo: `${getURL()}/auth/confirm?next=${encodeURIComponent(next)}` },
   });
 
   return { message: "resent" };

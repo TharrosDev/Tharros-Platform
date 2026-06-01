@@ -9,9 +9,10 @@ export const metadata: Metadata = { title: "Confirm your email" };
 export default async function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams: Promise<{ email?: string }>;
+  searchParams: Promise<{ email?: string; next?: string }>;
 }) {
-  const { email } = await searchParams;
+  const { email, next } = await searchParams;
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
 
   return (
     <AuthCard
@@ -34,7 +35,7 @@ export default async function VerifyEmailPage({
       }
     >
       {email ? (
-        <ResendVerification email={email} />
+        <ResendVerification email={email} next={safeNext} />
       ) : (
         <p className="text-muted-foreground text-sm">
           Didn&apos;t get it? Check your spam folder, or{" "}

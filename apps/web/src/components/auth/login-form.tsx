@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AuthCard, FieldError, FormMessage } from "@/components/auth/auth-card";
 
-export function LoginForm({ notice }: { notice?: string }) {
+export function LoginForm({ notice, next }: { notice?: string; next?: string }) {
   const [state, action, pending] = useActionState(logIn, undefined);
+  const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : "/signup";
 
   return (
     <AuthCard
@@ -19,13 +20,14 @@ export function LoginForm({ notice }: { notice?: string }) {
       footer={
         <>
           New to Tharros?{" "}
-          <Link className="text-primary font-medium hover:underline" href="/signup">
+          <Link className="text-primary font-medium hover:underline" href={signupHref}>
             Create an account
           </Link>
         </>
       }
     >
       <form action={action} className="space-y-4" noValidate>
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         {notice && !state?.message ? <FormMessage>{notice}</FormMessage> : null}
         {state?.message ? <FormMessage>{state.message}</FormMessage> : null}
 

@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { AuthCard, FieldError, FormMessage } from "@/components/auth/auth-card";
 
-export function SignupForm() {
+export function SignupForm({ next }: { next?: string }) {
   const [state, action, pending] = useActionState(signUp, undefined);
+  const loginHref = next ? `/login?next=${encodeURIComponent(next)}` : "/login";
 
   return (
     <AuthCard
@@ -19,13 +20,14 @@ export function SignupForm() {
       footer={
         <>
           Already have an account?{" "}
-          <Link className="text-primary font-medium hover:underline" href="/login">
+          <Link className="text-primary font-medium hover:underline" href={loginHref}>
             Sign in
           </Link>
         </>
       }
     >
       <form action={action} className="space-y-4" noValidate>
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         {state?.message ? <FormMessage>{state.message}</FormMessage> : null}
 
         <div className="space-y-1.5">
