@@ -5,6 +5,8 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { getURL } from "@/lib/site-url";
+import { sanitizeNext } from "@/lib/auth/safe-redirect";
+import { checkRateLimit } from "@/lib/rate-limit";
 import {
   logInSchema,
   requestResetSchema,
@@ -24,15 +26,6 @@ import {
 
 function fieldErrors(error: z.ZodError) {
   return z.flattenError(error).fieldErrors as Record<string, string[] | undefined>;
-}
-
-/**
- * Accept only same-origin relative paths as a post-auth redirect target, so the
- * `next` param (used by the team-invite accept flow) can't be an open redirect.
- * Rejects protocol-relative `//host` too.
- */
-function sanitizeNext(value: string): string | undefined {
-  return value.startsWith("/") && !value.startsWith("//") ? value : undefined;
 }
 
 export async function signUp(
@@ -113,6 +106,11 @@ export async function requestPasswordReset(
     return { errors: fieldErrors(parsed.error), values: raw };
   }
 
+  // Throttle by email. On limit, return the same neutral "sent" response and
+  // skip the send — no enumeration signal, and no email bombing of an address.
+  const { allowed } = await checkRateLimit(`pwreset:${parsed.data.email.toLowerCase()}`, 3, 900);
+  if (!allowed) return { message: "sent" };
+
   const supabase = await createClient();
   // Ignore the result on purpose — never reveal whether an email is registered.
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
@@ -152,6 +150,10 @@ export async function resendVerification(
   if (!email) return { message: "Missing email address." };
 
   const next = sanitizeNext(String(formData.get("next") ?? "")) ?? "/dashboard";
+
+  // Throttle by email; on limit return the same neutral "resent" response.
+  const { allowed } = await checkRateLimit(`verify:${email.toLowerCase()}`, 3, 900);
+  if (!allowed) return { message: "resent" };
 
   const supabase = await createClient();
   await supabase.auth.resend({

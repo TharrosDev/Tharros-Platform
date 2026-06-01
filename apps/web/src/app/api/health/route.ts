@@ -18,11 +18,13 @@ type CheckStatus = "up" | "down";
 async function checkDatabase(): Promise<CheckStatus> {
   try {
     const supabase = await createClient();
-    // Cheap round-trip that doesn't depend on any app table existing yet: ask
-    // PostgREST for the server time via a HEAD-style count on a system view.
-    // `auth.getSession()` hits Supabase without requiring schema, so use it as a
-    // connectivity probe.
-    const { error } = await supabase.auth.getSession();
+    // Real connectivity probe: a HEAD-style count against feature_flags (Day 7,
+    // public-read under RLS). This makes an actual PostgREST round-trip, so it
+    // fails when Postgres/Supabase is unreachable. (auth.getSession() only reads
+    // the local cookie and would report healthy even with the DB down.)
+    const { error } = await supabase
+      .from("feature_flags")
+      .select("*", { head: true, count: "exact" });
     return error ? "down" : "up";
   } catch (err) {
     logger.error("Health check: database probe threw", { err, check: "database" });
