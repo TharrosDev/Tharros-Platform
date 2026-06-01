@@ -325,3 +325,59 @@ describe("changeRole + removeMember", () => {
     expect(await membershipRole(userD, orgA)).toBeNull();
   });
 });
+
+describe("team members visibility (Bug #2 — two-step fetch)", () => {
+  it("the legacy memberships→profiles embed has no FK relationship (PGRST200)", async () => {
+    // Root cause: memberships.user_id and profiles.id both FK to auth.users,
+    // so there is no direct relationship for PostgREST to embed through.
+    const res = await clientA
+      .from("memberships")
+      .select("user_id, profiles(email)")
+      .eq("org_id", orgA);
+    expect(res.error).not.toBeNull();
+  });
+
+  it("owner A sees co-member B's name + email via the two-step query", async () => {
+    // Seed a display name (seedUser creates users without full_name).
+    await admin.from("profiles").update({ full_name: "Bea Tester" }).eq("id", userB);
+
+    const m = await clientA
+      .from("memberships")
+      .select("user_id, role")
+      .eq("org_id", orgA)
+      .order("created_at", { ascending: true });
+    expect(m.error).toBeNull();
+    const ids = (m.data ?? []).map((r) => r.user_id);
+    expect(ids).toContain(userB);
+
+    const p = await clientA.from("profiles").select("id, email, full_name").in("id", ids);
+    expect(p.error).toBeNull();
+    const bee = (p.data ?? []).find((r) => r.id === userB);
+    expect(bee?.email).toBe(emailFor("b"));
+    expect(bee?.full_name).toBe("Bea Tester");
+  });
+});
+
+describe("leaveOrg capability (Bug #3 — members can leave)", () => {
+  it("member B can delete their own membership (leave the org)", async () => {
+    const res = await clientB
+      .from("memberships")
+      .delete()
+      .eq("org_id", orgA)
+      .eq("user_id", userB)
+      .select();
+    expect(res.error).toBeNull();
+    expect(await membershipRole(userB, orgA)).toBeNull();
+  });
+
+  it("the sole owner A still cannot leave (last-owner guard)", async () => {
+    const res = await clientA
+      .from("memberships")
+      .delete()
+      .eq("org_id", orgA)
+      .eq("user_id", userA)
+      .select();
+    expect(res.error).not.toBeNull();
+    expect(await membershipRole(userA, orgA)).toBe("owner");
+  });
+});

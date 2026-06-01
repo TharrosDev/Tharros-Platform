@@ -230,6 +230,34 @@ describe("active org guard (profiles.current_org_id)", () => {
   });
 });
 
+describe("org list scoping (Bug #1 — switcher duplicate)", () => {
+  it("the unscoped membership read returns org A twice (co-member row leaks in)", async () => {
+    // Demonstrates the root cause: the memberships SELECT policy exposes every
+    // co-member row in the user's orgs, so A sees A's own owner row AND C's
+    // member row for org A — the same org twice.
+    const { data } = await clientA
+      .from("memberships")
+      .select("org_id")
+      .order("created_at", { ascending: true });
+    const forOrgA = (data ?? []).filter((r) => r.org_id === orgA);
+    expect(forOrgA.length).toBeGreaterThan(1);
+  });
+
+  it("scoping to the caller's own memberships returns each org exactly once", async () => {
+    // The getOrgContext fix: .eq("user_id", userA).
+    const { data, error } = await clientA
+      .from("memberships")
+      .select("org_id, organizations(id)")
+      .eq("user_id", userA)
+      .order("created_at", { ascending: true });
+    expect(error).toBeNull();
+    const orgIds = (data ?? []).map((r) => r.org_id);
+    // org A appears once, and there are no duplicate orgs at all.
+    expect(orgIds.filter((id) => id === orgA)).toHaveLength(1);
+    expect(new Set(orgIds).size).toBe(orgIds.length);
+  });
+});
+
 describe("org_settings RLS", () => {
   it("member C can read org A settings; outsider B cannot", async () => {
     const cRead = await clientC.from("org_settings").select("org_id").eq("org_id", orgA);

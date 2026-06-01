@@ -44,6 +44,11 @@ export const getOrgContext = cache(async (): Promise<OrgContext> => {
     supabase
       .from("memberships")
       .select("role, created_at, organizations(id, name, slug, onboarded_at)")
+      // Scope to the caller's OWN memberships. The memberships RLS policy
+      // exposes every co-member row in the user's orgs (the team page needs
+      // that), so without this filter an org with N members would appear N
+      // times in the switcher — once per co-member row.
+      .eq("user_id", user.id)
       .order("created_at", { ascending: true }),
     supabase.from("profiles").select("current_org_id").eq("id", user.id).single(),
   ]);

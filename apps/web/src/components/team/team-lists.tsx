@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, RotateCw, ShieldCheck, ShieldMinus, Trash2 } from "lucide-react";
+import { LogOut, MoreHorizontal, RotateCw, ShieldCheck, ShieldMinus, Trash2 } from "lucide-react";
 
 import {
   changeRole,
+  leaveOrg,
   removeMember,
   resendInvite,
   revokeInvite,
@@ -43,6 +44,7 @@ type Confirm = {
   title: string;
   description: string;
   confirmLabel: string;
+  successMsg: string;
   run: () => Promise<ActionResult>;
 };
 
@@ -70,6 +72,8 @@ export function TeamLists({
 
   const canManage = viewerRole === "owner" || viewerRole === "admin";
   const isOwner = viewerRole === "owner";
+  // Owners can't leave (last-owner guard / ownership transfer is out of scope).
+  const canLeave = viewerRole !== null && viewerRole !== "owner";
 
   function run(action: () => Promise<ActionResult>, successMsg: string) {
     startTransition(async () => {
@@ -87,7 +91,7 @@ export function TeamLists({
     if (!confirm) return;
     const c = confirm;
     setConfirm(null);
-    run(c.run, c.confirmLabel === "Remove" ? "Member removed." : "Invite revoked.");
+    run(c.run, c.successMsg);
   }
 
   return (
@@ -166,6 +170,7 @@ export function TeamLists({
                                   title: "Remove member",
                                   description: `Remove ${m.name ?? m.email} from this organization? They'll lose access immediately.`,
                                   confirmLabel: "Remove",
+                                  successMsg: "Member removed.",
                                   run: () => removeMember(m.userId),
                                 })
                               }
@@ -183,6 +188,30 @@ export function TeamLists({
             })}
           </TableBody>
         </Table>
+
+        {canLeave ? (
+          <div className="flex justify-end pt-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive"
+              disabled={pending}
+              onClick={() =>
+                setConfirm({
+                  title: "Leave organization",
+                  description:
+                    "Leave this organization? You'll lose access immediately and need a new invite to rejoin.",
+                  confirmLabel: "Leave",
+                  successMsg: "You left the organization.",
+                  run: () => leaveOrg(),
+                })
+              }
+            >
+              <LogOut className="size-4" />
+              Leave organization
+            </Button>
+          </div>
+        ) : null}
       </section>
 
       {canManage && pendingInvites.length > 0 ? (
@@ -236,6 +265,7 @@ export function TeamLists({
                               title: "Revoke invite",
                               description: `Revoke the invite for ${inv.email}? The link will stop working.`,
                               confirmLabel: "Revoke",
+                              successMsg: "Invite revoked.",
                               run: () => revokeInvite(inv.id),
                             })
                           }

@@ -2,6 +2,7 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getOrgContext, type UserOrg } from "@/lib/org/queries";
+import { logger } from "@/lib/observability/logger";
 
 export type TeamRole = "owner" | "admin" | "member";
 
@@ -29,11 +30,16 @@ export type Team = {
   pendingInvites: PendingInvite[];
 };
 
-// Embedded PostgREST row shapes (clients are untyped in this repo).
-type MemberRow = {
+// PostgREST row shapes (clients are untyped in this repo).
+type MembershipRow = {
   user_id: string;
   role: TeamRole;
-  profiles: { email: string | null; full_name: string | null } | null;
+};
+
+type ProfileRow = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
 };
 
 type InviteRow = {
@@ -55,10 +61,16 @@ export const getTeam = cache(async (): Promise<Team> => {
   }
 
   const supabase = await createClient();
+  // Members are fetched in two steps rather than via a PostgREST embed:
+  // `memberships` has no FK to `profiles` (both only reference auth.users), so
+  // `memberships.select("...profiles(...)")` errors with PGRST200. We fetch
+  // memberships, then the matching profiles, and join in JS — the same
+  // separate-query pattern getOrgContext uses. Both reads are RLS-scoped to the
+  // caller's co-members.
   const [membersRes, invitesRes] = await Promise.all([
     supabase
       .from("memberships")
-      .select("user_id, role, created_at, profiles(email, full_name)")
+      .select("user_id, role, created_at")
       .eq("org_id", activeOrg.id)
       .order("created_at", { ascending: true }),
     supabase
@@ -71,14 +83,48 @@ export const getTeam = cache(async (): Promise<Team> => {
       .order("created_at", { ascending: true }),
   ]);
 
-  const members: TeamMember[] = ((membersRes.data ?? []) as unknown as MemberRow[]).map(
-    (r) => ({
+  if (membersRes.error) {
+    logger.error("getTeam: memberships query failed", {
+      err: membersRes.error,
+      orgId: activeOrg.id,
+    });
+  }
+  if (invitesRes.error) {
+    logger.error("getTeam: invites query failed", {
+      err: invitesRes.error,
+      orgId: activeOrg.id,
+    });
+  }
+
+  const membershipRows = (membersRes.data ?? []) as unknown as MembershipRow[];
+
+  const userIds = membershipRows.map((r) => r.user_id);
+  let profilesById = new Map<string, ProfileRow>();
+  if (userIds.length > 0) {
+    const profilesRes = await supabase
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("id", userIds);
+    if (profilesRes.error) {
+      logger.error("getTeam: profiles query failed", {
+        err: profilesRes.error,
+        orgId: activeOrg.id,
+      });
+    }
+    profilesById = new Map(
+      ((profilesRes.data ?? []) as unknown as ProfileRow[]).map((p) => [p.id, p]),
+    );
+  }
+
+  const members: TeamMember[] = membershipRows.map((r) => {
+    const profile = profilesById.get(r.user_id);
+    return {
       userId: r.user_id,
-      email: r.profiles?.email ?? "",
-      name: r.profiles?.full_name ?? null,
+      email: profile?.email ?? "",
+      name: profile?.full_name ?? null,
       role: r.role,
-    }),
-  );
+    };
+  });
 
   const pendingInvites: PendingInvite[] = (
     (invitesRes.data ?? []) as unknown as InviteRow[]
