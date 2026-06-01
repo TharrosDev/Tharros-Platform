@@ -1,0 +1,65 @@
+# Day 14 — CI pipeline.
+# Quality gate for every PR and every push to main: typecheck + lint + the
+# Vitest RLS/org isolation harness + a production build. Branch protection
+# (configured in repo settings) requires this check to pass before merge.
+#
+# The Vitest harness does real Supabase round-trips (it signs up + tears down
+# auth users), so it runs against a DEDICATED test project — never prod.
+# See docs/CI.md for the secrets this workflow expects.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A newer push to the same branch/PR cancels the in-flight run.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: typecheck · lint · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Installs the pnpm version pinned by `packageManager` in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # pnpm 11.5 requires Node >= 22.13 (it imports node:sqlite).
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      # DB-touching suite. Points at the test Supabase project; the harness
+      # seeds + tears down its own users, so runs are self-cleaning.
+      - name: Test (RLS + org isolation harness)
+        run: pnpm test
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.TEST_SUPABASE_SECRET_KEY }}
+
+      # Production build. Env validation is skipped here (the secrets that gate
+      # it live in Vercel, not CI); the public Supabase test values are supplied
+      # so any build-time client construction resolves.
+      - name: Build
+        run: pnpm build
+        env:
+          SKIP_ENV_VALIDATION: "true"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
