@@ -14,6 +14,8 @@
         "SUPABASE_SECRET_KEY",
         "ANTHROPIC_API_KEY",
         "STRIPE_SECRET_KEY",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
         "STRIPE_WEBHOOK_SECRET",
         "NANGO_SECRET_KEY",
         "N8N_BASE_URL",

@@ -19,6 +19,13 @@ export const env = createEnv({
     SUPABASE_SECRET_KEY: z.string().min(1),
     ANTHROPIC_API_KEY: z.string().min(1),
     STRIPE_SECRET_KEY: z.string().min(1),
+    // Transactional email via Resend (Day 13). Send-only API key; also used as
+    // the SMTP password for Supabase Auth's custom SMTP (configured at Supabase,
+    // not here). Required — the mailer seam and auth email both depend on it.
+    RESEND_API_KEY: z.string().min(1),
+    // Default From identity for app-sent mail. Optional — falls back to the
+    // canonical address in lib/email/client.ts when unset.
+    EMAIL_FROM: z.string().min(1).optional(),
     // Deferred — optional until their phase.
     STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
     NANGO_SECRET_KEY: z.string().min(1).optional(),
@@ -48,6 +55,8 @@ export const env = createEnv({
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     NANGO_SECRET_KEY: process.env.NANGO_SECRET_KEY,
     N8N_BASE_URL: process.env.N8N_BASE_URL,
