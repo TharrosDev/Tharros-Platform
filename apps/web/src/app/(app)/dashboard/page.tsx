@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowUpRight, Sparkles, Users, Workflow } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { getAuthUser } from "@/lib/auth/current-user";
+import { getDisplayUser } from "@/lib/auth/user";
 import {
   Card,
   CardContent,
@@ -45,11 +47,16 @@ const activity = [
 
 const sparkline = [5, 8, 6, 11, 9, 14, 18, 24];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // First name from the signed-in user (full_name → email local-part fallback),
+  // mirroring the shell's getDisplayUser. The (app) layout guarantees a user.
+  const user = await getAuthUser();
+  const firstName = user ? getDisplayUser(user).name.split(/\s+/)[0] : null;
+
   return (
     <>
       <PageHeader
-        title="Welcome back, Magnus"
+        title={firstName ? `Welcome back, ${firstName}` : "Welcome back"}
         description="Here's what Tharros handled while you were out. A few things are waiting on your call."
         actions={<NewAutomationButton />}
       />
