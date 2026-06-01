@@ -23,7 +23,7 @@ the busywork and only surfacing what actually needs them.
 ## Brand Personality
 
 Warm Canadian, with backbone. Warm, plain, human, and local, but confident: it
-speaks to the person ("Welcome back, Magnus"), names outcomes rather than plumbing,
+speaks to the person ("Welcome back, {first name}"), names outcomes rather than plumbing,
 and never hides behind jargon. Three words: warm, confident, capable. The interface
 should feel inviting but assured: a grounded, well-kept workspace a busy owner
 trusts on sight, not a cozy cottage and not a cold control panel.

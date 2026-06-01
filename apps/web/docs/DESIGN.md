@@ -120,6 +120,6 @@ not cozy or cute. It talks to a busy owner, not an enterprise buyer.
   soft hedging ("nothing needs you right this second") and cutesy garnish (no emoji).
 - Plain words over jargon. Short, declarative sentences. Concrete nouns.
 - **No em-dashes in UI copy** (founder preference; commas or periods instead).
-- Speak to the person ("Welcome back, Magnus"), name the outcome, never the plumbing.
+- Speak to the person ("Welcome back, {first name}"), name the outcome, never the plumbing.
 - The "Local & Canadian" identity lives in the brand surfaces (sidebar wordmark,
   marketing, footer), not as a sticker in the working chrome.
