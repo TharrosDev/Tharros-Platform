@@ -75,4 +75,8 @@ export const env = createEnv({
   },
   // Treat "" (e.g. an unset Vercel var) as undefined so optional keys stay optional.
   emptyStringAsUndefined: true,
+  // CI builds the app without the production secrets (those live in Vercel, not
+  // GitHub). SKIP_ENV_VALIDATION lets the typecheck/build gate run there; it is
+  // never set on Vercel, so real deploys still fail fast on a missing key.
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });
