@@ -14,6 +14,7 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/verify-email",
   "/auth", // /auth/confirm callback
+  "/invite", // team-invite accept (redeems server-side; bounces to login itself)
   "/monitoring", // Sentry tunnel (also excluded by the proxy matcher)
 ];
 

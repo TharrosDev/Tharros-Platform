@@ -4,6 +4,12 @@ import { SignupForm } from "@/components/auth/signup-form";
 
 export const metadata: Metadata = { title: "Create your account" };
 
-export default function SignupPage() {
-  return <SignupForm />;
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
+  return <SignupForm next={safeNext} />;
 }
