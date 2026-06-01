@@ -159,6 +159,39 @@ export async function removeMember(userId: string): Promise<{ error?: string }> 
   return {};
 }
 
+/**
+ * Leave the active org (members + admins). Self-removal is permitted by the
+ * Day-11 DELETE policy; the last-owner guard blocks a sole owner from leaving
+ * and its message is surfaced. On success, repoints the caller's active org to
+ * a remaining membership (or null) so `current_org_id` doesn't dangle, then
+ * revalidates the whole layout so the sidebar switcher updates.
+ */
+export async function leaveOrg(): Promise<{ error?: string }> {
+  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
+  if (!user || !activeOrg) return { error: "No active organization." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("memberships")
+    .delete()
+    .eq("org_id", activeOrg.id)
+    .eq("user_id", user.id);
+  if (error) return { error: error.message };
+
+  // Repoint active org to any remaining membership (own rows only).
+  const { data: remaining } = await supabase
+    .from("memberships")
+    .select("org_id")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true })
+    .limit(1);
+  const nextOrgId = (remaining?.[0] as { org_id: string } | undefined)?.org_id ?? null;
+  await supabase.from("profiles").update({ current_org_id: nextOrgId }).eq("id", user.id);
+
+  revalidatePath("/", "layout");
+  return {};
+}
+
 /** Change a member's role. Owners-only per the Day-11 UPDATE policy. */
 export async function changeRole(
   userId: string,
