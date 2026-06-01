@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth/current-user";
 
 /** An org the current user belongs to, flattened for the shell + switcher. */
 export type UserOrg = {
@@ -35,12 +36,10 @@ type MembershipRow = {
  * `cache()` dedupes the work across the layout + sidebar within one request.
  */
 export const getOrgContext = cache(async (): Promise<OrgContext> => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
   if (!user) return { orgs: [], activeOrg: null, needsOnboarding: false };
 
+  const supabase = await createClient();
   const [membershipsRes, profileRes] = await Promise.all([
     supabase
       .from("memberships")

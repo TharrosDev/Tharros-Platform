@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth/current-user";
 import { getDisplayUser } from "@/lib/auth/user";
 import { getOrgContext } from "@/lib/org/queries";
 import { Sidebar } from "@/components/shell/sidebar";
@@ -13,12 +13,9 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Authoritative auth gate: getUser() verifies the JWT with Supabase. The proxy
-  // does an optimistic redirect, but this is the check we actually trust.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Authoritative auth gate: getAuthUser() verifies the JWT with Supabase. The
+  // proxy does an optimistic redirect, but this is the check we actually trust.
+  const user = await getAuthUser();
   if (!user) redirect("/login");
 
   // Org gate: an un-onboarded active org must finish the first-run wizard before
