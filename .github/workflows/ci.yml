@@ -32,7 +32,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # pnpm 11.5 requires Node >= 22.13 (it imports node:sqlite).
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
