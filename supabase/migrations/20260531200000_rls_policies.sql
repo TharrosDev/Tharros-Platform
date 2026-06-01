@@ -42,6 +42,9 @@ revoke execute on function public.current_user_role(uuid) from anon, public;
 -- ---------------------------------------------------------------------------
 -- profiles
 -- ---------------------------------------------------------------------------
+-- NOTE: superseded by 20260601130000_comember_helper.sql (audit fix #4), which
+-- replaces this inline self-join with the current_user_comember_ids() helper for
+-- performance. Semantics are identical; that later migration is the live form.
 drop policy if exists profiles_select_self_or_comember on public.profiles;
 create policy profiles_select_self_or_comember
   on public.profiles

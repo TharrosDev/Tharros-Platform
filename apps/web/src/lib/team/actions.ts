@@ -9,6 +9,7 @@ import { getDisplayUser } from "@/lib/auth/user";
 import { getOrgContext } from "@/lib/org/queries";
 import { getURL } from "@/lib/site-url";
 import { sendEmail } from "@/lib/email/send";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { InviteEmail } from "@/lib/email/templates/invite";
 import { inviteSchema, type TeamFormState } from "@/lib/team/schemas";
 
@@ -46,6 +47,12 @@ export async function sendInvite(
   const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
   if (!user || !activeOrg) {
     return { message: "No active organization. Try refreshing the page.", values: raw };
+  }
+
+  // Throttle invite sends per inviter to cap Resend-quota abuse.
+  const { allowed } = await checkRateLimit(`invite:${user.id}`, 20, 3600);
+  if (!allowed) {
+    return { message: "You're sending invites too quickly. Please try again later.", values: raw };
   }
 
   const supabase = await createClient();
@@ -94,6 +101,9 @@ export async function resendInvite(inviteId: string): Promise<{ error?: string }
 
   const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
   if (!user || !activeOrg) return { error: "Not authenticated." };
+
+  const { allowed } = await checkRateLimit(`invite:${user.id}`, 20, 3600);
+  if (!allowed) return { error: "You're sending invites too quickly. Please try again later." };
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("resend_invite", { p_invite: inviteId });
