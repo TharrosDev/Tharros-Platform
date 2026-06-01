@@ -1,3 +1,5 @@
+import { fileURLToPath } from "node:url";
+
 import { config } from "dotenv";
 import { defineConfig } from "vitest/config";
 
@@ -6,7 +8,17 @@ import { defineConfig } from "vitest/config";
 // service-role SUPABASE_SECRET_KEY for seeding/teardown).
 config({ path: ".env.local" });
 
+// Pure unit suites (e.g. lib/billing/plans) import `@/env`, whose t3-env schema
+// requires the full set of server secrets. CI's test job only supplies the
+// Supabase vars, so skip presence-validation here — the DB harnesses read raw
+// process.env directly and are unaffected. (Same stance as the CI build step.)
+process.env.SKIP_ENV_VALIDATION ||= "true";
+
 export default defineConfig({
+  // Resolve the app's `@/*` path alias so unit tests can import app modules.
+  resolve: {
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+  },
   test: {
     environment: "node",
     // RLS tests do real network round-trips and seed/tear-down auth users.
