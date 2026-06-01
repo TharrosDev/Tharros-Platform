@@ -26,6 +26,14 @@ export const env = createEnv({
     // Default From identity for app-sent mail. Optional — falls back to the
     // canonical address in lib/email/client.ts when unset.
     EMAIL_FROM: z.string().min(1).optional(),
+    // Stripe Price IDs for the three subscription tiers (Day 16). Created in
+    // test mode by scripts/stripe/setup-products.mjs. Optional until that script
+    // has run and the IDs are vaulted in Vercel — promote to required once set,
+    // or Checkout (Day 17) has nothing to charge. lib/billing/plans.ts reads
+    // these; the stable Price `lookup_key` is the fallback handle.
+    STRIPE_PRICE_STARTER: z.string().min(1).optional(),
+    STRIPE_PRICE_GROWTH: z.string().min(1).optional(),
+    STRIPE_PRICE_PRO: z.string().min(1).optional(),
     // Deferred — optional until their phase.
     STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
     NANGO_SECRET_KEY: z.string().min(1).optional(),
@@ -55,6 +63,9 @@ export const env = createEnv({
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_PRICE_STARTER: process.env.STRIPE_PRICE_STARTER,
+    STRIPE_PRICE_GROWTH: process.env.STRIPE_PRICE_GROWTH,
+    STRIPE_PRICE_PRO: process.env.STRIPE_PRICE_PRO,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,

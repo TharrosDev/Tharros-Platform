@@ -34,6 +34,13 @@ export default function MarketingHome() {
           Sign in
         </Link>
       </div>
+
+      <Link
+        href="/pricing"
+        className="type-small text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+      >
+        See pricing
+      </Link>
     </main>
   );
 }
