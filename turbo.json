@@ -33,6 +33,14 @@
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "cache": false,
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "SUPABASE_SECRET_KEY"
+      ]
     }
   }
 }
