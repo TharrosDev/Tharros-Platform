@@ -21,8 +21,17 @@ import { MobileNav } from "@/components/shell/mobile-nav";
 import { CommandPalette } from "@/components/shell/command-palette";
 import { signOut } from "@/lib/auth/actions";
 import type { DisplayUser } from "@/lib/auth/user";
+import type { UserOrg } from "@/lib/org/queries";
 
-function Topbar({ user }: { user: DisplayUser }) {
+function Topbar({
+  user,
+  orgs,
+  activeOrg,
+}: {
+  user: DisplayUser;
+  orgs: UserOrg[];
+  activeOrg: UserOrg | null;
+}) {
   const [cmdOpen, setCmdOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -38,7 +47,7 @@ function Topbar({ user }: { user: DisplayUser }) {
 
   return (
     <header className="bg-background/80 sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 px-4 backdrop-blur sm:px-6">
-      <MobileNav user={user} />
+      <MobileNav user={user} orgs={orgs} activeOrg={activeOrg} />
 
       <button
         type="button"

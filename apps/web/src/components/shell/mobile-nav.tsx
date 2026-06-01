@@ -8,8 +8,17 @@ import { buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/shell/sidebar";
 import type { DisplayUser } from "@/lib/auth/user";
+import type { UserOrg } from "@/lib/org/queries";
 
-function MobileNav({ user }: { user: DisplayUser }) {
+function MobileNav({
+  user,
+  orgs,
+  activeOrg,
+}: {
+  user: DisplayUser;
+  orgs: UserOrg[];
+  activeOrg: UserOrg | null;
+}) {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -24,7 +33,12 @@ function MobileNav({ user }: { user: DisplayUser }) {
         <Menu className="size-5" />
       </SheetTrigger>
       <SheetContent side="left" className="p-0">
-        <Sidebar user={user} onNavigate={() => setOpen(false)} />
+        <Sidebar
+          user={user}
+          orgs={orgs}
+          activeOrg={activeOrg}
+          onNavigate={() => setOpen(false)}
+        />
       </SheetContent>
     </Sheet>
   );

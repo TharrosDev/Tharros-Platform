@@ -8,15 +8,21 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TharrosWordmark } from "@/components/brand/logo";
+import { OrgSwitcher } from "@/components/shell/org-switcher";
 import { primaryNav, footerNav, type NavItem } from "@/components/shell/nav";
 import type { DisplayUser } from "@/lib/auth/user";
+import type { UserOrg } from "@/lib/org/queries";
 
 function Sidebar({
   user,
+  orgs,
+  activeOrg,
   onNavigate,
   className,
 }: {
   user: DisplayUser;
+  orgs: UserOrg[];
+  activeOrg: UserOrg | null;
   onNavigate?: () => void;
   className?: string;
 }) {
@@ -26,7 +32,11 @@ function Sidebar({
         <TharrosWordmark />
       </div>
 
-      <nav className="mt-8 flex flex-1 flex-col gap-1">
+      <div className="mt-6">
+        <OrgSwitcher orgs={orgs} activeOrg={activeOrg} />
+      </div>
+
+      <nav className="mt-6 flex flex-1 flex-col gap-1">
         {primaryNav.map((item) => (
           <NavLink key={item.href} item={item} onNavigate={onNavigate} />
         ))}
@@ -47,7 +57,7 @@ function Sidebar({
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{user.name}</p>
           <p className="text-sidebar-muted-foreground truncate text-xs">
-            {user.company ?? "Personal workspace"}
+            {user.email}
           </p>
         </div>
       </div>

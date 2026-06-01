@@ -6,7 +6,7 @@ export type DisplayUser = {
   email: string;
   /** 1–2 letters for the avatar fallback. */
   initials: string;
-  /** Business name — null until org onboarding (Day 12); shell shows a placeholder. */
+  /** Active org name — populated by the (app) layout from the org context. */
   company: string | null;
 };
 
@@ -20,7 +20,7 @@ function initialsFrom(name: string): string {
 /**
  * Maps a Supabase `User` to the `DisplayUser` the sidebar/topbar render.
  * Name comes from the `full_name` set at signup, falling back to the email
- * local-part. Company is a placeholder until organizations land (Day 12).
+ * local-part. Company starts null; the (app) layout fills it from the active org.
  */
 export function getDisplayUser(user: User): DisplayUser {
   const email = user.email ?? "";
