@@ -70,12 +70,17 @@ export function DocumentUploader() {
         return false;
       }
 
-      // Kick off text extraction (Day 25). Best-effort: any failure surfaces as a
-      // status badge in the document list, not as an upload failure.
+      // Kick off the ingestion pipeline (best-effort): extract text (Day 25),
+      // then chunk + embed (Day 26). Any failure surfaces as a status badge in
+      // the document list, not as an upload failure.
       try {
-        await fetch(`/api/documents/${reserved.id}/extract`, { method: "POST" });
+        const res = await fetch(`/api/documents/${reserved.id}/extract`, { method: "POST" });
+        const extracted = (await res.json().catch(() => null)) as { status?: string } | null;
+        if (extracted?.status === "extracted") {
+          await fetch(`/api/documents/${reserved.id}/embed`, { method: "POST" });
+        }
       } catch {
-        // Network hiccup — the doc stays at "uploaded"; re-index will retry (Day 26).
+        // Network hiccup — the doc stays at its last status; re-index will retry.
       }
 
       update(key, { status: "done" });
