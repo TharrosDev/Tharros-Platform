@@ -42,9 +42,11 @@ type StatusMeta = {
 const STATUS_META: Record<DocumentStatus, StatusMeta> = {
   uploaded: { label: "Uploaded", variant: "secondary" },
   extracting: { label: "Processing", variant: "info" },
+  extracted: { label: "Extracted", variant: "info" },
   chunking: { label: "Processing", variant: "info" },
   embedding: { label: "Processing", variant: "info" },
   ready: { label: "Ready", variant: "success" },
+  needs_ocr: { label: "Needs OCR", variant: "secondary" },
   failed: { label: "Failed", variant: "destructive" },
 };
 

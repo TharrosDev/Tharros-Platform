@@ -10,13 +10,17 @@
 /** Private Storage bucket holding the raw uploaded bytes. */
 export const DOCUMENTS_BUCKET = "documents";
 
-/** Pipeline status on `documents` (matches the CHECK constraint). */
+/** Pipeline status on `documents` (matches the CHECK constraint).
+ * Lifecycle: uploaded → extracting → extracted | needs_ocr | failed;
+ * Day 26 then drives extracted → chunking → embedding → ready. */
 export type DocumentStatus =
   | "uploaded"
   | "extracting"
+  | "extracted"
   | "chunking"
   | "embedding"
   | "ready"
+  | "needs_ocr"
   | "failed";
 
 /** Status on `ingestion_jobs` (matches the CHECK constraint). */

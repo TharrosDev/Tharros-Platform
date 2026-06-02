@@ -70,6 +70,14 @@ export function DocumentUploader() {
         return false;
       }
 
+      // Kick off text extraction (Day 25). Best-effort: any failure surfaces as a
+      // status badge in the document list, not as an upload failure.
+      try {
+        await fetch(`/api/documents/${reserved.id}/extract`, { method: "POST" });
+      } catch {
+        // Network hiccup — the doc stays at "uploaded"; re-index will retry (Day 26).
+      }
+
       update(key, { status: "done" });
       return true;
     },
