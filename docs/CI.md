@@ -73,10 +73,60 @@ branch ruleset** (or classic branch protection) for `main`:
 2. **Require a pull request before merging** (recommended for a solo dev too — it
    forces the check to run before `main` moves).
 
+## The `e2e` job (Day 22 — Playwright auth+billing spine)
+
+A second job, `e2e (playwright auth+billing spine)`, runs the browser-level
+end-to-end "spine" defined in `apps/web/e2e/auth-billing.spec.ts`
+(`playwright.config.ts`). It walks the real UI through the whole funnel —
+**signup → confirm → onboarding → invite → accept → gated → subscribe-loads →
+active → cancel** — in one ordered story.
+
+Steps: install → `playwright install --with-deps chromium` → `pnpm build` →
+`pnpm --filter @tharros/web test:e2e` (Playwright's `webServer` boots the built
+app with `next start`). The Playwright HTML report is uploaded as an artifact.
+
+Like the Vitest harness, it runs against the **test** Supabase project and is
+self-cleaning. Subscription state is seeded service-side (mirrors the Day-18
+webhook), so the Day-19 gate flips deterministically — **no Stripe Checkout
+iframe is completed**, which keeps the run fast and non-flaky.
+
+### Required / optional secrets for `e2e`
+
+It reuses the three `TEST_SUPABASE_*` secrets above. The Stripe secrets are
+**optional** — without them the checkout container still mounts (the assertion
+passes); with them the embedded Stripe iframe actually loads. All are **test
+mode**, low-risk:
+
+| Secret | Required? | Value |
+|---|---|---|
+| `TEST_SUPABASE_URL` / `TEST_SUPABASE_PUBLISHABLE_KEY` / `TEST_SUPABASE_SECRET_KEY` | yes | same as the `ci` job |
+| `STRIPE_TEST_SECRET_KEY` | optional | `sk_test_…` |
+| `STRIPE_TEST_PUBLISHABLE_KEY` | optional | `pk_test_…` |
+| `STRIPE_TEST_PRICE_GROWTH` | optional | the Growth `price_…` (test) |
+
+`RESEND_API_KEY` is set to a placeholder in the workflow — the invite email is
+allowed to fail because the spine reads the invite token from the DB.
+
+```sh
+gh secret set STRIPE_TEST_SECRET_KEY --body "sk_test_…"
+gh secret set STRIPE_TEST_PUBLISHABLE_KEY --body "pk_test_…"
+gh secret set STRIPE_TEST_PRICE_GROWTH --body "price_…"
+```
+
+### Running the spine locally
+
+```sh
+pnpm --filter @tharros/web exec playwright install chromium
+pnpm --filter @tharros/web build
+pnpm --filter @tharros/web test:e2e   # webServer runs `next start`
+```
+
+Point your `.env.local` at the **test** project (not prod) for a clean run;
+`NEXT_PUBLIC_SITE_URL` doesn't matter for the spine (it bypasses email links).
+
 ## Notes / future
 
-- **Playwright smoke test** is intentionally deferred (roadmap Day 14 listed it).
-  Add a `playwright` job once there are real authed flows worth smoking; it'll
-  need its own browser-install + cache step.
-- GitHub Actions free tier (2,000 private minutes/mo) is ample for solo use — a
-  run is well under 5 minutes.
+- When branch protection is enabled, add **both** the `typecheck · lint · test ·
+  build` and the `e2e (playwright auth+billing spine)` checks as required.
+- GitHub Actions free tier (2,000 private minutes/mo) is ample for solo use — the
+  quality gate is under 5 minutes; the e2e job adds a browser install + build.
