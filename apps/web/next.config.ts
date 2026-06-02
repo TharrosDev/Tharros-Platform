@@ -21,13 +21,19 @@ const isDev = process.env.NODE_ENV === "development";
 // Everything else is locked down. connect-src stays small on purpose: Sentry
 // events tunnel through same-origin `/monitoring` and Vercel Analytics beacons
 // are same-origin, so only Supabase (REST + Realtime websocket) needs listing.
+//
+// Stripe (Day 17): embedded Checkout loads Stripe.js from js.stripe.com and
+// mounts the payment form in iframes from js.stripe.com / checkout.stripe.com
+// (3DS challenges come from hooks.stripe.com), and Stripe.js posts to
+// api.stripe.com. Hence the stripe origins in script-/frame-/connect-src.
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://js.stripe.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data:;
   font-src 'self';
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co;
+  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://checkout.stripe.com;
+  frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://hooks.stripe.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self';

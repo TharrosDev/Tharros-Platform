@@ -52,7 +52,9 @@ export async function completeOnboarding(
     return { message: error.message, values: raw };
   }
 
-  redirect("/dashboard");
+  // First-run path: send the new org straight to the subscribe surface (Day 17).
+  // Day-19 gating will enforce an active/trialing subscription before the app.
+  redirect("/billing");
 }
 
 /** Create an additional organization and switch to it. */
