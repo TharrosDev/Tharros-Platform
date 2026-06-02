@@ -19,7 +19,7 @@ import { TharrosWordmark } from "@/components/brand/logo";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Simple, flat monthly pricing for Canadian small businesses. One predictable number — no per-seat surprises. Start with a 14-day free trial.",
+    "Simple, flat monthly pricing for Canadian small businesses. One predictable number, no per-seat surprises. Start with a 14-day free trial.",
 };
 
 export default function PricingPage() {
@@ -36,7 +36,7 @@ export default function PricingPage() {
         </Badge>
         <h1 className="type-h1 text-balance">Simple pricing that scales with you.</h1>
         <p className="type-body text-muted-foreground text-balance">
-          One flat monthly price per business — not per seat. Start free for{" "}
+          One flat monthly price per business, not per seat. Start free for{" "}
           {TRIAL_DAYS} days; cancel anytime. Prices in CAD, tax calculated at
           checkout.
         </p>

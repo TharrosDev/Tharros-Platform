@@ -27,7 +27,7 @@ export function ResetPassword({ resetUrl }: ResetPasswordProps) {
       <EmailButton href={resetUrl}>Reset password</EmailButton>
       <EmailText>
         This link expires in 1 hour. If you didn&apos;t request a reset, you can
-        ignore this email — your password won&apos;t change.
+        ignore this email and your password won&apos;t change.
       </EmailText>
       <EmailFallbackLink href={resetUrl} />
     </EmailLayout>
