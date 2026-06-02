@@ -3,10 +3,10 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Original Tharros mark — a rounded maple tile with a clean "T" cut out of it
- * (negative space, so it reads on any background). Single-colour: inherits
- * `currentColor`, so wrap it in `text-primary` for maple. Not derived from the
- * marketing-site glyph.
+ * Tharros "Workshop" mark — a sharp cobalt tile (tight 5u radius) with one
+ * chamfered top-right corner, and a clean "T" cut out of it as negative space
+ * so it reads on any background. The chamfer is the tool-precision tell. Single
+ * colour: inherits `currentColor`, so wrap it in `text-primary` for cobalt.
  */
 function TharrosMark({ className, ...props }: React.ComponentProps<"svg">) {
   return (
@@ -21,7 +21,7 @@ function TharrosMark({ className, ...props }: React.ComponentProps<"svg">) {
         fill="currentColor"
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M7 0h10a7 7 0 0 1 7 7v10a7 7 0 0 1-7 7H7a7 7 0 0 1-7-7V7a7 7 0 0 1 7-7Zm-1 6h12v3.5h-4.5V18h-3V9.5H6V6Z"
+        d="M5 0h9.5L24 4.6V19a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5Zm.5 6.2v3.3h5.1V18h2.8V9.5h5.1V6.2H5.5Z"
       />
     </svg>
   );

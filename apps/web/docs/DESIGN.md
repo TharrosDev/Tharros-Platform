@@ -1,49 +1,50 @@
-# Tharros Platform — Design System ("Maple Pure")
+# Tharros Platform — Design System ("Workshop")
 
-The look every screen inherits. Established Day 5; extended Day 6 with the app
-shell, overlay primitives, and theming; the tone was sharpened (Day 6.5) from
-warm-and-cozy toward **inviting + confident**. Goal: a dashboard a non-technical
-owner trusts on sight — warm, but with backbone. Generous air, crisp surfaces,
-one maple accent used decisively.
+The look every screen inherits. Reworked from the earlier "Maple Pure" system
+into **"Workshop"** — the maple identity (warm-stone tint, red-orange accent,
+maple logo tile) was dropped for a dependable, sharp, tool-like look: warm
+graphite chrome with weight, a clean light canvas to work on, and one decisive
+cobalt accent. Goal: a workspace a non-technical owner trusts on sight — calm at
+rest, obvious under pressure. Generous air, crisp surfaces, cobalt used sparingly.
 
 ## Principles
 
-- **Warmth from the brand, not from beige.** The neutral ramp is tinted toward
-  maple's own hue (~40) at very low chroma, so it reads as a warm stone, never
-  the cream / parchment near-white that hue ~75 produces (the SaaS-cream default
-  we explicitly avoid). Warmth is carried by the accent, copy, and this tint.
-- **Grounded chrome.** A warm **dark** sidebar (`--sidebar`, still hue ~40, not
-  grey) anchors the app and gives it weight; the top bar and content sit light
-  above it. This is the "strength" lever — confident, never cold-grey.
-- **Crisp, seated surfaces.** Cards sit on a tight, low shadow with a defined
-  border (`--border`), not a soft floating glow. Radius is a confident
-  `--radius: 0.5rem`, not pillowy. No glassmorphism.
-- **One accent: maple, decisive.** A deep warm red-orange for the primary action,
+- **Two deliberate neutral families.** The **chrome** (sidebar + all dark
+  surfaces) is a warm graphite — hue ~70 at very low chroma, a near-black with a
+  faint warm undertone, never cold-grey. The **content** canvas is a clean,
+  whisper-cool off-white tinted a hair toward cobalt (hue ~264), deliberately NOT
+  warm so it never drifts into the cream / parchment SaaS-cream default.
+- **Grounded chrome.** A warm-graphite **dark** sidebar (`--sidebar`) anchors the
+  app and gives it weight; the top bar and content sit light above it. The active
+  nav item is a solid **cobalt pill** — the signature move.
+- **Crisp, seated surfaces.** Cards sit on a tight, low cool shadow with a defined
+  border (`--border`), not a soft floating glow. Radius is a tight, tool-like
+  `--radius: 0.4rem`, not pillowy. No glassmorphism.
+- **One accent: cobalt, decisive.** A confident blue for the primary action,
   current selection, and state only — never a soft decorative wash. Never more
-  than one maple CTA competing in a view.
+  than one cobalt CTA competing in a view.
 - **Confident, not cozy.** Strength reads through typographic authority (heavier,
-  tighter headings) and restraint, not through cute garnish. Inviting, with
-  backbone.
+  tighter headings) and restraint, not through cute garnish.
 - **Light and dark, both AA.** Both ship from the same tokens; dark is a warm
-  near-black. Every text pair (including the dark-sidebar pairs) meets WCAG AA,
+  graphite near-black. Every text pair (including the chrome pairs) meets WCAG AA,
   verified by `scripts/contrast-check.mjs` (OKLCH -> WCAG over the ramp).
 
 ## Tokens
 
 All tokens are OKLCH CSS variables in `src/app/globals.css`, reusing shadcn
 variable names so every component inherits them. The whole neutral ramp and the
-accent share hue ~40 (maple's family); change a token and the app re-skins.
+accent share the same families (cobalt ~264 + graphite ~70); change a token and the app re-skins.
 
 | Token | Role |
 | --- | --- |
 | `--background` / `--foreground` | warm-stone canvas / warm ink |
 | `--sidebar` (+ `-foreground` / `-muted-foreground` / `-accent` / `-border`) | grounded **dark** chrome anchor; `-muted-foreground` is the on-dark muted text for inactive nav |
 | `--card` / `--popover` | near-white surfaces that sit on `--shadow-card` |
-| `--primary` / `--primary-foreground` | deep maple action colour / text on it |
-| `--primary-soft` / `--primary-soft-foreground` | soft maple wash / text on it (used sparingly) |
+| `--primary` / `--primary-foreground` | deep cobalt action colour / text on it |
+| `--primary-soft` / `--primary-soft-foreground` | soft cobalt wash / text on it (used sparingly) |
 | `--secondary` `--muted` `--accent` | quiet warm neutrals (hover, fills) |
 | `--success` `--warning` `--info` `--destructive` | semantics, tuned to read AA as text |
-| `--border` `--input` `--ring` | crisp hairlines and maple focus ring |
+| `--border` `--input` `--ring` | crisp hairlines and cobalt focus ring |
 | `--shadow-xs` `--shadow-card` `--shadow-card-hover` `--shadow-popover` | seated warm elevation scale |
 
 ## Type scale
@@ -60,7 +61,7 @@ body stays regular: `.type-body` 15px, `.type-small` 13px, `.type-meta` 11px
 Hand-authored under `src/components/ui/` (the shadcn CLI does not run in this
 monorepo), skinned to the tokens above.
 
-**Base primitives (Day 5):** `card` (the hero primitive), `button` (maple
+**Base primitives (Day 5):** `card` (the hero primitive), `button` (cobalt
 `default` + `soft` variant), `badge` (incl. `solid`/`success`/`warning`/`info`),
 `separator`, `input`, `textarea`, `label`, `skeleton`, `avatar`.
 
@@ -73,7 +74,7 @@ styled as a left `sheet`). Each wrapper styles the Base UI parts to the tokens
 and animates enter/exit via Base UI's `data-[starting-style]` /
 `data-[ending-style]` / `data-[open]` state attributes.
 
-**Brand:** `components/brand/logo.tsx` — `TharrosMark` (original rounded maple
+**Brand:** `components/brand/logo.tsx` — `TharrosMark` (sharp chamfered cobalt
 tile with a cut-out "T", single-colour via `currentColor`) and `TharrosWordmark`.
 
 **Layout helpers:** `components/page-header.tsx`, `components/stat-card.tsx`,
