@@ -79,9 +79,41 @@ truth. The `/billing/return` page reads the session directly from Stripe for the
 CSP: `next.config.ts` allows `js.stripe.com` (script + frame), `checkout.stripe.com`
 (frame + connect), `hooks.stripe.com` (frame, 3DS), and `api.stripe.com` (connect).
 
-## Webhooks
+## Webhooks (Day 18)
 
-Not configured yet — Day 18. `STRIPE_WEBHOOK_SECRET` stays unset until then.
+Endpoint: **`POST /api/webhooks/stripe`** (Node runtime; excluded from the proxy
+auth gate). Signature-verified with `STRIPE_WEBHOOK_SECRET` via
+`stripe.webhooks.constructEvent`, then `handleStripeEvent` (in `lib/billing/webhook.ts`)
+persists to `public.subscriptions` through the **service-role** client
+(`lib/supabase/admin.ts`) — the table's only writer.
+
+**Idempotent:** every processed event id is recorded in `public.stripe_events`;
+a duplicate delivery short-circuits with a 200 and no write. The id is recorded
+only *after* successful handling, so a failure returns 500 and Stripe retries
+(the subscription upsert is itself idempotent).
+
+**Events handled:** `customer.subscription.created` / `updated` / `deleted`
+(upsert the row, keyed on `org_id` from the subscription metadata set at
+Checkout) and `invoice.payment_failed` (mark `past_due`). Other types are
+acknowledged + recorded so Stripe stops retrying.
+
+**Responses:** `400` bad/missing signature or no secret · `500` handler error
+(retried) · `200` processed or duplicate.
+
+### Local testing
+
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe   # prints whsec_
+stripe trigger customer.subscription.created                    # row appears
+```
+
+Put the printed `whsec_` in `apps/web/.env.local` as `STRIPE_WEBHOOK_SECRET`.
+
+### Deploy
+
+Create the endpoint in **Dashboard → Developers → Webhooks** (URL
+`https://<env>/api/webhooks/stripe`, the four event types above), copy its
+signing secret, and vault `STRIPE_WEBHOOK_SECRET` per environment in Vercel.
 
 ## Going live (Day 99)
 

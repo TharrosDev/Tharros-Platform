@@ -16,6 +16,7 @@ const PUBLIC_PATHS = [
   "/auth", // /auth/confirm callback
   "/invite", // team-invite accept (redeems server-side; bounces to login itself)
   "/monitoring", // Sentry tunnel (also excluded by the proxy matcher)
+  "/api/webhooks", // Stripe webhook (also excluded by the proxy matcher)
 ];
 
 function isPublicPath(pathname: string): boolean {
