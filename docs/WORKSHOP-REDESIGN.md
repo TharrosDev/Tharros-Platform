@@ -2,7 +2,7 @@
 
 > **Living doc. Overwrite (don't append) after each push.** It's the single source
 > of truth for resuming the UI/UX overhaul. Branch: **`workshop-redesign`** → PR **#15**.
-> **Last updated: 2026-06-02 — after marketing home + pricing (commit pending this push).**
+> **Last updated: 2026-06-02 — after profile + product stubs (all UI passes done; only Obsidian + merge remain).**
 
 ## How to resume (paste this to Claude)
 > "Continue the Workshop redesign on the `workshop-redesign` branch. Read
@@ -53,14 +53,17 @@ Design contract + tokens live in `apps/web/docs/DESIGN.md` and
   (redirected signed-out visitors to /login) — added it to `PUBLIC_PATHS` in
   `lib/supabase/proxy.ts` so the public pricing page is reachable signed-out.
 
+- **Pass 7 — profile + product stubs**: profile was already a clean account form
+  (left as-is); the shared `ComingSoon` empty state (assistant/leads/automations)
+  is now a teaching placeholder — cobalt-soft icon tile + "In the works" tag +
+  what-lives-here line.
+
 ## Remaining 🔧 (do in order)
-1. **Profile + product stubs** — `(app)/profile/page.tsx`; the `ComingSoon` stubs
-   `(app)/(subscribed)/{assistant,leads,automations}` via a polished empty state.
+1. **Merge** `workshop-redesign` → `main` once CI is green (PR #15). (No workflow
+   files change here, so plain `git push` works.)
 2. **Update Obsidian memory** — replace old "Maple Pure" UI/build info with
    "Workshop" in the memory notes (hub `Tharros Platform - Overview`, design notes).
    Vault: `C:\Users\magnu\Downloads\obsidianMemory\Claude Memory\03 Tharros\`.
-3. **Merge** `workshop-redesign` → `main` once CI is green (PR #15). (No workflow
-   files change here, so plain `git push` works.)
 
 ## Working conventions
 - Per pass: edit → `pnpm typecheck` + `pnpm lint` → `pnpm --filter @tharros/web build`
