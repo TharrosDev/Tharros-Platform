@@ -18,6 +18,11 @@ export const env = createEnv({
   server: {
     SUPABASE_SECRET_KEY: z.string().min(1),
     ANTHROPIC_API_KEY: z.string().min(1),
+    // OpenAI — embeddings only (text-embedding-3-small) for the Day-26 RAG
+    // ingestion job. Optional until the key is vaulted in Vercel for all envs;
+    // the embeddings seam (lib/documents/embeddings.ts) fails fast at call time
+    // if it's unset. Promote to required once set in Vercel.
+    OPENAI_API_KEY: z.string().min(1).optional(),
     STRIPE_SECRET_KEY: z.string().min(1),
     // Transactional email via Resend (Day 13). Send-only API key; also used as
     // the SMTP password for Supabase Auth's custom SMTP (configured at Supabase,
@@ -62,6 +67,7 @@ export const env = createEnv({
   runtimeEnv: {
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_PRICE_STARTER: process.env.STRIPE_PRICE_STARTER,
     STRIPE_PRICE_GROWTH: process.env.STRIPE_PRICE_GROWTH,
