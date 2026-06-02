@@ -1,6 +1,6 @@
 "use server";
 
-import { stripe } from "@/lib/billing/client";
+import { getStripe } from "@/lib/billing/client";
 import { getPlan, TRIAL_DAYS } from "@/lib/billing/plans";
 import { tierSchema, type Tier } from "@/lib/billing/schemas";
 import { getOrgContext } from "@/lib/org/queries";
@@ -50,7 +50,7 @@ async function ensureCustomerForOwner() {
   }
 
   // First checkout for this org — create the Customer and persist its id.
-  const customer = await stripe.customers.create({
+  const customer = await getStripe().customers.create({
     email: user.email ?? undefined,
     name: org.name as string,
     metadata: { org_id: org.id as string },
@@ -94,7 +94,7 @@ export async function createCheckoutClientSecret(tier: Tier): Promise<string> {
 
   let session;
   try {
-    session = await stripe.checkout.sessions.create({
+    session = await getStripe().checkout.sessions.create({
       mode: "subscription",
       // The dahlia API renamed ui_mode values: embedded → "embedded_page".
       ui_mode: "embedded_page",
@@ -153,7 +153,7 @@ export async function getCheckoutStatus(
   const { activeOrg } = await getOrgContext();
   if (!activeOrg) return null;
 
-  const session = await stripe.checkout.sessions.retrieve(sessionId, {
+  const session = await getStripe().checkout.sessions.retrieve(sessionId, {
     expand: ["subscription"],
   });
 
