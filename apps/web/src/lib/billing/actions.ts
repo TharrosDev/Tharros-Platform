@@ -1,5 +1,7 @@
 "use server";
 
+import { redirect } from "next/navigation";
+
 import { getStripe } from "@/lib/billing/client";
 import { getPlan, TRIAL_DAYS } from "@/lib/billing/plans";
 import { tierSchema, type Tier } from "@/lib/billing/schemas";
@@ -172,4 +174,30 @@ export async function getCheckoutStatus(
     trialing: sub?.status === "trialing",
     tier,
   };
+}
+
+/**
+ * Day 20 — open the Stripe Customer Portal for the active org. Owner-only. The
+ * portal (configured in test via the Day-17 setup) handles cancel/reactivate,
+ * payment-method updates, and full invoice history; we just mint a session and
+ * redirect. Returns to /billing afterward.
+ */
+export async function openBillingPortal(): Promise<void> {
+  const { customerId } = await ensureCustomerForOwner();
+
+  let session;
+  try {
+    session = await getStripe().billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${getURL()}/billing`,
+    });
+  } catch (err) {
+    logger.error("billing.portal_session_failed", {
+      customer_id: customerId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    throw new CheckoutError("Could not open billing management. Please try again.");
+  }
+
+  redirect(session.url);
 }

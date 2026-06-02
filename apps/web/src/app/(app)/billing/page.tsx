@@ -1,25 +1,57 @@
-import Link from "next/link";
-
-import { PLANS, TRIAL_DAYS, formatMonthly } from "@/lib/billing/plans";
+import { TRIAL_DAYS } from "@/lib/billing/plans";
+import { getSubscription } from "@/lib/billing/entitlements";
+import { getRecentInvoices } from "@/lib/billing/queries";
 import { getOrgContext } from "@/lib/org/queries";
-import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { PlanPicker } from "@/components/billing/plan-picker";
+import { BillingOverview } from "@/components/billing/billing-overview";
 
 export const metadata = { title: "Billing" };
 
+// Statuses where the org has a manageable subscription → show the overview.
+// Anything else (no row, canceled, incomplete*) → show the plan picker.
+const MANAGEABLE = new Set([
+  "active",
+  "trialing",
+  "past_due",
+  "unpaid",
+  "paused",
+]);
+
 export default async function BillingPage() {
-  const { activeOrg } = await getOrgContext();
+  const [{ activeOrg }, subscription] = await Promise.all([
+    getOrgContext(),
+    getSubscription(),
+  ]);
   const isOwner = activeOrg?.role === "owner";
+  const subscribed = subscription !== null && MANAGEABLE.has(subscription.status);
+
+  if (subscribed && activeOrg) {
+    // Resolve the org's Stripe customer to pull recent invoices.
+    const supabase = await createClient();
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("stripe_customer_id")
+      .eq("id", activeOrg.id)
+      .single();
+    const customerId = org?.stripe_customer_id as string | null | undefined;
+    const invoices = customerId ? await getRecentInvoices(customerId) : [];
+
+    return (
+      <>
+        <PageHeader
+          title="Billing"
+          description="Your plan, payment method, and invoices."
+        />
+        <BillingOverview
+          subscription={subscription}
+          invoices={invoices}
+          isOwner={isOwner}
+        />
+      </>
+    );
+  }
 
   return (
     <>
@@ -27,70 +59,12 @@ export default async function BillingPage() {
         title="Choose your plan"
         description={`Start with a ${TRIAL_DAYS}-day free trial. Your card is collected now and charged when the trial ends — cancel anytime before then.`}
       />
-
       {!isOwner && (
         <p className="text-muted-foreground type-small">
           Only the organization owner can manage billing.
         </p>
       )}
-
-      <div className="grid gap-6 md:grid-cols-3">
-        {PLANS.map((plan) => (
-          <Card
-            key={plan.tier}
-            className={cn(
-              "relative flex flex-col",
-              plan.highlight && "border-primary shadow-lg",
-            )}
-          >
-            {plan.highlight && (
-              <Badge
-                variant="solid"
-                className="absolute -top-3 left-1/2 -translate-x-1/2"
-              >
-                Most popular
-              </Badge>
-            )}
-
-            <CardHeader>
-              <CardTitle className="type-h2">{plan.name}</CardTitle>
-              <CardDescription>{plan.blurb}</CardDescription>
-              <p className="mt-4">
-                <span className="type-h1">{formatMonthly(plan.priceMonthly)}</span>
-                <span className="text-muted-foreground type-small"> /month</span>
-              </p>
-            </CardHeader>
-
-            <CardContent className="flex-1">
-              <ul className="space-y-2">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="type-small text-muted-foreground">
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-
-            <CardFooter>
-              <Link
-                href={`/billing/subscribe?plan=${plan.tier}`}
-                aria-disabled={!isOwner}
-                tabIndex={isOwner ? undefined : -1}
-                className={cn(
-                  buttonVariants({
-                    size: "lg",
-                    variant: plan.highlight ? "default" : "outline",
-                  }),
-                  "w-full",
-                  !isOwner && "pointer-events-none opacity-50",
-                )}
-              >
-                Start free trial
-              </Link>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      <PlanPicker isOwner={isOwner} />
     </>
   );
 }
