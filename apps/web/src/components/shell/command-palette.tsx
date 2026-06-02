@@ -108,7 +108,9 @@ function CommandPalette({
                       data-active={isActive || undefined}
                       className={cn(
                         "focus-visible:ring-ring/40 flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm outline-none transition-colors focus-visible:ring-[3px]",
-                        isActive ? "bg-accent text-foreground" : "hover:bg-accent",
+                        isActive
+                          ? "bg-primary-soft text-primary-soft-foreground"
+                          : "hover:bg-accent",
                       )}
                     >
                       <Icon className="text-muted-foreground size-4 shrink-0" />

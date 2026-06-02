@@ -2,7 +2,7 @@
 
 > **Living doc. Overwrite (don't append) after each push.** It's the single source
 > of truth for resuming the UI/UX overhaul. Branch: **`workshop-redesign`** → PR **#15**.
-> **Last updated: 2026-06-02 — after auth/onboarding pass (commit `70e15f5`).**
+> **Last updated: 2026-06-02 — after app-shell polish (commit pending this push).**
 
 ## How to resume (paste this to Claude)
 > "Continue the Workshop redesign on the `workshop-redesign` branch. Read
@@ -42,21 +42,20 @@ Design contract + tokens live in `apps/web/docs/DESIGN.md` and
 - **Pass 4 — auth + onboarding** (`70e15f5`): split auth layout (warm-graphite
   brand panel + form on canvas, mobile-collapses); onboarding on the same dotted
   texture backdrop.
+- **Pass 5 — app-shell polish**: restraint pass — org-switcher tile is now neutral
+  (white/10) so the cobalt active-nav pill is the single cobalt focal point in the
+  chrome; command-palette selected row is cobalt-soft. (Shell was already strong
+  from the token reskin; this is targeted polish.)
 
 ## Remaining 🔧 (do in order)
-1. **App-shell polish** (IN PROGRESS) — `components/shell/{sidebar,topbar,mobile-nav,
-   org-switcher,command-palette,new-automation-button,coming-soon}.tsx`,
-   `components/page-header.tsx`. Refine spacing, nav group structure, topbar,
-   org-switcher, command palette to the Workshop bar. Keep the cobalt active pill.
-2. **Marketing home + pricing** — `(marketing)/page.tsx`, `(marketing)/pricing/page.tsx`.
-3. **Profile + product stubs** — `(app)/profile/page.tsx`; the `ComingSoon` stubs
+1. **Marketing home + pricing** — `(marketing)/page.tsx`, `(marketing)/pricing/page.tsx`.
+2. **Profile + product stubs** — `(app)/profile/page.tsx`; the `ComingSoon` stubs
    `(app)/(subscribed)/{assistant,leads,automations}` via a polished empty state.
-4. **Update Obsidian memory** — replace old "Maple Pure" UI/build info with
+3. **Update Obsidian memory** — replace old "Maple Pure" UI/build info with
    "Workshop" in the memory notes (hub `Tharros Platform - Overview`, design notes).
    Vault: `C:\Users\magnu\Downloads\obsidianMemory\Claude Memory\03 Tharros\`.
-5. **Merge** `workshop-redesign` → `main` once CI is green (PR #15). Note: pushing
-   `ci.yml` needs the GitHub MCP (local git lacks the `workflow` scope) — not an
-   issue here since the redesign touches no workflow files.
+4. **Merge** `workshop-redesign` → `main` once CI is green (PR #15), then update
+   the roadmap/Obsidian. (No workflow files change here, so plain `git push` works.)
 
 ## Working conventions
 - Per pass: edit → `pnpm typecheck` + `pnpm lint` → `pnpm --filter @tharros/web build`

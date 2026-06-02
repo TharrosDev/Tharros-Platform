@@ -57,7 +57,7 @@ export function OrgSwitcher({
           )}
           aria-label="Switch organization"
         >
-          <span className="bg-sidebar-accent text-sidebar-accent-foreground flex size-8 shrink-0 items-center justify-center rounded-md">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white/10 text-sidebar-foreground">
             <Building2 className="size-4" />
           </span>
           <span className="min-w-0 flex-1">
