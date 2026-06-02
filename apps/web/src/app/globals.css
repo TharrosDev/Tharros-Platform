@@ -4,117 +4,120 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Tharros Platform — "Maple Pure" design system.
+  Tharros Platform — "Workshop" design system.
 
-  An inviting, confident workspace for small-business owners — warm, but with
-  backbone. Three rules hold it together:
-    1. Warmth comes from the brand, not from beige. The neutral ramp is tinted
-       toward maple's own hue (~40) at very low chroma — a warm stone, never the
-       cream/parchment SaaS default (which lives at hue ~75).
-    2. One accent: maple, used decisively. Primary actions, current selection,
-       and state only — never a soft decorative wash.
-    3. Grounded chrome: a warm dark sidebar anchors the app; content sits light
-       above it on crisp, seated surfaces. Confident, never cold-grey — every
-       neutral (including the dark chrome) keeps maple's warm hue ~40.
+  A dependable, sharp, tool-like workspace for small-business owners. It reads
+  like a well-kept workshop: warm graphite chrome with weight, a clean light
+  canvas to work on, and one decisive cobalt accent. Three rules hold it together:
+    1. Two deliberate neutral families. The CHROME (sidebar, dark surfaces) is a
+       warm graphite (hue ~70, very low chroma) — near-black with a faint warm
+       undertone, never cold-grey. The CONTENT canvas is a clean, whisper-cool
+       off-white tinted a hair toward cobalt (hue ~264), deliberately NOT warm so
+       it never drifts into the cream/parchment SaaS default.
+    2. One accent: cobalt, used decisively. Primary actions, current selection,
+       and state only — never a soft decorative wash. The active nav is a solid
+       cobalt pill on the graphite chrome.
+    3. Sharp, seated surfaces. Crisp hairline borders, low cool shadows, a tight
+       0.4rem radius. Confident and precise, not pillowy. No glass.
 
   Tokens are OKLCH and reuse shadcn variable names so every component inherits.
-  All text pairs are verified to WCAG AA (see scripts/contrast-check.mjs history).
+  All text pairs are verified to WCAG AA (run scripts/contrast-check.mjs).
 */
 
 :root {
-  --radius: 0.5rem;
+  --radius: 0.4rem;
 
-  /* Surfaces — warm-stone ramp (canvas < sidebar < card) */
-  --background: oklch(0.94 0.006 40); /* warm light stone, the app canvas */
-  --foreground: oklch(0.26 0.014 40); /* warm near-black ink */
-  --card: oklch(0.99 0.003 40); /* near-white, lifts above the canvas */
-  --card-foreground: oklch(0.26 0.014 40);
-  --popover: oklch(0.99 0.003 40);
-  --popover-foreground: oklch(0.26 0.014 40);
+  /* Surfaces — clean cool-neutral content ramp (canvas < card) */
+  --background: oklch(0.975 0.004 264); /* whisper-cool off-white, the work canvas */
+  --foreground: oklch(0.24 0.014 264); /* near-black ink */
+  --card: oklch(0.995 0.0015 264); /* near-pure white, lifts above the canvas */
+  --card-foreground: oklch(0.24 0.014 264);
+  --popover: oklch(0.995 0.0015 264);
+  --popover-foreground: oklch(0.24 0.014 264);
 
-  /* Maple accent — deep and decisive */
-  --primary: oklch(0.5 0.18 38); /* deeper, more saturated; AA white text */
-  --primary-foreground: oklch(0.99 0.01 80);
-  --primary-soft: oklch(0.93 0.05 45); /* soft maple wash */
-  --primary-soft-foreground: oklch(0.46 0.15 40);
+  /* Cobalt accent — decisive */
+  --primary: oklch(0.52 0.16 264); /* AA with white text */
+  --primary-foreground: oklch(0.99 0.005 264);
+  --primary-soft: oklch(0.94 0.035 264); /* soft cobalt wash */
+  --primary-soft-foreground: oklch(0.45 0.14 264);
 
   /* Quiet neutrals */
-  --secondary: oklch(0.93 0.006 40);
-  --secondary-foreground: oklch(0.3 0.014 40);
-  --muted: oklch(0.935 0.006 40);
-  --muted-foreground: oklch(0.49 0.02 40); /* AA on canvas + card */
-  --accent: oklch(0.925 0.012 45); /* hover surface */
-  --accent-foreground: oklch(0.3 0.014 40);
+  --secondary: oklch(0.955 0.004 264);
+  --secondary-foreground: oklch(0.3 0.014 264);
+  --muted: oklch(0.955 0.004 264);
+  --muted-foreground: oklch(0.46 0.015 264); /* AA on canvas + card */
+  --accent: oklch(0.94 0.008 264); /* hover surface */
+  --accent-foreground: oklch(0.3 0.014 264);
 
   /* Semantics — tuned to read AA as text on light surfaces */
   --destructive: oklch(0.53 0.2 27);
-  --success: oklch(0.52 0.13 150);
-  --warning: oklch(0.52 0.11 70);
-  --info: oklch(0.52 0.13 250);
+  --success: oklch(0.51 0.13 150);
+  --warning: oklch(0.5 0.1 75);
+  --info: oklch(0.52 0.15 255);
 
-  /* Lines & focus — crisper hairlines */
-  --border: oklch(0.86 0.006 40);
-  --input: oklch(0.86 0.006 40);
-  --ring: oklch(0.5 0.18 38);
+  /* Lines & focus — crisp hairlines */
+  --border: oklch(0.9 0.005 264);
+  --input: oklch(0.9 0.005 264);
+  --ring: oklch(0.52 0.16 264);
 
-  /* Grounded chrome: a warm dark sidebar anchors the app (keeps hue ~40) */
-  --sidebar: oklch(0.27 0.015 40);
-  --sidebar-foreground: oklch(0.95 0.006 80);
-  --sidebar-muted-foreground: oklch(0.72 0.012 70);
-  --sidebar-accent: oklch(0.42 0.12 42);
-  --sidebar-accent-foreground: oklch(0.96 0.03 70);
+  /* Grounded chrome: a warm graphite sidebar anchors the app (hue ~70) */
+  --sidebar: oklch(0.235 0.008 70);
+  --sidebar-foreground: oklch(0.96 0.004 70);
+  --sidebar-muted-foreground: oklch(0.72 0.01 70);
+  --sidebar-accent: oklch(0.52 0.16 264); /* cobalt active pill */
+  --sidebar-accent-foreground: oklch(0.99 0.005 264);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.7 0.16 45);
+  --sidebar-ring: oklch(0.62 0.16 264);
 
-  /* Seated warm-tinted elevation (crisp, not floating) */
-  --shadow-xs: 0 1px 2px oklch(0.26 0.02 40 / 0.06);
-  --shadow-card: 0 1px 1px oklch(0.26 0.02 40 / 0.05), 0 2px 4px oklch(0.26 0.02 40 / 0.06);
-  --shadow-card-hover: 0 2px 4px oklch(0.26 0.02 40 / 0.07), 0 6px 14px oklch(0.26 0.02 40 / 0.1);
-  --shadow-popover: 0 6px 16px oklch(0.26 0.02 40 / 0.12), 0 12px 28px oklch(0.26 0.02 40 / 0.12);
+  /* Seated cool-tinted elevation (crisp, not floating) */
+  --shadow-xs: 0 1px 2px oklch(0.24 0.02 264 / 0.06);
+  --shadow-card: 0 1px 1px oklch(0.24 0.02 264 / 0.05), 0 2px 4px oklch(0.24 0.02 264 / 0.06);
+  --shadow-card-hover: 0 2px 4px oklch(0.24 0.02 264 / 0.07), 0 6px 14px oklch(0.24 0.02 264 / 0.1);
+  --shadow-popover: 0 6px 16px oklch(0.24 0.02 264 / 0.12), 0 12px 28px oklch(0.24 0.02 264 / 0.12);
 }
 
 .dark {
-  /* Surfaces — warm near-black ramp */
-  --background: oklch(0.205 0.01 40);
-  --foreground: oklch(0.96 0.006 80);
-  --card: oklch(0.245 0.01 40);
-  --card-foreground: oklch(0.96 0.006 80);
-  --popover: oklch(0.245 0.01 40);
-  --popover-foreground: oklch(0.96 0.006 80);
+  /* Surfaces — warm graphite near-black ramp (chrome hue ~70 throughout) */
+  --background: oklch(0.2 0.007 70);
+  --foreground: oklch(0.96 0.004 70);
+  --card: oklch(0.238 0.007 70);
+  --card-foreground: oklch(0.96 0.004 70);
+  --popover: oklch(0.238 0.007 70);
+  --popover-foreground: oklch(0.96 0.004 70);
 
-  /* Maple accent — brightened for dark */
-  --primary: oklch(0.7 0.16 45);
-  --primary-foreground: oklch(0.2 0.02 50);
-  --primary-soft: oklch(0.33 0.05 42);
-  --primary-soft-foreground: oklch(0.84 0.1 50);
+  /* Cobalt accent — brightened for dark */
+  --primary: oklch(0.66 0.15 264);
+  --primary-foreground: oklch(0.18 0.02 264);
+  --primary-soft: oklch(0.32 0.06 264);
+  --primary-soft-foreground: oklch(0.84 0.1 264);
 
   /* Quiet neutrals */
-  --secondary: oklch(0.28 0.01 40);
-  --secondary-foreground: oklch(0.96 0.006 80);
-  --muted: oklch(0.28 0.01 40);
-  --muted-foreground: oklch(0.71 0.015 70);
-  --accent: oklch(0.3 0.012 45);
-  --accent-foreground: oklch(0.96 0.006 80);
+  --secondary: oklch(0.275 0.007 70);
+  --secondary-foreground: oklch(0.96 0.004 70);
+  --muted: oklch(0.275 0.007 70);
+  --muted-foreground: oklch(0.72 0.012 70);
+  --accent: oklch(0.3 0.008 70);
+  --accent-foreground: oklch(0.96 0.004 70);
 
   /* Semantics — brightened for dark surfaces */
   --destructive: oklch(0.7 0.19 25);
   --success: oklch(0.72 0.14 150);
-  --warning: oklch(0.8 0.13 80);
-  --info: oklch(0.72 0.13 250);
+  --warning: oklch(0.82 0.13 85);
+  --info: oklch(0.72 0.14 255);
 
   /* Lines & focus */
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 13%);
-  --ring: oklch(0.7 0.16 45);
+  --ring: oklch(0.66 0.15 264);
 
-  /* Sidebar layer */
-  --sidebar: oklch(0.225 0.01 40);
-  --sidebar-foreground: oklch(0.96 0.006 80);
-  --sidebar-muted-foreground: oklch(0.71 0.015 70);
-  --sidebar-accent: oklch(0.4 0.11 42);
-  --sidebar-accent-foreground: oklch(0.95 0.04 70);
+  /* Sidebar layer — a touch deeper than the card */
+  --sidebar: oklch(0.215 0.007 70);
+  --sidebar-foreground: oklch(0.96 0.004 70);
+  --sidebar-muted-foreground: oklch(0.72 0.012 70);
+  --sidebar-accent: oklch(0.55 0.16 264); /* cobalt active pill */
+  --sidebar-accent-foreground: oklch(0.99 0.005 264);
   --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.7 0.16 45);
+  --sidebar-ring: oklch(0.66 0.15 264);
 
   /* Depth */
   --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.3);

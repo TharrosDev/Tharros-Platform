@@ -67,8 +67,8 @@ export function DangerZone({
           <CardHeader>
             <CardTitle>Delete this organization</CardTitle>
             <CardDescription>
-              Permanently deletes <strong>{orgName}</strong> and all its data —
-              team, settings, and subscription. Any active subscription is
+              Permanently deletes <strong>{orgName}</strong> and all its data:
+              its team, settings, and subscription. Any active subscription is
               cancelled. This cannot be undone.
             </CardDescription>
           </CardHeader>

@@ -19,7 +19,7 @@ import { TharrosWordmark } from "@/components/brand/logo";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Simple, flat monthly pricing for Canadian small businesses. One predictable number — no per-seat surprises. Start with a 14-day free trial.",
+    "Simple, flat monthly pricing for Canadian small businesses. One predictable number, no per-seat surprises. Start with a 14-day free trial.",
 };
 
 export default function PricingPage() {
@@ -36,7 +36,7 @@ export default function PricingPage() {
         </Badge>
         <h1 className="type-h1 text-balance">Simple pricing that scales with you.</h1>
         <p className="type-body text-muted-foreground text-balance">
-          One flat monthly price per business — not per seat. Start free for{" "}
+          One flat monthly price per business, not per seat. Start free for{" "}
           {TRIAL_DAYS} days; cancel anytime. Prices in CAD, tax calculated at
           checkout.
         </p>
@@ -48,7 +48,9 @@ export default function PricingPage() {
             key={plan.tier}
             className={cn(
               "relative flex flex-col",
-              plan.highlight && "border-primary shadow-lg",
+              plan.highlight
+                ? "border-primary ring-primary/15 shadow-card-hover ring-1 md:-my-2"
+                : "border-border shadow-card",
             )}
           >
             {plan.highlight && (
@@ -64,8 +66,8 @@ export default function PricingPage() {
               <CardTitle className="type-h2">{plan.name}</CardTitle>
               <CardDescription>{plan.blurb}</CardDescription>
               <p className="mt-4">
-                <span className="type-display">{formatMonthly(plan.priceMonthly)}</span>
-                <span className="text-muted-foreground type-small"> /month</span>
+                <span className="num type-display">{formatMonthly(plan.priceMonthly)}</span>
+                <span className="text-muted-foreground type-small"> /month CAD</span>
               </p>
             </CardHeader>
 

@@ -42,7 +42,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
           <Section style={card}>{children}</Section>
           <Section style={footer}>
             <Text style={footerText}>
-              Tharros — the AI operating layer for small businesses.
+              Tharros, the AI operating layer for small businesses.
             </Text>
             <Text style={footerMuted}>
               You received this email because an account action was requested at{" "}

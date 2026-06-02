@@ -20,9 +20,17 @@ export default async function OnboardingLayout({
   if (!needsOnboarding) redirect("/dashboard");
 
   return (
-    <div className="bg-background flex min-h-screen flex-col items-center justify-center gap-8 px-4 py-12">
-      <TharrosWordmark markClassName="size-7" />
-      {children}
+    <div className="bg-background relative flex min-h-screen flex-col items-center justify-center gap-8 px-4 py-12">
+      <div
+        aria-hidden
+        className="text-foreground pointer-events-none absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
+          backgroundSize: "22px 22px",
+        }}
+      />
+      <TharrosWordmark markClassName="size-7" className="relative" />
+      <div className="relative w-full max-w-sm">{children}</div>
     </div>
   );
 }

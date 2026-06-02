@@ -10,6 +10,7 @@ import { env } from "@/env";
 const PUBLIC_PATHS = [
   "/login",
   "/signup",
+  "/pricing", // public marketing pricing — reachable signed-out
   "/forgot-password",
   "/reset-password",
   "/verify-email",

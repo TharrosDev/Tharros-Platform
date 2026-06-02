@@ -1,7 +1,12 @@
 import type { NavIcon } from "@/components/shell/nav";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-/** Shared empty state for product pages that ship in a later phase. */
+/**
+ * Shared empty state for product pages that ship in a later phase. A calm,
+ * on-brand placeholder: a cobalt-soft icon tile, an "In the works" tag, and a
+ * line that tells the owner what will live here.
+ */
 function ComingSoon({
   icon: Icon,
   message,
@@ -10,11 +15,15 @@ function ComingSoon({
   message: string;
 }) {
   return (
-    <Card className="flex flex-col items-center justify-center gap-3 border-dashed py-16 text-center">
-      <span className="bg-secondary text-foreground flex size-12 items-center justify-center rounded-lg border border-border [&>svg]:size-6">
+    <Card className="flex flex-col items-center justify-center gap-4 border-dashed py-20 text-center">
+      <span className="bg-primary-soft text-primary-soft-foreground flex size-14 items-center justify-center rounded-xl [&>svg]:size-7">
         <Icon />
       </span>
-      <p className="text-muted-foreground max-w-sm text-sm">{message}</p>
+      <Badge variant="outline" className="gap-1.5">
+        <span className="bg-primary size-1.5 rounded-full" />
+        In the works
+      </Badge>
+      <p className="text-muted-foreground max-w-sm text-pretty">{message}</p>
     </Card>
   );
 }

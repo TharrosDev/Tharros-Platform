@@ -51,9 +51,9 @@ export default async function CheckoutReturnPage({
         <p className="text-muted-foreground type-body max-w-prose">
           {complete
             ? result.trialing
-              ? "Your free trial has begun — you won't be charged until it ends. You can manage or cancel anytime from this page."
+              ? "Your free trial has begun. You won't be charged until it ends. You can manage or cancel anytime from this page."
               : "Your subscription is active. Thanks for choosing Tharros."
-            : "This can take a moment. Refresh shortly, or head to your dashboard — we'll email you a receipt."}
+            : "This can take a moment. Refresh shortly, or head to your dashboard, and we'll email you a receipt."}
         </p>
         <Link href="/dashboard" className={cn(buttonVariants({ size: "lg" }))}>
           Go to dashboard

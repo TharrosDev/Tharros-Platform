@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tharros — Your business, running itself",
+  title: "Tharros: Your business, running itself",
   description:
     "The AI operating layer for small businesses. Local and Canadian, built to do the busywork so you can get back to the work that matters.",
 };

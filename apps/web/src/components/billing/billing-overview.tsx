@@ -68,32 +68,54 @@ export function BillingOverview({
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <CardTitle className="type-h2">{plan?.name ?? "Your plan"}</CardTitle>
-            <Badge variant={statusBadgeVariant(subscription.status)}>
-              {statusLabel(subscription.status)}
-            </Badge>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2.5">
+                <CardTitle className="type-h2">{plan?.name ?? "Your plan"}</CardTitle>
+                <Badge variant={statusBadgeVariant(subscription.status)}>
+                  {statusLabel(subscription.status)}
+                </Badge>
+              </div>
+              <CardDescription>
+                {plan ? (
+                  <>
+                    <span className="num text-foreground font-medium">
+                      {formatMonthly(plan.priceMonthly)}
+                    </span>{" "}
+                    CAD / month
+                  </>
+                ) : null}
+                {plan && line ? " · " : null}
+                {line}
+              </CardDescription>
+            </div>
+            {isOwner ? (
+              <form action={openBillingPortal}>
+                <Button type="submit" variant="outline">
+                  Manage billing
+                  <ExternalLink className="size-4" />
+                </Button>
+              </form>
+            ) : null}
           </div>
-          <CardDescription>
-            {plan ? `${formatMonthly(plan.priceMonthly)}/month` : null}
-            {plan && line ? " · " : null}
-            {line}
-          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {isOwner ? (
-            <form action={openBillingPortal}>
-              <Button type="submit" variant="outline">
-                Manage billing
-                <ExternalLink className="size-4" />
-              </Button>
-            </form>
-          ) : (
-            <p className="text-muted-foreground type-small">
-              Only the organization owner can manage billing.
-            </p>
-          )}
-        </CardContent>
+        {plan ? (
+          <CardContent>
+            <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+              {plan.features.map((feature) => (
+                <li key={feature} className="text-muted-foreground type-small flex items-start gap-2">
+                  <span className="bg-primary/60 mt-2 size-1 shrink-0 rounded-full" aria-hidden />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            {!isOwner ? (
+              <p className="text-muted-foreground type-small mt-4">
+                Only the organization owner can manage billing.
+              </p>
+            ) : null}
+          </CardContent>
+        ) : null}
       </Card>
 
       <section className="space-y-3">
