@@ -1,22 +1,22 @@
 /**
- * Email-safe Maple Pure palette. Email clients can't read CSS custom properties
+ * Email-safe "Workshop" palette. Email clients can't read CSS custom properties
  * or OKLCH, so these are static hex approximations of the light-mode tokens in
  * app/globals.css. Emails render light-mode only (dark-mode email support is
- * inconsistent across clients), mirroring the app's warm-stone canvas + maple
- * accent + grounded dark ink anchor.
+ * inconsistent across clients), mirroring the app's clean cool canvas + cobalt
+ * accent + warm-graphite chrome anchor.
  */
 export const palette = {
-  canvas: "#ECE7E2", // --background: warm light stone
-  card: "#FCFBFA", // --card: near-white pillow
-  ink: "#2B2520", // --foreground: warm near-black
-  mutedInk: "#6A5F56", // --muted-foreground: AA on canvas + card
-  border: "#DAD4CE", // --border
-  maple: "#A8451F", // --primary: deeper maple (AA with white text)
-  mapleDark: "#8F3A18", // hover/pressed maple
-  mapleText: "#FBF6F0", // --primary-foreground: warm off-white on maple
-  anchor: "#2C2622", // --sidebar: grounded warm-dark ink (footer)
-  anchorText: "#E6E0DA",
-  anchorMuted: "#A89E94",
+  canvas: "#F5F7F9", // --background: whisper-cool off-white
+  card: "#FDFDFE", // --card: near-pure white
+  ink: "#1C1F26", // --foreground: near-black
+  mutedInk: "#545861", // --muted-foreground: AA on canvas + card
+  border: "#DCDEE1", // --border
+  primary: "#3862C4", // --primary: cobalt (AA with white text)
+  primaryDark: "#2850B0", // hover/pressed cobalt
+  primaryText: "#FAFCFF", // --primary-foreground: off-white on cobalt
+  anchor: "#211D1A", // --sidebar: warm-graphite chrome anchor (footer)
+  anchorText: "#F3F1EF",
+  anchorMuted: "#A9A49E",
 } as const;
 
 export const font =

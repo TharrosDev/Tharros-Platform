@@ -122,7 +122,7 @@ const brandRow = {
 };
 
 const wordmark = {
-  color: palette.maple,
+  color: palette.primary,
   fontSize: "22px",
   fontWeight: 700,
   letterSpacing: "-0.01em",
@@ -152,9 +152,9 @@ const paragraph = {
 };
 
 const button = {
-  backgroundColor: palette.maple,
+  backgroundColor: palette.primary,
   borderRadius: "8px",
-  color: palette.mapleText,
+  color: palette.primaryText,
   display: "inline-block",
   fontSize: "16px",
   fontWeight: 600,
@@ -168,7 +168,7 @@ const fallback = {
 };
 
 const fallbackLink = {
-  color: palette.maple,
+  color: palette.primary,
   fontSize: "13px",
 };
 
@@ -196,5 +196,5 @@ const footerMuted = {
 };
 
 const footerLink = {
-  color: palette.maple,
+  color: palette.primary,
 };
