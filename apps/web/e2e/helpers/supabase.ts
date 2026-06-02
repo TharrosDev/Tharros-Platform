@@ -41,27 +41,6 @@ export async function createConfirmedUser(email: string): Promise<string> {
   return data.user.id;
 }
 
-/**
- * Confirm a user who just signed up through the UI (signup keeps email
- * verification required in prod; the spine bypasses the email click here). The
- * Day-10 trigger writes a profiles row with the email, so we resolve the id from
- * there, then flip email_confirm via the admin API.
- */
-export async function confirmUserByEmail(email: string): Promise<string> {
-  const { data, error } = await admin
-    .from("profiles")
-    .select("id")
-    .eq("email", email)
-    .single();
-  if (error) throw error;
-  const id = (data as { id: string }).id;
-  const { error: updErr } = await admin.auth.admin.updateUserById(id, {
-    email_confirm: true,
-  });
-  if (updErr) throw updErr;
-  return id;
-}
-
 /** The personal org auto-provisioned for a user by the Day-10 signup trigger. */
 export async function ownOrgId(userId: string): Promise<string> {
   const { data, error } = await admin
