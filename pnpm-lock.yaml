@@ -44,6 +44,12 @@ importers:
       '@sentry/nextjs':
         specifier: ^10.55.0
         version: 10.55.0(@opentelemetry/core@2.7.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.7.1(@opentelemetry/api@1.9.1))(next@16.2.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)(webpack@5.107.2(lightningcss@1.32.0))
+      '@stripe/react-stripe-js':
+        specifier: ^6.5.0
+        version: 6.5.0(@stripe/stripe-js@9.7.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@stripe/stripe-js':
+        specifier: ^9.7.0
+        version: 9.7.0
       '@supabase/ssr':
         specifier: ^0.10.3
         version: 0.10.3(@supabase/supabase-js@2.106.2)
@@ -1452,6 +1458,17 @@ packages:
 
   '@stablelib/base64@1.0.1':
     resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
+
+  '@stripe/react-stripe-js@6.5.0':
+    resolution: {integrity: sha512-MF+H1dXcmlBxBO56F4GlVK0ArpHrKtaOlSZdppqynTmUHVII9M0MedKJd9bLOfWaYe3fFEhd0cQfU/8srWf8yw==}
+    peerDependencies:
+      '@stripe/stripe-js': '>=9.5.0 <10.0.0'
+      react: '>=16.8.0 <20.0.0'
+      react-dom: '>=16.8.0 <20.0.0'
+
+  '@stripe/stripe-js@9.7.0':
+    resolution: {integrity: sha512-r1ElolvWXM4aYnZZVHvKW3EDL8JcwEuIgTuWxlB5lvC+YsvjkQ0gX35x9d8dTDubX395fViLVqkaolVs1PmIQQ==}
+    engines: {node: '>=12.16'}
 
   '@supabase/auth-js@2.106.2':
     resolution: {integrity: sha512-VcAjUErkHkhC5Jaf+g/G1qbkQrFh8edaCdHa7pxJmHUjkWKjT7UnYCtPA89XV0N0GIYRkEqJZw5V62CtOxTmBQ==}
@@ -5753,6 +5770,15 @@ snapshots:
   '@sindresorhus/merge-streams@4.0.0': {}
 
   '@stablelib/base64@1.0.1': {}
+
+  '@stripe/react-stripe-js@6.5.0(@stripe/stripe-js@9.7.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+    dependencies:
+      '@stripe/stripe-js': 9.7.0
+      prop-types: 15.8.1
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+
+  '@stripe/stripe-js@9.7.0': {}
 
   '@supabase/auth-js@2.106.2':
     dependencies:

@@ -38,8 +38,18 @@ Two-step. The code sets `automatic_tax: { enabled: true }` on the Checkout Sessi
 1. Dashboard → **Tax → Registrations** → add a **Canada** registration (GST/HST).
 2. Confirm the head-office origin address under Tax → Settings.
 
-It is safe to enable `automatic_tax` before a registration exists — Stripe simply
-won't collect tax until one is active. Add provincial registrations as nexus grows.
+**⚠️ Required before any checkout works.** `automatic_tax: { enabled: true }` (set
+on every Checkout Session) rejects the session with *"You must have a valid head
+office address to enable automatic tax calculation"* until the **head-office
+address** is set under **Tax → Settings**. So both steps are hard prerequisites
+for Day-17 Checkout in each mode (test now, live at Day 99):
+
+1. Tax → Settings → set the **head-office (origin) address**.
+2. Tax → Registrations → add the **Canada GST/HST** registration.
+
+A registration alone is *not* enough — Stripe won't *collect* tax until a
+registration is active, but it won't even *create the session* without the
+head-office address.
 
 ## Customer Portal
 
@@ -50,6 +60,24 @@ Self-service plan management (Day 20 generates portal sessions). Configure once 
   history**.
 - Set business name + support email; link the Terms/Privacy URLs once the legal
   pages land (Day 86) — placeholders are fine for now.
+
+## Checkout (Day 17)
+
+**Embedded** Checkout, subscription mode, owner-only. `lib/billing/actions.ts`
+`createCheckoutClientSecret(tier)` ensures one Stripe Customer per org (persisted
+to `organizations.stripe_customer_id`), then creates an `embedded_page` session
+tied to the org (`client_reference_id` + metadata `org_id`/`tier`), with a 14-day
+trial, **card up front** (`payment_method_collection: "always"`), `automatic_tax`
++ `tax_id_collection`. The client component (`components/billing/embedded-checkout.tsx`)
+mounts it; the `return_url` lands on `/billing/return`, which reads the session
+for a confirmation. New users are routed to `/billing` straight after onboarding.
+
+The subscription is **not** persisted here — the Day-18 webhook is the source of
+truth. The `/billing/return` page reads the session directly from Stripe for the
+"trial started" confirmation only.
+
+CSP: `next.config.ts` allows `js.stripe.com` (script + frame), `checkout.stripe.com`
+(frame + connect), `hooks.stripe.com` (frame, 3DS), and `api.stripe.com` (connect).
 
 ## Webhooks
 

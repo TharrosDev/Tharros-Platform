@@ -17,9 +17,22 @@ import { env } from "@/env";
  * `apiVersion` is pinned to the version this installed SDK's types target
  * (stripe-node only ships types for the latest version). Bump it in lockstep
  * when upgrading the `stripe` package. Test mode until Day 99 (live-key swap).
+ *
+ * Constructed lazily via `getStripe()` — building the app on CI runs with
+ * SKIP_ENV_VALIDATION and no STRIPE_SECRET_KEY, and a module-scope `new Stripe()`
+ * would throw "Neither apiKey nor config.authenticator provided" while Next
+ * collects route config. Lazy init keeps the import side-effect-free; the key is
+ * only required when a checkout/webhook call actually runs (always on Vercel).
  */
-export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2026-05-27.dahlia",
-  appInfo: { name: "Tharros Platform" },
-  typescript: true,
-});
+let client: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!client) {
+    client = new Stripe(env.STRIPE_SECRET_KEY, {
+      apiVersion: "2026-05-27.dahlia",
+      appInfo: { name: "Tharros Platform" },
+      typescript: true,
+    });
+  }
+  return client;
+}
