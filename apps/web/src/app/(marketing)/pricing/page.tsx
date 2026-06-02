@@ -48,7 +48,9 @@ export default function PricingPage() {
             key={plan.tier}
             className={cn(
               "relative flex flex-col",
-              plan.highlight && "border-primary shadow-lg",
+              plan.highlight
+                ? "border-primary ring-primary/15 shadow-card-hover ring-1 md:-my-2"
+                : "border-border shadow-card",
             )}
           >
             {plan.highlight && (
@@ -64,8 +66,8 @@ export default function PricingPage() {
               <CardTitle className="type-h2">{plan.name}</CardTitle>
               <CardDescription>{plan.blurb}</CardDescription>
               <p className="mt-4">
-                <span className="type-display">{formatMonthly(plan.priceMonthly)}</span>
-                <span className="text-muted-foreground type-small"> /month</span>
+                <span className="num type-display">{formatMonthly(plan.priceMonthly)}</span>
+                <span className="text-muted-foreground type-small"> /month CAD</span>
               </p>
             </CardHeader>
 

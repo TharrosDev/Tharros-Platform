@@ -2,7 +2,7 @@
 
 > **Living doc. Overwrite (don't append) after each push.** It's the single source
 > of truth for resuming the UI/UX overhaul. Branch: **`workshop-redesign`** → PR **#15**.
-> **Last updated: 2026-06-02 — after app-shell polish (commit pending this push).**
+> **Last updated: 2026-06-02 — after marketing home + pricing (commit pending this push).**
 
 ## How to resume (paste this to Claude)
 > "Continue the Workshop redesign on the `workshop-redesign` branch. Read
@@ -46,16 +46,21 @@ Design contract + tokens live in `apps/web/docs/DESIGN.md` and
   (white/10) so the cobalt active-nav pill is the single cobalt focal point in the
   chrome; command-palette selected row is cobalt-soft. (Shell was already strong
   from the token reskin; this is targeted polish.)
+- **Pass 6 — marketing home + pricing**: home is now a graphite Workshop hero
+  (header + bold headline + cobalt/bordered CTAs + dotted texture/glow, matching
+  the auth panel); pricing cards aligned to the app picker (raised cobalt-ring
+  highlight, mono prices). **Fixed a real bug:** `/pricing` was proxy-gated
+  (redirected signed-out visitors to /login) — added it to `PUBLIC_PATHS` in
+  `lib/supabase/proxy.ts` so the public pricing page is reachable signed-out.
 
 ## Remaining 🔧 (do in order)
-1. **Marketing home + pricing** — `(marketing)/page.tsx`, `(marketing)/pricing/page.tsx`.
-2. **Profile + product stubs** — `(app)/profile/page.tsx`; the `ComingSoon` stubs
+1. **Profile + product stubs** — `(app)/profile/page.tsx`; the `ComingSoon` stubs
    `(app)/(subscribed)/{assistant,leads,automations}` via a polished empty state.
-3. **Update Obsidian memory** — replace old "Maple Pure" UI/build info with
+2. **Update Obsidian memory** — replace old "Maple Pure" UI/build info with
    "Workshop" in the memory notes (hub `Tharros Platform - Overview`, design notes).
    Vault: `C:\Users\magnu\Downloads\obsidianMemory\Claude Memory\03 Tharros\`.
-4. **Merge** `workshop-redesign` → `main` once CI is green (PR #15), then update
-   the roadmap/Obsidian. (No workflow files change here, so plain `git push` works.)
+3. **Merge** `workshop-redesign` → `main` once CI is green (PR #15). (No workflow
+   files change here, so plain `git push` works.)
 
 ## Working conventions
 - Per pass: edit → `pnpm typecheck` + `pnpm lint` → `pnpm --filter @tharros/web build`
