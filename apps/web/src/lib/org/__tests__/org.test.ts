@@ -284,3 +284,88 @@ describe("org_settings RLS", () => {
     expect(aUpd.data).toHaveLength(1);
   });
 });
+
+describe("business profile + notifications writes (Day 21)", () => {
+  it("member C cannot update org A's identity; owner A can", async () => {
+    const cUpd = await clientC
+      .from("organizations")
+      .update({ name: "Hijacked Co" })
+      .eq("id", orgA)
+      .select();
+    expect(cUpd.data).toEqual([]);
+
+    const aUpd = await clientA
+      .from("organizations")
+      .update({ name: "Acme Industries", industry: "Trades & Construction", size: "11-50" })
+      .eq("id", orgA)
+      .select();
+    expect(aUpd.error).toBeNull();
+    expect(aUpd.data).toHaveLength(1);
+
+    const { data } = await admin
+      .from("organizations")
+      .select("name, industry, size")
+      .eq("id", orgA)
+      .single();
+    expect(data?.name).toBe("Acme Industries");
+    expect(data?.industry).toBe("Trades & Construction");
+    expect(data?.size).toBe("11-50");
+  });
+
+  it("owner A can persist notification preferences to org_settings", async () => {
+    const prefs = { new_lead: false, weekly_summary: true, billing_account: true };
+    const aUpd = await clientA
+      .from("org_settings")
+      .update({ notifications: prefs })
+      .eq("org_id", orgA)
+      .select();
+    expect(aUpd.error).toBeNull();
+
+    const { data } = await admin
+      .from("org_settings")
+      .select("notifications")
+      .eq("org_id", orgA)
+      .single();
+    expect(data?.notifications).toEqual(prefs);
+  });
+});
+
+describe("org deletion cascade (Day 21 danger zone)", () => {
+  it("owner B can delete an org, cascading its membership + settings rows", async () => {
+    // Create a throwaway org owned by B (also becomes B's active org).
+    const { data: orgId, error: createErr } = await clientB.rpc("create_organization", {
+      p_name: "Disposable Workspace",
+      p_industry: "Other",
+      p_size: "1",
+    });
+    expect(createErr).toBeNull();
+    const doomedOrg = orgId as string;
+
+    // A non-owner (C) cannot delete it; the owner (B) can.
+    const cDel = await clientC.from("organizations").delete().eq("id", doomedOrg).select();
+    expect(cDel.data).toEqual([]);
+
+    const bDel = await clientB.from("organizations").delete().eq("id", doomedOrg).select();
+    expect(bDel.error).toBeNull();
+
+    // Org row gone, and the cascade removed its membership + settings.
+    const { data: org } = await admin
+      .from("organizations")
+      .select("id")
+      .eq("id", doomedOrg)
+      .maybeSingle();
+    expect(org).toBeNull();
+
+    const { count: memberships } = await admin
+      .from("memberships")
+      .select("user_id", { count: "exact", head: true })
+      .eq("org_id", doomedOrg);
+    expect(memberships).toBe(0);
+
+    const { count: settings } = await admin
+      .from("org_settings")
+      .select("org_id", { count: "exact", head: true })
+      .eq("org_id", doomedOrg);
+    expect(settings).toBe(0);
+  });
+});
