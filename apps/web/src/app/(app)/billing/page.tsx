@@ -1,4 +1,3 @@
-import { TRIAL_DAYS } from "@/lib/billing/plans";
 import { getSubscription } from "@/lib/billing/entitlements";
 import { getRecentInvoices } from "@/lib/billing/queries";
 import { getOrgContext } from "@/lib/org/queries";
@@ -57,7 +56,7 @@ export default async function BillingPage() {
     <>
       <PageHeader
         title="Choose your plan"
-        description={`Start with a ${TRIAL_DAYS}-day free trial. Your card is collected now and charged when the trial ends — cancel anytime before then.`}
+        description="Pick the plan that fits how you work today. You can move up or down anytime."
       />
       {!isOwner && (
         <p className="text-muted-foreground type-small">

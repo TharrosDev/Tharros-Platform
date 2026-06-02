@@ -1,63 +1,69 @@
 import Link from "next/link";
+import { Check } from "lucide-react";
 
-import { PLANS, formatMonthly } from "@/lib/billing/plans";
+import { PLANS, formatMonthly, TRIAL_DAYS } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 /**
  * The three-tier subscribe surface. Shown on /billing when the active org has no
- * (manageable) subscription. Extracted from the Day-17 page so the Day-20 billing
- * settings view can swap in when subscribed. Owner-gated CTAs.
+ * (manageable) subscription. Owner-gated CTAs route to the embedded Checkout.
+ * The "Growth" tier is the committed focal point: cobalt ring, raised, filled CTA.
  */
 export function PlanPicker({ isOwner }: { isOwner: boolean }) {
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      {PLANS.map((plan) => (
-        <Card
-          key={plan.tier}
-          className={cn(
-            "relative flex flex-col",
-            plan.highlight && "border-primary shadow-lg",
-          )}
-        >
-          {plan.highlight && (
-            <Badge
-              variant="solid"
-              className="absolute -top-3 left-1/2 -translate-x-1/2"
-            >
-              Most popular
-            </Badge>
-          )}
+    <div>
+      <div className="grid items-stretch gap-5 md:grid-cols-3">
+        {PLANS.map((plan) => (
+          <div
+            key={plan.tier}
+            className={cn(
+              "bg-card relative flex flex-col rounded-lg border p-6 transition-shadow",
+              plan.highlight
+                ? "border-primary ring-primary/15 shadow-card-hover ring-1 md:-my-2 md:py-8"
+                : "border-border shadow-card",
+            )}
+          >
+            {plan.highlight && (
+              <Badge
+                variant="solid"
+                className="absolute -top-2.5 left-6 px-2.5 py-0.5"
+              >
+                Most popular
+              </Badge>
+            )}
 
-          <CardHeader>
-            <CardTitle className="type-h2">{plan.name}</CardTitle>
-            <CardDescription>{plan.blurb}</CardDescription>
-            <p className="mt-4">
-              <span className="type-h1">{formatMonthly(plan.priceMonthly)}</span>
-              <span className="text-muted-foreground type-small"> /month</span>
+            <div className="space-y-1">
+              <h3 className="type-h2">{plan.name}</h3>
+              <p className="text-muted-foreground type-small text-pretty">{plan.blurb}</p>
+            </div>
+
+            <div className="mt-5 flex items-baseline gap-1.5">
+              <span className="num text-foreground text-4xl font-bold tracking-tight">
+                {formatMonthly(plan.priceMonthly)}
+              </span>
+              <span className="text-muted-foreground type-small">CAD / month</span>
+            </div>
+            <p className="text-muted-foreground type-meta mt-2">
+              {TRIAL_DAYS}-day free trial
             </p>
-          </CardHeader>
 
-          <CardContent className="flex-1">
-            <ul className="space-y-2">
+            <ul className="mt-6 flex-1 space-y-2.5">
               {plan.features.map((feature) => (
-                <li key={feature} className="type-small text-muted-foreground">
-                  {feature}
+                <li key={feature} className="flex items-start gap-2.5">
+                  <Check
+                    className={cn(
+                      "mt-0.5 size-4 shrink-0",
+                      plan.highlight ? "text-primary" : "text-muted-foreground",
+                    )}
+                    aria-hidden
+                  />
+                  <span className="type-small">{feature}</span>
                 </li>
               ))}
             </ul>
-          </CardContent>
 
-          <CardFooter>
             <Link
               href={`/billing/subscribe?plan=${plan.tier}`}
               aria-disabled={!isOwner}
@@ -67,15 +73,20 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
                   size: "lg",
                   variant: plan.highlight ? "default" : "outline",
                 }),
-                "w-full",
+                "mt-7 w-full",
                 !isOwner && "pointer-events-none opacity-50",
               )}
             >
               Start free trial
             </Link>
-          </CardFooter>
-        </Card>
-      ))}
+          </div>
+        ))}
+      </div>
+
+      <p className="text-muted-foreground type-small mt-6 text-center">
+        Your card is collected now and charged when the trial ends. Cancel anytime
+        before then and you won&apos;t be billed.
+      </p>
     </div>
   );
 }
