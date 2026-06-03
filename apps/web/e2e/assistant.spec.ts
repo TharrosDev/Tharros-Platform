@@ -70,12 +70,17 @@ test("assistant spine", async ({ page }) => {
     await expect(page.getByText("Ready", { exact: true })).toBeVisible();
 
     // The assistant empty state now offers the generation templates instead of
-    // the upload nudge.
+    // the upload nudge. (The chips render in both the empty state and the
+    // composer header, so scope to the first match — strict mode otherwise.)
     await page.goto("/assistant");
-    await expect(page.getByRole("button", { name: "Draft email" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Write SOP" })).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Summarize policy" }),
+      page.getByRole("button", { name: "Draft email" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Write SOP" }).first(),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Summarize policy" }).first(),
     ).toBeVisible();
   });
 
@@ -156,7 +161,7 @@ test("assistant spine", async ({ page }) => {
 
   await test.step("the Draft email template generates a draft", async () => {
     await page.goto("/assistant");
-    await page.getByRole("button", { name: "Draft email" }).click();
+    await page.getByRole("button", { name: "Draft email" }).first().click();
     await page
       .getByLabel("Ask the assistant a question")
       .fill("Reply to a customer asking about our refund window.");
