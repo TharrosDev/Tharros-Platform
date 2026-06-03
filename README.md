@@ -1,6 +1,6 @@
 # Tharros Platform
 
-**The AI operating layer for small businesses.** A multi-tenant SaaS where a business uploads its documents (SOPs, policies, FAQs, price lists) and gets a grounded, cited AI assistant that answers from them — plus lead capture and automations.
+**The AI operating layer for small businesses.** A multi-tenant SaaS where a business uploads its documents (SOPs, policies, FAQs, price lists) and gets a grounded, cited AI assistant that answers from them — with streaming chat, inline citations, generation templates (draft email / write SOP / summarize policy), and knowledge management — plus lead capture and automations.
 
 Production: [tharros.ca](https://tharros.ca) · Private repo (`TharrosDev/Tharros-Platform`).
 
@@ -10,16 +10,18 @@ Production: [tharros.ca](https://tharros.ca) · Private repo (`TharrosDev/Tharro
 - **Next.js 16** (App Router, React 19) — note: a *modified* build, see [`apps/web/AGENTS.md`](apps/web/AGENTS.md)
 - **TypeScript** (strict), **Tailwind CSS v4**, **Base UI** + shadcn-style primitives
 - **Supabase** — Postgres + Auth (SSR) + Storage + **pgvector**, with Row-Level Security
-- **Stripe** — subscriptions (Checkout + Customer Portal)
-- **OpenAI** (`text-embedding-3-small`) for embeddings · **Anthropic Claude** for generation
+- **Stripe** — subscriptions (Checkout + Customer Portal), with per-plan AI usage caps
+- **OpenAI** (`text-embedding-3-small`, 1536-dim) for embeddings · **Anthropic Claude** for generation (Opus 4.8 for grounded Q&A, Haiku 4.5 for templated generation)
 - **Sentry** observability · **Vercel** hosting/CI · **Vitest** + **Playwright** tests
 
 ## Repository layout
 
 ```
 apps/web/              # the Next.js application (the only deployable)
-  src/app/             # routes: (marketing) (auth) (app)/(subscribed) api
-  src/lib/             # supabase clients, auth, billing, documents (RAG), email…
+  src/app/             # routes: (marketing) (auth) (onboarding) (app)/(subscribed) api
+  src/lib/             # supabase clients, auth, billing, documents (RAG),
+                       #   assistant (chat), anthropic (model seam), email…
+  src/eval/            # offline RAG eval harness (fixtures, questions, metrics)
   e2e/                 # Playwright specs
 packages/eslint-config # shared ESLint config
 packages/tsconfig      # shared TS config
@@ -66,6 +68,8 @@ pnpm --filter @tharros/web test:e2e        # Playwright
 
 - **Multi-tenant + RLS.** Every domain table is org-scoped; access is enforced in the database via Row-Level Security helpers (`current_user_orgs()`, `current_user_role()`). The user-session Supabase client respects RLS; a service-role client (server-only) is the sole writer to internal pipeline tables.
 - **RAG pipeline** (`apps/web/src/lib/documents/`): `upload → extract → chunk → embed → retrieve`, tracked on `documents.status`, with vectors stored in pgvector and searched via a `match_document_chunks` RPC.
+- **AI assistant** (`apps/web/src/lib/assistant/`): a streaming chat endpoint (`api/assistant/query`, NDJSON frames) that retrieves grounding chunks, prompts Claude to cite-or-decline, persists each turn, and returns numbered inline citations. Generation templates route to a cheaper model; per-org token usage is metered and enforced against plan caps.
+- **RAG eval** (`apps/web/src/eval/`): an offline harness over fixture corpora that sweeps chunk size × top-k and scores retrieval + answer quality (recall, citation accuracy, faithfulness, negative-question handling).
 - **Migrations** in `supabase/migrations/` are the source of truth and are applied to both the production and CI-test Supabase projects.
 
 See [`CLAUDE.md`](CLAUDE.md) for a deeper architecture orientation and the project's conventions.
