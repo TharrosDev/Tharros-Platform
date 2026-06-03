@@ -9,6 +9,7 @@ import { logger } from "@/lib/observability/logger";
 import { DOCUMENTS_BUCKET, storagePathFor } from "@/lib/documents/types";
 import { sanitizeStorageName, validateUploadFile } from "@/lib/documents/validation";
 import { normalizeTags } from "@/lib/documents/tags";
+import { listDocumentsPage, type DocumentPage } from "@/lib/documents/queries";
 
 /**
  * Day 24 — document server actions. The bytes go straight from the browser to
@@ -139,4 +140,19 @@ export async function deleteDocument(id: string): Promise<{ error?: string }> {
 
   revalidatePath(KNOWLEDGE_PATH);
   return {};
+}
+
+/**
+ * Day 24 (perf) — keyset page of the org's documents for the library's search +
+ * "Load more". Membership is enforced by the `search_documents` RPC (a non-member
+ * gets an empty page), and we re-derive the active org from the caller's session
+ * rather than trusting a client-passed id.
+ */
+export async function searchDocuments(
+  search: string,
+  cursor: string | null,
+): Promise<DocumentPage> {
+  const { activeOrg } = await getOrgContext();
+  if (!activeOrg) return { documents: [], nextCursor: null };
+  return listDocumentsPage(activeOrg.id, { search, cursor });
 }

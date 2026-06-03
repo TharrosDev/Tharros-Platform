@@ -41,6 +41,7 @@ export function AssistantChat({
   hasDocuments,
   readOnly = false,
   nearLimit = false,
+  olderTruncated = false,
 }: {
   selectedId: string | null;
   initialMessages: ChatMessage[];
@@ -48,6 +49,8 @@ export function AssistantChat({
   readOnly?: boolean;
   /** Day 33 — org is at ≥80% of its monthly query cap; show a soft warning. */
   nearLimit?: boolean;
+  /** Older turns exist beyond the loaded window (very long thread). */
+  olderTruncated?: boolean;
 }) {
   const router = useRouter();
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages);
@@ -199,6 +202,11 @@ export function AssistantChat({
           />
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+            {olderTruncated ? (
+              <p className="text-muted-foreground border-border rounded-md border border-dashed py-2 text-center text-xs">
+                Showing the most recent messages in this conversation.
+              </p>
+            ) : null}
             {messages.map((m, i) => (
               <ChatTurn
                 key={m.id}

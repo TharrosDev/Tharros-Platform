@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getOrgContext } from "@/lib/org/queries";
-import { listDocuments } from "@/lib/documents/queries";
+import { hasAnyDocument } from "@/lib/documents/queries";
 import { checkQueryCap } from "@/lib/billing/usage";
 import {
+  getConversation,
   getConversationMessages,
-  listConversations,
+  listConversationsPage,
 } from "@/lib/assistant/conversations";
 import { PageHeader } from "@/components/page-header";
 import { AssistantChat } from "@/components/assistant/assistant-chat";
@@ -26,20 +27,21 @@ export default async function AssistantPage({
   // The (app) + (subscribed) layouts already gate auth + org; this is defensive.
   if (!user || !activeOrg) redirect("/login");
 
-  const [conversations, documents, cap] = await Promise.all([
-    listConversations(activeOrg.id),
-    listDocuments(activeOrg.id),
+  const [convPage, hasDocuments, cap] = await Promise.all([
+    listConversationsPage(activeOrg.id),
+    hasAnyDocument(activeOrg.id),
     checkQueryCap(activeOrg.id),
   ]);
 
-  // Resolve the selected conversation. An unknown id (deleted, or another org's)
+  // Resolve the selected conversation by id (independent of the paginated history
+  // list, which may not contain it). An unknown id (deleted, or another org's)
   // falls back to a fresh chat rather than showing an empty mystery thread.
-  const selected = selectedParam
-    ? conversations.find((c) => c.id === selectedParam) ?? null
-    : null;
+  const selected = selectedParam ? await getConversation(selectedParam) : null;
   if (selectedParam && !selected) redirect("/assistant");
 
-  const messages = selected ? await getConversationMessages(selected.id) : [];
+  const { messages, truncated } = selected
+    ? await getConversationMessages(selected.id)
+    : { messages: [], truncated: false };
   const readOnly = selected ? selected.userId !== user.id : false;
 
   return (
@@ -49,7 +51,8 @@ export default async function AssistantPage({
         description="Ask anything about your business. Answers come straight from your documents, with sources."
         actions={
           <ConversationHistory
-            conversations={conversations}
+            conversations={convPage.conversations}
+            initialNextCursor={convPage.nextCursor}
             activeId={selected?.id ?? null}
             viewerId={user.id}
           />
@@ -59,7 +62,8 @@ export default async function AssistantPage({
         key={selected?.id ?? "new"}
         selectedId={selected?.id ?? null}
         initialMessages={messages}
-        hasDocuments={documents.length > 0}
+        olderTruncated={truncated}
+        hasDocuments={hasDocuments}
         readOnly={readOnly}
         nearLimit={cap.nearLimit}
       />

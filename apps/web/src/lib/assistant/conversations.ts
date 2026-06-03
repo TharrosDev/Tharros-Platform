@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/observability/logger";
+import { PAGE_SIZE, decodeCursor, nextCursorFrom } from "@/lib/pagination";
 import type { Citation } from "@/lib/documents/rag-prompt";
 import type { ChatMessage, Conversation } from "@/lib/assistant/types";
 
@@ -41,30 +42,86 @@ type ConversationRow = {
  * second `profiles` query (no FK from conversations→profiles, so PostgREST can't
  * embed it — same join-in-JS pattern as the team page).
  */
-export async function listConversations(orgId: string): Promise<Conversation[]> {
+export type ConversationPage = {
+  conversations: Conversation[];
+  nextCursor: string | null;
+};
+
+export async function listConversationsPage(
+  orgId: string,
+  opts?: { limit?: number; cursor?: string | null },
+): Promise<ConversationPage> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const limit = opts?.limit ?? PAGE_SIZE.conversations;
+  const cursor = decodeCursor(opts?.cursor);
+
+  let q = supabase
     .from("conversations")
     .select("id, title, user_id, created_at, updated_at")
     .eq("org_id", orgId)
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit);
+
+  // Keyset: (updated_at, id) strictly before the cursor row, newest-first.
+  if (cursor) {
+    q = q.or(
+      `updated_at.lt.${cursor.ts},and(updated_at.eq.${cursor.ts},id.lt.${cursor.id})`,
+    );
+  }
+
+  const { data, error } = await q;
 
   if (error) {
     logger.error("assistant.list_conversations_failed", { org_id: orgId, error: error.message });
-    return [];
+    return { conversations: [], nextCursor: null };
   }
 
   const rows = (data ?? []) as ConversationRow[];
   const names = await resolveAskerNames(supabase, rows.map((r) => r.user_id));
 
-  return rows.map((r) => ({
-    id: r.id,
-    title: r.title,
-    userId: r.user_id,
-    askerName: names.get(r.user_id) ?? null,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  }));
+  return {
+    conversations: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      userId: r.user_id,
+      askerName: names.get(r.user_id) ?? null,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+    })),
+    nextCursor: nextCursorFrom(rows, limit, (r) => ({ ts: r.updated_at, id: r.id })),
+  };
+}
+
+/**
+ * A single conversation by id, RLS-scoped (visible to its author or the org
+ * owner). Lets the page resolve the `?c=` selection independently of the
+ * paginated history list. `null` if absent / not visible.
+ */
+export async function getConversation(id: string): Promise<Conversation | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("id, title, user_id, created_at, updated_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    logger.error("assistant.get_conversation_failed", { conversation_id: id, error: error.message });
+    return null;
+  }
+  if (!data) return null;
+
+  const row = data as ConversationRow;
+  const names = await resolveAskerNames(supabase, [row.user_id]);
+  return {
+    id: row.id,
+    title: row.title,
+    userId: row.user_id,
+    askerName: names.get(row.user_id) ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 /** Resolve user_id → display name (full_name, else email) for the owner's view. */
@@ -96,30 +153,56 @@ type MessageRow = {
   created_at: string;
 };
 
-/** Messages of a conversation, oldest-first. RLS gates access to the parent. */
-export async function getConversationMessages(conversationId: string): Promise<ChatMessage[]> {
+export type MessagePage = {
+  /** The most recent page of turns, oldest-first for display. */
+  messages: ChatMessage[];
+  /** True when older turns exist beyond this page (not yet loaded). */
+  truncated: boolean;
+};
+
+/**
+ * The most recent `limit` turns of a conversation, oldest-first for display.
+ * Bounded so a very long thread never ships every message at once; `truncated`
+ * tells the UI that earlier turns exist. RLS gates access to the parent.
+ */
+export async function getConversationMessages(
+  conversationId: string,
+  opts?: { limit?: number },
+): Promise<MessagePage> {
   const supabase = await createClient();
+  const limit = opts?.limit ?? PAGE_SIZE.messages;
+
+  // Fetch newest-first (limit + 1 to detect older turns), then flip to ascending.
   const { data, error } = await supabase
     .from("messages")
     .select("id, role, content, citations, created_at")
     .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(limit + 1);
 
   if (error) {
     logger.error("assistant.get_messages_failed", {
       conversation_id: conversationId,
       error: error.message,
     });
-    return [];
+    return { messages: [], truncated: false };
   }
 
-  return ((data ?? []) as MessageRow[]).map((r) => ({
-    id: r.id,
-    role: r.role,
-    content: r.content,
-    citations: r.citations ?? [],
-    createdAt: r.created_at,
-  }));
+  const rows = (data ?? []) as MessageRow[];
+  const truncated = rows.length > limit;
+  const page = (truncated ? rows.slice(0, limit) : rows).slice().reverse();
+
+  return {
+    messages: page.map((r) => ({
+      id: r.id,
+      role: r.role,
+      content: r.content,
+      citations: r.citations ?? [],
+      createdAt: r.created_at,
+    })),
+    truncated,
+  };
 }
 
 /** Create a new conversation; returns its id, or null on failure (logged). */

@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import { History, Plus, MoreHorizontal, Pencil, Trash2, MessageSquare } from "lucide-react";
 
 import type { Conversation } from "@/lib/assistant/types";
-import { deleteConversation, renameConversation } from "@/lib/assistant/actions";
+import {
+  deleteConversation,
+  loadMoreConversations,
+  renameConversation,
+} from "@/lib/assistant/actions";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,10 +46,12 @@ function ago(iso: string): string {
 
 export function ConversationHistory({
   conversations,
+  initialNextCursor,
   activeId,
   viewerId,
 }: {
   conversations: Conversation[];
+  initialNextCursor: string | null;
   activeId: string | null;
   viewerId: string;
 }) {
@@ -56,6 +62,39 @@ export function ConversationHistory({
   const [deleting, setDeleting] = React.useState<Conversation | null>(null);
   const [pending, startTransition] = React.useTransition();
 
+  // `conversations` is the server-rendered first page (refreshes on mutation);
+  // `extra` holds any keyset pages the user loaded. Display de-dupes by id.
+  const [extra, setExtra] = React.useState<Conversation[]>([]);
+  const [cursor, setCursor] = React.useState<string | null>(initialNextCursor);
+  const [loadingMore, setLoadingMore] = React.useState(false);
+
+  const items = React.useMemo(() => {
+    const seen = new Set<string>();
+    const out: Conversation[] = [];
+    for (const c of [...conversations, ...extra]) {
+      if (seen.has(c.id)) continue;
+      seen.add(c.id);
+      out.push(c);
+    }
+    return out;
+  }, [conversations, extra]);
+
+  // After a mutation the first page is re-fetched server-side; drop loaded pages
+  // so the list doesn't show stale/duplicated rows.
+  function resetPages() {
+    setExtra([]);
+    setCursor(initialNextCursor);
+  }
+
+  async function loadMore() {
+    if (!cursor) return;
+    setLoadingMore(true);
+    const res = await loadMoreConversations(cursor);
+    setExtra((prev) => [...prev, ...res.conversations]);
+    setCursor(res.nextCursor);
+    setLoadingMore(false);
+  }
+
   function runRename(title: string) {
     const target = renaming;
     if (!target) return;
@@ -63,7 +102,10 @@ export function ConversationHistory({
     startTransition(async () => {
       const res = await renameConversation(target.id, title);
       if (res.error) toast.add({ title: "Couldn't rename", description: res.error });
-      else router.refresh();
+      else {
+        resetPages();
+        router.refresh();
+      }
     });
   }
 
@@ -79,7 +121,10 @@ export function ConversationHistory({
       }
       toast.add({ title: "Conversation deleted" });
       if (target.id === activeId) router.push("/assistant");
-      else router.refresh();
+      else {
+        resetPages();
+        router.refresh();
+      }
     });
   }
 
@@ -110,13 +155,13 @@ export function ConversationHistory({
           </div>
 
           <nav className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
-            {conversations.length === 0 ? (
+            {items.length === 0 ? (
               <p className="text-muted-foreground px-2 py-6 text-center text-sm">
                 No conversations yet.
               </p>
             ) : (
               <ul className="space-y-0.5">
-                {conversations.map((c) => {
+                {items.map((c) => {
                   const active = c.id === activeId;
                   const showAsker = c.userId !== viewerId && c.askerName;
                   return (
@@ -163,6 +208,19 @@ export function ConversationHistory({
                 })}
               </ul>
             )}
+            {cursor ? (
+              <div className="px-2 pt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => void loadMore()}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? "Loading…" : "Load older"}
+                </Button>
+              </div>
+            ) : null}
           </nav>
         </SheetContent>
       </Sheet>

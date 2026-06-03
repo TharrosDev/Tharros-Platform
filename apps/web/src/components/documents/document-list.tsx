@@ -1,13 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { FileText, MoreHorizontal, RefreshCw, Search, Tag, Trash2, X } from "lucide-react";
 
-import { deleteDocument, setDocumentTags } from "@/lib/documents/actions";
+import { deleteDocument, searchDocuments, setDocumentTags } from "@/lib/documents/actions";
 import type { Document, DocumentStatus } from "@/lib/documents/types";
 import { formatBytes } from "@/lib/documents/validation";
-import { matchesQuery, normalizeTags, MAX_TAGS } from "@/lib/documents/tags";
+import { normalizeTags, MAX_TAGS } from "@/lib/documents/tags";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -36,11 +35,6 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
 
-export type DocumentCitationMap = Record<
-  string,
-  { citedCount: number; lastCitedAt: string | null }
->;
-
 type StatusMeta = {
   label: string;
   variant: "secondary" | "info" | "success" | "destructive";
@@ -65,25 +59,67 @@ function formatDate(iso: string): string {
   });
 }
 
+/**
+ * Library table. Search + pagination are server-side (the `search_documents`
+ * keyset RPC), so the client only ever holds the pages it has loaded — never the
+ * whole org library. Mutations (delete / tag / re-index) update local state in
+ * place rather than refreshing the whole page (which would refetch from the top).
+ * A new upload bumps the server-passed key, remounting this with a fresh page.
+ */
 export function DocumentList({
-  documents,
-  citations,
+  initialDocuments,
+  initialCursor,
 }: {
-  documents: Document[];
-  citations: DocumentCitationMap;
+  initialDocuments: Document[];
+  initialCursor: string | null;
 }) {
-  const router = useRouter();
   const toast = useToast();
+  const [docs, setDocs] = React.useState<Document[]>(initialDocuments);
+  const [cursor, setCursor] = React.useState<string | null>(initialCursor);
+  const [query, setQuery] = React.useState("");
+  const [searching, setSearching] = React.useState(false);
+  const [loadingMore, setLoadingMore] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
   const [confirm, setConfirm] = React.useState<Document | null>(null);
   const [tagDoc, setTagDoc] = React.useState<Document | null>(null);
-  const [query, setQuery] = React.useState("");
   const [busyId, setBusyId] = React.useState<string | null>(null);
 
-  const filtered = React.useMemo(
-    () => documents.filter((d) => matchesQuery(d, query)),
-    [documents, query],
-  );
+  // Debounced server-side search. The effect body only schedules a timer (no
+  // synchronous setState); the fetch + setState run in the async callback.
+  const mounted = React.useRef(false);
+  React.useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    const t = setTimeout(() => {
+      void (async () => {
+        setSearching(true);
+        const res = await searchDocuments(query, null);
+        setDocs(res.documents);
+        setCursor(res.nextCursor);
+        setSearching(false);
+      })();
+    }, 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  async function loadMore() {
+    if (!cursor) return;
+    setLoadingMore(true);
+    const res = await searchDocuments(query, cursor);
+    setDocs((prev) => [...prev, ...res.documents]);
+    setCursor(res.nextCursor);
+    setLoadingMore(false);
+  }
+
+  // After a re-index the status changed server-side; reload the current query's
+  // first page to reflect it (and pick up any new ingestion state).
+  async function reloadCurrent() {
+    const res = await searchDocuments(query, null);
+    setDocs(res.documents);
+    setCursor(res.nextCursor);
+  }
 
   function runDelete() {
     if (!confirm) return;
@@ -94,16 +130,15 @@ export function DocumentList({
       if (res?.error) {
         toast.add({ title: "Something went wrong", description: res.error });
       } else {
+        setDocs((prev) => prev.filter((d) => d.id !== doc.id));
         toast.add({ title: "Document deleted", description: `${doc.filename} was removed.` });
-        router.refresh();
       }
     });
   }
 
   // Re-index = re-run the ingestion chain (extract → embed), reusing the Day-25/26
   // routes the uploader uses. Handles a failed doc (retry) or a ready doc (rebuild
-  // chunks after a content/model change). Synchronous routes, so refresh once both
-  // resolve to land on the final status.
+  // chunks). Synchronous routes, so reload once both resolve to land on status.
   async function runReindex(doc: Document) {
     setBusyId(doc.id);
     try {
@@ -124,11 +159,12 @@ export function DocumentList({
       toast.add({ title: "Couldn't re-index", description: "Please try again." });
     } finally {
       setBusyId(null);
-      router.refresh();
+      await reloadCurrent();
     }
   }
 
-  if (documents.length === 0) {
+  const showInitialEmpty = docs.length === 0 && query.trim() === "" && !searching;
+  if (showInitialEmpty) {
     return (
       <div className="border-border flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed py-16 text-center">
         <span className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-xl [&>svg]:size-6">
@@ -157,123 +193,132 @@ export function DocumentList({
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {docs.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">
-          No documents match “{query}”.
+          {searching ? "Searching…" : `No documents match “${query}”.`}
         </p>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Document</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden text-right md:table-cell">Cited</TableHead>
-              <TableHead className="hidden md:table-cell">Size</TableHead>
-              <TableHead className="hidden md:table-cell">Added</TableHead>
-              <TableHead className="w-10 text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((doc) => {
-              const meta = STATUS_META[doc.status];
-              const stat = citations[doc.id];
-              const busy = busyId === doc.id;
-              return (
-                <TableRow key={doc.id}>
-                  <TableCell>
-                    <div className="flex items-start gap-2.5">
-                      <FileText className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                      <div className="min-w-0">
-                        <span className="text-foreground block truncate font-medium" title={doc.filename}>
-                          {doc.filename}
-                        </span>
-                        {doc.tags.length > 0 ? (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {doc.tags.map((t) => (
-                              <button
-                                key={t}
-                                type="button"
-                                onClick={() => setQuery(t)}
-                                className="bg-muted text-muted-foreground hover:bg-accent hover:text-foreground rounded px-1.5 py-0.5 text-xs transition-colors"
-                              >
-                                {t}
-                              </button>
-                            ))}
-                          </div>
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Document</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="hidden text-right md:table-cell">Cited</TableHead>
+                <TableHead className="hidden md:table-cell">Size</TableHead>
+                <TableHead className="hidden md:table-cell">Added</TableHead>
+                <TableHead className="w-10 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {docs.map((doc) => {
+                const meta = STATUS_META[doc.status];
+                const busy = busyId === doc.id;
+                return (
+                  <TableRow key={doc.id}>
+                    <TableCell>
+                      <div className="flex items-start gap-2.5">
+                        <FileText className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+                        <div className="min-w-0">
+                          <span className="text-foreground block truncate font-medium" title={doc.filename}>
+                            {doc.filename}
+                          </span>
+                          {doc.tags.length > 0 ? (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {doc.tags.map((t) => (
+                                <button
+                                  key={t}
+                                  type="button"
+                                  onClick={() => setQuery(t)}
+                                  className="bg-muted text-muted-foreground hover:bg-accent hover:text-foreground rounded px-1.5 py-0.5 text-xs transition-colors"
+                                >
+                                  {t}
+                                </button>
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={busy ? "info" : meta.variant}>
+                          {busy ? "Re-indexing…" : meta.label}
+                        </Badge>
+                        {doc.status === "failed" && !busy ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive h-7 gap-1 px-2"
+                            onClick={() => void runReindex(doc)}
+                          >
+                            <RefreshCw className="size-3.5" />
+                            Retry
+                          </Button>
                         ) : null}
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={busy ? "info" : meta.variant}>
-                        {busy ? "Re-indexing…" : meta.label}
-                      </Badge>
-                      {doc.status === "failed" && !busy ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive h-7 gap-1 px-2"
-                          onClick={() => void runReindex(doc)}
+                    </TableCell>
+                    <TableCell
+                      className="text-muted-foreground hidden text-right tabular-nums md:table-cell"
+                      title={doc.lastCitedAt ? `Last cited ${formatDate(doc.lastCitedAt)}` : undefined}
+                    >
+                      {doc.citedCount ? doc.citedCount : "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground hidden md:table-cell">
+                      {doc.sizeBytes != null ? formatBytes(doc.sizeBytes) : "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground hidden md:table-cell">
+                      {formatDate(doc.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+                          aria-label={`Actions for ${doc.filename}`}
                         >
-                          <RefreshCw className="size-3.5" />
-                          Retry
-                        </Button>
-                      ) : null}
-                    </div>
-                  </TableCell>
-                  <TableCell
-                    className="text-muted-foreground hidden text-right tabular-nums md:table-cell"
-                    title={stat?.lastCitedAt ? `Last cited ${formatDate(stat.lastCitedAt)}` : undefined}
-                  >
-                    {stat?.citedCount ? stat.citedCount : "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground hidden md:table-cell">
-                    {doc.sizeBytes != null ? formatBytes(doc.sizeBytes) : "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground hidden md:table-cell">
-                    {formatDate(doc.createdAt)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
-                        aria-label={`Actions for ${doc.filename}`}
-                      >
-                        <MoreHorizontal className="size-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => setTagDoc(doc)}>
-                          <Tag />
-                          Edit tags
-                        </DropdownMenuItem>
-                        <DropdownMenuItem disabled={busy} onClick={() => void runReindex(doc)}>
-                          <RefreshCw />
-                          Re-index
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => setConfirm(doc)}
-                        >
-                          <Trash2 />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                          <MoreHorizontal className="size-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onClick={() => setTagDoc(doc)}>
+                            <Tag />
+                            Edit tags
+                          </DropdownMenuItem>
+                          <DropdownMenuItem disabled={busy} onClick={() => void runReindex(doc)}>
+                            <RefreshCw />
+                            Re-index
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => setConfirm(doc)}
+                          >
+                            <Trash2 />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          {cursor ? (
+            <div className="flex justify-center pt-2">
+              <Button variant="outline" size="sm" onClick={() => void loadMore()} disabled={loadingMore}>
+                {loadingMore ? "Loading…" : "Load more"}
+              </Button>
+            </div>
+          ) : null}
+        </>
       )}
 
       <TagEditorDialog
         doc={tagDoc}
         onClose={() => setTagDoc(null)}
-        onSaved={() => {
+        onSaved={(id, tags) => {
           setTagDoc(null);
-          router.refresh();
+          setDocs((prev) => prev.map((d) => (d.id === id ? { ...d, tags } : d)));
         }}
       />
 
@@ -309,7 +354,7 @@ function TagEditorDialog({
 }: {
   doc: Document | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (id: string, tags: string[]) => void;
 }) {
   return (
     <Dialog open={doc !== null} onOpenChange={(open) => !open && onClose()}>
@@ -328,7 +373,7 @@ function TagEditorBody({
 }: {
   doc: Document;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (id: string, tags: string[]) => void;
 }) {
   const toast = useToast();
   const [tags, setTags] = React.useState<string[]>(doc.tags);
@@ -360,7 +405,7 @@ function TagEditorBody({
       return;
     }
     toast.add({ title: "Tags updated", description: `${doc.filename} tags saved.` });
-    onSaved();
+    onSaved(doc.id, merged);
   }
 
   const atLimit = tags.length >= MAX_TAGS;

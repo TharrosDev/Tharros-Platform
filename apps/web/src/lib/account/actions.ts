@@ -50,28 +50,54 @@ export async function deleteAccount(
 
   const ownedOrgIds = (ownerRows ?? []).map((r) => (r as { org_id: string }).org_id);
 
-  // Owner count per owned org → which ones the caller solely owns.
+  // Owner count per owned org → which ones the caller solely owns. One batched
+  // read of every owner row across the owned orgs, tallied in JS (was an N+1:
+  // one COUNT query per owned org).
   const ownerCountByOrg: Record<string, number> = {};
-  for (const orgId of ownedOrgIds) {
-    const { count } = await admin
+  if (ownedOrgIds.length > 0) {
+    for (const orgId of ownedOrgIds) ownerCountByOrg[orgId] = 0;
+    const { data: ownerCountRows, error: ownerCountErr } = await admin
       .from("memberships")
-      .select("user_id", { count: "exact", head: true })
-      .eq("org_id", orgId)
+      .select("org_id")
+      .in("org_id", ownedOrgIds)
       .eq("role", "owner");
-    ownerCountByOrg[orgId] = count ?? 0;
+    if (ownerCountErr) return { error: ownerCountErr.message };
+    for (const row of (ownerCountRows ?? []) as { org_id: string }[]) {
+      ownerCountByOrg[row.org_id] = (ownerCountByOrg[row.org_id] ?? 0) + 1;
+    }
   }
   const toDelete = soleOwnedOrgIds(ownedOrgIds, ownerCountByOrg);
 
-  for (const orgId of toDelete) {
-    // Cancel the org's Stripe subscription before the cascade drops the mirror.
-    const { data: sub } = await admin
+  // Pre-fetch the Stripe subscription for every org we're about to delete in one
+  // query (was an N+1: one SELECT per org). The cancel + org delete below stay
+  // per-org — Stripe is an external call and the delete is a single-row op.
+  const subByOrg = new Map<
+    string,
+    { stripe_subscription_id: string | null; status: string | null }
+  >();
+  if (toDelete.length > 0) {
+    const { data: subRows } = await admin
       .from("subscriptions")
-      .select("stripe_subscription_id, status")
-      .eq("org_id", orgId)
-      .maybeSingle();
-    const subId = (sub as { stripe_subscription_id: string | null } | null)
-      ?.stripe_subscription_id;
-    const status = (sub as { status: string | null } | null)?.status;
+      .select("org_id, stripe_subscription_id, status")
+      .in("org_id", toDelete);
+    for (const s of (subRows ?? []) as {
+      org_id: string;
+      stripe_subscription_id: string | null;
+      status: string | null;
+    }[]) {
+      subByOrg.set(s.org_id, {
+        stripe_subscription_id: s.stripe_subscription_id,
+        status: s.status,
+      });
+    }
+  }
+
+  // Cancel each org's Stripe subscription before deleting (external call — can't
+  // be inside the DB transaction; the org delete drops the mirror row).
+  for (const orgId of toDelete) {
+    const sub = subByOrg.get(orgId) ?? null;
+    const subId = sub?.stripe_subscription_id;
+    const status = sub?.status;
     if (subId && status && status !== "canceled" && status !== "incomplete_expired") {
       try {
         await getStripe().subscriptions.cancel(subId);
@@ -85,15 +111,23 @@ export async function deleteAccount(
         return { error: "Could not cancel an active subscription. Please try again." };
       }
     }
+  }
 
-    const { error: delErr } = await admin.from("organizations").delete().eq("id", orgId);
+  // Delete all sole-owned orgs in ONE transaction. The RPC re-verifies sole
+  // ownership server-side (it never trusts the id list), so a partial failure
+  // can't orphan rows the way the old per-org loop could.
+  if (toDelete.length > 0) {
+    const { error: delErr } = await admin.rpc("delete_owned_orgs", {
+      p_user: user.id,
+      p_org_ids: toDelete,
+    });
     if (delErr) {
-      logger.error("account.delete_org_failed", {
+      logger.error("account.delete_orgs_failed", {
         user_id: user.id,
-        org_id: orgId,
+        org_ids: toDelete,
         error: delErr.message,
       });
-      return { error: "Could not delete one of your organizations. Please try again." };
+      return { error: "Could not delete your organizations. Please try again." };
     }
   }
 
