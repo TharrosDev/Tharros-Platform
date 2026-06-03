@@ -167,9 +167,9 @@ export function DocumentList({
             <TableRow>
               <TableHead>Document</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Cited</TableHead>
-              <TableHead>Size</TableHead>
-              <TableHead>Added</TableHead>
+              <TableHead className="hidden text-right md:table-cell">Cited</TableHead>
+              <TableHead className="hidden md:table-cell">Size</TableHead>
+              <TableHead className="hidden md:table-cell">Added</TableHead>
               <TableHead className="w-10 text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -205,20 +205,35 @@ export function DocumentList({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={busy ? "info" : meta.variant}>
-                      {busy ? "Re-indexing…" : meta.label}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={busy ? "info" : meta.variant}>
+                        {busy ? "Re-indexing…" : meta.label}
+                      </Badge>
+                      {doc.status === "failed" && !busy ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive h-7 gap-1 px-2"
+                          onClick={() => void runReindex(doc)}
+                        >
+                          <RefreshCw className="size-3.5" />
+                          Retry
+                        </Button>
+                      ) : null}
+                    </div>
                   </TableCell>
                   <TableCell
-                    className="text-muted-foreground text-right tabular-nums"
+                    className="text-muted-foreground hidden text-right tabular-nums md:table-cell"
                     title={stat?.lastCitedAt ? `Last cited ${formatDate(stat.lastCitedAt)}` : undefined}
                   >
                     {stat?.citedCount ? stat.citedCount : "—"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground hidden md:table-cell">
                     {doc.sizeBytes != null ? formatBytes(doc.sizeBytes) : "—"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(doc.createdAt)}</TableCell>
+                  <TableCell className="text-muted-foreground hidden md:table-cell">
+                    {formatDate(doc.createdAt)}
+                  </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger
