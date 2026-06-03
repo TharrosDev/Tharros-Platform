@@ -202,6 +202,9 @@ export async function seedConversationWithCitedAnswer(
       org_id: orgId,
       role: "user",
       content: args.question,
+      // Explicit [] — in a bulk insert PostgREST fills keys absent from one row
+      // with NULL (not the column default), which violates citations NOT NULL.
+      citations: [],
     },
     {
       conversation_id: conversationId,
