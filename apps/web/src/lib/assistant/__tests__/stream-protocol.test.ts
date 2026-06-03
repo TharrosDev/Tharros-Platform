@@ -10,7 +10,7 @@ import {
 const META: ChatStreamEvent = {
   type: "meta",
   conversationId: "conv-1",
-  citations: [{ documentId: "d1", filename: "handbook.pdf", chunkIndices: [0, 2] }],
+  citations: [{ index: 1, documentId: "d1", filename: "handbook.pdf", chunkIndices: [0, 2] }],
   grounded: true,
 };
 

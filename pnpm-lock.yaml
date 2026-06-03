@@ -110,6 +110,9 @@ importers:
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
+      unist-util-visit:
+        specifier: ^5.1.0
+        version: 5.1.0
       unpdf:
         specifier: ^1.6.2
         version: 1.6.2

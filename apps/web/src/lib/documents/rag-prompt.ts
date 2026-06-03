@@ -12,6 +12,8 @@ export type GroundingChunk = RetrievedChunk & { filename: string };
 
 /** A document the answer drew from, with the chunk positions that were used. */
 export type Citation = {
+  /** 1-based source number, stable between the prompt's SOURCES list and the UI. */
+  index: number;
   documentId: string;
   filename: string;
   /** Chunk indices (within the document) that were supplied as context. */
@@ -22,12 +24,16 @@ export type Citation = {
  * Grounding instructions for the assistant. Phrased as rules/context (not
  * override commands) — Opus 4.8 follows literal instructions well, so the
  * "only use the sources / say you don't know" contract is stated plainly.
+ *
+ * Day 30: citations are numbered markers tied to the SOURCES list, so the UI can
+ * render each `[n]` as a clickable source chip.
  */
-export const SYSTEM_PROMPT = `You are the Tharros business assistant. You answer questions strictly from the SOURCES the user provides below — internal documents a business has uploaded.
+export const SYSTEM_PROMPT = `You are the Tharros business assistant. You answer questions strictly from the SOURCES the user provides below — internal documents a business has uploaded. Each source is labelled with a number, e.g. [1].
 
 Rules:
 - Use ONLY the information in the provided sources. Do not rely on outside or general knowledge.
-- Cite the source filename(s) you used, inline, in parentheses — e.g. (handbook.pdf). Cite every claim you make.
+- Cite with the source's bracket number immediately after the claim it supports, e.g. "Refunds are 30 days [1]." Use multiple when a claim draws on several, e.g. "[1][2]". Cite every claim you make.
+- Use the bracket numbers only. Do not write out filenames in your prose.
 - If the sources do not contain enough information to answer, say so plainly: state that the uploaded documents don't cover it. Do not guess, speculate, or fill gaps from general knowledge.
 - Be concise and direct. Quote short phrases from the sources when it helps precision.`;
 
@@ -36,47 +42,66 @@ export const NO_CONTEXT_ANSWER =
   "I couldn't find anything in your uploaded documents that covers this. Try rephrasing the question, or upload a document that contains the answer.";
 
 /**
- * Render retrieved chunks as a single labeled context string. Each chunk is
- * tagged with its source filename and in-document index so the model can cite
- * by filename. Order is preserved (the RPC already returns best-match first).
+ * Distinct documents across the chunks, in first-seen (best-match-first) order,
+ * numbered from 1. The single source of truth for citation numbering — both the
+ * SOURCES block the model sees and the `Citation[]` the UI renders use it, so a
+ * `[n]` marker always points at the same document in both.
  */
-export function buildContextBlock(chunks: GroundingChunk[]): string {
-  const sources = chunks
-    .map(
-      (c, i) =>
-        `[${i + 1}] (source: ${c.filename} #${c.chunkIndex})\n${c.content.trim()}`,
-    )
-    .join("\n\n");
-
-  return `SOURCES:\n\n${sources}`;
-}
-
-/**
- * Collapse the grounding chunks into one citation per document, gathering the
- * chunk indices used. First-seen document order is preserved; indices are
- * de-duplicated and sorted ascending for stable output.
- */
-export function buildCitations(chunks: GroundingChunk[]): Citation[] {
-  const byDoc = new Map<string, Citation>();
-
+function orderDocuments(
+  chunks: GroundingChunk[],
+): { documentId: string; filename: string; index: number }[] {
+  const seen = new Map<string, { documentId: string; filename: string; index: number }>();
   for (const c of chunks) {
-    const existing = byDoc.get(c.documentId);
-    if (existing) {
-      if (!existing.chunkIndices.includes(c.chunkIndex)) {
-        existing.chunkIndices.push(c.chunkIndex);
-      }
-    } else {
-      byDoc.set(c.documentId, {
+    if (!seen.has(c.documentId)) {
+      seen.set(c.documentId, {
         documentId: c.documentId,
         filename: c.filename,
-        chunkIndices: [c.chunkIndex],
+        index: seen.size + 1,
       });
     }
   }
+  return [...seen.values()];
+}
 
-  for (const citation of byDoc.values()) {
-    citation.chunkIndices.sort((a, b) => a - b);
-  }
+/**
+ * Render the retrieved chunks as a numbered SOURCES block, grouped by document.
+ * Each document gets one `[n] filename` header (the number the model cites with)
+ * followed by its chunk(s) in retrieval order.
+ */
+export function buildContextBlock(chunks: GroundingChunk[]): string {
+  const docs = orderDocuments(chunks);
+  const indexById = new Map(docs.map((d) => [d.documentId, d.index]));
 
-  return [...byDoc.values()];
+  const sections = docs.map((doc) => {
+    const body = chunks
+      .filter((c) => c.documentId === doc.documentId)
+      .map((c) => c.content.trim())
+      .join("\n\n");
+    return `[${indexById.get(doc.documentId)}] ${doc.filename}\n${body}`;
+  });
+
+  return `SOURCES:\n\n${sections.join("\n\n")}`;
+}
+
+/**
+ * One citation per document, carrying the same 1-based `index` used in the
+ * SOURCES block, the filename, and the de-duplicated, sorted chunk indices that
+ * were supplied as context. Ordered by `index`.
+ */
+export function buildCitations(chunks: GroundingChunk[]): Citation[] {
+  const docs = orderDocuments(chunks);
+
+  return docs.map((doc) => {
+    const chunkIndices = [
+      ...new Set(
+        chunks.filter((c) => c.documentId === doc.documentId).map((c) => c.chunkIndex),
+      ),
+    ].sort((a, b) => a - b);
+    return {
+      index: doc.index,
+      documentId: doc.documentId,
+      filename: doc.filename,
+      chunkIndices,
+    };
+  });
 }
