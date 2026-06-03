@@ -46,16 +46,15 @@ describe("parseFrames", () => {
 
 describe("createFrameDecoder", () => {
   it("reassembles events split across arbitrary chunk boundaries", () => {
-    const wire = [META, { type: "delta", text: "a" }, { type: "done" }]
-      .map(encodeFrame)
-      .join("") as string;
+    const events: ChatStreamEvent[] = [META, { type: "delta", text: "a" }, { type: "done" }];
+    const wire = events.map(encodeFrame).join("");
 
     const decoder = createFrameDecoder();
     const out: ChatStreamEvent[] = [];
     // Feed the stream one character at a time — the worst-case fragmentation.
     for (const ch of wire) out.push(...decoder.push(ch));
 
-    expect(out).toEqual([META, { type: "delta", text: "a" }, { type: "done" }]);
+    expect(out).toEqual(events);
   });
 
   it("buffers a partial line until its newline arrives", () => {
