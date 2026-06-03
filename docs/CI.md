@@ -103,9 +103,24 @@ mode**, low-risk:
 | `STRIPE_TEST_SECRET_KEY` | optional | `sk_test_…` |
 | `STRIPE_TEST_PUBLISHABLE_KEY` | optional | `pk_test_…` |
 | `STRIPE_TEST_PRICE_GROWTH` | optional | the Growth `price_…` (test) |
+| `OPENAI_API_KEY` | optional | enables the assistant spine's live tail (real ingest) |
+| `ANTHROPIC_API_KEY` | optional | enables the assistant spine's live tail (real Claude answer + draft) |
 
 `RESEND_API_KEY` is set to a placeholder in the workflow — the invite email is
 allowed to fail because the spine reads the invite token from the DB.
+
+### The assistant spine (Day 36 — `apps/web/e2e/assistant.spec.ts`)
+
+`test:e2e` runs every spec in `apps/web/e2e/`, so the same job also runs the
+**AI Assistant spine**: upload → ingest → query → cited answer → draft email.
+Like the billing spine it is **two layers**. The always-on **deterministic core**
+seeds the same ground truth the real pipeline writes (a `ready` document, a cited
+conversation) and asserts the knowledge/assistant UI + persistence — green with
+only the `TEST_SUPABASE_*` secrets. A **live tail** (`test.skip` unless both
+`OPENAI_API_KEY` and `ANTHROPIC_API_KEY` are set) does a genuine upload→ingest
+→answer→draft run; it spends provider tokens, so it stays skipped in the default
+keyless CI run and only fires on a keyed run (locally or with the optional
+secrets above).
 
 ```sh
 gh secret set STRIPE_TEST_SECRET_KEY --body "sk_test_…"
