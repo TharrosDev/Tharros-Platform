@@ -1,17 +1,25 @@
 import { getOrgContext } from "@/lib/org/queries";
-import { listDocuments } from "@/lib/documents/queries";
+import { getDocumentCitationCounts, listDocuments } from "@/lib/documents/queries";
 import { PageHeader } from "@/components/page-header";
 import { DocumentUploader } from "@/components/documents/document-uploader";
-import { DocumentList } from "@/components/documents/document-list";
+import { DocumentList, type DocumentCitationMap } from "@/components/documents/document-list";
 
 /**
- * Day 24 — Knowledge base. Upload + manage the documents the AI Assistant will
- * answer from. Ingestion (extraction → chunking → embedding) lands Days 25–28;
- * for now documents sit at status "uploaded" and re-index is stubbed.
+ * Day 24 — Knowledge base. Upload + manage the documents the AI Assistant
+ * answers from. Day 32 added tagging, library search, citation usage stats, and
+ * live re-index controls (the ingestion pipeline landed Days 25–28).
  */
 export default async function KnowledgePage() {
   const { activeOrg } = await getOrgContext();
-  const documents = activeOrg ? await listDocuments(activeOrg.id) : [];
+  const [documents, citationStats] = activeOrg
+    ? await Promise.all([
+        listDocuments(activeOrg.id),
+        getDocumentCitationCounts(activeOrg.id),
+      ])
+    : [[], new Map()];
+
+  // Map → plain object so it can cross the server→client boundary.
+  const citations: DocumentCitationMap = Object.fromEntries(citationStats);
 
   return (
     <div className="space-y-8">
@@ -22,7 +30,7 @@ export default async function KnowledgePage() {
       <DocumentUploader />
       <section className="space-y-3">
         <h2 className="type-h2">Documents</h2>
-        <DocumentList documents={documents} />
+        <DocumentList documents={documents} citations={citations} />
       </section>
     </div>
   );
