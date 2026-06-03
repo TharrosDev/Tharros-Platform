@@ -41,6 +41,47 @@ export type AnswerOptions = {
 };
 
 /**
+ * Retrieve the top-k chunks for `question` in `orgId` and join each to its
+ * document filename (for grounding + citations). Goes through the RLS
+ * user-session client, so tenancy is enforced by the database. Returns [] on a
+ * blank query, no matches, a lookup error, or when no chunk has a live document
+ * row — i.e. the "no grounded context" signal the caller decides how to handle.
+ *
+ * Shared by `answerQuestion` (Day 28, non-streaming) and the Day-29 streaming
+ * chat endpoint so the retrieval + filename-join logic lives in one place.
+ */
+export async function retrieveGroundingChunks(
+  orgId: string,
+  question: string,
+  options: AnswerOptions = {},
+): Promise<GroundingChunk[]> {
+  const chunks = await searchChunks(orgId, question, { limit: options.limit ?? 6 });
+  if (chunks.length === 0) return [];
+
+  // Join chunk → document filename. RLS scopes this to the caller's orgs;
+  // chunks whose document row is missing are dropped.
+  const documentIds = [...new Set(chunks.map((c) => c.documentId))];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("documents")
+    .select("id, filename")
+    .in("id", documentIds);
+
+  if (error) {
+    logger.error("rag.filename_lookup_failed", { org_id: orgId, error: error.message });
+    return [];
+  }
+
+  const filenameById = new Map(
+    (data as { id: string; filename: string }[]).map((d) => [d.id, d.filename]),
+  );
+  return chunks.flatMap((c) => {
+    const filename = filenameById.get(c.documentId);
+    return filename ? [{ ...c, filename }] : [];
+  });
+}
+
+/**
  * Build the (deterministic) Claude request for a question + its grounding
  * chunks. Prompt caching is wired from day one: a breakpoint on the system
  * prompt and one on the context block. Note the Opus 4.8 minimum cacheable
@@ -86,33 +127,7 @@ export async function answerQuestion(
   question: string,
   options: AnswerOptions = {},
 ): Promise<RagAnswer> {
-  const chunks = await searchChunks(orgId, question, { limit: options.limit ?? 6 });
-  if (chunks.length === 0) {
-    return { answer: NO_CONTEXT_ANSWER, citations: [], grounded: false, usage: null };
-  }
-
-  // Join chunk → document filename for grounding + citations. RLS scopes this
-  // to the caller's orgs; chunks whose document row is missing are dropped.
-  const documentIds = [...new Set(chunks.map((c) => c.documentId))];
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("documents")
-    .select("id, filename")
-    .in("id", documentIds);
-
-  if (error) {
-    logger.error("rag.filename_lookup_failed", { org_id: orgId, error: error.message });
-    return { answer: NO_CONTEXT_ANSWER, citations: [], grounded: false, usage: null };
-  }
-
-  const filenameById = new Map(
-    (data as { id: string; filename: string }[]).map((d) => [d.id, d.filename]),
-  );
-  const grounded: GroundingChunk[] = chunks.flatMap((c) => {
-    const filename = filenameById.get(c.documentId);
-    return filename ? [{ ...c, filename }] : [];
-  });
-
+  const grounded = await retrieveGroundingChunks(orgId, question, options);
   if (grounded.length === 0) {
     return { answer: NO_CONTEXT_ANSWER, citations: [], grounded: false, usage: null };
   }
