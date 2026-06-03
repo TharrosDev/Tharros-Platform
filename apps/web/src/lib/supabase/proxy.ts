@@ -16,6 +16,7 @@ const PUBLIC_PATHS = [
   "/verify-email",
   "/auth", // /auth/confirm callback
   "/invite", // team-invite accept (redeems server-side; bounces to login itself)
+  "/portal", // employee portal (auth-light; account-less employees, token-scoped)
   "/monitoring", // Sentry tunnel (also excluded by the proxy matcher)
   "/api/webhooks", // Stripe webhook (also excluded by the proxy matcher)
 ];
