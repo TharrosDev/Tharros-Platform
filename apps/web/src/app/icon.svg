@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Tharros">
+  <path
+    fill="#3862c4"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M5 0h9.5L24 4.6V19a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5Zm.5 6.2v3.3h5.1V18h2.8V9.5h5.1V6.2H5.5Z"
+  />
+</svg>
