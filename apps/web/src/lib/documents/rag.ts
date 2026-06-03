@@ -93,6 +93,12 @@ export type RagRequestOptions = {
   systemPrompt?: string;
   /** Label the user turn carries (Day 31 templates use "Task" instead of "Question"). */
   instructionLabel?: string;
+  /**
+   * Override the Claude model (Day 33 routing). Defaults to `DEFAULT_MODEL`
+   * (Opus). Templates pass `CHEAP_MODEL` (Haiku). Caching breakpoints are
+   * unchanged — Haiku's minimum cacheable prefix is no larger than Opus's.
+   */
+  model?: string;
 };
 
 export function buildRagRequest(
@@ -100,13 +106,17 @@ export function buildRagRequest(
   chunks: GroundingChunk[],
   options: RagRequestOptions = {},
 ): MessageCreateParamsNonStreaming {
-  const { systemPrompt = SYSTEM_PROMPT, instructionLabel = "Question" } = options;
+  const {
+    systemPrompt = SYSTEM_PROMPT,
+    instructionLabel = "Question",
+    model = DEFAULT_MODEL,
+  } = options;
   const system: TextBlockParam[] = [
     { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
   ];
 
   return {
-    model: DEFAULT_MODEL,
+    model,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
     system,

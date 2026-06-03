@@ -16,12 +16,14 @@ import { env } from "@/env";
  */
 export const anthropic = new Anthropic({
   apiKey: env.ANTHROPIC_API_KEY,
+  // Day 33 — rate-limit resilience. The SDK retries 408/409/429/5xx with
+  // exponential backoff and honors the `Retry-After` header on its own; we just
+  // raise the ceiling from the default 2 (matches the embeddings seam's
+  // MAX_RETRIES = 4). A 429 the SDK can't recover from surfaces as an
+  // Anthropic.APIError(status: 429) for the caller to handle gracefully.
+  maxRetries: 4,
 });
 
-/**
- * Default model for product work. Opus 4.8 is the most capable model and the
- * baseline for the RAG assistant + agents (Phase 2+). Drop to a cheaper model
- * (`claude-haiku-4-5`) per-call for simple/classification tasks to manage cost
- * — Claude's only ceiling is cost, not capability (see the tech-stack notes).
- */
-export const DEFAULT_MODEL = "claude-opus-4-8";
+// Model ids + routing live in the pure `./models` module (so they're testable
+// without this server-only seam); re-export for existing call sites.
+export { CHEAP_MODEL, DEFAULT_MODEL, modelForTemplate } from "./models";

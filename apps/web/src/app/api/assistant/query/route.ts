@@ -1,7 +1,11 @@
+import Anthropic from "@anthropic-ai/sdk";
+import type { Usage } from "@anthropic-ai/sdk/resources/messages";
+
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
-import { anthropic } from "@/lib/anthropic/client";
+import { anthropic, modelForTemplate } from "@/lib/anthropic/client";
+import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
 import { buildRagRequest, retrieveGroundingChunks } from "@/lib/documents/rag";
 import { buildCitations, NO_CONTEXT_ANSWER } from "@/lib/documents/rag-prompt";
 import {
@@ -43,6 +47,22 @@ export async function POST(req: Request): Promise<Response> {
   const { activeOrg } = await getOrgContext();
   if (!activeOrg) {
     return Response.json({ error: "No active organization" }, { status: 403 });
+  }
+
+  // Day 33 — plan cap. Hard-block once the org hits its tier's monthly query
+  // limit, before any retrieval or generation spend. The (subscribed) layout has
+  // already ensured an active/trialing subscription.
+  const cap = await checkQueryCap(activeOrg.id);
+  if (!cap.allowed) {
+    return Response.json(
+      {
+        error: "You've reached this month's AI query limit. Upgrade your plan to continue.",
+        code: "usage_cap",
+        used: cap.used,
+        cap: cap.cap,
+      },
+      { status: 429 },
+    );
   }
 
   let body: { question?: unknown; conversationId?: unknown; template?: unknown };
@@ -120,7 +140,10 @@ export async function POST(req: Request): Promise<Response> {
         send({ type: "meta", conversationId: finalConversationId, citations, grounded: grounded.length > 0 });
 
         let answer = "";
-        let usage: unknown = null;
+        let usage: Usage | null = null;
+        // Day 33 — route the structured generation templates to the cheaper
+        // model; keep open-ended grounded Q&A on Opus where quality earns it.
+        const model = modelForTemplate(template);
 
         if (grounded.length === 0) {
           answer = NO_CONTEXT_ANSWER;
@@ -131,8 +154,9 @@ export async function POST(req: Request): Promise<Response> {
               ? buildRagRequest(question, grounded, {
                   systemPrompt: templateSystemPrompt(template),
                   instructionLabel: "Task",
+                  model,
                 })
-              : buildRagRequest(question, grounded),
+              : buildRagRequest(question, grounded, { model }),
           );
           for await (const event of claudeStream) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
@@ -161,11 +185,22 @@ export async function POST(req: Request): Promise<Response> {
         });
         await touchConversation(supabase, finalConversationId);
 
+        // Day 33 — meter the spend (best-effort; skips the no-context path where
+        // usage is null). Counts toward the org's monthly cap.
+        await recordUsage(orgId, user.id, model, usage);
+
         send({ type: "done" });
         controller.close();
       } catch (err) {
-        logger.error("assistant.stream_failed", { org_id: orgId, err });
-        send({ type: "error", message: "Couldn't generate an answer. Please try again." });
+        // A rate limit the SDK couldn't retry away surfaces as a 429/529 — tell
+        // the user it's transient rather than implying their answer failed.
+        if (err instanceof Anthropic.APIError && (err.status === 429 || err.status === 529)) {
+          logger.warn("assistant.rate_limited", { org_id: orgId, status: err.status });
+          send({ type: "error", message: "The assistant is busy right now. Please try again in a moment." });
+        } else {
+          logger.error("assistant.stream_failed", { org_id: orgId, err });
+          send({ type: "error", message: "Couldn't generate an answer. Please try again." });
+        }
         controller.close();
       }
     },
