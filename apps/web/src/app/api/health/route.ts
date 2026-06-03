@@ -24,7 +24,7 @@ async function checkDatabase(): Promise<CheckStatus> {
     // the local cookie and would report healthy even with the DB down.)
     const { error } = await supabase
       .from("feature_flags")
-      .select("*", { head: true, count: "exact" });
+      .select("key", { head: true, count: "exact" });
     return error ? "down" : "up";
   } catch (err) {
     logger.error("Health check: database probe threw", { err, check: "database" });

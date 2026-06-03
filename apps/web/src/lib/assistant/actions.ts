@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 
 import { getAuthUser } from "@/lib/auth/current-user";
+import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/observability/logger";
+import { listConversationsPage, type ConversationPage } from "@/lib/assistant/conversations";
 
 /**
  * Day 29 — conversation mutations for the history panel. Both go through the
@@ -16,6 +18,13 @@ const ASSISTANT_PATH = "/assistant";
 const TITLE_MAX = 120;
 
 type ActionResult = { error?: string };
+
+/** Next keyset page of the history list, scoped to the caller's active org. */
+export async function loadMoreConversations(cursor: string | null): Promise<ConversationPage> {
+  const { activeOrg } = await getOrgContext();
+  if (!activeOrg) return { conversations: [], nextCursor: null };
+  return listConversationsPage(activeOrg.id, { cursor });
+}
 
 export async function renameConversation(id: string, title: string): Promise<ActionResult> {
   const user = await getAuthUser();

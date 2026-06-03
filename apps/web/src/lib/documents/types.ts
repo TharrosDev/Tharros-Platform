@@ -38,6 +38,9 @@ export type Document = {
   error: string | null;
   /** Day 32 — org-member-editable labels for organizing the library. */
   tags: string[];
+  /** Denormalized citation usage (kept current by a DB trigger). */
+  citedCount: number;
+  lastCitedAt: string | null;
   createdAt: string; // ISO
 };
 
