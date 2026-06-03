@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, BookOpen, ArrowUp, Mail, ClipboardList, FileText, X } from "lucide-react";
+import { Sparkles, BookOpen, ArrowUp, Mail, ClipboardList, FileText, RefreshCw, X } from "lucide-react";
 
 import type { Citation } from "@/lib/documents/rag-prompt";
 import type { ChatMessage } from "@/lib/assistant/types";
@@ -56,6 +56,11 @@ export function AssistantChat({
   // Day 33 — set when the API returns a usage-cap 429; swaps the warning for a
   // hard "upgrade to continue" banner.
   const [capReached, setCapReached] = React.useState(false);
+  // Day 35 — the last thing we tried to send, so a failed answer can be retried.
+  const [lastAttempt, setLastAttempt] = React.useState<{
+    question: string;
+    template: TemplateId | null;
+  } | null>(null);
   const [activeTemplate, setActiveTemplate] = React.useState<TemplateId | null>(null);
   const activeMeta = activeTemplate ? TEMPLATES.find((t) => t.id === activeTemplate) : null;
   const pendingRef = React.useRef<Pending | null>(null);
@@ -72,14 +77,16 @@ export function AssistantChat({
   }, []);
 
   const send = React.useCallback(
-    async (question: string) => {
+    async (question: string, templateArg?: TemplateId | null) => {
       if (streaming) return;
       setError(null);
 
       // Capture + clear the template mode for this turn; subsequent turns are
-      // plain Q&A unless the user picks a template again.
-      const template = activeTemplate;
+      // plain Q&A unless the user picks a template again. A retry passes the
+      // original template explicitly (templateArg) so it isn't lost.
+      const template = templateArg !== undefined ? templateArg : activeTemplate;
       setActiveTemplate(null);
+      setLastAttempt({ question, template });
 
       const userId = crypto.randomUUID();
       const assistantId = crypto.randomUUID();
@@ -149,11 +156,10 @@ export function AssistantChat({
           // User pressed Stop: keep whatever streamed, attach any citations.
           patch(assistantId, (m) => ({ ...m, citations }));
         } else {
-          setError("Something went wrong generating that answer. Please try again.");
-          patch(assistantId, (m) => ({
-            ...m,
-            content: m.content || "I couldn't finish that answer.",
-          }));
+          // Drop the failed turn and surface a retryable error above the
+          // composer (the user's question is preserved in `lastAttempt`).
+          setMessages((prev) => prev.filter((m) => m.id !== userId && m.id !== assistantId));
+          setError("Something went wrong generating that answer.");
         }
       } finally {
         setStreaming(false);
@@ -172,6 +178,12 @@ export function AssistantChat({
   const stop = React.useCallback(() => {
     abortRef.current?.abort();
   }, []);
+
+  const retry = React.useCallback(() => {
+    if (!lastAttempt) return;
+    setError(null);
+    void send(lastAttempt.question, lastAttempt.template);
+  }, [lastAttempt, send]);
 
   const showEmpty = messages.length === 0 && !streaming;
 
@@ -196,11 +208,6 @@ export function AssistantChat({
                 }
               />
             ))}
-            {error ? (
-              <p className="text-destructive mx-auto text-sm" role="alert">
-                {error}
-              </p>
-            ) : null}
             <div ref={bottomRef} />
           </div>
         )}
@@ -213,6 +220,22 @@ export function AssistantChat({
             <Link href="/billing" className="font-medium underline underline-offset-2">
               Upgrade your plan
             </Link>
+          </UsageNotice>
+        ) : error ? (
+          <UsageNotice tone="error">
+            <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span>{error}</span>
+              {lastAttempt ? (
+                <button
+                  type="button"
+                  onClick={retry}
+                  className="text-destructive inline-flex items-center gap-1 font-medium underline underline-offset-2"
+                >
+                  <RefreshCw className="size-3.5" />
+                  Try again
+                </button>
+              ) : null}
+            </span>
           </UsageNotice>
         ) : nearLimit ? (
           <UsageNotice tone="warning">
@@ -286,15 +309,28 @@ function EmptyState({
           <TemplateChips active={null} onPick={onPickTemplate} disabled={false} />
         </div>
       ) : (
-        <div className="border-border mt-7 flex w-full flex-col items-center gap-3 rounded-xl border border-dashed px-4 py-8">
-          <p className="text-foreground text-sm font-medium">No documents yet</p>
-          <p className="text-muted-foreground max-w-sm text-sm">
-            Upload your SOPs, policies, and manuals first. Then the assistant can answer from
-            them.
+        <div className="border-border bg-card shadow-card mt-7 flex w-full flex-col gap-4 rounded-xl border p-5 text-left">
+          <p className="text-foreground font-medium">Add your documents to get started</p>
+          <p className="text-muted-foreground text-sm">
+            The assistant answers from what you upload, so it needs a few documents first.
           </p>
-          <Link href="/knowledge" className={cn(buttonVariants({ variant: "default", size: "sm" }), "mt-1")}>
+          <ol className="text-muted-foreground flex flex-col gap-2.5 text-sm">
+            {[
+              "Upload your SOPs, policies, price lists, or FAQs.",
+              "Ask a question in plain language.",
+              "Get an answer with the source it came from.",
+            ].map((step, i) => (
+              <li key={step} className="flex items-start gap-2.5">
+                <span className="bg-primary-soft text-primary-soft-foreground mt-px flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                  {i + 1}
+                </span>
+                <span className="text-foreground">{step}</span>
+              </li>
+            ))}
+          </ol>
+          <Link href="/knowledge" className={cn(buttonVariants({ variant: "default", size: "sm" }), "self-start")}>
             <BookOpen className="size-4" />
-            Go to Knowledge
+            Add documents
           </Link>
         </div>
       )}
