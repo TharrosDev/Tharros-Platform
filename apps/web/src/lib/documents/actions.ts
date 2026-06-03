@@ -8,6 +8,7 @@ import { getOrgContext } from "@/lib/org/queries";
 import { logger } from "@/lib/observability/logger";
 import { DOCUMENTS_BUCKET, storagePathFor } from "@/lib/documents/types";
 import { sanitizeStorageName, validateUploadFile } from "@/lib/documents/validation";
+import { normalizeTags } from "@/lib/documents/tags";
 
 /**
  * Day 24 — document server actions. The bytes go straight from the browser to
@@ -67,6 +68,34 @@ export async function createDocumentRecord(input: {
 
   revalidatePath(KNOWLEDGE_PATH);
   return { id, storagePath };
+}
+
+/** Set a document's tags (org members; RLS scopes to the caller's orgs).
+ * Tags are re-normalized server-side — never trust the client's set. */
+export async function setDocumentTags(
+  id: string,
+  tags: string[],
+): Promise<{ error?: string; tags?: string[] }> {
+  const { activeOrg } = await getOrgContext();
+  if (!activeOrg) {
+    return { error: "No active organization. Try refreshing the page." };
+  }
+
+  const normalized = normalizeTags(Array.isArray(tags) ? tags : []);
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("documents")
+    .update({ tags: normalized })
+    .eq("id", id);
+
+  if (error) {
+    logger.error("documents.set_tags_failed", { document_id: id, error: error.message });
+    return { error: "Could not update tags. Please try again." };
+  }
+
+  revalidatePath(KNOWLEDGE_PATH);
+  return { tags: normalized };
 }
 
 /** Delete a document: its Storage object first, then the row (chunks cascade). */

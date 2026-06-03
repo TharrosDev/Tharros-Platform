@@ -22,6 +22,7 @@ type DocumentRow = {
   size_bytes: number | null;
   status: DocumentStatus;
   error: string | null;
+  tags: string[] | null;
   created_at: string;
 };
 
@@ -36,12 +37,13 @@ function mapDocument(row: DocumentRow): Document {
     sizeBytes: row.size_bytes,
     status: row.status,
     error: row.error,
+    tags: row.tags ?? [],
     createdAt: row.created_at,
   };
 }
 
 const DOCUMENT_COLUMNS =
-  "id, org_id, uploaded_by, storage_path, filename, mime_type, size_bytes, status, error, created_at";
+  "id, org_id, uploaded_by, storage_path, filename, mime_type, size_bytes, status, error, tags, created_at";
 
 /** Documents in an org the caller belongs to, newest first. `[]` on error. */
 export async function listDocuments(orgId: string): Promise<Document[]> {
@@ -57,6 +59,33 @@ export async function listDocuments(orgId: string): Promise<Document[]> {
     return [];
   }
   return (data as DocumentRow[]).map(mapDocument);
+}
+
+/** Per-document citation usage in an org, keyed by documentId. Empty map on error. */
+export type DocumentCitationStat = { citedCount: number; lastCitedAt: string | null };
+
+export async function getDocumentCitationCounts(
+  orgId: string,
+): Promise<Map<string, DocumentCitationStat>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("document_citation_counts", { p_org: orgId });
+
+  const stats = new Map<string, DocumentCitationStat>();
+  if (error) {
+    logger.error("documents.citation_counts_failed", { org_id: orgId, error: error.message });
+    return stats;
+  }
+  for (const row of (data ?? []) as {
+    document_id: string;
+    cited_count: number;
+    last_cited_at: string | null;
+  }[]) {
+    stats.set(row.document_id, {
+      citedCount: Number(row.cited_count),
+      lastCitedAt: row.last_cited_at,
+    });
+  }
+  return stats;
 }
 
 /** A single document by id (RLS-scoped to the caller's orgs). `null` if absent. */

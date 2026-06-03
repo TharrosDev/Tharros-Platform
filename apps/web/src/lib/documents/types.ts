@@ -36,6 +36,8 @@ export type Document = {
   sizeBytes: number | null;
   status: DocumentStatus;
   error: string | null;
+  /** Day 32 — org-member-editable labels for organizing the library. */
+  tags: string[];
   createdAt: string; // ISO
 };
 
