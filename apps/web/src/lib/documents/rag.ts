@@ -36,7 +36,9 @@ export type RagAnswer = {
 };
 
 export type AnswerOptions = {
-  /** Max chunks to retrieve (RPC clamps to 1..50). Default 6. */
+  /** Max chunks to retrieve (RPC clamps to 1..50). Default 4 (Day-34 eval:
+   * fewer chunks → less tangential context → better "I don't know" behavior on
+   * out-of-corpus questions, with no recall loss; also cheaper). */
   limit?: number;
 };
 
@@ -55,7 +57,7 @@ export async function retrieveGroundingChunks(
   question: string,
   options: AnswerOptions = {},
 ): Promise<GroundingChunk[]> {
-  const chunks = await searchChunks(orgId, question, { limit: options.limit ?? 6 });
+  const chunks = await searchChunks(orgId, question, { limit: options.limit ?? 4 });
   if (chunks.length === 0) return [];
 
   // Join chunk → document filename. RLS scopes this to the caller's orgs;
