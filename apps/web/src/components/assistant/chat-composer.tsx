@@ -16,11 +16,17 @@ export function ChatComposer({
   onStop,
   streaming,
   disabled = false,
+  placeholder,
+  header,
 }: {
   onSend: (text: string) => void;
   onStop: () => void;
   streaming: boolean;
   disabled?: boolean;
+  /** Override the textarea placeholder (Day 31: template-specific prompt). */
+  placeholder?: string;
+  /** Optional element rendered above the input (Day 31: active-template chip). */
+  header?: React.ReactNode;
 }) {
   const [value, setValue] = React.useState("");
   const trimmed = value.trim();
@@ -41,6 +47,7 @@ export function ChatComposer({
 
   return (
     <div className="bg-background/85 sticky bottom-0 pt-2 pb-4 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+      {header ? <div className="mb-2">{header}</div> : null}
       <div
         className={cn(
           "border-input bg-card shadow-card focus-within:border-ring focus-within:ring-ring/40 relative flex items-end gap-2 rounded-xl border p-2 transition-[box-shadow,border-color] focus-within:ring-[3px]",
@@ -54,7 +61,9 @@ export function ChatComposer({
           disabled={disabled}
           rows={1}
           placeholder={
-            disabled ? "This is a teammate's conversation." : "Ask about your documents…"
+            disabled
+              ? "This is a teammate's conversation."
+              : (placeholder ?? "Ask about your documents…")
           }
           aria-label="Ask the assistant a question"
           className="max-h-44 min-h-11 resize-none border-0 bg-transparent px-2 py-2.5 shadow-none focus-visible:ring-0"

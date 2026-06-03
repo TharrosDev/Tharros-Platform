@@ -88,12 +88,21 @@ export async function retrieveGroundingChunks(
  * prefix is 4096 tokens, so short single-shot prompts may not register a cache
  * read yet — the payoff grows with large contexts and Day-29 multi-turn history.
  */
+export type RagRequestOptions = {
+  /** Override the grounding system prompt (Day 31 generation templates). Defaults to `SYSTEM_PROMPT`. */
+  systemPrompt?: string;
+  /** Label the user turn carries (Day 31 templates use "Task" instead of "Question"). */
+  instructionLabel?: string;
+};
+
 export function buildRagRequest(
-  question: string,
+  instruction: string,
   chunks: GroundingChunk[],
+  options: RagRequestOptions = {},
 ): MessageCreateParamsNonStreaming {
+  const { systemPrompt = SYSTEM_PROMPT, instructionLabel = "Question" } = options;
   const system: TextBlockParam[] = [
-    { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+    { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
   ];
 
   return {
@@ -110,7 +119,7 @@ export function buildRagRequest(
             text: buildContextBlock(chunks),
             cache_control: { type: "ephemeral" },
           },
-          { type: "text", text: `Question: ${question}` },
+          { type: "text", text: `${instructionLabel}: ${instruction}` },
         ],
       },
     ],
