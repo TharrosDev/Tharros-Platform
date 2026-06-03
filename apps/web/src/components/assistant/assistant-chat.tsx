@@ -3,15 +3,22 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, BookOpen, ArrowUp } from "lucide-react";
+import { Sparkles, BookOpen, ArrowUp, Mail, ClipboardList, FileText, X } from "lucide-react";
 
 import type { Citation } from "@/lib/documents/rag-prompt";
 import type { ChatMessage } from "@/lib/assistant/types";
 import { createFrameDecoder } from "@/lib/assistant/stream-protocol";
+import { TEMPLATES, type TemplateId } from "@/lib/assistant/templates";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ChatTurn } from "@/components/assistant/chat-message";
 import { ChatComposer } from "@/components/assistant/chat-composer";
+
+const TEMPLATE_ICONS: Record<TemplateId, React.ComponentType<{ className?: string }>> = {
+  draft_email: Mail,
+  write_sop: ClipboardList,
+  summarize_policy: FileText,
+};
 
 const EXAMPLE_PROMPTS = [
   "What's our refund policy?",
@@ -43,6 +50,8 @@ export function AssistantChat({
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages);
   const [streaming, setStreaming] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [activeTemplate, setActiveTemplate] = React.useState<TemplateId | null>(null);
+  const activeMeta = activeTemplate ? TEMPLATES.find((t) => t.id === activeTemplate) : null;
   const pendingRef = React.useRef<Pending | null>(null);
   const abortRef = React.useRef<AbortController | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
@@ -60,6 +69,11 @@ export function AssistantChat({
     async (question: string) => {
       if (streaming) return;
       setError(null);
+
+      // Capture + clear the template mode for this turn; subsequent turns are
+      // plain Q&A unless the user picks a template again.
+      const template = activeTemplate;
+      setActiveTemplate(null);
 
       const userId = crypto.randomUUID();
       const assistantId = crypto.randomUUID();
@@ -82,7 +96,11 @@ export function AssistantChat({
         const res = await fetch("/api/assistant/query", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question, conversationId: selectedId ?? undefined }),
+          body: JSON.stringify({
+          question,
+          conversationId: selectedId ?? undefined,
+          template: template ?? undefined,
+        }),
           signal: controller.signal,
         });
         if (!res.ok || !res.body) {
@@ -131,7 +149,7 @@ export function AssistantChat({
         }
       }
     },
-    [streaming, selectedId, patch, router],
+    [streaming, selectedId, patch, router, activeTemplate],
   );
 
   const stop = React.useCallback(() => {
@@ -144,7 +162,12 @@ export function AssistantChat({
     <div className="flex min-h-[calc(100vh-16rem)] flex-col">
       <div className="flex-1">
         {showEmpty ? (
-          <EmptyState hasDocuments={hasDocuments} onPick={send} readOnly={readOnly} />
+          <EmptyState
+            hasDocuments={hasDocuments}
+            onPick={send}
+            onPickTemplate={setActiveTemplate}
+            readOnly={readOnly}
+          />
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
             {messages.map((m, i) => (
@@ -167,7 +190,20 @@ export function AssistantChat({
       </div>
 
       <div className="mx-auto w-full max-w-3xl">
-        <ChatComposer onSend={send} onStop={stop} streaming={streaming} disabled={readOnly} />
+        <ChatComposer
+          onSend={send}
+          onStop={stop}
+          streaming={streaming}
+          disabled={readOnly}
+          placeholder={activeMeta?.placeholder}
+          header={
+            readOnly ? null : activeMeta ? (
+              <ActiveTemplateChip label={activeMeta.label} onClear={() => setActiveTemplate(null)} />
+            ) : (
+              <TemplateChips active={null} onPick={setActiveTemplate} disabled={hasDocuments === false} />
+            )
+          }
+        />
       </div>
     </div>
   );
@@ -176,10 +212,12 @@ export function AssistantChat({
 function EmptyState({
   hasDocuments,
   onPick,
+  onPickTemplate,
   readOnly,
 }: {
   hasDocuments: boolean;
   onPick: (q: string) => void;
+  onPickTemplate: (id: TemplateId) => void;
   readOnly: boolean;
 }) {
   return (
@@ -194,18 +232,26 @@ function EmptyState({
       </p>
 
       {readOnly ? null : hasDocuments ? (
-        <div className="mt-7 flex w-full flex-col gap-2">
-          {EXAMPLE_PROMPTS.map((p) => (
-            <button
-              key={p}
-              type="button"
-              onClick={() => onPick(p)}
-              className="group border-border bg-card hover:border-ring hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors"
-            >
-              <span className="text-foreground">{p}</span>
-              <ArrowUp className="text-muted-foreground size-4 shrink-0 rotate-45 transition-transform group-hover:rotate-90" />
-            </button>
-          ))}
+        <div className="mt-7 flex w-full flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            {EXAMPLE_PROMPTS.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPick(p)}
+                className="group border-border bg-card hover:border-ring hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors"
+              >
+                <span className="text-foreground">{p}</span>
+                <ArrowUp className="text-muted-foreground size-4 shrink-0 rotate-45 transition-transform group-hover:rotate-90" />
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="border-border h-px flex-1 border-t" />
+            <span className="text-muted-foreground text-xs">or generate something</span>
+            <span className="border-border h-px flex-1 border-t" />
+          </div>
+          <TemplateChips active={null} onPick={onPickTemplate} disabled={false} />
         </div>
       ) : (
         <div className="border-border mt-7 flex w-full flex-col items-center gap-3 rounded-xl border border-dashed px-4 py-8">
@@ -220,6 +266,60 @@ function EmptyState({
           </Link>
         </div>
       )}
+    </div>
+  );
+}
+
+/** The three quick-action buttons that put the composer into a template mode. */
+function TemplateChips({
+  active,
+  onPick,
+  disabled,
+}: {
+  active: TemplateId | null;
+  onPick: (id: TemplateId) => void;
+  disabled: boolean;
+}) {
+  if (disabled) return null;
+  return (
+    <div className="flex flex-wrap gap-2">
+      {TEMPLATES.map((t) => {
+        const Icon = TEMPLATE_ICONS[t.id];
+        return (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => onPick(t.id)}
+            aria-pressed={active === t.id}
+            title={t.description}
+            className={cn(
+              "border-border bg-card hover:border-ring hover:bg-accent/50 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+              active === t.id && "border-ring bg-accent",
+            )}
+          >
+            <Icon className="text-muted-foreground size-3.5" />
+            {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** The chip shown above the composer once a template is selected. */
+function ActiveTemplateChip({ label, onClear }: { label: string; onClear: () => void }) {
+  return (
+    <div className="bg-primary-soft text-primary-soft-foreground inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium">
+      <Sparkles className="size-3.5" />
+      {label}
+      <button
+        type="button"
+        onClick={onClear}
+        aria-label="Clear template"
+        className="hover:bg-background/40 -mr-1 ml-0.5 inline-flex size-4 items-center justify-center rounded-full transition-colors"
+      >
+        <X className="size-3" />
+      </button>
     </div>
   );
 }

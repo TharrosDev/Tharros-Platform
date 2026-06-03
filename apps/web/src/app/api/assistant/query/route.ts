@@ -11,6 +11,12 @@ import {
   touchConversation,
 } from "@/lib/assistant/conversations";
 import { encodeFrame, type ChatStreamEvent } from "@/lib/assistant/stream-protocol";
+import {
+  isTemplateId,
+  TEMPLATES,
+  templateSystemPrompt,
+  type TemplateId,
+} from "@/lib/assistant/templates";
 import { logger } from "@/lib/observability/logger";
 
 // Node runtime: the RAG pipeline transitively uses the embeddings seam + the
@@ -23,8 +29,10 @@ const REFUSAL_ANSWER = "I can't help with that request.";
 /**
  * Day 29 — streaming RAG chat endpoint. Persists the turn (per org/user) and
  * streams the answer as NDJSON (see `lib/assistant/stream-protocol`). Body:
- * `{ question, conversationId? }`. A new conversation is created on the first
- * turn; its id comes back in the `meta` frame so the client can route to it.
+ * `{ question, conversationId?, template? }`. A new conversation is created on
+ * the first turn; its id comes back in the `meta` frame so the client can route
+ * to it. Day 31: an optional `template` swaps the grounding system prompt for a
+ * deliverable-shaped one (draft email / write SOP / summarize policy).
  */
 export async function POST(req: Request): Promise<Response> {
   const user = await getAuthUser();
@@ -37,7 +45,7 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: "No active organization" }, { status: 403 });
   }
 
-  let body: { question?: unknown; conversationId?: unknown };
+  let body: { question?: unknown; conversationId?: unknown; template?: unknown };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -54,6 +62,16 @@ export async function POST(req: Request): Promise<Response> {
   const conversationIdInput =
     typeof body.conversationId === "string" && body.conversationId ? body.conversationId : null;
 
+  // Optional Day-31 generation template. Absent → plain Q&A. Reject unknown ids
+  // rather than silently falling back, so a typo surfaces instead of misbehaving.
+  let template: TemplateId | null = null;
+  if (body.template !== undefined && body.template !== null) {
+    if (!isTemplateId(body.template)) {
+      return Response.json({ error: "Unknown template" }, { status: 400 });
+    }
+    template = body.template;
+  }
+
   // One client for the whole request — built here in request scope and reused
   // inside the stream so we never call cookies() after the response is returned.
   const supabase = await createClient();
@@ -63,10 +81,11 @@ export async function POST(req: Request): Promise<Response> {
   // a failure here is a clean HTTP error before any streaming begins.
   let conversationId = conversationIdInput;
   if (!conversationId) {
+    const templateLabel = template ? TEMPLATES.find((t) => t.id === template)?.label : null;
     conversationId = await createConversation(supabase, {
       orgId,
       userId: user.id,
-      title: conversationTitle(question),
+      title: conversationTitle(templateLabel ? `${templateLabel}: ${question}` : question),
     });
   }
   if (!conversationId) {
@@ -107,7 +126,14 @@ export async function POST(req: Request): Promise<Response> {
           answer = NO_CONTEXT_ANSWER;
           send({ type: "delta", text: answer });
         } else {
-          const claudeStream = anthropic.messages.stream(buildRagRequest(question, grounded));
+          const claudeStream = anthropic.messages.stream(
+            template
+              ? buildRagRequest(question, grounded, {
+                  systemPrompt: templateSystemPrompt(template),
+                  instructionLabel: "Task",
+                })
+              : buildRagRequest(question, grounded),
+          );
           for await (const event of claudeStream) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
               answer += event.delta.text;

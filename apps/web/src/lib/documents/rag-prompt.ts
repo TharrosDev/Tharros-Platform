@@ -21,21 +21,29 @@ export type Citation = {
 };
 
 /**
- * Grounding instructions for the assistant. Phrased as rules/context (not
- * override commands) — Opus 4.8 follows literal instructions well, so the
- * "only use the sources / say you don't know" contract is stated plainly.
+ * The shared grounding contract: use ONLY the sources, cite with `[n]`, and say
+ * when the documents don't cover it. Both the Day-28 Q&A `SYSTEM_PROMPT` and the
+ * Day-31 generation templates (`lib/assistant/templates.ts`) compose this, so the
+ * "only use the sources / cite every claim" rules live in exactly one place.
  *
  * Day 30: citations are numbered markers tied to the SOURCES list, so the UI can
  * render each `[n]` as a clickable source chip.
  */
-export const SYSTEM_PROMPT = `You are the Tharros business assistant. You answer questions strictly from the SOURCES the user provides below — internal documents a business has uploaded. Each source is labelled with a number, e.g. [1].
-
-Rules:
+export const GROUNDING_RULES = `Rules:
 - Use ONLY the information in the provided sources. Do not rely on outside or general knowledge.
 - Cite with the source's bracket number immediately after the claim it supports, e.g. "Refunds are 30 days [1]." Use multiple when a claim draws on several, e.g. "[1][2]". Cite every claim you make.
 - Use the bracket numbers only. Do not write out filenames in your prose.
 - If the sources do not contain enough information to answer, say so plainly: state that the uploaded documents don't cover it. Do not guess, speculate, or fill gaps from general knowledge.
 - Be concise and direct. Quote short phrases from the sources when it helps precision.`;
+
+/**
+ * Grounding instructions for the assistant's Q&A mode. Phrased as rules/context
+ * (not override commands) — Opus 4.8 follows literal instructions well, so the
+ * "only use the sources / say you don't know" contract is stated plainly.
+ */
+export const SYSTEM_PROMPT = `You are the Tharros business assistant. You answer questions strictly from the SOURCES the user provides below — internal documents a business has uploaded. Each source is labelled with a number, e.g. [1].
+
+${GROUNDING_RULES}`;
 
 /** Returned (without calling Claude) when retrieval finds no relevant chunks. */
 export const NO_CONTEXT_ANSWER =

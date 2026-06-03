@@ -10,6 +10,7 @@ import {
   NotGroundedNote,
   SourcesDialog,
 } from "@/components/assistant/citations";
+import { MessageActions } from "@/components/assistant/message-actions";
 
 /**
  * Day 29/30 — one chat turn. User turns sit right in a soft-cobalt bubble (plain
@@ -64,11 +65,14 @@ function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming
           <span className="bg-primary ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse rounded-full align-middle motion-reduce:animate-none" />
         ) : null}
         {!streaming && message.content ? (
-          message.citations.length > 0 ? (
-            <CitationFooter citations={message.citations} onOpen={setOpenIndex} />
-          ) : (
-            <NotGroundedNote />
-          )
+          <>
+            {message.citations.length > 0 ? (
+              <CitationFooter citations={message.citations} onOpen={setOpenIndex} />
+            ) : (
+              <NotGroundedNote />
+            )}
+            <MessageActions content={message.content} />
+          </>
         ) : null}
         <SourcesDialog
           citations={message.citations}
