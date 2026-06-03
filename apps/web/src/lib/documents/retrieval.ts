@@ -63,7 +63,7 @@ export async function searchChunks(
   const { data, error } = await supabase.rpc("match_document_chunks", {
     query_embedding: toVectorLiteral(queryEmbedding),
     p_org: orgId,
-    match_count: options.limit ?? 5,
+    match_count: options.limit ?? 4,
     p_document_id: options.documentId ?? null,
   });
 

@@ -23,7 +23,9 @@ export default defineConfig({
     environment: "node",
     // The Playwright E2E specs live in e2e/ and use the @playwright/test runner —
     // keep Vitest out of them (its default glob would otherwise grab *.spec.ts).
-    exclude: ["**/node_modules/**", "**/dist/**", "e2e/**"],
+    // `*.live.ts` are gated provider eval harnesses (Day 34) — run only via
+    // `pnpm eval` (vitest.eval.config.ts), never in the default suite / CI.
+    exclude: ["**/node_modules/**", "**/dist/**", "e2e/**", "**/*.live.ts"],
     // RLS tests do real network round-trips and seed/tear-down auth users.
     testTimeout: 30_000,
     hookTimeout: 30_000,

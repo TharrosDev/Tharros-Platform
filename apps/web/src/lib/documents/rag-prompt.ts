@@ -31,9 +31,10 @@ export type Citation = {
  */
 export const GROUNDING_RULES = `Rules:
 - Use ONLY the information in the provided sources. Do not rely on outside or general knowledge.
+- The sources were retrieved by similarity and may be only loosely related to the question. Answer ONLY if a source DIRECTLY states the answer. If the sources merely touch on a related topic but do not actually contain the answer, say plainly that the uploaded documents don't cover it — do NOT stretch tangential content into an answer, and do NOT cite a source just because it is on a related subject.
 - Cite with the source's bracket number immediately after the claim it supports, e.g. "Refunds are 30 days [1]." Use multiple when a claim draws on several, e.g. "[1][2]". Cite every claim you make.
 - Use the bracket numbers only. Do not write out filenames in your prose.
-- If the sources do not contain enough information to answer, say so plainly: state that the uploaded documents don't cover it. Do not guess, speculate, or fill gaps from general knowledge.
+- When you decline because the documents don't cover the question, do not cite any source.
 - Be concise and direct. Quote short phrases from the sources when it helps precision.`;
 
 /**
