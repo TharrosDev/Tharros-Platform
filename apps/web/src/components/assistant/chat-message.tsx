@@ -1,15 +1,21 @@
+"use client";
+
 import * as React from "react";
 
 import type { ChatMessage } from "@/lib/assistant/types";
 import { TharrosMark } from "@/components/brand/logo";
 import { AssistantMarkdown } from "@/components/assistant/markdown";
-import { Citations } from "@/components/assistant/citations";
+import {
+  CitationFooter,
+  NotGroundedNote,
+  SourcesDialog,
+} from "@/components/assistant/citations";
 
 /**
- * Day 29 — one chat turn. User turns sit right in a soft-cobalt bubble (plain
- * text, newlines preserved). Assistant turns sit left on the canvas with the
- * Tharros mark as avatar, rendered as markdown, with source chips beneath. While
- * streaming, a blinking cobalt caret trails the partial text.
+ * Day 29/30 — one chat turn. User turns sit right in a soft-cobalt bubble (plain
+ * text, newlines preserved). Assistant turns sit left with the Tharros mark as
+ * avatar, rendered as markdown with inline `[n]` citation chips, a streaming
+ * caret, and a trust footer (Day 30) listing the documents the answer drew from.
  */
 export function ChatTurn({
   message,
@@ -28,6 +34,14 @@ export function ChatTurn({
     );
   }
 
+  return <AssistantTurn message={message} streaming={streaming} />;
+}
+
+function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming: boolean }) {
+  // Which source the sources dialog is opened to (null = closed). Shared by the
+  // inline `[n]` markers and the footer source list.
+  const [openIndex, setOpenIndex] = React.useState<number | null>(null);
+
   return (
     <div className="flex gap-3">
       <span
@@ -38,14 +52,29 @@ export function ChatTurn({
       </span>
       <div className="min-w-0 flex-1 pt-0.5">
         {message.content ? (
-          <AssistantMarkdown content={message.content} />
+          <AssistantMarkdown
+            content={message.content}
+            citations={message.citations}
+            onCite={setOpenIndex}
+          />
         ) : streaming ? (
           <ThinkingDots />
         ) : null}
         {streaming && message.content ? (
           <span className="bg-primary ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse rounded-full align-middle motion-reduce:animate-none" />
         ) : null}
-        {!streaming ? <Citations citations={message.citations} /> : null}
+        {!streaming && message.content ? (
+          message.citations.length > 0 ? (
+            <CitationFooter citations={message.citations} onOpen={setOpenIndex} />
+          ) : (
+            <NotGroundedNote />
+          )
+        ) : null}
+        <SourcesDialog
+          citations={message.citations}
+          openIndex={openIndex}
+          onClose={() => setOpenIndex(null)}
+        />
       </div>
     </div>
   );
