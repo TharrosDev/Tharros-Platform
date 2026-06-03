@@ -39,6 +39,12 @@ export type Plan = {
   highlight: boolean;
   /** Feature bullets — differentiate on connectors, AI/workflow volume, support. */
   features: string[];
+  /**
+   * Assistant queries allowed per calendar month (Day 33 cost cap). Must match
+   * the "Up to N AI queries / month" feature bullet above — this number is the
+   * one the enforcement layer reads (`queryCapFor`); the bullet is just copy.
+   */
+  monthlyQueryCap: number;
 };
 
 export const PLANS: readonly Plan[] = [
@@ -56,6 +62,7 @@ export const PLANS: readonly Plan[] = [
       "Up to 500 AI queries / month",
       "Email support",
     ],
+    monthlyQueryCap: 500,
   },
   {
     tier: "growth",
@@ -72,6 +79,7 @@ export const PLANS: readonly Plan[] = [
       "Up to 5,000 AI queries / month",
       "Priority email support",
     ],
+    monthlyQueryCap: 5_000,
   },
   {
     tier: "pro",
@@ -88,6 +96,7 @@ export const PLANS: readonly Plan[] = [
       "Up to 25,000 AI queries / month",
       "Priority support with onboarding help",
     ],
+    monthlyQueryCap: 25_000,
   },
 ] as const;
 
@@ -106,6 +115,14 @@ export function getPlan(tier: Tier): Plan {
 export function planByPriceId(priceId: string | null | undefined): Plan | undefined {
   if (!priceId) return undefined;
   return PLANS.find((p) => p.priceId === priceId);
+}
+
+/**
+ * The monthly assistant-query cap for a tier (Day 33 cost control). The single
+ * number the enforcement layer reads — mirrors the tier's pricing-page copy.
+ */
+export function queryCapFor(tier: Tier): number {
+  return getPlan(tier).monthlyQueryCap;
 }
 
 /** Format a cents amount as a whole-dollar CAD string, e.g. 14900 → "$149". */

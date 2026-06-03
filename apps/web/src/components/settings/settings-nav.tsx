@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Building2, TriangleAlert, Users, type LucideIcon } from "lucide-react";
+import { Bell, Building2, Gauge, TriangleAlert, Users, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ type Section = {
 const SECTIONS: Section[] = [
   { href: "/settings/organization", label: "Business profile", icon: Building2 },
   { href: "/settings/team", label: "Team", icon: Users },
+  { href: "/settings/usage", label: "Usage & cost", icon: Gauge },
   { href: "/settings/notifications", label: "Notifications", icon: Bell },
   { href: "/settings/danger", label: "Danger zone", icon: TriangleAlert, danger: true },
 ];

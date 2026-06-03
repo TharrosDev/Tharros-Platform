@@ -40,16 +40,22 @@ export function AssistantChat({
   initialMessages,
   hasDocuments,
   readOnly = false,
+  nearLimit = false,
 }: {
   selectedId: string | null;
   initialMessages: ChatMessage[];
   hasDocuments: boolean;
   readOnly?: boolean;
+  /** Day 33 — org is at ≥80% of its monthly query cap; show a soft warning. */
+  nearLimit?: boolean;
 }) {
   const router = useRouter();
   const [messages, setMessages] = React.useState<ChatMessage[]>(initialMessages);
   const [streaming, setStreaming] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  // Day 33 — set when the API returns a usage-cap 429; swaps the warning for a
+  // hard "upgrade to continue" banner.
+  const [capReached, setCapReached] = React.useState(false);
   const [activeTemplate, setActiveTemplate] = React.useState<TemplateId | null>(null);
   const activeMeta = activeTemplate ? TEMPLATES.find((t) => t.id === activeTemplate) : null;
   const pendingRef = React.useRef<Pending | null>(null);
@@ -103,6 +109,17 @@ export function AssistantChat({
         }),
           signal: controller.signal,
         });
+        if (res.status === 429) {
+          const data = (await res.json().catch(() => null)) as { code?: string; error?: string } | null;
+          if (data?.code === "usage_cap") {
+            // Drop the optimistic turns — no answer is coming — and surface the
+            // hard cap banner instead.
+            setMessages((prev) => prev.filter((m) => m.id !== userId && m.id !== assistantId));
+            setCapReached(true);
+            setError(data.error ?? "You've reached this month's AI query limit.");
+            return;
+          }
+        }
         if (!res.ok || !res.body) {
           throw new Error("request failed");
         }
@@ -190,6 +207,21 @@ export function AssistantChat({
       </div>
 
       <div className="mx-auto w-full max-w-3xl">
+        {capReached ? (
+          <UsageNotice tone="error">
+            {error ?? "You've reached this month's AI query limit."}{" "}
+            <Link href="/billing" className="font-medium underline underline-offset-2">
+              Upgrade your plan
+            </Link>
+          </UsageNotice>
+        ) : nearLimit ? (
+          <UsageNotice tone="warning">
+            You&apos;re close to this month&apos;s AI query limit.{" "}
+            <Link href="/billing" className="font-medium underline underline-offset-2">
+              Review your plan
+            </Link>
+          </UsageNotice>
+        ) : null}
         <ChatComposer
           onSend={send}
           onStop={stop}
@@ -302,6 +334,29 @@ function TemplateChips({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/** Day 33 — a small inline notice above the composer for usage-cap states. */
+function UsageNotice({
+  tone,
+  children,
+}: {
+  tone: "warning" | "error";
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role="status"
+      className={cn(
+        "mb-2 rounded-lg border px-3 py-2 text-sm",
+        tone === "error"
+          ? "border-destructive/40 bg-destructive/10 text-destructive"
+          : "border-border bg-accent/40 text-foreground",
+      )}
+    >
+      {children}
     </div>
   );
 }

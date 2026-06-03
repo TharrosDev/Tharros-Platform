@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getOrgContext } from "@/lib/org/queries";
 import { listDocuments } from "@/lib/documents/queries";
+import { checkQueryCap } from "@/lib/billing/usage";
 import {
   getConversationMessages,
   listConversations,
@@ -25,9 +26,10 @@ export default async function AssistantPage({
   // The (app) + (subscribed) layouts already gate auth + org; this is defensive.
   if (!user || !activeOrg) redirect("/login");
 
-  const [conversations, documents] = await Promise.all([
+  const [conversations, documents, cap] = await Promise.all([
     listConversations(activeOrg.id),
     listDocuments(activeOrg.id),
+    checkQueryCap(activeOrg.id),
   ]);
 
   // Resolve the selected conversation. An unknown id (deleted, or another org's)
@@ -59,6 +61,7 @@ export default async function AssistantPage({
         initialMessages={messages}
         hasDocuments={documents.length > 0}
         readOnly={readOnly}
+        nearLimit={cap.nearLimit}
       />
     </div>
   );

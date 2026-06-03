@@ -7,6 +7,7 @@ import {
   formatMonthly,
   getPlan,
   planByPriceId,
+  queryCapFor,
 } from "../plans";
 import { TIERS } from "../schemas";
 
@@ -59,5 +60,20 @@ describe("billing plans", () => {
   it("formatMonthly renders whole-dollar CAD", () => {
     expect(formatMonthly(14900)).toBe("$149");
     expect(formatMonthly(69900)).toBe("$699");
+  });
+
+  it("sets the monthly query cap (Day 33) to match the ladder", () => {
+    expect(queryCapFor("starter")).toBe(500);
+    expect(queryCapFor("growth")).toBe(5_000);
+    expect(queryCapFor("pro")).toBe(25_000);
+  });
+
+  it("keeps each tier's cap consistent with its 'AI queries / month' bullet", () => {
+    for (const plan of PLANS) {
+      const bullet = plan.features.find((f) => /AI queries \/ month/.test(f));
+      expect(bullet, `${plan.tier} should advertise a query cap`).toBeDefined();
+      const copyNumber = Number(bullet!.replace(/[^\d]/g, ""));
+      expect(copyNumber).toBe(plan.monthlyQueryCap);
+    }
   });
 });
