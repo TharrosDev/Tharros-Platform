@@ -9,9 +9,10 @@ import { runDueJobs } from "@/lib/jobs/runner";
  *
  * Exercises the claim/reap RPCs and the TS runner against the dedicated CI test
  * Supabase project, using a service-role client (the deny-all `jobs` table's only
- * accessor). Provider-free. Every row this test writes carries payload.run = RUN
- * so it can be cleaned exhaustively; the CI table is otherwise empty, so the
- * global claim_due_jobs only ever sees this run's rows.
+ * accessor). Provider-free. claim_due_jobs/reap_stuck_jobs are GLOBAL queries, so
+ * the harness owns the whole table: `clearAllJobs` (beforeEach/afterAll) wipes it
+ * to stay isolated from prior runs. Safe because no app writes the test project's
+ * `jobs` table.
  *
  * Run with `pnpm --filter @tharros/web test`.
  */
@@ -25,8 +26,12 @@ const admin: SupabaseClient = createClient(SUPABASE_URL, SECRET_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
 
-async function clearRunJobs() {
-  await admin.from("jobs").delete().filter("payload->>run", "eq", RUN);
+// claim_due_jobs / reap_stuck_jobs operate GLOBALLY (they're the real worker
+// queries), so these tests are only deterministic on an empty table. The CI test
+// project's `jobs` table is owned exclusively by this harness (no app writes it),
+// so clear ALL rows — not just this run's — to stay isolated from prior runs.
+async function clearAllJobs() {
+  await admin.from("jobs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
 }
 
 async function getJob(id: string) {
@@ -41,8 +46,8 @@ async function getJob(id: string) {
   };
 }
 
-beforeEach(clearRunJobs);
-afterAll(clearRunJobs);
+beforeEach(clearAllJobs);
+afterAll(clearAllJobs);
 
 describe("runDueJobs — happy path", () => {
   it("runs a due noop job to succeeded", async () => {
