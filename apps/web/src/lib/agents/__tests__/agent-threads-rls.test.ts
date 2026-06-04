@@ -71,7 +71,6 @@ let userA = ""; // owner of org A
 let userC = ""; // plain member of org A
 let userB = ""; // owner of org B (unrelated)
 let orgA = "";
-let orgB = "";
 let threadA = ""; // a thread in org A
 let turnA = ""; // an assistant turn in threadA
 
@@ -85,7 +84,6 @@ beforeAll(async () => {
   userB = await seedUser("ownerB");
 
   orgA = await ownOrgId(userA);
-  orgB = await ownOrgId(userB);
 
   // userC is a plain member of org A.
   const { error: memErr } = await admin
