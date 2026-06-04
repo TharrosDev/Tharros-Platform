@@ -66,7 +66,7 @@ The chat layer over the RAG pipeline. `api/assistant/query` (Node runtime) strea
 - `templates.ts` — generation templates (draft email / write SOP / summarize policy); a template swaps the grounding system prompt for a deliverable-shaped one. `citation-markers.ts` — numbered inline `[n]` markers. `export.ts` — thread export.
 
 ### Model seam + cost/rate controls
-- `lib/anthropic/` — the Claude seam. `client.ts` holds the SDK instance (`server-only`); `models.ts` is pure/testable and defines `DEFAULT_MODEL` (`claude-opus-4-8`, grounded Q&A) + `CHEAP_MODEL` (`claude-haiku-4-5`, templated generation), routed by `modelForTemplate`.
+- `lib/anthropic/` — the Claude seam. `client.ts` holds the SDK instance (`server-only`); `models.ts` is pure/testable and defines `DEFAULT_MODEL` (`claude-sonnet-4-6`, grounded Q&A — at **high** reasoning effort via `output_config.effort` in `buildRagRequest`) + `CHEAP_MODEL` (`claude-haiku-4-5`, templated generation), routed by `modelForTemplate`. Opus is reserved for later internal integration-management work, not the chatbot/scheduling path.
 - `lib/billing/usage.ts` — per-org AI metering. After each Claude call, token usage is written to `ai_usage_events` via the **service-role admin client** (no user-write RLS, mirroring `subscriptions` / `document_chunks`). `checkQueryCap` enforces the plan's monthly query cap before answering; `/settings/usage` reads the member-readable `ai_usage_summary` RPC. `ai-pricing.ts` / `usage-math.ts` keep cost math pure and testable.
 
 ### RAG eval harness (`apps/web/src/eval/`)
