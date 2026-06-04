@@ -5,16 +5,19 @@
  */
 
 /**
- * Default model for product work. Opus 4.8 is the most capable model and the
- * baseline for the RAG assistant + agents. Open-ended grounded Q&A runs here —
- * quality earns the cost.
+ * Default model for product work — the highest tier the customer-facing features
+ * (RAG assistant + scheduling agents) use. **Sonnet 4.6 at high effort**: strong
+ * enough for grounded Q&A and the scheduling agent loop, at a fraction of Opus's
+ * cost. Opus is deliberately reserved for later internal integration-management
+ * work, not the chatbot/scheduling path (overkill + too expensive there). The
+ * "high effort" half lives in `buildRagRequest` (output_config.effort).
  */
-export const DEFAULT_MODEL = "claude-opus-4-8";
+export const DEFAULT_MODEL = "claude-sonnet-4-6";
 
 /**
- * Cheaper model for structured, lower-complexity work where Opus quality isn't
- * needed: the Day-31 generation templates (draft email / write SOP / summarize
- * policy). The biggest lever on unit economics.
+ * Cheaper model for structured, lower-complexity work where the default's quality
+ * isn't needed: the Day-31 generation templates (draft email / write SOP /
+ * summarize policy). The biggest lever on unit economics.
  */
 export const CHEAP_MODEL = "claude-haiku-4-5";
 

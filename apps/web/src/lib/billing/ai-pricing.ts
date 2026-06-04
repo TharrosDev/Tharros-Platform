@@ -24,6 +24,10 @@ export type ModelRates = {
 
 /** USD list prices per 1M tokens. Update if Anthropic's pricing changes. */
 export const MODEL_RATES: Record<string, ModelRates> = {
+  // Sonnet 4.6 — the product default (RAG assistant + scheduling agents).
+  "claude-sonnet-4-6": { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.3 },
+  // Opus 4.8 — reserved for later internal integration-management work; kept
+  // priced so any such call still meters correctly.
   "claude-opus-4-8": { input: 15, output: 75, cacheWrite: 18.75, cacheRead: 1.5 },
   "claude-haiku-4-5": { input: 1, output: 5, cacheWrite: 1.25, cacheRead: 0.1 },
 };

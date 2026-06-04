@@ -142,7 +142,7 @@ export async function POST(req: Request): Promise<Response> {
         let answer = "";
         let usage: Usage | null = null;
         // Day 33 — route the structured generation templates to the cheaper
-        // model; keep open-ended grounded Q&A on Opus where quality earns it.
+        // model; open-ended grounded Q&A runs the default tier (Sonnet, high effort).
         const model = modelForTemplate(template);
 
         if (grounded.length === 0) {
@@ -155,6 +155,8 @@ export async function POST(req: Request): Promise<Response> {
                   systemPrompt: templateSystemPrompt(template),
                   instructionLabel: "Task",
                   model,
+                  // Cheap template path (Haiku) — skip the high-effort config.
+                  effort: null,
                 })
               : buildRagRequest(question, grounded, { model }),
           );

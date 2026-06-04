@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   MessageCreateParamsNonStreaming,
+  OutputConfig,
   TextBlockParam,
   Usage,
 } from "@anthropic-ai/sdk/resources/messages";
@@ -97,10 +98,16 @@ export type RagRequestOptions = {
   instructionLabel?: string;
   /**
    * Override the Claude model (Day 33 routing). Defaults to `DEFAULT_MODEL`
-   * (Opus). Templates pass `CHEAP_MODEL` (Haiku). Caching breakpoints are
-   * unchanged — Haiku's minimum cacheable prefix is no larger than Opus's.
+   * (Sonnet 4.6). Templates pass `CHEAP_MODEL` (Haiku). Caching breakpoints are
+   * unchanged — Haiku's minimum cacheable prefix is no larger.
    */
   model?: string;
+  /**
+   * Reasoning effort for the default (highest) tier. Defaults to `"high"` — the
+   * "Sonnet at high effort" the customer-facing path runs at. Pass `null` to omit
+   * it entirely, which the cheap template path does so Haiku stays cheap.
+   */
+  effort?: OutputConfig["effort"] | null;
 };
 
 export function buildRagRequest(
@@ -112,6 +119,7 @@ export function buildRagRequest(
     systemPrompt = SYSTEM_PROMPT,
     instructionLabel = "Question",
     model = DEFAULT_MODEL,
+    effort = "high",
   } = options;
   const system: TextBlockParam[] = [
     { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
@@ -121,6 +129,9 @@ export function buildRagRequest(
     model,
     max_tokens: 16000,
     thinking: { type: "adaptive" },
+    // High reasoning effort on the default (Sonnet) tier; omitted for the cheap
+    // template path (effort: null) so Haiku stays inexpensive.
+    ...(effort ? { output_config: { effort } } : {}),
     system,
     messages: [
       {

@@ -44,7 +44,8 @@ import { EVAL_QUESTIONS } from "./questions";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const EMBEDDING_MODEL = "text-embedding-3-small";
-const ANSWER_MODEL = "claude-opus-4-8";
+// Mirror the shipping config: the default tier is Sonnet 4.6 at high effort.
+const ANSWER_MODEL = "claude-sonnet-4-6";
 const JUDGE_MODEL = "claude-haiku-4-5";
 
 const CHUNK_CONFIGS: { label: string; opts: ChunkOptions }[] = [
@@ -113,6 +114,7 @@ async function answer(question: string, grounded: GroundingChunk[]): Promise<str
     model: ANSWER_MODEL,
     max_tokens: 1024,
     thinking: { type: "adaptive" },
+    output_config: { effort: "high" },
     system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
     messages: [
       {
