@@ -19,6 +19,7 @@ const PUBLIC_PATHS = [
   "/portal", // employee portal (auth-light; account-less employees, token-scoped)
   "/monitoring", // Sentry tunnel (also excluded by the proxy matcher)
   "/api/webhooks", // Stripe webhook (also excluded by the proxy matcher)
+  "/api/cron", // durable job worker tick — pg_cron/Vercel cron, Bearer-secret auth
 ];
 
 function isPublicPath(pathname: string): boolean {

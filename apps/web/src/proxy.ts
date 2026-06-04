@@ -11,6 +11,7 @@ export const config = {
      * Match all request paths except:
      * - api/webhooks (Stripe et al. — no Supabase session; must not be bounced
      *   to /login or have session-refresh run on a third-party POST)
+     * - api/cron (durable job worker tick — Bearer-secret auth, no Supabase session)
      * - monitoring (Sentry tunnelRoute — must not run through session refresh)
      * - _next/static (static files)
      * - _next/image (image optimization)
@@ -18,6 +19,6 @@ export const config = {
      * - image files
      * Feel free to refine once auth-gated routes exist.
      */
-    "/((?!api/webhooks|monitoring|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api/webhooks|api/cron|monitoring|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -39,6 +39,11 @@ export const env = createEnv({
     STRIPE_PRICE_STARTER: z.string().min(1).optional(),
     STRIPE_PRICE_GROWTH: z.string().min(1).optional(),
     STRIPE_PRICE_PRO: z.string().min(1).optional(),
+    // Shared secret for the durable job worker tick (Day 38). pg_cron (via pg_net)
+    // and Vercel Cron send it as `Authorization: Bearer <CRON_SECRET>`; the
+    // /api/cron/jobs/run route verifies it. Optional until vaulted in Vercel +
+    // Supabase Vault — the route returns 503 until then. Promote to required once set.
+    CRON_SECRET: z.string().min(1).optional(),
     // Deferred — optional until their phase.
     STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
     NANGO_SECRET_KEY: z.string().min(1).optional(),
@@ -74,6 +79,7 @@ export const env = createEnv({
     STRIPE_PRICE_PRO: process.env.STRIPE_PRICE_PRO,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
+    CRON_SECRET: process.env.CRON_SECRET,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     NANGO_SECRET_KEY: process.env.NANGO_SECRET_KEY,
     N8N_BASE_URL: process.env.N8N_BASE_URL,
