@@ -19,18 +19,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { CommandPalette } from "@/components/shell/command-palette";
+import { NotificationMenu } from "@/components/shell/notification-menu";
 import { signOut } from "@/lib/auth/actions";
 import type { DisplayUser } from "@/lib/auth/user";
 import type { UserOrg } from "@/lib/org/queries";
+import type { Notification } from "@/lib/notifications/types";
 
 function Topbar({
   user,
   orgs,
   activeOrg,
+  notifications,
+  unreadCount,
 }: {
   user: DisplayUser;
   orgs: UserOrg[];
   activeOrg: UserOrg | null;
+  notifications: Notification[];
+  unreadCount: number;
 }) {
   const [cmdOpen, setCmdOpen] = React.useState(false);
 
@@ -60,6 +66,7 @@ function Topbar({
       </button>
 
       <div className="ml-auto flex items-center gap-2">
+        <NotificationMenu notifications={notifications} unreadCount={unreadCount} />
         <ThemeToggle />
 
         <DropdownMenu>

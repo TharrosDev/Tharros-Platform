@@ -4,6 +4,7 @@ import { getAuthUser } from "@/lib/auth/current-user";
 import { getDisplayUser } from "@/lib/auth/user";
 import { getOrgContext } from "@/lib/org/queries";
 import { getEntitlement } from "@/lib/billing/entitlements";
+import { getUnreadCount, listNotifications } from "@/lib/notifications/queries";
 import { Sidebar } from "@/components/shell/sidebar";
 import { Topbar } from "@/components/shell/topbar";
 import { BillingBanner } from "@/components/billing/billing-banner";
@@ -32,6 +33,12 @@ export default async function AppLayout({
   // with the (subscribed) gate's read within the same request.
   const entitlement = await getEntitlement();
 
+  // In-app notification inbox for the topbar bell (RLS scopes to this user).
+  const [notifications, unreadCount] = await Promise.all([
+    listNotifications({ limit: 10 }),
+    getUnreadCount(),
+  ]);
+
   return (
     <ToastProvider>
       <TooltipProvider>
@@ -41,7 +48,13 @@ export default async function AppLayout({
           </aside>
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <Topbar user={displayUser} orgs={orgs} activeOrg={activeOrg} />
+            <Topbar
+              user={displayUser}
+              orgs={orgs}
+              activeOrg={activeOrg}
+              notifications={notifications}
+              unreadCount={unreadCount}
+            />
             <BillingBanner entitlement={entitlement} />
             <main className="mx-auto w-full max-w-5xl flex-1 space-y-8 px-4 py-8 sm:px-6 sm:py-10">
               {children}
