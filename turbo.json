@@ -22,6 +22,7 @@
         "RESEND_API_KEY",
         "EMAIL_FROM",
         "STRIPE_WEBHOOK_SECRET",
+        "CRON_SECRET",
         "NANGO_SECRET_KEY",
         "N8N_BASE_URL",
         "N8N_API_KEY",
