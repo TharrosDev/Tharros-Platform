@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useActionState } from "react";
-import { CalendarClock, Trash2, UserCog } from "lucide-react";
+import { CalendarClock, Send, Trash2, UserCog } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import {
 import {
   addTemporaryOverride,
   removeAvailabilityRow,
+  requestAvailabilityNudge,
   savePermanentAvailability,
 } from "@/lib/scheduling/actions";
 import type { EmployeeAvailability } from "@/lib/scheduling/queries";
@@ -78,6 +79,10 @@ export function AvailabilityManager({
             </SelectContent>
           </Select>
         </div>
+
+        {selectedId && canManage ? (
+          <RequestAvailabilityButton employeeId={selectedId} employeeName={selectedName} />
+        ) : null}
       </div>
 
       {!selectedId || !availability ? (
@@ -104,6 +109,37 @@ export function AvailabilityManager({
         </div>
       )}
     </div>
+  );
+}
+
+/** Emails the employee a portal link to set their availability, then chases follow-ups. */
+function RequestAvailabilityButton({
+  employeeId,
+  employeeName,
+}: {
+  employeeId: string;
+  employeeName: string | null;
+}) {
+  const toast = useToast();
+  const [requesting, startRequest] = React.useTransition();
+
+  function request() {
+    startRequest(async () => {
+      const res = await requestAvailabilityNudge(employeeId);
+      toast.add({
+        title: res.error ? "Couldn't send request" : "Availability requested",
+        description:
+          res.error ??
+          `We emailed ${employeeName ?? "them"} a link to set their availability.`,
+      });
+    });
+  }
+
+  return (
+    <Button type="button" variant="outline" onClick={request} disabled={requesting}>
+      <Send className="size-4" aria-hidden />
+      {requesting ? "Sending…" : "Request availability"}
+    </Button>
   );
 }
 

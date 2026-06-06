@@ -4,7 +4,11 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getOrgContext } from "@/lib/org/queries";
+import { getAuthUser } from "@/lib/auth/current-user";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { enqueueJob } from "@/lib/jobs/enqueue";
 import { logger } from "@/lib/observability/logger";
 
 import { DEFAULT_LABOR_RULE_PARAMS, LABOR_RULE_PRESETS } from "./presets";
@@ -211,6 +215,46 @@ export async function addTemporaryOverride(
 
   revalidatePath("/scheduling/availability");
   return { ok: true, message: "Override added." };
+}
+
+/**
+ * Day 45 — ask an employee to set their availability. Mints the portal token
+ * (the RPC self-guards owner/admin, so this proves the manager's role + gives the
+ * system job a live link to send), then hands off to the Day-38 job runtime: the
+ * `availability-nudge` handler emails the request now and chases follow-ups until
+ * availability is set. Owner/admin only; throttled per manager.
+ */
+export async function requestAvailabilityNudge(employeeId: string): Promise<{ error?: string }> {
+  if (!employeeId) return { error: "Missing employee." };
+
+  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
+  if (!user || !activeOrg) return { error: "Not authenticated." };
+
+  // Throttle per manager to cap Resend-quota abuse (reuses the Day-15 limiter).
+  const { allowed } = await checkRateLimit(`availability-nudge:${user.id}`, 30, 3600);
+  if (!allowed) return { error: "You're sending requests too quickly. Please try again later." };
+
+  const supabase = await createClient();
+  const { error: rpcErr } = await supabase.rpc("issue_portal_token", {
+    p_employee_id: employeeId,
+  });
+  if (rpcErr) return { error: rpcErr.message };
+
+  // Jobs table is deny-all (service-role only writer) → admin client.
+  const admin = createAdminClient();
+  try {
+    await enqueueJob(admin, {
+      type: "availability-nudge",
+      payload: { employeeId, orgId: activeOrg.id, attempt: 0 },
+      orgId: activeOrg.id,
+    });
+  } catch (err) {
+    logger.error("requestAvailabilityNudge: enqueue failed", { err, employeeId });
+    return { error: "Couldn't queue the request. Please try again." };
+  }
+
+  revalidatePath("/scheduling/availability");
+  return {};
 }
 
 /** Delete one availability row (permanent or temporary) by id. RLS-scoped. */

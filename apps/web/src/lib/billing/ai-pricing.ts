@@ -24,12 +24,17 @@ export type ModelRates = {
 
 /** USD list prices per 1M tokens. Update if Anthropic's pricing changes. */
 export const MODEL_RATES: Record<string, ModelRates> = {
-  // Sonnet 4.6 — the product default (RAG assistant + scheduling agents).
+  // Sonnet 4.6 — the RAG assistant default. (Scheduling AI runs on DeepSeek — below.)
   "claude-sonnet-4-6": { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.3 },
   // Opus 4.8 — reserved for later internal integration-management work; kept
   // priced so any such call still meters correctly.
   "claude-opus-4-8": { input: 15, output: 75, cacheWrite: 18.75, cacheRead: 1.5 },
   "claude-haiku-4-5": { input: 1, output: 5, cacheWrite: 1.25, cacheRead: 0.1 },
+  // DeepSeek — the scheduling provider (Day 45). DeepSeek bills in USD too. It has
+  // no separate cache-WRITE charge (a first occurrence is just a cache miss at the
+  // input rate), so cacheWrite mirrors input; cacheRead is the cache-hit rate.
+  "deepseek-v4-flash": { input: 0.14, output: 0.28, cacheWrite: 0.14, cacheRead: 0.0028 },
+  "deepseek-v4-pro": { input: 0.435, output: 0.87, cacheWrite: 0.435, cacheRead: 0.003625 },
 };
 
 export type TokenCounts = {
