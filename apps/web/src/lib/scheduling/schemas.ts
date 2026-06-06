@@ -96,3 +96,60 @@ export type SchedulingSetupPayload = z.infer<typeof schedulingSetupSchema>;
 
 /** Returned by the wizard server action. `message` (not `ok`) surfaces failures. */
 export type SchedulingSetupState = { ok?: boolean; message?: string } | undefined;
+
+/* ---------------------------------------------------------------------------
+ * Day 44 — employee availability (manager surface).
+ *
+ * Whitelist model: a permanent day or an "available" temporary override means
+ * the employee CAN work then; an unmarked weekday is not available. A null time
+ * window means the whole day.
+ * ------------------------------------------------------------------------- */
+
+const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { error: "Use a valid date." });
+
+/** One weekday row in the permanent weekly grid. Only `is_available` days are saved. */
+export const permanentDaySchema = z
+  .object({
+    day_of_week: z.number().int().min(0).max(6),
+    is_available: z.boolean(),
+    start_time: z.union([timeString, z.literal("")]).optional(),
+    end_time: z.union([timeString, z.literal("")]).optional(),
+  })
+  .refine((d) => !d.start_time || !d.end_time || d.end_time > d.start_time, {
+    error: "End time must be after start time.",
+    path: ["end_time"],
+  });
+
+/** The whole weekly grid the manager submits (one entry per weekday, 0–6 unique). */
+export const permanentAvailabilitySchema = z
+  .array(permanentDaySchema)
+  .max(7)
+  .refine((rows) => new Set(rows.map((r) => r.day_of_week)).size === rows.length, {
+    error: "Each weekday may appear only once.",
+  });
+
+/** A single temporary, dated availability override. */
+export const temporaryOverrideSchema = z
+  .object({
+    effective_date: dateString,
+    end_date: z.union([dateString, z.literal("")]).optional(),
+    is_available: z.boolean().default(true),
+    start_time: z.union([timeString, z.literal("")]).optional(),
+    end_time: z.union([timeString, z.literal("")]).optional(),
+    notes: z.string().trim().max(300).optional(),
+  })
+  .refine((d) => !d.end_date || d.end_date >= d.effective_date, {
+    error: "End date can't be before the start date.",
+    path: ["end_date"],
+  })
+  .refine((d) => !d.start_time || !d.end_time || d.end_time > d.start_time, {
+    error: "End time must be after start time.",
+    path: ["end_time"],
+  });
+
+export type PermanentDay = z.infer<typeof permanentDaySchema>;
+export type PermanentAvailability = z.infer<typeof permanentAvailabilitySchema>;
+export type TemporaryOverride = z.infer<typeof temporaryOverrideSchema>;
+
+/** Returned by the availability server actions. */
+export type AvailabilityState = { ok?: boolean; message?: string } | undefined;
