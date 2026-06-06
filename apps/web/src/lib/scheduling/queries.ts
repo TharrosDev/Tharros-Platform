@@ -70,3 +70,64 @@ export const getLaborRules = cache(async (orgId: string): Promise<LaborRules> =>
   }
   return normalizeLaborRules(data as unknown as LaborRulesRow);
 });
+
+/**
+ * Day 43 — whether the scheduling setup wizard has been completed for an org.
+ * Drives the `/scheduling` ↔ `/scheduling/setup` redirect gate.
+ */
+export const getSchedulingStatus = cache(
+  async (orgId: string): Promise<{ onboardedAt: string | null }> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("org_settings")
+      .select("scheduling_onboarded_at")
+      .eq("org_id", orgId)
+      .maybeSingle();
+    if (error) {
+      logger.error("getSchedulingStatus: query failed", { err: error, orgId });
+    }
+    return { onboardedAt: (data?.scheduling_onboarded_at as string | null) ?? null };
+  },
+);
+
+export type SchedulingSummary = {
+  onboardedAt: string | null;
+  employeeCount: number;
+  openDays: number;
+  preset: LaborRulePreset;
+  persona: { tone: string; notes: string };
+};
+
+/**
+ * Day 43 — read-only summary for the `/scheduling` landing page (counts + the
+ * active preset/persona). All sources are member-readable via RLS.
+ */
+export const getSchedulingSummary = cache(async (orgId: string): Promise<SchedulingSummary> => {
+  const supabase = await createClient();
+  const [settingsRes, employeesRes, hoursRes, rules] = await Promise.all([
+    supabase
+      .from("org_settings")
+      .select("scheduling_onboarded_at, agent_persona")
+      .eq("org_id", orgId)
+      .maybeSingle(),
+    supabase
+      .from("employees")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", orgId)
+      .eq("active", true),
+    supabase.from("business_hours").select("is_closed").eq("org_id", orgId).eq("is_closed", false),
+    getLaborRules(orgId),
+  ]);
+
+  const persona = (settingsRes.data?.agent_persona ?? {}) as {
+    tone?: string;
+    notes?: string;
+  };
+  return {
+    onboardedAt: (settingsRes.data?.scheduling_onboarded_at as string | null) ?? null,
+    employeeCount: employeesRes.count ?? 0,
+    openDays: (hoursRes.data ?? []).length,
+    preset: rules.preset,
+    persona: { tone: persona.tone ?? "professional", notes: persona.notes ?? "" },
+  };
+});

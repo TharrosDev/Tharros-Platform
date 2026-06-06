@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import {
   BookOpen,
+  CalendarDays,
   CreditCard,
   LayoutGrid,
   Settings,
@@ -23,6 +24,7 @@ export type NavItem = {
 export const primaryNav: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { label: "AI Assistant", href: "/assistant", icon: Sparkles },
+  { label: "Scheduling", href: "/scheduling", icon: CalendarDays },
   { label: "Knowledge", href: "/knowledge", icon: BookOpen },
   { label: "Lead Capture", href: "/leads", icon: Users, badge: "3 new" },
   { label: "Automations", href: "/automations", icon: Workflow },
