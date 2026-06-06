@@ -131,3 +131,89 @@ export const getSchedulingSummary = cache(async (orgId: string): Promise<Schedul
     persona: { tone: persona.tone ?? "professional", notes: persona.notes ?? "" },
   };
 });
+
+/* ---------------------------------------------------------------------------
+ * Day 44 — employee availability reads (manager surface).
+ * ------------------------------------------------------------------------- */
+
+export type PermanentRow = {
+  id: string;
+  day_of_week: number;
+  is_available: boolean;
+  start_time: string | null;
+  end_time: string | null;
+};
+
+export type TemporaryRow = {
+  id: string;
+  effective_date: string;
+  end_date: string | null;
+  is_available: boolean;
+  start_time: string | null;
+  end_time: string | null;
+  notes: string | null;
+};
+
+export type EmployeeAvailability = {
+  permanent: PermanentRow[];
+  temporary: TemporaryRow[];
+};
+
+/**
+ * Day 44 — one employee's availability, split into the permanent weekly grid and
+ * the dated temporary overrides. Member-readable via RLS, so org-scoped without
+ * an explicit org filter; we still pass `employeeId` (an employee belongs to one
+ * org). `time` columns come back as `HH:MM:SS` strings.
+ */
+export const getEmployeeAvailability = cache(
+  async (employeeId: string): Promise<EmployeeAvailability> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("availability")
+      .select(
+        "id, kind, day_of_week, effective_date, end_date, start_time, end_time, is_available, notes",
+      )
+      .eq("employee_id", employeeId)
+      .order("day_of_week", { ascending: true })
+      .order("effective_date", { ascending: true });
+
+    if (error) {
+      logger.error("getEmployeeAvailability: query failed", { err: error, employeeId });
+    }
+
+    const rows = (data ?? []) as Array<{
+      id: string;
+      kind: "permanent" | "temporary";
+      day_of_week: number | null;
+      effective_date: string | null;
+      end_date: string | null;
+      start_time: string | null;
+      end_time: string | null;
+      is_available: boolean;
+      notes: string | null;
+    }>;
+
+    return {
+      permanent: rows
+        .filter((r) => r.kind === "permanent" && r.day_of_week !== null)
+        .map((r) => ({
+          id: r.id,
+          day_of_week: r.day_of_week as number,
+          is_available: r.is_available,
+          start_time: r.start_time,
+          end_time: r.end_time,
+        })),
+      temporary: rows
+        .filter((r) => r.kind === "temporary" && r.effective_date !== null)
+        .map((r) => ({
+          id: r.id,
+          effective_date: r.effective_date as string,
+          end_date: r.end_date,
+          is_available: r.is_available,
+          start_time: r.start_time,
+          end_time: r.end_time,
+          notes: r.notes,
+        })),
+    };
+  },
+);

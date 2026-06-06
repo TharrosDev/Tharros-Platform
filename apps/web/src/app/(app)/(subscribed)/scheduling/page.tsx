@@ -38,9 +38,17 @@ export default async function SchedulingPage() {
         title="Scheduling"
         description="Your scheduling workspace is set up. Availability and schedule generation arrive next."
         actions={
-          <Link href="/scheduling/setup" className={buttonVariants({ variant: "outline" })}>
-            Edit setup
-          </Link>
+          <>
+            <Link
+              href="/scheduling/availability"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Availability
+            </Link>
+            <Link href="/scheduling/setup" className={buttonVariants({ variant: "outline" })}>
+              Edit setup
+            </Link>
+          </>
         }
       />
 
