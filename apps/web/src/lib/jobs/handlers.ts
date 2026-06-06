@@ -2,6 +2,7 @@ import { logger } from "@/lib/observability/logger";
 
 import type { Job, JobHandler } from "@/lib/jobs/types";
 import { notificationSendHandler } from "@/lib/notifications/handler";
+import { availabilityNudgeHandler } from "@/lib/scheduling/availability-nudge";
 
 /**
  * Day 38 — the job handler registry. Maps a job `type` to the side effect that
@@ -26,6 +27,7 @@ const noop: JobHandler = async (job: Job) => {
 const HANDLERS: Record<string, JobHandler> = {
   noop,
   "notification-send": notificationSendHandler,
+  "availability-nudge": availabilityNudgeHandler,
 };
 
 /** The handler for a job type, or null if none is registered (→ treated as failure). */

@@ -37,6 +37,7 @@ key fails the build with a named error rather than a runtime crash.
 | `NEXT_PUBLIC_NANGO_PUBLIC_KEY` | client | Nango | no (optional) | Nango dashboard | Day 35 |
 | `N8N_BASE_URL` | server | n8n | no (optional) | n8n instance URL (host TBD: self-host vs Cloud) | Day 41 |
 | `N8N_API_KEY` | server | n8n | no (optional) | n8n → Settings → API | Day 41 |
+| `DEEPSEEK_API_KEY` | server | DeepSeek | no (optional) | platform.deepseek.com → API keys (provider for ALL scheduling AI) | Day 45 |
 
 "Optional" keys are reserved as placeholders in `env.ts` and `.env.example`; they
 become required when their phase lands. Promote a key from optional → required in

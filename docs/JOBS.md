@@ -24,6 +24,15 @@ Claude / run the solver, so they can't run in SQL).
 be **idempotent**. Add a real handler by registering it in `handlers.ts` and adding
 its type to `JobType` in `types.ts`.
 
+**Registered handlers:**
+- `noop` (Day 38) — proves the loop end-to-end.
+- `notification-send` (Day 40) — delivers the email channel of a `notification_events` row.
+- `availability-nudge` (Day 45) — emails an employee a portal link to set their availability,
+  and reschedules itself (every 3 days, up to 3 emails) until they do. Idempotent + self-
+  terminating: no-ops the moment the employee has permanent availability. Enqueued by the
+  manager action `requestAvailabilityNudge`, which mints the portal token first (the system
+  can't); the handler reads the live token to build the link.
+
 ## Operator setup (the minutely tick)
 
 The worker is ticked by **pg_cron → pg_net** (plan-independent minutely cadence,

@@ -2,6 +2,16 @@ import "server-only";
 
 import type { Usage } from "@anthropic-ai/sdk/resources/messages";
 
+/**
+ * The token-count subset metering actually records. The full Anthropic `Usage`
+ * satisfies this, and DeepSeek usage is mapped into it (lib/deepseek/usage.ts) —
+ * so both providers meter through the one `recordUsage` seam.
+ */
+export type MeteredUsage = Pick<
+  Usage,
+  "input_tokens" | "output_tokens" | "cache_read_input_tokens" | "cache_creation_input_tokens"
+>;
+
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/observability/logger";
 import { getSubscription } from "@/lib/billing/entitlements";
@@ -27,7 +37,7 @@ export async function recordUsage(
   orgId: string,
   userId: string | null,
   model: string,
-  usage: Usage | null,
+  usage: MeteredUsage | null,
 ): Promise<void> {
   if (!usage) return;
 

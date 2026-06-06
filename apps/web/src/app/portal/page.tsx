@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { CalendarDays, Clock, Plane } from "lucide-react";
+import Link from "next/link";
+import { CalendarDays, ChevronRight, Clock, Plane } from "lucide-react";
 
 import { getPortalSession } from "@/lib/portal/session";
 import { signOutPortal } from "@/lib/portal/actions";
@@ -20,11 +21,6 @@ const COMING_SOON = [
     icon: CalendarDays,
     title: "Your schedule",
     body: "See your shifts for the next two weeks, with add-to-calendar.",
-  },
-  {
-    icon: Clock,
-    title: "Your availability",
-    body: "Tell us when you can work — in plain language — and keep it current.",
   },
   {
     icon: Plane,
@@ -54,11 +50,30 @@ export default async function PortalPage() {
           <p className="text-muted-foreground type-meta">{session.orgName}</p>
           <h1 className="type-h1 mt-1">Hi {session.employeeName}</h1>
           <p className="text-muted-foreground mt-3 type-body">
-            This is your personal portal for {session.orgName}. Your scheduling tools are
-            on the way — you&apos;ll get an email when there&apos;s something to do here.
+            This is your personal portal for {session.orgName}. Set your availability below; more
+            scheduling tools arrive soon.
           </p>
 
-          <ul className="mt-8 flex flex-col gap-3">
+          <Link
+            href="/portal/availability"
+            className="group border-primary/30 bg-primary-soft/40 hover:bg-primary-soft/70 mt-8 flex items-center gap-3 rounded-xl border p-4 transition-colors"
+          >
+            <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <Clock className="size-4.5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-foreground font-medium">Set your availability</p>
+              <p className="text-muted-foreground text-sm">
+                Tell us when you can work, in plain language.
+              </p>
+            </div>
+            <ChevronRight
+              className="text-muted-foreground group-hover:text-foreground size-5 shrink-0 transition-colors"
+              aria-hidden
+            />
+          </Link>
+
+          <ul className="mt-3 flex flex-col gap-3">
             {COMING_SOON.map(({ icon: Icon, title, body }) => (
               <li
                 key={title}

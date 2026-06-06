@@ -23,6 +23,12 @@ export const env = createEnv({
     // the embeddings seam (lib/documents/embeddings.ts) fails fast at call time
     // if it's unset. Promote to required once set in Vercel.
     OPENAI_API_KEY: z.string().min(1).optional(),
+    // DeepSeek — the provider for ALL scheduling AI (Day 45). OpenAI-compatible,
+    // far cheaper than Claude for the hundreds-of-calls/month scheduling drives.
+    // Optional until vaulted in Vercel for all envs; the client seam
+    // (lib/deepseek/client.ts) fails fast at call time if it's unset. Promote to
+    // required once set in Vercel.
+    DEEPSEEK_API_KEY: z.string().min(1).optional(),
     STRIPE_SECRET_KEY: z.string().min(1),
     // Transactional email via Resend (Day 13). Send-only API key; also used as
     // the SMTP password for Supabase Auth's custom SMTP (configured at Supabase,
@@ -73,6 +79,7 @@ export const env = createEnv({
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_PRICE_STARTER: process.env.STRIPE_PRICE_STARTER,
     STRIPE_PRICE_GROWTH: process.env.STRIPE_PRICE_GROWTH,

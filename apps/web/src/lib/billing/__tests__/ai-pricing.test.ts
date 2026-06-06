@@ -71,6 +71,36 @@ describe("estimateCostCents", () => {
     expect(MODEL_RATES["claude-opus-4-8"]).toBeDefined();
     expect(MODEL_RATES["claude-haiku-4-5"]).toBeDefined();
   });
+
+  it("prices the DeepSeek scheduling model (input + output)", () => {
+    // 1M input @ $0.14 + 1M output @ $0.28 = $0.42 = 42 cents.
+    const cents = estimateCostCents({
+      model: "deepseek-v4-flash",
+      inputTokens: 1_000_000,
+      outputTokens: 1_000_000,
+      cacheReadTokens: 0,
+      cacheCreationTokens: 0,
+    });
+    expect(cents).toBe(42);
+  });
+
+  it("prices DeepSeek far below the Claude default for the same tokens", () => {
+    const counts = {
+      inputTokens: 1_000_000,
+      outputTokens: 1_000_000,
+      cacheReadTokens: 0,
+      cacheCreationTokens: 0,
+    };
+    const deepseek = estimateCostCents({ model: "deepseek-v4-flash", ...counts });
+    const sonnet = estimateCostCents({ model: "claude-sonnet-4-6", ...counts });
+    expect(deepseek).toBeGreaterThan(0);
+    expect(deepseek).toBeLessThan(sonnet);
+  });
+
+  it("knows both DeepSeek scheduling tiers", () => {
+    expect(MODEL_RATES["deepseek-v4-flash"]).toBeDefined();
+    expect(MODEL_RATES["deepseek-v4-pro"]).toBeDefined();
+  });
 });
 
 describe("formatUsd", () => {
