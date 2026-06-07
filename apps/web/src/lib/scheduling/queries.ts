@@ -4,7 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/observability/logger";
 
 import { defaultLaborRules } from "./presets";
+import { buildSolverInput } from "./solver/build-input";
 import type { LaborRulePreset, LaborRules } from "./types";
+import type { ValidationContext } from "./validation";
 
 /**
  * Day 42 — read-only access to an org's labor ruleset.
@@ -217,3 +219,135 @@ export const getEmployeeAvailability = cache(
     };
   },
 );
+
+/* ---------------------------------------------------------------------------
+ * Day 50 — schedule calendar reads (the draft + its shifts + edit-validation
+ * context). All member-readable via the Day-41 RLS, so org-scoped without an
+ * explicit filter where the id already pins the org.
+ * ------------------------------------------------------------------------- */
+
+export type DraftSchedule = {
+  id: string;
+  name: string;
+  periodStart: string;
+  periodEnd: string;
+  status: "draft" | "published" | "archived";
+  optimizationSummary: string | null;
+};
+
+/** The shift shape the calendar UI renders + edits (camelCase, client-safe). */
+export type CalendarShift = {
+  id: string;
+  employeeId: string | null;
+  roleId: string | null;
+  startsAt: string;
+  endsAt: string;
+  breakMinutes: number;
+  status: "draft" | "published" | "open" | "cancelled";
+  locked: boolean;
+  notes: string | null;
+};
+
+/**
+ * The most recent draft schedule for an org, or null if none has been generated.
+ * Day 50 edits the latest draft; Day 51 adds version/period selection + publish.
+ */
+export const getLatestDraftSchedule = cache(
+  async (orgId: string): Promise<DraftSchedule | null> => {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("schedules")
+      .select("id, name, period_start, period_end, status, optimization_summary")
+      .eq("org_id", orgId)
+      .eq("status", "draft")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      logger.error("getLatestDraftSchedule: query failed", { err: error, orgId });
+    }
+    if (!data) return null;
+    return {
+      id: data.id as string,
+      name: data.name as string,
+      periodStart: data.period_start as string,
+      periodEnd: data.period_end as string,
+      status: data.status as DraftSchedule["status"],
+      optimizationSummary: (data.optimization_summary as string | null) ?? null,
+    };
+  },
+);
+
+/** All shifts on a schedule, ordered chronologically. Member-readable via RLS. */
+export const getScheduleShifts = cache(async (scheduleId: string): Promise<CalendarShift[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shifts")
+    .select(
+      "id, employee_id, role_certification_id, starts_at, ends_at, break_minutes, status, locked, notes",
+    )
+    .eq("schedule_id", scheduleId)
+    .order("starts_at", { ascending: true });
+
+  if (error) {
+    logger.error("getScheduleShifts: query failed", { err: error, scheduleId });
+  }
+
+  return ((data ?? []) as Array<Record<string, unknown>>).map((r) => ({
+    id: r.id as string,
+    employeeId: (r.employee_id as string | null) ?? null,
+    roleId: (r.role_certification_id as string | null) ?? null,
+    startsAt: r.starts_at as string,
+    endsAt: r.ends_at as string,
+    breakMinutes: Number(r.break_minutes ?? 0),
+    status: r.status as CalendarShift["status"],
+    locked: Boolean(r.locked),
+    notes: (r.notes as string | null) ?? null,
+  }));
+});
+
+export type RoleCertification = { id: string; name: string };
+
+/** The org's role/certification catalog — labels + the add-shift role picker. */
+export const getRoleCertifications = cache(async (orgId: string): Promise<RoleCertification[]> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("roles_certifications")
+    .select("id, name")
+    .eq("org_id", orgId)
+    .order("name", { ascending: true });
+  if (error) {
+    logger.error("getRoleCertifications: query failed", { err: error, orgId });
+  }
+  return ((data ?? []) as Array<{ id: string; name: string }>).map((r) => ({
+    id: r.id,
+    name: r.name,
+  }));
+});
+
+/**
+ * Assemble the {@link ValidationContext} for live edit re-validation: each
+ * employee's minor flag, valid role/cert ids, and resolved availability, plus the
+ * org's labor ruleset. Reuses the Day-46 {@link buildSolverInput} (the same
+ * RLS-scoped fetch + resolution) and drops the soft-objective fields the edit
+ * checks don't need. Role-cert expiry is evaluated against the schedule period.
+ */
+export async function getScheduleValidationContext(
+  orgId: string,
+  periodStart: string,
+  periodEnd: string,
+): Promise<ValidationContext> {
+  const supabase = await createClient();
+  const input = await buildSolverInput(orgId, periodStart, periodEnd, supabase);
+  return {
+    laborRules: input.laborRules,
+    employees: input.employees.map((e) => ({
+      id: e.id,
+      isMinor: e.isMinor,
+      roleIds: e.roleIds,
+      permanent: e.permanent,
+      temporary: e.temporary,
+    })),
+  };
+}
