@@ -65,10 +65,14 @@ function temporaryCoversDate(row: TemporaryRow, date: string): boolean {
   return date >= row.effective_date && date <= end;
 }
 
+/** The availability fields {@link isAvailable} reads — the whole `SolverEmployee`
+ * satisfies it, but the Day-50 edit validator passes a lighter shape. */
+export type AvailabilitySource = Pick<SolverEmployee, "permanent" | "temporary">;
+
 /**
  * Whether `employee` can work `slot` under the whitelist model. Pure + total.
  */
-export function isAvailable(employee: SolverEmployee, slot: CoverageSlot): boolean {
+export function isAvailable(employee: AvailabilitySource, slot: CoverageSlot): boolean {
   const win = slotWindow(slot);
 
   const covering = employee.temporary.filter((t) => temporaryCoversDate(t, slot.date));
