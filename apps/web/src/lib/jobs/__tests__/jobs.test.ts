@@ -106,26 +106,49 @@ describe("runDueJobs — failure handling", () => {
 });
 
 describe("claim_due_jobs — atomic claim", () => {
-  it("claims due pending jobs and respects the limit", async () => {
-    await Promise.all([
-      enqueueJob(admin, { type: "noop", payload: { run: RUN } }),
-      enqueueJob(admin, { type: "noop", payload: { run: RUN } }),
-      enqueueJob(admin, { type: "noop", payload: { run: RUN } }),
-    ]);
-
-    const { data, error } = await admin.rpc("claim_due_jobs", { p_limit: 2 });
-    expect(error).toBeNull();
-    const claimed = (data ?? []) as Array<{ status: string; attempts: number; locked_at: string }>;
-    expect(claimed).toHaveLength(2);
-    for (const j of claimed) {
-      expect(j.status).toBe("running");
-      expect(j.attempts).toBe(1);
-      expect(j.locked_at).not.toBeNull();
+  it("claims its own due jobs up to the limit, leaving the rest", async () => {
+    // The CI `jobs` table is shared with the concurrently-running e2e job (and
+    // other PRs), so foreign due rows can appear between the beforeEach wipe and
+    // the claim below. claim_due_jobs is a GLOBAL query, so asserting exact global
+    // counts is racy (the historical flake). Isolate by asserting only on THIS
+    // run's rows by id: back-date them a day so they sort ahead of any app-
+    // enqueued job (which uses run_at≈now), and since claim_due_jobs orders by
+    // run_at, the oldest-due rows it returns are deterministically ours.
+    const past = (sec: number) =>
+      new Date(Date.now() - 86_400_000 + sec * 1000).toISOString();
+    const ids: string[] = [];
+    for (let i = 0; i < 3; i++) {
+      const { data, error } = await admin
+        .from("jobs")
+        .insert({ type: "noop", payload: { run: RUN }, run_at: past(i) })
+        .select("id")
+        .single();
+      if (error) throw error;
+      ids.push((data as { id: string }).id);
     }
 
-    // One of the three remains claimable.
-    const { data: rest } = await admin.rpc("claim_due_jobs", { p_limit: 10 });
-    expect((rest ?? []).length).toBe(1);
+    // Claim 2 → our two oldest, and never more than the limit.
+    const { data: first, error } = await admin.rpc("claim_due_jobs", { p_limit: 2 });
+    expect(error).toBeNull();
+    const firstIds = ((first ?? []) as Array<{ id: string }>).map((j) => j.id);
+    expect(firstIds.length).toBeLessThanOrEqual(2); // respects the limit
+    expect(firstIds).toContain(ids[0]);
+    expect(firstIds).toContain(ids[1]);
+    expect(firstIds).not.toContain(ids[2]);
+
+    // Each claimed row is marked running, attempts incremented, lock held.
+    for (const id of [ids[0], ids[1]]) {
+      const job = await getJob(id);
+      expect(job.status).toBe("running");
+      expect(job.attempts).toBe(1);
+      expect(job.locked_at).not.toBeNull();
+    }
+
+    // The third was untouched and is still claimable on the next pass (SKIP LOCKED).
+    expect((await getJob(ids[2])).status).toBe("pending");
+    const { data: second } = await admin.rpc("claim_due_jobs", { p_limit: 2 });
+    const secondIds = ((second ?? []) as Array<{ id: string }>).map((j) => j.id);
+    expect(secondIds).toContain(ids[2]);
   });
 });
 
