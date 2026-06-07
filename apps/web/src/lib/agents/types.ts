@@ -55,6 +55,12 @@ export type AgentAuditAction =
   | "structured_output"
   | "takeover"
   | "release"
+  // Day 48 — scheduling optimize-loop steps.
+  | "optimize_started"
+  | "solve_attempt"
+  | "remedy_applied"
+  | "escalation_emitted"
+  | "optimize_completed"
   | (string & {});
 
 export type AgentAuditEvent = {
