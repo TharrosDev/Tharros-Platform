@@ -20,7 +20,7 @@ import { employeeSchema, type EmployeeFormState } from "@/lib/employees/schemas"
  * revalidates /settings/employees so the roster refreshes.
  */
 
-const EMPLOYEES_PATH = "/settings/employees";
+const EMPLOYEES_PATH = "/scheduling/employees";
 
 function fieldErrors(error: z.ZodError) {
   return z.flattenError(error).fieldErrors as Record<string, string[] | undefined>;
