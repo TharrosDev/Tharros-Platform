@@ -2,6 +2,10 @@ import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/observability/logger";
+import {
+  resolveSickCallReasonPolicy,
+  type SickCallReasonPolicy,
+} from "@/lib/scheduling/sick-call";
 
 /**
  * Day 53 — the employee's hosted portal schedule (next 2 weeks of published
@@ -67,4 +71,15 @@ export async function getPortalSchedule(
       notes: r.notes ?? null,
     };
   });
+}
+
+/** The org's sick-call reason policy (Day 54), read from org_settings.agent_persona. */
+export async function getSickCallReasonPolicy(orgId: string): Promise<SickCallReasonPolicy> {
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("org_settings")
+    .select("agent_persona")
+    .eq("org_id", orgId)
+    .maybeSingle();
+  return resolveSickCallReasonPolicy((data as { agent_persona?: unknown } | null)?.agent_persona);
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 import { getPortalSession } from "@/lib/portal/session";
-import { getPortalSchedule } from "@/lib/portal/schedule";
+import { getPortalSchedule, getSickCallReasonPolicy } from "@/lib/portal/schedule";
 import { signOutPortal } from "@/lib/portal/actions";
 import { TharrosWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,12 @@ export const dynamic = "force-dynamic";
 
 export default async function PortalSchedulePage() {
   const session = await getPortalSession();
-  const shifts = session ? await getPortalSchedule(session.employeeId, session.orgId) : [];
+  const [shifts, reasonPolicy] = session
+    ? await Promise.all([
+        getPortalSchedule(session.employeeId, session.orgId),
+        getSickCallReasonPolicy(session.orgId),
+      ])
+    : [[], "optional" as const];
 
   return (
     <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
@@ -46,7 +51,11 @@ export default async function PortalSchedulePage() {
           <p className="text-muted-foreground mt-2 type-body">Your shifts for the next two weeks.</p>
 
           <div className="mt-6">
-            <PortalSchedule shifts={shifts} orgName={session.orgName} />
+            <PortalSchedule
+              shifts={shifts}
+              orgName={session.orgName}
+              reasonPolicy={reasonPolicy}
+            />
           </div>
         </div>
       ) : (
