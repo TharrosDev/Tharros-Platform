@@ -38,7 +38,11 @@ async function openShiftWithOffers(
   days: number,
   opts: { withSickCall?: boolean } = {},
 ): Promise<{ shiftId: string; sickCallId: string | null; offerIds: string[] }> {
-  const startsAt = isoIn(days);
+  // Fixed 09:00–13:00 UTC window (vs the current time-of-day) so the shift stays
+  // inside a single UTC day and the whole-day availability grants it deterministically
+  // — `isoIn(days)` would cross midnight when CI runs late in the UTC day.
+  const date = isoIn(days).slice(0, 10);
+  const startsAt = `${date}T09:00:00Z`;
   const { data: shift, error: sErr } = await admin
     .from("shifts")
     .insert({
@@ -46,7 +50,7 @@ async function openShiftWithOffers(
       schedule_id: scheduleId,
       employee_id: null,
       starts_at: startsAt,
-      ends_at: new Date(Date.parse(startsAt) + 4 * 60 * 60 * 1000).toISOString(),
+      ends_at: `${date}T13:00:00Z`,
       break_minutes: 0,
       status: "open",
     })
@@ -161,16 +165,17 @@ afterAll(async () => {
 
 describe("openReplacement", () => {
   it("offers an open shift to every eligible employee, moves the sick-call to filling, and arms the timeout", async () => {
-    // A fresh open shift (no offers yet) + a sick-call to fill.
-    const startsAt = isoIn(6);
+    // A fresh open shift (no offers yet) + a sick-call to fill. Fixed 09:00–13:00 UTC
+    // window so the whole-day availability grants it regardless of CI's wall clock.
+    const date = isoIn(6).slice(0, 10);
     const { data: shift } = await admin
       .from("shifts")
       .insert({
         org_id: orgA,
         schedule_id: scheduleId,
         employee_id: null,
-        starts_at: startsAt,
-        ends_at: new Date(Date.parse(startsAt) + 4 * 60 * 60 * 1000).toISOString(),
+        starts_at: `${date}T09:00:00Z`,
+        ends_at: `${date}T13:00:00Z`,
         break_minutes: 0,
         status: "open",
       })

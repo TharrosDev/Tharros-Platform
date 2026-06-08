@@ -29,9 +29,15 @@ let empC = "";
 let scheduleId = "";
 let roleId = "";
 
-/** A published shift `days` out, assigned to `employeeId`, optionally requiring a role. */
+/**
+ * A published shift `days` out at a fixed 09:00–13:00 UTC window, assigned to
+ * `employeeId`, optionally requiring a role. The fixed wall clock (vs the current
+ * time-of-day) keeps the shift inside a single UTC day so the whole-day availability
+ * grants it deterministically — `isoIn(days)` would cross midnight when CI runs late
+ * in the UTC day, flakily making nobody eligible.
+ */
 async function shift(employeeId: string, days: number, roleCertId: string | null = null): Promise<string> {
-  const startsAt = isoIn(days);
+  const date = isoIn(days).slice(0, 10);
   const { data, error } = await admin
     .from("shifts")
     .insert({
@@ -39,8 +45,8 @@ async function shift(employeeId: string, days: number, roleCertId: string | null
       schedule_id: scheduleId,
       employee_id: employeeId,
       role_certification_id: roleCertId,
-      starts_at: startsAt,
-      ends_at: new Date(Date.parse(startsAt) + 4 * 60 * 60 * 1000).toISOString(),
+      starts_at: `${date}T09:00:00Z`,
+      ends_at: `${date}T13:00:00Z`,
       break_minutes: 0,
       status: "published",
     })
