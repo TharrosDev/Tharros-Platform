@@ -51,6 +51,12 @@ export default async function SchedulingPage() {
             >
               Availability
             </Link>
+            <Link
+              href="/scheduling/conversations"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Conversations
+            </Link>
             <Link href="/scheduling/setup" className={buttonVariants({ variant: "outline" })}>
               Edit setup
             </Link>
