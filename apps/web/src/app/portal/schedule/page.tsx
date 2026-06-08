@@ -10,6 +10,7 @@ import {
   getProposableCoworkers,
   getIncomingSwaps,
   getOpenSwaps,
+  getMyTimeOff,
 } from "@/lib/portal/schedule";
 import { signOutPortal } from "@/lib/portal/actions";
 import { TharrosWordmark } from "@/components/brand/logo";
@@ -17,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { PortalSchedule } from "@/components/portal/portal-schedule";
 import { ReplacementOffers } from "@/components/portal/replacement-offers";
 import { SwapInbox } from "@/components/portal/swap-inbox";
+import { TimeOffSection } from "@/components/portal/time-off-section";
 
 export const metadata: Metadata = {
   title: "My schedule",
@@ -27,7 +29,7 @@ export const dynamic = "force-dynamic";
 
 export default async function PortalSchedulePage() {
   const session = await getPortalSession();
-  const [shifts, offers, reasonPolicy, coworkers, incomingSwaps, openSwaps] = session
+  const [shifts, offers, reasonPolicy, coworkers, incomingSwaps, openSwaps, timeOff] = session
     ? await Promise.all([
         getPortalSchedule(session.employeeId, session.orgId),
         getOpenOffers(session.employeeId, session.orgId),
@@ -35,8 +37,9 @@ export default async function PortalSchedulePage() {
         getProposableCoworkers(session.employeeId, session.orgId),
         getIncomingSwaps(session.employeeId, session.orgId),
         getOpenSwaps(session.employeeId, session.orgId),
+        getMyTimeOff(session.employeeId, session.orgId),
       ])
-    : [[], [], "optional" as const, [], [], []];
+    : [[], [], "optional" as const, [], [], [], []];
 
   return (
     <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
@@ -66,6 +69,7 @@ export default async function PortalSchedulePage() {
           <div className="mt-6">
             <ReplacementOffers offers={offers} />
             <SwapInbox incoming={incomingSwaps} open={openSwaps} />
+            <TimeOffSection requests={timeOff} />
             <PortalSchedule
               shifts={shifts}
               orgName={session.orgName}

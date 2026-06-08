@@ -473,6 +473,57 @@ export async function denySwap(args: { requestId: string }): Promise<CalendarAct
   return { ok: true };
 }
 
+/** Day 57 — manager approves a pending time-off request. */
+export async function approveTimeOff(args: { requestId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.requestId) return { ok: false, message: "Missing request." };
+
+  const { approveTimeOff: approveEngine } = await import("./time-off");
+  const result = await approveEngine(createAdminClient(), {
+    orgId: auth.orgId,
+    requestId: args.requestId,
+    reviewerUserId: auth.userId,
+  });
+  if (!result.ok) return { ok: false, message: result.message };
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
+/** Day 57 — manager denies a pending time-off request. */
+export async function denyTimeOff(args: { requestId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.requestId) return { ok: false, message: "Missing request." };
+
+  const { denyTimeOff: denyEngine } = await import("./time-off");
+  const result = await denyEngine(createAdminClient(), {
+    orgId: auth.orgId,
+    requestId: args.requestId,
+    reviewerUserId: auth.userId,
+  });
+  if (!result.ok) return { ok: false, message: result.message };
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
+/** Day 57 — manager reverses an already-approved (incl. auto-approved) time-off request. */
+export async function reverseTimeOff(args: { requestId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.requestId) return { ok: false, message: "Missing request." };
+
+  const { reverseTimeOff: reverseEngine } = await import("./time-off");
+  const result = await reverseEngine(createAdminClient(), {
+    orgId: auth.orgId,
+    requestId: args.requestId,
+    reviewerUserId: auth.userId,
+  });
+  if (!result.ok) return { ok: false, message: result.message };
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
 /** Generate a fresh draft for a period — delegates to the Day-49 panel. */
 export async function generateDraftSchedule(args: {
   periodStart: string;

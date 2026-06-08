@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeftRight,
+  CalendarClock,
   CalendarRange,
   CheckCircle2,
   Clock,
@@ -39,16 +40,20 @@ import {
 import {
   addShift,
   approveSwap,
+  approveTimeOff,
   assignShift,
   deleteShift,
   denySwap,
+  denyTimeOff,
   findReplacement,
   generateDraftSchedule,
   publishSchedule,
   reopenSchedule,
+  reverseTimeOff,
   toggleShiftLock,
   updateShiftTimes,
 } from "@/lib/scheduling/calendar-actions";
+import type { PendingTimeOff } from "@/lib/scheduling/time-off";
 import type {
   AuditEntry,
   CalendarShift,
@@ -109,6 +114,7 @@ export function ScheduleCalendar({
   auditTrail,
   canManage,
   escalatedSwaps = [],
+  timeOffRequests = [],
 }: {
   schedule: DraftSchedule | null;
   shifts: CalendarShift[];
@@ -118,6 +124,7 @@ export function ScheduleCalendar({
   auditTrail: AuditEntry[];
   canManage: boolean;
   escalatedSwaps?: EscalatedSwap[];
+  timeOffRequests?: PendingTimeOff[];
 }) {
   // Server truth: edits persist via server actions, then `router.refresh()` re-runs
   // the page and feeds fresh props — no local mirror of the shift list to drift.
@@ -128,6 +135,8 @@ export function ScheduleCalendar({
   const [adding, setAdding] = React.useState<{ day: string; employeeId: string | null } | null>(null);
   const [showHistory, setShowHistory] = React.useState(false);
   const [showSwaps, setShowSwaps] = React.useState(false);
+  const [showTimeOff, setShowTimeOff] = React.useState(false);
+  const pendingTimeOffCount = timeOffRequests.filter((r) => r.status === "pending").length;
 
   const roleName = React.useMemo(() => new Map(roles.map((r) => [r.id, r.name])), [roles]);
 
@@ -235,6 +244,16 @@ export function ScheduleCalendar({
               </Badge>
             </Button>
           ) : null}
+          {canManage && timeOffRequests.length > 0 ? (
+            <Button variant="outline" size="sm" onClick={() => setShowTimeOff(true)}>
+              <CalendarClock className="size-4" /> Time off
+              {pendingTimeOffCount > 0 ? (
+                <Badge variant="warning" className="ml-1">
+                  {pendingTimeOffCount}
+                </Badge>
+              ) : null}
+            </Button>
+          ) : null}
           {canManage && isPublished ? (
             <ReopenButton scheduleId={schedule.id} />
           ) : null}
@@ -334,6 +353,10 @@ export function ScheduleCalendar({
 
       {showSwaps ? (
         <SwapReviewDialog swaps={escalatedSwaps} onClose={() => setShowSwaps(false)} />
+      ) : null}
+
+      {showTimeOff ? (
+        <TimeOffReviewDialog requests={timeOffRequests} onClose={() => setShowTimeOff(false)} />
       ) : null}
 
       {adding ? (
@@ -1055,6 +1078,116 @@ function SwapReviewDialog({ swaps, onClose }: { swaps: EscalatedSwap[]; onClose:
                     <Button type="button" size="sm" variant="ghost" onClick={() => act(s.requestId, false)} disabled={busy}>
                       Deny
                     </Button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+const TIME_OFF_BAND_LABEL: Record<string, string> = {
+  low: "Low impact",
+  medium: "Medium impact",
+  high: "High impact",
+};
+
+/** "Jun 15 – Jun 18" (or "Jun 15" for a single day) from YYYY-MM-DD. */
+function timeOffRangeLabel(startDate: string, endDate: string): string {
+  const fmt = (d: string) =>
+    new Date(`${d}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  return startDate === endDate ? fmt(startDate) : `${fmt(startDate)} – ${fmt(endDate)}`;
+}
+
+function TimeOffReviewDialog({
+  requests,
+  onClose,
+}: {
+  requests: PendingTimeOff[];
+  onClose: () => void;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const [pendingId, setPendingId] = React.useState<string | null>(null);
+  const [, start] = React.useTransition();
+
+  function act(requestId: string, action: "approve" | "deny" | "reverse") {
+    setPendingId(requestId);
+    start(async () => {
+      const res =
+        action === "approve"
+          ? await approveTimeOff({ requestId })
+          : action === "deny"
+            ? await denyTimeOff({ requestId })
+            : await reverseTimeOff({ requestId });
+      setPendingId(null);
+      const done = action === "approve" ? "approved" : action === "reverse" ? "reversed" : "denied";
+      toast.add({
+        title: "Time off",
+        description: res.ok ? `Request ${done}.` : (res.message ?? "Couldn't update."),
+      });
+      if (res.ok) router.refresh();
+    });
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Time-off requests</DialogTitle>
+          <DialogDescription>
+            The agent assessed staffing impact. Low-impact requests are auto-approved — you can
+            reverse one if you need the cover.
+          </DialogDescription>
+        </DialogHeader>
+        {requests.length === 0 ? (
+          <p className="text-muted-foreground text-sm">Nothing to review.</p>
+        ) : (
+          <ul className="max-h-[24rem] space-y-3 overflow-y-auto">
+            {requests.map((r) => {
+              const busy = pendingId === r.id;
+              const approved = r.status === "approved";
+              return (
+                <li key={r.id} className="border-border rounded-lg border p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm">
+                      <strong>{r.employeeName}</strong>{" "}
+                      <span className="tabular-nums">{timeOffRangeLabel(r.startDate, r.endDate)}</span>
+                      {approved ? <span className="text-emerald-600 dark:text-emerald-400"> · approved{r.autoDecided ? " (auto)" : ""}</span> : null}
+                    </p>
+                    {r.impactBand ? (
+                      <Badge variant={r.impactBand === "high" ? "warning" : "secondary"} className="shrink-0">
+                        {TIME_OFF_BAND_LABEL[r.impactBand] ?? r.impactBand}
+                      </Badge>
+                    ) : null}
+                  </div>
+                  {r.reason ? <p className="text-muted-foreground mt-1 text-xs">{r.reason}</p> : null}
+                  {r.recommendation ? (
+                    <p className="text-muted-foreground mt-1 text-xs italic">{r.recommendation}</p>
+                  ) : null}
+                  <div className="mt-2 flex gap-2">
+                    {approved ? (
+                      <Button type="button" size="sm" variant="ghost" onClick={() => act(r.id, "reverse")} disabled={busy}>
+                        {busy ? "…" : "Reverse"}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button type="button" size="sm" onClick={() => act(r.id, "approve")} disabled={busy}>
+                          {busy ? "…" : "Approve"}
+                        </Button>
+                        <Button type="button" size="sm" variant="ghost" onClick={() => act(r.id, "deny")} disabled={busy}>
+                          Deny
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </li>
               );
