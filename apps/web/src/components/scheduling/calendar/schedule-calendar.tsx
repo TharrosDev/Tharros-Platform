@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
+  ArrowLeftRight,
   CalendarRange,
   CheckCircle2,
   Clock,
@@ -37,8 +38,10 @@ import {
 } from "@/components/ui/select";
 import {
   addShift,
+  approveSwap,
   assignShift,
   deleteShift,
+  denySwap,
   findReplacement,
   generateDraftSchedule,
   publishSchedule,
@@ -50,6 +53,7 @@ import type {
   AuditEntry,
   CalendarShift,
   DraftSchedule,
+  EscalatedSwap,
   RoleCertification,
 } from "@/lib/scheduling/queries";
 import { validateEdits, type EditShift, type EditViolation, type ValidationContext } from "@/lib/scheduling/validation";
@@ -104,6 +108,7 @@ export function ScheduleCalendar({
   validation,
   auditTrail,
   canManage,
+  escalatedSwaps = [],
 }: {
   schedule: DraftSchedule | null;
   shifts: CalendarShift[];
@@ -112,6 +117,7 @@ export function ScheduleCalendar({
   validation: ValidationContext | null;
   auditTrail: AuditEntry[];
   canManage: boolean;
+  escalatedSwaps?: EscalatedSwap[];
 }) {
   // Server truth: edits persist via server actions, then `router.refresh()` re-runs
   // the page and feeds fresh props — no local mirror of the shift list to drift.
@@ -121,6 +127,7 @@ export function ScheduleCalendar({
   const [editing, setEditing] = React.useState<CalendarShift | null>(null);
   const [adding, setAdding] = React.useState<{ day: string; employeeId: string | null } | null>(null);
   const [showHistory, setShowHistory] = React.useState(false);
+  const [showSwaps, setShowSwaps] = React.useState(false);
 
   const roleName = React.useMemo(() => new Map(roles.map((r) => [r.id, r.name])), [roles]);
 
@@ -220,6 +227,14 @@ export function ScheduleCalendar({
           <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
             <History className="size-4" /> History
           </Button>
+          {canManage && escalatedSwaps.length > 0 ? (
+            <Button variant="outline" size="sm" onClick={() => setShowSwaps(true)}>
+              <ArrowLeftRight className="size-4" /> Swaps
+              <Badge variant="warning" className="ml-1">
+                {escalatedSwaps.length}
+              </Badge>
+            </Button>
+          ) : null}
           {canManage && isPublished ? (
             <ReopenButton scheduleId={schedule.id} />
           ) : null}
@@ -315,6 +330,10 @@ export function ScheduleCalendar({
 
       {showHistory ? (
         <HistoryDialog entries={auditTrail} employees={employees} onClose={() => setShowHistory(false)} />
+      ) : null}
+
+      {showSwaps ? (
+        <SwapReviewDialog swaps={escalatedSwaps} onClose={() => setShowSwaps(false)} />
       ) : null}
 
       {adding ? (
@@ -927,6 +946,12 @@ const ACTION_LABEL: Record<string, string> = {
   "shift.locked": "Shift locked",
   "shift.unlocked": "Shift unlocked",
   "replacement.requested": "Replacement requested",
+  "shift_swap.requested": "Swap requested",
+  "shift_swap.escalated": "Swap escalated",
+  "shift_swap.approved": "Swap approved",
+  "shift_swap.applied": "Swap applied",
+  "shift_swap.declined": "Swap declined",
+  "shift_swap.denied": "Swap denied",
 };
 
 function HistoryDialog({
@@ -966,6 +991,74 @@ function HistoryDialog({
                 </div>
               </li>
             ))}
+          </ul>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function SwapReviewDialog({ swaps, onClose }: { swaps: EscalatedSwap[]; onClose: () => void }) {
+  const router = useRouter();
+  const toast = useToast();
+  const [pendingId, setPendingId] = React.useState<string | null>(null);
+  const [, start] = React.useTransition();
+
+  function act(requestId: string, approve: boolean) {
+    setPendingId(requestId);
+    start(async () => {
+      const res = approve ? await approveSwap({ requestId }) : await denySwap({ requestId });
+      setPendingId(null);
+      toast.add({
+        title: "Swap",
+        description: res.ok ? (approve ? "Swap approved." : "Swap denied.") : (res.message ?? "Couldn't update."),
+      });
+      if (res.ok) router.refresh();
+    });
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Shift swaps to review</DialogTitle>
+          <DialogDescription>Swaps an agent couldn&apos;t auto-approve. Approve to apply, or deny.</DialogDescription>
+        </DialogHeader>
+        {swaps.length === 0 ? (
+          <p className="text-muted-foreground text-sm">Nothing to review.</p>
+        ) : (
+          <ul className="max-h-[24rem] space-y-3 overflow-y-auto">
+            {swaps.map((s) => {
+              const busy = pendingId === s.requestId;
+              return (
+                <li key={s.requestId} className="border-border rounded-lg border p-3">
+                  <p className="text-sm">
+                    <strong>{s.claimantName}</strong> would take <strong>{s.requesterName}</strong>&apos;s{" "}
+                    <span className="tabular-nums">{s.shiftLabel}</span> shift
+                    {s.tradeForLabel ? (
+                      <>
+                        {" "}
+                        in exchange for their <span className="tabular-nums">{s.tradeForLabel}</span> shift
+                      </>
+                    ) : null}
+                    .
+                  </p>
+                  <div className="mt-2 flex gap-2">
+                    <Button type="button" size="sm" onClick={() => act(s.requestId, true)} disabled={busy}>
+                      {busy ? "…" : "Approve"}
+                    </Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => act(s.requestId, false)} disabled={busy}>
+                      Deny
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
         <DialogFooter>

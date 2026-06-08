@@ -211,7 +211,7 @@ const num = (v: number | string | null): number => (v === null ? 0 : typeof v ==
 /** Window (± a week) of shifts to feed the labor checks around the open shift. */
 const LABOR_WINDOW_MS = 8 * 24 * 60 * 60 * 1000;
 
-async function readLaborRules(admin: SupabaseClient, orgId: string): Promise<LaborRules> {
+export async function readLaborRules(admin: SupabaseClient, orgId: string): Promise<LaborRules> {
   const { data } = await admin
     .from("labor_rules")
     .select("*")

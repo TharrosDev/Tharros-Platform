@@ -3,12 +3,20 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 import { getPortalSession } from "@/lib/portal/session";
-import { getPortalSchedule, getOpenOffers, getSickCallReasonPolicy } from "@/lib/portal/schedule";
+import {
+  getPortalSchedule,
+  getOpenOffers,
+  getSickCallReasonPolicy,
+  getProposableCoworkers,
+  getIncomingSwaps,
+  getOpenSwaps,
+} from "@/lib/portal/schedule";
 import { signOutPortal } from "@/lib/portal/actions";
 import { TharrosWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { PortalSchedule } from "@/components/portal/portal-schedule";
 import { ReplacementOffers } from "@/components/portal/replacement-offers";
+import { SwapInbox } from "@/components/portal/swap-inbox";
 
 export const metadata: Metadata = {
   title: "My schedule",
@@ -19,13 +27,16 @@ export const dynamic = "force-dynamic";
 
 export default async function PortalSchedulePage() {
   const session = await getPortalSession();
-  const [shifts, offers, reasonPolicy] = session
+  const [shifts, offers, reasonPolicy, coworkers, incomingSwaps, openSwaps] = session
     ? await Promise.all([
         getPortalSchedule(session.employeeId, session.orgId),
         getOpenOffers(session.employeeId, session.orgId),
         getSickCallReasonPolicy(session.orgId),
+        getProposableCoworkers(session.employeeId, session.orgId),
+        getIncomingSwaps(session.employeeId, session.orgId),
+        getOpenSwaps(session.employeeId, session.orgId),
       ])
-    : [[], [], "optional" as const];
+    : [[], [], "optional" as const, [], [], []];
 
   return (
     <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
@@ -54,10 +65,12 @@ export default async function PortalSchedulePage() {
 
           <div className="mt-6">
             <ReplacementOffers offers={offers} />
+            <SwapInbox incoming={incomingSwaps} open={openSwaps} />
             <PortalSchedule
               shifts={shifts}
               orgName={session.orgName}
               reasonPolicy={reasonPolicy}
+              coworkers={coworkers}
             />
           </div>
         </div>

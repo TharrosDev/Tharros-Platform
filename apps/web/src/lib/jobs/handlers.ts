@@ -11,6 +11,10 @@ import {
   replacementOfferNotifyHandler,
   replacementTimeoutHandler,
 } from "@/lib/scheduling/replacement-handlers";
+import {
+  swapProposalNotifyHandler,
+  swapResultNotifyHandler,
+} from "@/lib/scheduling/swap-handlers";
 
 /**
  * Day 38 — the job handler registry. Maps a job `type` to the side effect that
@@ -40,6 +44,8 @@ const HANDLERS: Record<string, JobHandler> = {
   "shift-reminder": shiftReminderHandler,
   "replacement-offer-notify": replacementOfferNotifyHandler,
   "replacement-offer-timeout": replacementTimeoutHandler,
+  "swap-proposal-notify": swapProposalNotifyHandler,
+  "swap-result-notify": swapResultNotifyHandler,
 };
 
 /** The handler for a job type, or null if none is registered (→ treated as failure). */

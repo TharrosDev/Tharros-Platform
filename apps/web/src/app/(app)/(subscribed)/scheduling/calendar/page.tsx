@@ -5,6 +5,7 @@ import { ScheduleCalendar } from "@/components/scheduling/calendar/schedule-cale
 import { getOrgContext } from "@/lib/org/queries";
 import { getRoster } from "@/lib/employees/queries";
 import {
+  getEscalatedSwaps,
   getLatestSchedule,
   getRoleCertifications,
   getScheduleAuditTrail,
@@ -13,6 +14,7 @@ import {
   getScheduleValidationContext,
   type AuditEntry,
   type CalendarShift,
+  type EscalatedSwap,
 } from "@/lib/scheduling/queries";
 import type { ValidationContext } from "@/lib/scheduling/validation";
 
@@ -36,6 +38,7 @@ export default async function ScheduleCalendarPage() {
     getRoleCertifications(activeOrg.id),
   ]);
   const canManage = roster.viewerRole === "owner" || roster.viewerRole === "admin";
+  const escalatedSwaps: EscalatedSwap[] = canManage ? await getEscalatedSwaps(activeOrg.id) : [];
 
   let shifts: CalendarShift[] = [];
   let validation: ValidationContext | null = null;
@@ -62,6 +65,7 @@ export default async function ScheduleCalendarPage() {
         validation={validation}
         auditTrail={auditTrail}
         canManage={canManage}
+        escalatedSwaps={escalatedSwaps}
       />
     </div>
   );

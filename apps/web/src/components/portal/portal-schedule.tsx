@@ -2,9 +2,10 @@ import { CalendarPlus, Download } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { googleCalendarUrl } from "@/lib/scheduling/ics";
-import type { PortalShift } from "@/lib/portal/schedule";
+import type { PortalShift, ProposableCoworker } from "@/lib/portal/schedule";
 import type { SickCallReasonPolicy } from "@/lib/scheduling/sick-call";
 import { SickCallButton } from "@/components/portal/sick-call-button";
+import { SwapProposalButton } from "@/components/portal/swap-proposal-button";
 
 /**
  * Day 53 — the employee's hosted schedule list. Server component (no
@@ -36,10 +37,12 @@ export function PortalSchedule({
   shifts,
   orgName,
   reasonPolicy,
+  coworkers,
 }: {
   shifts: PortalShift[];
   orgName: string;
   reasonPolicy: SickCallReasonPolicy;
+  coworkers: ProposableCoworker[];
 }) {
   if (shifts.length === 0) {
     return (
@@ -91,11 +94,16 @@ export function PortalSchedule({
                     <p className="text-muted-foreground text-xs">{s.breakMinutes} min break</p>
                   ) : null}
                   {s.notes ? <p className="text-muted-foreground mt-1 text-xs">{s.notes}</p> : null}
-                  <div className="mt-2">
+                  <div className="mt-2 flex items-center gap-4">
                     <SickCallButton
                       shiftId={s.id}
                       shiftLabel={`${fmtDayHeading.format(new Date(Date.parse(`${dayKey(s.startsAt)}T00:00:00Z`)))}, ${timeRange(s.startsAt, s.endsAt)}`}
                       reasonPolicy={reasonPolicy}
+                    />
+                    <SwapProposalButton
+                      shiftId={s.id}
+                      shiftLabel={`${fmtDayHeading.format(new Date(Date.parse(`${dayKey(s.startsAt)}T00:00:00Z`)))}, ${timeRange(s.startsAt, s.endsAt)}`}
+                      coworkers={coworkers}
                     />
                   </div>
                 </div>

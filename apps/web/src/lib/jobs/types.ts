@@ -14,7 +14,9 @@ export type JobType =
   | "schedule-delivery"
   | "shift-reminder"
   | "replacement-offer-notify"
-  | "replacement-offer-timeout";
+  | "replacement-offer-timeout"
+  | "swap-proposal-notify"
+  | "swap-result-notify";
 
 /** A claimed job, mapped from the DB row to camelCase for handlers. */
 export type Job = {
