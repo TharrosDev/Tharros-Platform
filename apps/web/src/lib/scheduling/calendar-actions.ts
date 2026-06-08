@@ -22,8 +22,14 @@ import { getOrgContext } from "@/lib/org/queries";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { logger } from "@/lib/observability/logger";
 
-import { getScheduleShifts, getScheduleValidationContext, type CalendarShift } from "./queries";
+import {
+  getPublishedVersionCount,
+  getScheduleShifts,
+  getScheduleValidationContext,
+  type CalendarShift,
+} from "./queries";
 import { validateEdits, type EditShift, type ValidationContext } from "./validation";
+import { publishGate } from "./publish";
 
 export type CalendarActionResult = { ok: true } | { ok: false; message: string };
 
@@ -54,15 +60,20 @@ function toEditShift(s: CalendarShift): EditShift {
   };
 }
 
-/** The schedule a shift belongs to + that schedule's current shifts + ctx. */
-async function loadSchedule(
-  scheduleId: string,
-  orgId: string,
-): Promise<{ periodStart: string; periodEnd: string; shifts: CalendarShift[]; ctx: ValidationContext } | null> {
+type LoadedSchedule = {
+  status: string;
+  periodStart: string;
+  periodEnd: string;
+  shifts: CalendarShift[];
+  ctx: ValidationContext;
+};
+
+/** The schedule a shift belongs to + its status + current shifts + ctx. */
+async function loadSchedule(scheduleId: string, orgId: string): Promise<LoadedSchedule | null> {
   const supabase = await createClient();
   const { data: sched } = await supabase
     .from("schedules")
-    .select("period_start, period_end")
+    .select("status, period_start, period_end")
     .eq("id", scheduleId)
     .maybeSingle();
   if (!sched) return null;
@@ -72,7 +83,20 @@ async function loadSchedule(
     getScheduleShifts(scheduleId),
     getScheduleValidationContext(orgId, periodStart, periodEnd),
   ]);
-  return { periodStart, periodEnd, shifts, ctx };
+  return { status: sched.status as string, periodStart, periodEnd, shifts, ctx };
+}
+
+const REOPEN_TO_EDIT = "Reopen the schedule before editing it.";
+
+/** A schedule's status, or null if it no longer exists. */
+async function scheduleStatusOf(scheduleId: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("schedules")
+    .select("status")
+    .eq("id", scheduleId)
+    .maybeSingle();
+  return (data?.status as string | undefined) ?? null;
 }
 
 /**
@@ -97,13 +121,21 @@ function checkNoNewHardViolation(
   return null;
 }
 
-/** Audit a calendar mutation (service-role; the log is write-restricted). */
+/**
+ * Audit a calendar mutation (service-role; the log is write-restricted). Always
+ * stamps `schedule_id` into `detail` so the Day-51 history reader can gather every
+ * event for a schedule (including its shifts) via `detail->>schedule_id`.
+ */
 async function audit(
   orgId: string,
   userId: string,
   action: string,
-  entityId: string,
-  detail: Record<string, unknown>,
+  opts: {
+    entityType: "schedule" | "shift";
+    entityId: string;
+    scheduleId: string;
+    detail?: Record<string, unknown>;
+  },
 ): Promise<void> {
   try {
     const admin = createAdminClient();
@@ -112,12 +144,12 @@ async function audit(
       actor_type: "manager",
       actor_id: userId,
       action,
-      entity_type: "shift",
-      entity_id: entityId,
-      detail,
+      entity_type: opts.entityType,
+      entity_id: opts.entityId,
+      detail: { schedule_id: opts.scheduleId, ...(opts.detail ?? {}) },
     });
   } catch (err) {
-    logger.error("calendar audit failed", { err, action, entityId });
+    logger.error("calendar audit failed", { err, action, entityId: opts.entityId });
   }
 }
 
@@ -141,6 +173,7 @@ export async function assignShift(args: {
 
   const loaded = await loadSchedule(shiftRow.schedule_id as string, auth.orgId);
   if (!loaded) return { ok: false, message: "That schedule no longer exists." };
+  if (loaded.status !== "draft") return { ok: false, message: REOPEN_TO_EDIT };
 
   const next = loaded.shifts.map((s) =>
     s.id === args.shiftId ? { ...toEditShift(s), employeeId: args.employeeId } : toEditShift(s),
@@ -157,8 +190,11 @@ export async function assignShift(args: {
     return { ok: false, message: "Couldn't save the change. Please try again." };
   }
 
-  await audit(auth.orgId, auth.userId, "shift.assigned", args.shiftId, {
-    employee_id: args.employeeId,
+  await audit(auth.orgId, auth.userId, "shift.assigned", {
+    entityType: "shift",
+    entityId: args.shiftId,
+    scheduleId: shiftRow.schedule_id as string,
+    detail: { employee_id: args.employeeId },
   });
   revalidatePath(CALENDAR_PATH);
   return { ok: true };
@@ -196,6 +232,7 @@ export async function updateShiftTimes(args: {
 
   const loaded = await loadSchedule(shiftRow.schedule_id as string, auth.orgId);
   if (!loaded) return { ok: false, message: "That schedule no longer exists." };
+  if (loaded.status !== "draft") return { ok: false, message: REOPEN_TO_EDIT };
 
   const next = loaded.shifts.map((s) =>
     s.id === args.shiftId
@@ -214,10 +251,11 @@ export async function updateShiftTimes(args: {
     return { ok: false, message: "Couldn't save the change. Please try again." };
   }
 
-  await audit(auth.orgId, auth.userId, "shift.retimed", args.shiftId, {
-    starts_at: args.startsAt,
-    ends_at: args.endsAt,
-    break_minutes: breakMinutes,
+  await audit(auth.orgId, auth.userId, "shift.retimed", {
+    entityType: "shift",
+    entityId: args.shiftId,
+    scheduleId: shiftRow.schedule_id as string,
+    detail: { starts_at: args.startsAt, ends_at: args.endsAt, break_minutes: breakMinutes },
   });
   revalidatePath(CALENDAR_PATH);
   return { ok: true };
@@ -245,6 +283,7 @@ export async function addShift(args: {
 
   const loaded = await loadSchedule(args.scheduleId, auth.orgId);
   if (!loaded) return { ok: false, message: "That schedule no longer exists." };
+  if (loaded.status !== "draft") return { ok: false, message: REOPEN_TO_EDIT };
 
   const draft: EditShift = {
     id: "new",
@@ -278,9 +317,11 @@ export async function addShift(args: {
     return { ok: false, message: "Couldn't add the shift. Please try again." };
   }
 
-  await audit(auth.orgId, auth.userId, "shift.added", inserted.id as string, {
-    schedule_id: args.scheduleId,
-    employee_id: args.employeeId,
+  await audit(auth.orgId, auth.userId, "shift.added", {
+    entityType: "shift",
+    entityId: inserted.id as string,
+    scheduleId: args.scheduleId,
+    detail: { employee_id: args.employeeId },
   });
   revalidatePath(CALENDAR_PATH);
   return { ok: true };
@@ -295,11 +336,14 @@ export async function deleteShift(args: { shiftId: string }): Promise<CalendarAc
   const supabase = await createClient();
   const { data: shiftRow } = await supabase
     .from("shifts")
-    .select("id, locked")
+    .select("id, schedule_id, locked")
     .eq("id", args.shiftId)
     .maybeSingle();
   if (!shiftRow) return { ok: true }; // already gone
   if (shiftRow.locked) return { ok: false, message: "Unlock the shift before deleting it." };
+  if ((await scheduleStatusOf(shiftRow.schedule_id as string)) !== "draft") {
+    return { ok: false, message: REOPEN_TO_EDIT };
+  }
 
   const { error } = await supabase.from("shifts").delete().eq("id", args.shiftId);
   if (error) {
@@ -307,7 +351,11 @@ export async function deleteShift(args: { shiftId: string }): Promise<CalendarAc
     return { ok: false, message: "Couldn't delete the shift. Please try again." };
   }
 
-  await audit(auth.orgId, auth.userId, "shift.deleted", args.shiftId, {});
+  await audit(auth.orgId, auth.userId, "shift.deleted", {
+    entityType: "shift",
+    entityId: args.shiftId,
+    scheduleId: shiftRow.schedule_id as string,
+  });
   revalidatePath(CALENDAR_PATH);
   return { ok: true };
 }
@@ -322,6 +370,16 @@ export async function toggleShiftLock(args: {
   if (!args.shiftId) return { ok: false, message: "Missing shift." };
 
   const supabase = await createClient();
+  const { data: shiftRow } = await supabase
+    .from("shifts")
+    .select("id, schedule_id")
+    .eq("id", args.shiftId)
+    .maybeSingle();
+  if (!shiftRow) return { ok: false, message: "That shift no longer exists." };
+  if ((await scheduleStatusOf(shiftRow.schedule_id as string)) !== "draft") {
+    return { ok: false, message: REOPEN_TO_EDIT };
+  }
+
   const { error } = await supabase
     .from("shifts")
     .update({ locked: args.locked })
@@ -331,7 +389,11 @@ export async function toggleShiftLock(args: {
     return { ok: false, message: "Couldn't update the lock. Please try again." };
   }
 
-  await audit(auth.orgId, auth.userId, args.locked ? "shift.locked" : "shift.unlocked", args.shiftId, {});
+  await audit(auth.orgId, auth.userId, args.locked ? "shift.locked" : "shift.unlocked", {
+    entityType: "shift",
+    entityId: args.shiftId,
+    scheduleId: shiftRow.schedule_id as string,
+  });
   revalidatePath(CALENDAR_PATH);
   return { ok: true };
 }
@@ -344,6 +406,120 @@ export async function generateDraftSchedule(args: {
   const { runSchedulePanel } = await import("./panel/panel-actions");
   const res = await runSchedulePanel({ periodStart: args.periodStart, periodEnd: args.periodEnd });
   if (!res.ok) return { ok: false, message: res.message };
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
+/**
+ * Publish a draft schedule: gate on constraints, snapshot the shift set as a
+ * `published` version, flip the schedule + its shifts to published, and audit it.
+ * Hard violations always block; open shifts / soft warnings need `override`.
+ */
+export async function publishSchedule(args: {
+  scheduleId: string;
+  override?: boolean;
+  note?: string;
+}): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.scheduleId) return { ok: false, message: "Missing schedule." };
+
+  const loaded = await loadSchedule(args.scheduleId, auth.orgId);
+  if (!loaded) return { ok: false, message: "That schedule no longer exists." };
+  if (loaded.status === "published") return { ok: false, message: "This schedule is already published." };
+
+  const violations = validateEdits(loaded.shifts.map(toEditShift), loaded.ctx);
+  const openShiftCount = loaded.shifts.filter((s) => s.employeeId === null).length;
+  const gate = publishGate(violations, openShiftCount, args.override === true);
+  if (!gate.allowed) return { ok: false, message: gate.blockReason ?? "Can't publish yet." };
+
+  const supabase = await createClient();
+  const publishedAt = new Date().toISOString();
+
+  // 1. Flip the schedule to published.
+  const { error: schedErr } = await supabase
+    .from("schedules")
+    .update({ status: "published", published_at: publishedAt, updated_at: publishedAt })
+    .eq("id", args.scheduleId);
+  if (schedErr) {
+    logger.error("publishSchedule: schedule update failed", { err: schedErr, scheduleId: args.scheduleId });
+    return { ok: false, message: "Couldn't publish the schedule. Please try again." };
+  }
+
+  // 2. Flip assigned draft shifts to published (open shifts stay open).
+  const { error: shiftErr } = await supabase
+    .from("shifts")
+    .update({ status: "published" })
+    .eq("schedule_id", args.scheduleId)
+    .eq("status", "draft");
+  if (shiftErr) {
+    logger.error("publishSchedule: shifts update failed", { err: shiftErr, scheduleId: args.scheduleId });
+  }
+
+  // 3. Immutable snapshot of the published shift set as a version.
+  const versionNumber = (await getPublishedVersionCount(args.scheduleId)) + 1;
+  const label = `published-v${versionNumber}`;
+  const assignments = loaded.shifts.map((s) => ({
+    employeeId: s.employeeId,
+    roleId: s.roleId,
+    startsAt: s.startsAt,
+    endsAt: s.endsAt,
+    breakMinutes: s.breakMinutes,
+    locked: s.locked,
+  }));
+  const { error: versionErr } = await supabase.from("schedule_versions").insert({
+    org_id: auth.orgId,
+    schedule_id: args.scheduleId,
+    source: "published",
+    label,
+    assignments,
+    covered: openShiftCount === 0,
+    total_missing: openShiftCount,
+    note: args.note && args.note.trim().length > 0 ? args.note.trim() : null,
+  });
+  if (versionErr) {
+    logger.error("publishSchedule: version insert failed", { err: versionErr, scheduleId: args.scheduleId });
+  }
+
+  await audit(auth.orgId, auth.userId, "schedule.published", {
+    entityType: "schedule",
+    entityId: args.scheduleId,
+    scheduleId: args.scheduleId,
+    detail: { version: label, override: args.override === true, open_shifts: openShiftCount },
+  });
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
+/** Reopen a published schedule for edits (published → draft). */
+export async function reopenSchedule(args: { scheduleId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.scheduleId) return { ok: false, message: "Missing schedule." };
+
+  const supabase = await createClient();
+  const { data: sched } = await supabase
+    .from("schedules")
+    .select("status")
+    .eq("id", args.scheduleId)
+    .maybeSingle();
+  if (!sched) return { ok: false, message: "That schedule no longer exists." };
+  if (sched.status !== "published") return { ok: false, message: "Only a published schedule can be reopened." };
+
+  const { error } = await supabase
+    .from("schedules")
+    .update({ status: "draft", updated_at: new Date().toISOString() })
+    .eq("id", args.scheduleId);
+  if (error) {
+    logger.error("reopenSchedule: update failed", { err: error, scheduleId: args.scheduleId });
+    return { ok: false, message: "Couldn't reopen the schedule. Please try again." };
+  }
+
+  await audit(auth.orgId, auth.userId, "schedule.reopened", {
+    entityType: "schedule",
+    entityId: args.scheduleId,
+    scheduleId: args.scheduleId,
+  });
   revalidatePath(CALENDAR_PATH);
   return { ok: true };
 }

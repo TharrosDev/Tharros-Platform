@@ -2,12 +2,22 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { CalendarRange, Lock, LockOpen, Plus, TriangleAlert } from "lucide-react";
+import {
+  CalendarRange,
+  CheckCircle2,
+  Clock,
+  History,
+  Lock,
+  LockOpen,
+  Plus,
+  TriangleAlert,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FormMessage } from "@/components/auth/auth-card";
 import { useToast } from "@/components/ui/toast";
 import {
@@ -30,10 +40,17 @@ import {
   assignShift,
   deleteShift,
   generateDraftSchedule,
+  publishSchedule,
+  reopenSchedule,
   toggleShiftLock,
   updateShiftTimes,
 } from "@/lib/scheduling/calendar-actions";
-import type { CalendarShift, DraftSchedule, RoleCertification } from "@/lib/scheduling/queries";
+import type {
+  AuditEntry,
+  CalendarShift,
+  DraftSchedule,
+  RoleCertification,
+} from "@/lib/scheduling/queries";
 import { validateEdits, type EditShift, type EditViolation, type ValidationContext } from "@/lib/scheduling/validation";
 
 const WINDOW_DAYS = 14;
@@ -84,6 +101,7 @@ export function ScheduleCalendar({
   employees,
   roles,
   validation,
+  auditTrail,
   canManage,
 }: {
   schedule: DraftSchedule | null;
@@ -91,6 +109,7 @@ export function ScheduleCalendar({
   employees: Employee[];
   roles: RoleCertification[];
   validation: ValidationContext | null;
+  auditTrail: AuditEntry[];
   canManage: boolean;
 }) {
   // Server truth: edits persist via server actions, then `router.refresh()` re-runs
@@ -100,6 +119,7 @@ export function ScheduleCalendar({
   const [windowStart, setWindowStart] = React.useState(schedule?.periodStart ?? "");
   const [editing, setEditing] = React.useState<CalendarShift | null>(null);
   const [adding, setAdding] = React.useState<{ day: string; employeeId: string | null } | null>(null);
+  const [showHistory, setShowHistory] = React.useState(false);
 
   const roleName = React.useMemo(() => new Map(roles.map((r) => [r.id, r.name])), [roles]);
 
@@ -126,6 +146,11 @@ export function ScheduleCalendar({
       <EmptyState canManage={canManage} />
     );
   }
+
+  const isDraft = schedule.status === "draft";
+  const isPublished = schedule.status === "published";
+  const editable = canManage && isDraft;
+  const openShiftCount = shifts.filter((s) => s.employeeId === null).length;
 
   const days = Array.from({ length: WINDOW_DAYS }, (_, i) => addDays(windowStart, i));
   const windowEnd = days[days.length - 1];
@@ -166,15 +191,45 @@ export function ScheduleCalendar({
           </span>
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {isPublished ? (
+            <Badge variant="success">
+              <CheckCircle2 className="size-3.5" aria-hidden /> Published
+              {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
+            </Badge>
+          ) : (
+            <Badge variant="secondary">Draft</Badge>
+          )}
           {hardCount > 0 ? (
             <Badge variant="destructive">
               <TriangleAlert className="size-3.5" aria-hidden /> {hardCount} to fix
             </Badge>
+          ) : softCount > 0 || openShiftCount > 0 ? (
+            <Badge variant="warning">
+              {[
+                openShiftCount > 0 ? `${openShiftCount} open` : null,
+                softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Badge>
           ) : (
-            <Badge variant="success">No conflicts</Badge>
+            <Badge variant="success">All covered</Badge>
           )}
-          {softCount > 0 ? <Badge variant="warning">{softCount} warning{softCount > 1 ? "s" : ""}</Badge> : null}
+          <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
+            <History className="size-4" /> History
+          </Button>
+          {canManage && isPublished ? (
+            <ReopenButton scheduleId={schedule.id} />
+          ) : null}
+          {canManage && isDraft ? (
+            <PublishDialog
+              scheduleId={schedule.id}
+              hardCount={hardCount}
+              softCount={softCount}
+              openShiftCount={openShiftCount}
+            />
+          ) : null}
           {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
         </div>
       </div>
@@ -225,7 +280,7 @@ export function ScheduleCalendar({
                         />
                       ))}
                     </div>
-                    {canManage ? (
+                    {editable ? (
                       <button
                         type="button"
                         aria-label="Add shift"
@@ -252,8 +307,13 @@ export function ScheduleCalendar({
           employees={employees}
           roleName={roleName}
           validation={validation}
+          editable={editable}
           onClose={() => setEditing(null)}
         />
+      ) : null}
+
+      {showHistory ? (
+        <HistoryDialog entries={auditTrail} employees={employees} onClose={() => setShowHistory(false)} />
       ) : null}
 
       {adding ? (
@@ -319,6 +379,7 @@ function EditShiftDialog({
   employees,
   roleName,
   validation,
+  editable,
   onClose,
 }: {
   shift: CalendarShift;
@@ -326,11 +387,15 @@ function EditShiftDialog({
   employees: Employee[];
   roleName: Map<string, string>;
   validation: ValidationContext | null;
+  editable: boolean;
   onClose: () => void;
 }) {
   const router = useRouter();
   const toast = useToast();
   const [pending, start] = React.useTransition();
+
+  // A published schedule (editable=false) or a locked shift is read-only here.
+  const locked = shift.locked || !editable;
 
   const [employeeId, setEmployeeId] = React.useState<string>(shift.employeeId ?? UNASSIGNED);
   const [startDate, setStartDate] = React.useState(dateOf(shift.startsAt));
@@ -377,7 +442,7 @@ function EditShiftDialog({
   const dirtyEmployee = employee !== shift.employeeId;
 
   async function save() {
-    if (shift.locked) return { ok: false, message: "Shift is locked." } as const;
+    if (locked) return { ok: false, message: "Shift can't be edited." } as const;
     // Persist whichever parts changed.
     if (dirtyTimes) {
       const r = await updateShiftTimes({ shiftId: shift.id, startsAt, endsAt, breakMinutes: shift.breakMinutes });
@@ -407,7 +472,7 @@ function EditShiftDialog({
             <Select
               value={employeeId}
               onValueChange={(v) => setEmployeeId(v ?? UNASSIGNED)}
-              disabled={shift.locked}
+              disabled={locked}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Open (unassigned)" />
@@ -426,52 +491,64 @@ function EditShiftDialog({
           <div className="grid grid-cols-3 gap-3">
             <label className="space-y-1.5">
               <span className="text-muted-foreground text-xs font-medium">Date</span>
-              <Input type="date" value={startDate} disabled={shift.locked} onChange={(e) => setStartDate(e.target.value)} />
+              <Input type="date" value={startDate} disabled={locked} onChange={(e) => setStartDate(e.target.value)} />
             </label>
             <label className="space-y-1.5">
               <span className="text-muted-foreground text-xs font-medium">From</span>
-              <Input type="time" value={startTime} disabled={shift.locked} onChange={(e) => setStartTime(e.target.value)} />
+              <Input type="time" value={startTime} disabled={locked} onChange={(e) => setStartTime(e.target.value)} />
             </label>
             <label className="space-y-1.5">
               <span className="text-muted-foreground text-xs font-medium">To</span>
-              <Input type="time" value={endTime} disabled={shift.locked} onChange={(e) => setEndTime(e.target.value)} />
+              <Input type="time" value={endTime} disabled={locked} onChange={(e) => setEndTime(e.target.value)} />
             </label>
           </div>
 
           <ViolationList violations={previewViolations} />
           {error ? <FormMessage>{error}</FormMessage> : null}
-          {shift.locked ? (
+          {!editable ? (
+            <p className="text-muted-foreground text-sm">
+              This schedule is published. Reopen it for edits to make changes.
+            </p>
+          ) : shift.locked ? (
             <p className="text-muted-foreground text-sm">This shift is locked. Unlock it to make changes.</p>
           ) : null}
         </div>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              run(() => toggleShiftLock({ shiftId: shift.id, locked: !shift.locked }), shift.locked ? "Shift unlocked." : "Shift locked.")
-            }
-            disabled={pending}
-          >
-            {shift.locked ? <LockOpen className="size-4" /> : <Lock className="size-4" />}
-            {shift.locked ? "Unlock" : "Lock"}
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => run(() => deleteShift({ shiftId: shift.id }), "Shift deleted.")}
-            disabled={pending || shift.locked}
-          >
-            Delete
-          </Button>
-          <Button
-            type="button"
-            onClick={() => run(save, "Shift updated.")}
-            disabled={pending || shift.locked || hardPreview.length > 0 || (!dirtyTimes && !dirtyEmployee)}
-          >
-            {pending ? "Saving…" : "Save"}
-          </Button>
+          {editable ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  run(() => toggleShiftLock({ shiftId: shift.id, locked: !shift.locked }), shift.locked ? "Shift unlocked." : "Shift locked.")
+                }
+                disabled={pending}
+              >
+                {shift.locked ? <LockOpen className="size-4" /> : <Lock className="size-4" />}
+                {shift.locked ? "Unlock" : "Lock"}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => run(() => deleteShift({ shiftId: shift.id }), "Shift deleted.")}
+                disabled={pending || shift.locked}
+              >
+                Delete
+              </Button>
+              <Button
+                type="button"
+                onClick={() => run(save, "Shift updated.")}
+                disabled={pending || shift.locked || hardPreview.length > 0 || (!dirtyTimes && !dirtyEmployee)}
+              >
+                {pending ? "Saving…" : "Save"}
+              </Button>
+            </>
+          ) : (
+            <Button type="button" variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -666,6 +743,205 @@ function EmptyState({ canManage }: { canManage: boolean }) {
 
 function todayUtc(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+/* ------------------------------ publish / reopen --------------------------- */
+
+function ReopenButton({ scheduleId }: { scheduleId: string }) {
+  const router = useRouter();
+  const toast = useToast();
+  const [pending, start] = React.useTransition();
+  return (
+    <Button
+      variant="default"
+      size="sm"
+      disabled={pending}
+      onClick={() =>
+        start(async () => {
+          const res = await reopenSchedule({ scheduleId });
+          toast.add({
+            title: "Schedule",
+            description: res.ok ? "Reopened for edits." : (res.message ?? "Couldn't reopen."),
+          });
+          if (res.ok) router.refresh();
+        })
+      }
+    >
+      <LockOpen className="size-4" /> {pending ? "Reopening…" : "Reopen for edits"}
+    </Button>
+  );
+}
+
+function PublishDialog({
+  scheduleId,
+  hardCount,
+  softCount,
+  openShiftCount,
+}: {
+  scheduleId: string;
+  hardCount: number;
+  softCount: number;
+  openShiftCount: number;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const [open, setOpen] = React.useState(false);
+  const [pending, start] = React.useTransition();
+  const [ack, setAck] = React.useState(false);
+  const [note, setNote] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+
+  const needsAck = openShiftCount > 0 || softCount > 0;
+  const blockedHard = hardCount > 0;
+  const canPublish = !blockedHard && (!needsAck || ack);
+
+  function publish() {
+    setError(null);
+    start(async () => {
+      const res = await publishSchedule({ scheduleId, override: needsAck, note });
+      if (!res.ok) {
+        setError(res.message ?? "Couldn't publish.");
+        return;
+      }
+      toast.add({ title: "Schedule", description: "Schedule published." });
+      router.refresh();
+      setOpen(false);
+    });
+  }
+
+  return (
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>
+        <CheckCircle2 className="size-4" /> Publish
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Publish schedule</DialogTitle>
+            <DialogDescription>
+              Publishing locks in this schedule as the approved version. (Employees are notified in a
+              later step.)
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {blockedHard ? (
+              <div className="border-destructive/40 bg-destructive/10 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
+                <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+                <span>
+                  Fix {hardCount} conflict{hardCount > 1 ? "s" : ""} before publishing. Conflicts are
+                  flagged in red on the calendar.
+                </span>
+              </div>
+            ) : needsAck ? (
+              <label className="border-warning/40 bg-warning/10 flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
+                <Checkbox checked={ack} onCheckedChange={(v) => setAck(v === true)} className="mt-0.5" />
+                <span className="text-foreground">
+                  Publish with{" "}
+                  {[
+                    openShiftCount > 0 ? `${openShiftCount} open shift${openShiftCount > 1 ? "s" : ""}` : null,
+                    softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" and ")}
+                  . I have reviewed and want to publish anyway.
+                </span>
+              </label>
+            ) : (
+              <div className="border-success/40 bg-success/10 text-success flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden />
+                <span>Fully covered with no conflicts. Ready to publish.</span>
+              </div>
+            )}
+
+            <label className="space-y-1.5">
+              <span className="text-muted-foreground text-xs font-medium">Note (optional)</span>
+              <Input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="e.g. Approved for the long weekend"
+                maxLength={300}
+              />
+            </label>
+            {error ? <FormMessage>{error}</FormMessage> : null}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>
+              Cancel
+            </Button>
+            <Button onClick={publish} disabled={pending || !canPublish}>
+              {pending ? "Publishing…" : "Publish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+/* -------------------------------- history ---------------------------------- */
+
+const ACTION_LABEL: Record<string, string> = {
+  "schedule.created": "Draft generated",
+  "schedule.published": "Published",
+  "schedule.reopened": "Reopened for edits",
+  "candidate_panel.judged": "Candidates judged",
+  "shift.assigned": "Shift reassigned",
+  "shift.retimed": "Shift retimed",
+  "shift.added": "Shift added",
+  "shift.deleted": "Shift removed",
+  "shift.locked": "Shift locked",
+  "shift.unlocked": "Shift unlocked",
+};
+
+function HistoryDialog({
+  entries,
+  employees,
+  onClose,
+}: {
+  entries: AuditEntry[];
+  employees: Employee[];
+  onClose: () => void;
+}) {
+  const empName = React.useMemo(() => new Map(employees.map((e) => [e.id, e.name])), [employees]);
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Change history</DialogTitle>
+          <DialogDescription>Every change to this schedule, newest first.</DialogDescription>
+        </DialogHeader>
+        {entries.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No changes recorded yet.</p>
+        ) : (
+          <ul className="max-h-[24rem] space-y-2 overflow-y-auto">
+            {entries.map((e) => (
+              <li key={e.id} className="flex items-start gap-3 text-sm">
+                <Clock className="text-muted-foreground mt-0.5 size-4 shrink-0" aria-hidden />
+                <div className="min-w-0">
+                  <p className="font-medium">{ACTION_LABEL[e.action] ?? e.action}</p>
+                  <p className="text-muted-foreground text-xs">
+                    <span className="capitalize">{e.actorType}</span>
+                    {typeof e.detail.employee_id === "string" && empName.get(e.detail.employee_id)
+                      ? ` · ${empName.get(e.detail.employee_id)}`
+                      : ""}
+                    {typeof e.detail.version === "string" ? ` · ${e.detail.version}` : ""}
+                    {` · ${e.createdAt.slice(0, 16).replace("T", " ")}`}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 function GenerateDialog({ defaultStart, primary }: { defaultStart: string; primary?: boolean }) {

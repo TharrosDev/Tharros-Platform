@@ -232,6 +232,7 @@ export type DraftSchedule = {
   periodStart: string;
   periodEnd: string;
   status: "draft" | "published" | "archived";
+  publishedAt: string | null;
   optimizationSummary: string | null;
 };
 
@@ -249,33 +250,82 @@ export type CalendarShift = {
 };
 
 /**
- * The most recent draft schedule for an org, or null if none has been generated.
- * Day 50 edits the latest draft; Day 51 adds version/period selection + publish.
+ * The most recent schedule for an org (any status), or null if none exists. Day 50
+ * edited only the latest draft; Day 51 publishes + reopens, so the calendar must
+ * keep showing a schedule after it's published (the old draft-only filter hid it).
  */
-export const getLatestDraftSchedule = cache(
-  async (orgId: string): Promise<DraftSchedule | null> => {
+export const getLatestSchedule = cache(async (orgId: string): Promise<DraftSchedule | null> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("schedules")
+    .select("id, name, period_start, period_end, status, published_at, optimization_summary")
+    .eq("org_id", orgId)
+    .neq("status", "archived")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    logger.error("getLatestSchedule: query failed", { err: error, orgId });
+  }
+  if (!data) return null;
+  return {
+    id: data.id as string,
+    name: data.name as string,
+    periodStart: data.period_start as string,
+    periodEnd: data.period_end as string,
+    status: data.status as DraftSchedule["status"],
+    publishedAt: (data.published_at as string | null) ?? null,
+    optimizationSummary: (data.optimization_summary as string | null) ?? null,
+  };
+});
+
+/** How many published snapshots a schedule already has — for the next `v{n}` label. */
+export const getPublishedVersionCount = cache(async (scheduleId: string): Promise<number> => {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("schedule_versions")
+    .select("id", { count: "exact", head: true })
+    .eq("schedule_id", scheduleId)
+    .eq("source", "published");
+  if (error) {
+    logger.error("getPublishedVersionCount: query failed", { err: error, scheduleId });
+  }
+  return count ?? 0;
+});
+
+export type AuditEntry = {
+  id: string;
+  actorType: "manager" | "employee" | "agent" | "system";
+  action: string;
+  detail: Record<string, unknown>;
+  createdAt: string;
+};
+
+/**
+ * The change history for a schedule — `scheduling_audit_log` rows for the schedule
+ * itself OR any of its shifts (shift events carry `schedule_id` in `detail`).
+ * Member-readable via RLS, newest first.
+ */
+export const getScheduleAuditTrail = cache(
+  async (scheduleId: string, limit = 100): Promise<AuditEntry[]> => {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from("schedules")
-      .select("id, name, period_start, period_end, status, optimization_summary")
-      .eq("org_id", orgId)
-      .eq("status", "draft")
+      .from("scheduling_audit_log")
+      .select("id, actor_type, action, detail, created_at")
+      .or(`entity_id.eq.${scheduleId},detail->>schedule_id.eq.${scheduleId}`)
       .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
+      .limit(limit);
     if (error) {
-      logger.error("getLatestDraftSchedule: query failed", { err: error, orgId });
+      logger.error("getScheduleAuditTrail: query failed", { err: error, scheduleId });
     }
-    if (!data) return null;
-    return {
-      id: data.id as string,
-      name: data.name as string,
-      periodStart: data.period_start as string,
-      periodEnd: data.period_end as string,
-      status: data.status as DraftSchedule["status"],
-      optimizationSummary: (data.optimization_summary as string | null) ?? null,
-    };
+    return ((data ?? []) as Array<Record<string, unknown>>).map((r) => ({
+      id: r.id as string,
+      actorType: r.actor_type as AuditEntry["actorType"],
+      action: r.action as string,
+      detail: (r.detail as Record<string, unknown>) ?? {},
+      createdAt: r.created_at as string,
+    }));
   },
 );
 
