@@ -20,7 +20,8 @@ export type NotificationType =
   | "sick_call"
   | "replacement_filled"
   | "replacement_escalated"
-  | "swap_escalated";
+  | "swap_escalated"
+  | "time_off_requested";
 
 export type EmailStatus = "none" | "pending" | "sent" | "failed" | "skipped";
 

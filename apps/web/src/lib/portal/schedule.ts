@@ -301,6 +301,51 @@ export async function getIncomingSwaps(employeeId: string, orgId: string): Promi
   return assembleSwaps(admin, orgId, (data ?? []) as SwapReqRow[]);
 }
 
+/* ----------------------------- Day 57 — time off -------------------------- */
+
+/** The employee's own time-off requests as shown on the portal. */
+export type MyTimeOff = {
+  id: string;
+  startDate: string;
+  endDate: string;
+  reason: string | null;
+  status: string;
+};
+
+/**
+ * Day 57 — the employee's recent + upcoming time-off requests (pending / approved /
+ * denied), newest first. Scoped to the session's employee + org via the admin client
+ * (auth-light portal, no RLS).
+ */
+export async function getMyTimeOff(employeeId: string, orgId: string): Promise<MyTimeOff[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("time_off_requests")
+    .select("id, start_date, end_date, reason, status")
+    .eq("employee_id", employeeId)
+    .eq("org_id", orgId)
+    .neq("status", "cancelled")
+    .order("created_at", { ascending: false })
+    .limit(10);
+  if (error) {
+    logger.error("getMyTimeOff: query failed", { err: error, employeeId });
+    return [];
+  }
+  return ((data ?? []) as Array<{
+    id: string;
+    start_date: string;
+    end_date: string;
+    reason: string | null;
+    status: string;
+  }>).map((r) => ({
+    id: r.id,
+    startDate: r.start_date,
+    endDate: r.end_date,
+    reason: r.reason,
+    status: r.status,
+  }));
+}
+
 /** Open swap offers this employee could pick up (excluding their own). */
 export async function getOpenSwaps(employeeId: string, orgId: string): Promise<PortalSwap[]> {
   const admin = createAdminClient();

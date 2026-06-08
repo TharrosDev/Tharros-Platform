@@ -17,6 +17,8 @@ import {
   type EscalatedSwap,
 } from "@/lib/scheduling/queries";
 import type { ValidationContext } from "@/lib/scheduling/validation";
+import { getPendingTimeOff, type PendingTimeOff } from "@/lib/scheduling/time-off";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Day 50/51 — schedule calendar. Renders the latest schedule as a two-week grid
@@ -38,7 +40,9 @@ export default async function ScheduleCalendarPage() {
     getRoleCertifications(activeOrg.id),
   ]);
   const canManage = roster.viewerRole === "owner" || roster.viewerRole === "admin";
-  const escalatedSwaps: EscalatedSwap[] = canManage ? await getEscalatedSwaps(activeOrg.id) : [];
+  const [escalatedSwaps, timeOffRequests]: [EscalatedSwap[], PendingTimeOff[]] = canManage
+    ? await Promise.all([getEscalatedSwaps(activeOrg.id), getPendingTimeOff(createAdminClient(), activeOrg.id)])
+    : [[], []];
 
   let shifts: CalendarShift[] = [];
   let validation: ValidationContext | null = null;
@@ -66,6 +70,7 @@ export default async function ScheduleCalendarPage() {
         auditTrail={auditTrail}
         canManage={canManage}
         escalatedSwaps={escalatedSwaps}
+        timeOffRequests={timeOffRequests}
       />
     </div>
   );
