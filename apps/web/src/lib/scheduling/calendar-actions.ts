@@ -437,6 +437,42 @@ export async function findReplacement(args: { shiftId: string }): Promise<Calend
   return { ok: true };
 }
 
+/** Day 56 — manager approves an escalated shift swap (applies it atomically). */
+export async function approveSwap(args: { requestId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.requestId) return { ok: false, message: "Missing swap." };
+
+  const { approveSwap: approveSwapEngine } = await import("./swaps");
+  const admin = createAdminClient();
+  const result = await approveSwapEngine(admin, {
+    orgId: auth.orgId,
+    requestId: args.requestId,
+    reviewerUserId: auth.userId,
+  });
+  if (!result.ok) return { ok: false, message: result.message };
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
+/** Day 56 — manager denies an escalated (or pending) shift swap. */
+export async function denySwap(args: { requestId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.requestId) return { ok: false, message: "Missing swap." };
+
+  const { denySwap: denySwapEngine } = await import("./swaps");
+  const admin = createAdminClient();
+  const result = await denySwapEngine(admin, {
+    orgId: auth.orgId,
+    requestId: args.requestId,
+    reviewerUserId: auth.userId,
+  });
+  if (!result.ok) return { ok: false, message: result.message };
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
 /** Generate a fresh draft for a period — delegates to the Day-49 panel. */
 export async function generateDraftSchedule(args: {
   periodStart: string;

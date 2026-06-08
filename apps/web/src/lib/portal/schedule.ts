@@ -157,3 +157,164 @@ export async function getSickCallReasonPolicy(orgId: string): Promise<SickCallRe
     .maybeSingle();
   return resolveSickCallReasonPolicy((data as { agent_persona?: unknown } | null)?.agent_persona);
 }
+
+/* ----------------------------- Day 56 — shift swaps ----------------------- */
+
+function roleNameOf(rc: { name: string } | { name: string }[] | null | undefined): string | null {
+  const v = Array.isArray(rc) ? rc[0] : rc;
+  return v?.name ?? null;
+}
+
+/** A coworker the employee can propose a swap to, with their upcoming shifts (Y options). */
+export type ProposableCoworker = {
+  id: string;
+  name: string;
+  shifts: Array<{ id: string; startsAt: string; endsAt: string; roleName: string | null }>;
+};
+
+/**
+ * Active coworkers (excluding self) + their upcoming published shifts — feeds the
+ * "Propose swap" dialog (pick a coworker, optionally pick one of their shifts to trade for).
+ */
+export async function getProposableCoworkers(
+  employeeId: string,
+  orgId: string,
+): Promise<ProposableCoworker[]> {
+  const admin = createAdminClient();
+  const nowIso = new Date().toISOString();
+
+  const { data: emps } = await admin
+    .from("employees")
+    .select("id, name")
+    .eq("org_id", orgId)
+    .eq("active", true)
+    .neq("id", employeeId)
+    .order("name", { ascending: true });
+  const coworkers = (emps ?? []) as Array<{ id: string; name: string }>;
+  if (coworkers.length === 0) return [];
+
+  const { data: shiftRows } = await admin
+    .from("shifts")
+    .select("id, employee_id, starts_at, ends_at, roles_certifications(name)")
+    .eq("org_id", orgId)
+    .eq("status", "published")
+    .gte("starts_at", nowIso)
+    .in(
+      "employee_id",
+      coworkers.map((c) => c.id),
+    )
+    .order("starts_at", { ascending: true });
+
+  const byEmp = new Map<string, ProposableCoworker["shifts"]>();
+  for (const r of (shiftRows ?? []) as Array<{
+    id: string;
+    employee_id: string;
+    starts_at: string;
+    ends_at: string;
+    roles_certifications: { name: string } | { name: string }[] | null;
+  }>) {
+    const list = byEmp.get(r.employee_id) ?? [];
+    list.push({ id: r.id, startsAt: r.starts_at, endsAt: r.ends_at, roleName: roleNameOf(r.roles_certifications) });
+    byEmp.set(r.employee_id, list);
+  }
+
+  return coworkers.map((c) => ({ id: c.id, name: c.name, shifts: byEmp.get(c.id) ?? [] }));
+}
+
+/** A swap proposal/offer as shown on the portal. */
+export type PortalSwap = {
+  requestId: string;
+  fromName: string;
+  /** The shift on offer (X). */
+  shift: { startsAt: string; endsAt: string; roleName: string | null };
+  /** The counterpart shift the responder would give up (Y), or null for a handoff/open offer. */
+  tradeFor: { startsAt: string; endsAt: string; roleName: string | null } | null;
+};
+
+type SwapReqRow = {
+  id: string;
+  shift_id: string;
+  requesting_employee_id: string;
+  target_shift_id: string | null;
+};
+
+/** Assemble PortalSwap rows from raw swap requests (fetch shift + requester detail). */
+async function assembleSwaps(
+  admin: ReturnType<typeof createAdminClient>,
+  orgId: string,
+  rows: SwapReqRow[],
+): Promise<PortalSwap[]> {
+  if (rows.length === 0) return [];
+  const shiftIds = [...new Set(rows.flatMap((r) => [r.shift_id, r.target_shift_id]).filter((v): v is string => !!v))];
+  const reqIds = [...new Set(rows.map((r) => r.requesting_employee_id))];
+
+  const [{ data: shiftRows }, { data: empRows }] = await Promise.all([
+    admin
+      .from("shifts")
+      .select("id, starts_at, ends_at, roles_certifications(name)")
+      .eq("org_id", orgId)
+      .in("id", shiftIds),
+    admin.from("employees").select("id, name").eq("org_id", orgId).in("id", reqIds),
+  ]);
+
+  const shiftById = new Map(
+    ((shiftRows ?? []) as Array<{
+      id: string;
+      starts_at: string;
+      ends_at: string;
+      roles_certifications: { name: string } | { name: string }[] | null;
+    }>).map((s) => [
+      s.id,
+      { startsAt: s.starts_at, endsAt: s.ends_at, roleName: roleNameOf(s.roles_certifications) },
+    ]),
+  );
+  const nameById = new Map(((empRows ?? []) as Array<{ id: string; name: string }>).map((e) => [e.id, e.name]));
+
+  return rows
+    .map((r) => {
+      const shift = shiftById.get(r.shift_id);
+      if (!shift) return null;
+      return {
+        requestId: r.id,
+        fromName: nameById.get(r.requesting_employee_id) ?? "A coworker",
+        shift,
+        tradeFor: r.target_shift_id ? (shiftById.get(r.target_shift_id) ?? null) : null,
+      } satisfies PortalSwap;
+    })
+    .filter((s): s is PortalSwap => s !== null);
+}
+
+/** Targeted swap proposals awaiting this employee's response. */
+export async function getIncomingSwaps(employeeId: string, orgId: string): Promise<PortalSwap[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("shift_swap_requests")
+    .select("id, shift_id, requesting_employee_id, target_shift_id")
+    .eq("org_id", orgId)
+    .eq("target_employee_id", employeeId)
+    .eq("status", "pending")
+    .order("created_at", { ascending: true });
+  if (error) {
+    logger.error("getIncomingSwaps: query failed", { err: error, employeeId });
+    return [];
+  }
+  return assembleSwaps(admin, orgId, (data ?? []) as SwapReqRow[]);
+}
+
+/** Open swap offers this employee could pick up (excluding their own). */
+export async function getOpenSwaps(employeeId: string, orgId: string): Promise<PortalSwap[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("shift_swap_requests")
+    .select("id, shift_id, requesting_employee_id, target_shift_id")
+    .eq("org_id", orgId)
+    .is("target_employee_id", null)
+    .eq("status", "pending")
+    .neq("requesting_employee_id", employeeId)
+    .order("created_at", { ascending: true });
+  if (error) {
+    logger.error("getOpenSwaps: query failed", { err: error, employeeId });
+    return [];
+  }
+  return assembleSwaps(admin, orgId, (data ?? []) as SwapReqRow[]);
+}

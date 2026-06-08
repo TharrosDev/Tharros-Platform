@@ -401,3 +401,70 @@ export async function getScheduleValidationContext(
     })),
   };
 }
+
+/** A swap escalated to the manager for approval (Day 56). */
+export type EscalatedSwap = {
+  requestId: string;
+  requesterName: string;
+  claimantName: string;
+  shiftLabel: string;
+  tradeForLabel: string | null;
+  createdAt: string;
+};
+
+/** "Mon Jun 15, 9:00 AM – 5:00 PM" from local-as-UTC ISO strings (UTC accessors). */
+function swapShiftLabel(startsAt: string, endsAt: string): string {
+  const fmtDay = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+  const fmtTime = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
+  return `${fmtDay.format(new Date(Date.parse(startsAt)))}, ${fmtTime.format(new Date(Date.parse(startsAt)))} – ${fmtTime.format(new Date(Date.parse(endsAt)))}`;
+}
+
+/** Swaps awaiting manager approval (status 'accepted'). Member-readable via RLS. */
+export async function getEscalatedSwaps(orgId: string): Promise<EscalatedSwap[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shift_swap_requests")
+    .select("id, shift_id, requesting_employee_id, target_employee_id, target_shift_id, created_at")
+    .eq("org_id", orgId)
+    .eq("status", "accepted")
+    .order("created_at", { ascending: true });
+  if (error) {
+    logger.error("getEscalatedSwaps: query failed", { err: error, orgId });
+    return [];
+  }
+  const rows = (data ?? []) as Array<{
+    id: string;
+    shift_id: string;
+    requesting_employee_id: string;
+    target_employee_id: string | null;
+    target_shift_id: string | null;
+    created_at: string;
+  }>;
+  if (rows.length === 0) return [];
+
+  const shiftIds = [...new Set(rows.flatMap((r) => [r.shift_id, r.target_shift_id]).filter((v): v is string => !!v))];
+  const empIds = [
+    ...new Set(rows.flatMap((r) => [r.requesting_employee_id, r.target_employee_id]).filter((v): v is string => !!v)),
+  ];
+  const [{ data: shiftRows }, { data: empRows }] = await Promise.all([
+    supabase.from("shifts").select("id, starts_at, ends_at").eq("org_id", orgId).in("id", shiftIds),
+    supabase.from("employees").select("id, name").eq("org_id", orgId).in("id", empIds),
+  ]);
+  const shiftById = new Map(
+    ((shiftRows ?? []) as Array<{ id: string; starts_at: string; ends_at: string }>).map((s) => [s.id, s]),
+  );
+  const nameById = new Map(((empRows ?? []) as Array<{ id: string; name: string }>).map((e) => [e.id, e.name]));
+
+  return rows.map((r) => {
+    const x = shiftById.get(r.shift_id);
+    const y = r.target_shift_id ? shiftById.get(r.target_shift_id) : null;
+    return {
+      requestId: r.id,
+      requesterName: nameById.get(r.requesting_employee_id) ?? "An employee",
+      claimantName: r.target_employee_id ? (nameById.get(r.target_employee_id) ?? "A coworker") : "A coworker",
+      shiftLabel: x ? swapShiftLabel(x.starts_at, x.ends_at) : "a shift",
+      tradeForLabel: y ? swapShiftLabel(y.starts_at, y.ends_at) : null,
+      createdAt: r.created_at,
+    };
+  });
+}
