@@ -7,7 +7,12 @@
 export type JobStatus = "pending" | "running" | "succeeded" | "failed" | "dead";
 
 /** Known job types. New handlers add their type here as their feature lands. */
-export type JobType = "noop" | "notification-send" | "availability-nudge";
+export type JobType =
+  | "noop"
+  | "notification-send"
+  | "availability-nudge"
+  | "schedule-delivery"
+  | "shift-reminder";
 
 /** A claimed job, mapped from the DB row to camelCase for handlers. */
 export type Job = {

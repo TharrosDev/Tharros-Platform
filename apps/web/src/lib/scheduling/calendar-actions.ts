@@ -30,6 +30,8 @@ import {
 } from "./queries";
 import { validateEdits, type EditShift, type ValidationContext } from "./validation";
 import { publishGate } from "./publish";
+import { enqueueJob } from "@/lib/jobs/enqueue";
+import { assignedEmployeeIds, planReminders } from "./delivery";
 
 export type CalendarActionResult = { ok: true } | { ok: false; message: string };
 
@@ -487,6 +489,66 @@ export async function publishSchedule(args: {
     scheduleId: args.scheduleId,
     detail: { version: label, override: args.override === true, open_shifts: openShiftCount },
   });
+
+  // 4. Deliver (best-effort — never block the publish): ensure each assigned
+  //    employee has a live portal token (reuse if present, else mint via the
+  //    owner/admin-gated RPC), clear this schedule's stale pending jobs, then
+  //    enqueue a delivery email now + a reminder 24h before each upcoming shift.
+  try {
+    const admin = createAdminClient();
+    const employeeIds = assignedEmployeeIds(loaded.shifts);
+
+    for (const employeeId of employeeIds) {
+      const { data: tok } = await supabase
+        .from("employee_portal_tokens")
+        .select("id")
+        .eq("employee_id", employeeId)
+        .is("revoked_at", null)
+        .limit(1)
+        .maybeSingle();
+      if (!tok) {
+        await supabase.rpc("issue_portal_token", { p_employee_id: employeeId });
+      }
+    }
+
+    await admin
+      .from("jobs")
+      .delete()
+      .in("type", ["schedule-delivery", "shift-reminder"])
+      .eq("status", "pending")
+      .eq("payload->>scheduleId", args.scheduleId);
+
+    for (const employeeId of employeeIds) {
+      await enqueueJob(admin, {
+        type: "schedule-delivery",
+        payload: { employeeId, orgId: auth.orgId, scheduleId: args.scheduleId },
+        orgId: auth.orgId,
+      });
+    }
+    for (const r of planReminders(loaded.shifts, Date.now())) {
+      await enqueueJob(admin, {
+        type: "shift-reminder",
+        payload: {
+          shiftId: r.shiftId,
+          employeeId: r.employeeId,
+          orgId: auth.orgId,
+          scheduleId: args.scheduleId,
+        },
+        orgId: auth.orgId,
+        runAt: r.runAt,
+      });
+    }
+
+    await audit(auth.orgId, auth.userId, "schedule.delivered", {
+      entityType: "schedule",
+      entityId: args.scheduleId,
+      scheduleId: args.scheduleId,
+      detail: { employees: employeeIds.length },
+    });
+  } catch (err) {
+    logger.error("publishSchedule: delivery enqueue failed", { err, scheduleId: args.scheduleId });
+  }
+
   revalidatePath(CALENDAR_PATH);
   return { ok: true };
 }

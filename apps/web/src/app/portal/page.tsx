@@ -18,11 +18,6 @@ export const dynamic = "force-dynamic";
 
 const COMING_SOON = [
   {
-    icon: CalendarDays,
-    title: "Your schedule",
-    body: "See your shifts for the next two weeks, with add-to-calendar.",
-  },
-  {
     icon: Plane,
     title: "Time off & swaps",
     body: "Request time off, pick up open shifts, and swap with teammates.",
@@ -50,15 +45,34 @@ export default async function PortalPage() {
           <p className="text-muted-foreground type-meta">{session.orgName}</p>
           <h1 className="type-h1 mt-1">Hi {session.employeeName}</h1>
           <p className="text-muted-foreground mt-3 type-body">
-            This is your personal portal for {session.orgName}. Set your availability below; more
-            scheduling tools arrive soon.
+            This is your personal portal for {session.orgName}. See your schedule and set your
+            availability below.
           </p>
 
           <Link
-            href="/portal/availability"
+            href="/portal/schedule"
             className="group border-primary/30 bg-primary-soft/40 hover:bg-primary-soft/70 mt-8 flex items-center gap-3 rounded-xl border p-4 transition-colors"
           >
             <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <CalendarDays className="size-4.5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-foreground font-medium">Your schedule</p>
+              <p className="text-muted-foreground text-sm">
+                See your shifts for the next two weeks, with add-to-calendar.
+              </p>
+            </div>
+            <ChevronRight
+              className="text-muted-foreground group-hover:text-foreground size-5 shrink-0 transition-colors"
+              aria-hidden
+            />
+          </Link>
+
+          <Link
+            href="/portal/availability"
+            className="group border-border bg-card hover:bg-accent/40 mt-3 flex items-center gap-3 rounded-xl border p-4 transition-colors"
+          >
+            <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
               <Clock className="size-4.5" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
