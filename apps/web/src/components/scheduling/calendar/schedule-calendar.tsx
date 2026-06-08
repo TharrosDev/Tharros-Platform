@@ -39,6 +39,7 @@ import {
   addShift,
   assignShift,
   deleteShift,
+  findReplacement,
   generateDraftSchedule,
   publishSchedule,
   reopenSchedule,
@@ -545,13 +546,45 @@ function EditShiftDialog({
               </Button>
             </>
           ) : (
-            <Button type="button" variant="outline" onClick={onClose}>
-              Close
-            </Button>
+            <>
+              {shift.employeeId === null && shift.status === "open" ? (
+                <FindReplacementButton shiftId={shift.id} />
+              ) : null}
+              <Button type="button" variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </>
           )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Broadcast an open (uncovered) shift to eligible staff — first-accept-wins (Day 55). */
+function FindReplacementButton({ shiftId }: { shiftId: string }) {
+  const router = useRouter();
+  const toast = useToast();
+  const [pending, start] = React.useTransition();
+  return (
+    <Button
+      type="button"
+      disabled={pending}
+      onClick={() =>
+        start(async () => {
+          const res = await findReplacement({ shiftId });
+          toast.add({
+            title: "Replacement",
+            description: res.ok
+              ? "Sent to eligible employees. First to accept gets it."
+              : (res.message ?? "Couldn't start the search."),
+          });
+          if (res.ok) router.refresh();
+        })
+      }
+    >
+      {pending ? "Sending…" : "Find replacement"}
+    </Button>
   );
 }
 
@@ -893,6 +926,7 @@ const ACTION_LABEL: Record<string, string> = {
   "shift.deleted": "Shift removed",
   "shift.locked": "Shift locked",
   "shift.unlocked": "Shift unlocked",
+  "replacement.requested": "Replacement requested",
 };
 
 function HistoryDialog({

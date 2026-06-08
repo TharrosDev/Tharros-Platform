@@ -17,7 +17,9 @@ export type NotificationType =
   | "new_lead"
   | "weekly_summary"
   | "agent_handoff"
-  | "sick_call";
+  | "sick_call"
+  | "replacement_filled"
+  | "replacement_escalated";
 
 export type EmailStatus = "none" | "pending" | "sent" | "failed" | "skipped";
 

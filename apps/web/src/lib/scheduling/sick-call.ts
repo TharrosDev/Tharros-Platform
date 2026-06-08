@@ -10,6 +10,8 @@ import { SCHEDULING_MODEL } from "@/lib/deepseek/models";
 import { createNotification } from "@/lib/notifications/notify";
 import { logger } from "@/lib/observability/logger";
 
+import { openReplacement } from "./replacement";
+
 /**
  * Day 54 — sick-call / absence handling (Phase 3G, disruption handling).
  *
@@ -316,7 +318,21 @@ export async function processSickCall(
     // The event is recorded; surface success to the employee but flag for ops.
   }
 
-  // 5. Best-effort side effects: thread (takeover anchor), turns, manager
+  // 5. Kick off the Day-55 replacement engine: find eligible staff, broadcast the
+  // open shift, arm the timeout. Best-effort — a failure here can't block the
+  // call-out (the shift is already vacated; a manager can re-trigger from the UI).
+  try {
+    await openReplacement(admin, {
+      shiftId,
+      orgId,
+      sickCallId,
+      vacatedBy: employeeId,
+    });
+  } catch (err) {
+    logger.warn("sick_call.replacement_open_failed", { err, shiftId, sickCallId });
+  }
+
+  // 6. Best-effort side effects: thread (takeover anchor), turns, manager
   // notifications, audit. None of these block the call-out.
   const threadId = await openSickCallThread(admin, {
     orgId,

@@ -400,6 +400,43 @@ export async function toggleShiftLock(args: {
   return { ok: true };
 }
 
+/**
+ * Day 55 — manually kick off the replacement engine for an open shift (e.g. a
+ * published shift left uncovered, or one a manager just opened). Broadcasts the
+ * open shift to every eligible employee; first-accept-wins via the atomic RPC.
+ * Same engine the Day-54 sick-call auto-fires.
+ */
+export async function findReplacement(args: { shiftId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.shiftId) return { ok: false, message: "Missing shift." };
+
+  const supabase = await createClient();
+  const { data: shiftRow } = await supabase
+    .from("shifts")
+    .select("id, status, employee_id, schedule_id")
+    .eq("id", args.shiftId)
+    .maybeSingle();
+  if (!shiftRow) return { ok: false, message: "That shift no longer exists." };
+  if (shiftRow.status !== "open" || shiftRow.employee_id !== null) {
+    return { ok: false, message: "Only an open, unfilled shift can be sent out for replacement." };
+  }
+
+  const { openReplacement } = await import("./replacement");
+  const admin = createAdminClient();
+  const result = await openReplacement(admin, { shiftId: args.shiftId, orgId: auth.orgId });
+  if (!result.ok) return { ok: false, message: result.message };
+
+  await audit(auth.orgId, auth.userId, "replacement.requested", {
+    entityType: "shift",
+    entityId: args.shiftId,
+    scheduleId: shiftRow.schedule_id as string,
+    detail: { offered: result.offered, outcome: result.status },
+  });
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
 /** Generate a fresh draft for a period — delegates to the Day-49 panel. */
 export async function generateDraftSchedule(args: {
   periodStart: string;
