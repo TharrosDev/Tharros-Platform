@@ -3,11 +3,12 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
 import { getPortalSession } from "@/lib/portal/session";
-import { getPortalSchedule, getSickCallReasonPolicy } from "@/lib/portal/schedule";
+import { getPortalSchedule, getOpenOffers, getSickCallReasonPolicy } from "@/lib/portal/schedule";
 import { signOutPortal } from "@/lib/portal/actions";
 import { TharrosWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { PortalSchedule } from "@/components/portal/portal-schedule";
+import { ReplacementOffers } from "@/components/portal/replacement-offers";
 
 export const metadata: Metadata = {
   title: "My schedule",
@@ -18,12 +19,13 @@ export const dynamic = "force-dynamic";
 
 export default async function PortalSchedulePage() {
   const session = await getPortalSession();
-  const [shifts, reasonPolicy] = session
+  const [shifts, offers, reasonPolicy] = session
     ? await Promise.all([
         getPortalSchedule(session.employeeId, session.orgId),
+        getOpenOffers(session.employeeId, session.orgId),
         getSickCallReasonPolicy(session.orgId),
       ])
-    : [[], "optional" as const];
+    : [[], [], "optional" as const];
 
   return (
     <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
@@ -51,6 +53,7 @@ export default async function PortalSchedulePage() {
           <p className="text-muted-foreground mt-2 type-body">Your shifts for the next two weeks.</p>
 
           <div className="mt-6">
+            <ReplacementOffers offers={offers} />
             <PortalSchedule
               shifts={shifts}
               orgName={session.orgName}

@@ -12,7 +12,9 @@ export type JobType =
   | "notification-send"
   | "availability-nudge"
   | "schedule-delivery"
-  | "shift-reminder";
+  | "shift-reminder"
+  | "replacement-offer-notify"
+  | "replacement-offer-timeout";
 
 /** A claimed job, mapped from the DB row to camelCase for handlers. */
 export type Job = {

@@ -7,6 +7,10 @@ import {
   scheduleDeliveryHandler,
   shiftReminderHandler,
 } from "@/lib/scheduling/delivery-handler";
+import {
+  replacementOfferNotifyHandler,
+  replacementTimeoutHandler,
+} from "@/lib/scheduling/replacement-handlers";
 
 /**
  * Day 38 — the job handler registry. Maps a job `type` to the side effect that
@@ -34,6 +38,8 @@ const HANDLERS: Record<string, JobHandler> = {
   "availability-nudge": availabilityNudgeHandler,
   "schedule-delivery": scheduleDeliveryHandler,
   "shift-reminder": shiftReminderHandler,
+  "replacement-offer-notify": replacementOfferNotifyHandler,
+  "replacement-offer-timeout": replacementTimeoutHandler,
 };
 
 /** The handler for a job type, or null if none is registered (→ treated as failure). */
