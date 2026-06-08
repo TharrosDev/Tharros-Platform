@@ -161,13 +161,16 @@ describe("processSickCall", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
-    // The sick-call event was recorded with the normalized reason.
+    // The sick-call event was recorded with the normalized reason. Day 55:
+    // processSickCall now chains into the replacement engine — with no other
+    // eligible employee in this fixture (the second worker has no availability),
+    // it escalates immediately rather than leaving the event 'open'.
     const { data: sc } = await admin
       .from("sick_call_events")
       .select("id, status, shift_id, notes, employee_id")
       .eq("id", result.sickCallId)
       .single();
-    expect(sc!.status).toBe("open");
+    expect(sc!.status).toBe("escalated");
     expect(sc!.shift_id).toBe(shiftId);
     expect(sc!.employee_id).toBe(emp1);
     expect(sc!.notes).toBe("Illness");

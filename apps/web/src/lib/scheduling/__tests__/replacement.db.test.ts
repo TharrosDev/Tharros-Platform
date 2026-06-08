@@ -239,8 +239,12 @@ describe("claim_replacement_offer (first-accept-wins)", () => {
         p_org_id: orgA,
       }),
     ]);
-    const outcomes = [a.data?.[0]?.outcome, b.data?.[0]?.outcome].sort();
-    expect(outcomes).toEqual(["accepted", "already_filled"]);
+    // Exactly one wins. The loser gets either 'already_filled' (it read its offer
+    // before the winner committed, then saw the shift taken) or 'invalid' (the
+    // winner had already expired its sibling offer) — both mean "didn't get it".
+    const outcomes = [a.data?.[0]?.outcome, b.data?.[0]?.outcome];
+    expect(outcomes.filter((o) => o === "accepted")).toHaveLength(1);
+    expect(outcomes.filter((o) => o === "already_filled" || o === "invalid")).toHaveLength(1);
 
     // The shift is assigned to exactly one of them and republished.
     const { data: shift } = await admin

@@ -108,7 +108,7 @@ begin
 
   update public.replacement_pool_events
   set status = 'expired', responded_at = coalesce(responded_at, now())
-  where shift_id = v_offer.shift_id
+  where replacement_pool_events.shift_id = v_offer.shift_id
     and id <> v_offer.id
     and status = 'offered';
 
