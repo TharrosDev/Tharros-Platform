@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Mail, MoreHorizontal, RotateCw, Trash2 } from "lucide-react";
 
@@ -82,10 +83,13 @@ export function EmployeeRoster({
           {employees.map((e) => (
             <TableRow key={e.id}>
               <TableCell>
-                <div className="flex flex-col">
+                <Link
+                  href={`/scheduling/employees/${e.id}`}
+                  className="flex flex-col hover:underline"
+                >
                   <span className="text-foreground font-medium">{e.name}</span>
                   <span className="text-muted-foreground text-xs">{e.email}</span>
-                </div>
+                </Link>
               </TableCell>
               <TableCell>
                 {e.hasPortalAccess ? (

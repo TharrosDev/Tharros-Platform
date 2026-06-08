@@ -42,6 +42,9 @@ export default async function SchedulingPage() {
             <Link href="/scheduling/calendar" className={buttonVariants()}>
               Schedule
             </Link>
+            <Link href="/scheduling/employees" className={buttonVariants({ variant: "outline" })}>
+              Team
+            </Link>
             <Link
               href="/scheduling/availability"
               className={buttonVariants({ variant: "outline" })}
