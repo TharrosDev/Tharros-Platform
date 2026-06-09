@@ -50,7 +50,7 @@ export type StepActions = {
   setPersonaNotes: (v: string) => void;
 };
 
-const fieldLabel = "text-muted-foreground text-xs font-medium";
+const fieldLabel = "text-xs font-medium";
 
 /* ----------------------------------- Roster ---------------------------------- */
 

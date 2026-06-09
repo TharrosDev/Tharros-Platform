@@ -61,7 +61,12 @@ import type {
   EscalatedSwap,
   RoleCertification,
 } from "@/lib/scheduling/queries";
-import { validateEdits, type EditShift, type EditViolation, type ValidationContext } from "@/lib/scheduling/validation";
+import {
+  validateEdits,
+  type EditShift,
+  type EditViolation,
+  type ValidationContext,
+} from "@/lib/scheduling/validation";
 
 const WINDOW_DAYS = 14;
 const OPEN_ROW = "__open__";
@@ -132,7 +137,9 @@ export function ScheduleCalendar({
 
   const [windowStart, setWindowStart] = React.useState(schedule?.periodStart ?? "");
   const [editing, setEditing] = React.useState<CalendarShift | null>(null);
-  const [adding, setAdding] = React.useState<{ day: string; employeeId: string | null } | null>(null);
+  const [adding, setAdding] = React.useState<{ day: string; employeeId: string | null } | null>(
+    null,
+  );
   const [showHistory, setShowHistory] = React.useState(false);
   const [showSwaps, setShowSwaps] = React.useState(false);
   const [showTimeOff, setShowTimeOff] = React.useState(false);
@@ -159,9 +166,7 @@ export function ScheduleCalendar({
   const softCount = boardViolations.length - hardCount;
 
   if (!schedule) {
-    return (
-      <EmptyState canManage={canManage} />
-    );
+    return <EmptyState canManage={canManage} />;
   }
 
   const isDraft = schedule.status === "draft";
@@ -208,64 +213,66 @@ export function ScheduleCalendar({
           </span>
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          {isPublished ? (
-            <Badge variant="success">
-              <CheckCircle2 className="size-3.5" aria-hidden /> Published
-              {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
-            </Badge>
-          ) : (
-            <Badge variant="secondary">Draft</Badge>
-          )}
-          {hardCount > 0 ? (
-            <Badge variant="destructive">
-              <TriangleAlert className="size-3.5" aria-hidden /> {hardCount} to fix
-            </Badge>
-          ) : softCount > 0 || openShiftCount > 0 ? (
-            <Badge variant="warning">
-              {[
-                openShiftCount > 0 ? `${openShiftCount} open` : null,
-                softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </Badge>
-          ) : (
-            <Badge variant="success">All covered</Badge>
-          )}
-          <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
-            <History className="size-4" /> History
-          </Button>
-          {canManage && escalatedSwaps.length > 0 ? (
-            <Button variant="outline" size="sm" onClick={() => setShowSwaps(true)}>
-              <ArrowLeftRight className="size-4" /> Swaps
-              <Badge variant="warning" className="ml-1">
-                {escalatedSwaps.length}
+        <div className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-2">
+          <div className="flex items-center gap-2">
+            {isPublished ? (
+              <Badge variant="success">
+                <CheckCircle2 className="size-3.5" aria-hidden /> Published
+                {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
               </Badge>
+            ) : (
+              <Badge variant="secondary">Draft</Badge>
+            )}
+            {hardCount > 0 ? (
+              <Badge variant="destructive">
+                <TriangleAlert className="size-3.5" aria-hidden /> {hardCount} to fix
+              </Badge>
+            ) : softCount > 0 || openShiftCount > 0 ? (
+              <Badge variant="warning">
+                {[
+                  openShiftCount > 0 ? `${openShiftCount} open` : null,
+                  softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </Badge>
+            ) : (
+              <Badge variant="success">All covered</Badge>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
+              <History className="size-4" /> History
             </Button>
-          ) : null}
-          {canManage && timeOffRequests.length > 0 ? (
-            <Button variant="outline" size="sm" onClick={() => setShowTimeOff(true)}>
-              <CalendarClock className="size-4" /> Time off
-              {pendingTimeOffCount > 0 ? (
+            {canManage && escalatedSwaps.length > 0 ? (
+              <Button variant="outline" size="sm" onClick={() => setShowSwaps(true)}>
+                <ArrowLeftRight className="size-4" /> Swaps
                 <Badge variant="warning" className="ml-1">
-                  {pendingTimeOffCount}
+                  {escalatedSwaps.length}
                 </Badge>
-              ) : null}
-            </Button>
-          ) : null}
-          {canManage && isPublished ? (
-            <ReopenButton scheduleId={schedule.id} />
-          ) : null}
-          {canManage && isDraft ? (
-            <PublishDialog
-              scheduleId={schedule.id}
-              hardCount={hardCount}
-              softCount={softCount}
-              openShiftCount={openShiftCount}
-            />
-          ) : null}
-          {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
+              </Button>
+            ) : null}
+            {canManage && timeOffRequests.length > 0 ? (
+              <Button variant="outline" size="sm" onClick={() => setShowTimeOff(true)}>
+                <CalendarClock className="size-4" /> Time off
+                {pendingTimeOffCount > 0 ? (
+                  <Badge variant="warning" className="ml-1">
+                    {pendingTimeOffCount}
+                  </Badge>
+                ) : null}
+              </Button>
+            ) : null}
+            {canManage && isPublished ? <ReopenButton scheduleId={schedule.id} /> : null}
+            {canManage && isDraft ? (
+              <PublishDialog
+                scheduleId={schedule.id}
+                hardCount={hardCount}
+                softCount={softCount}
+                openShiftCount={openShiftCount}
+              />
+            ) : null}
+            {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
+          </div>
         </div>
       </div>
 
@@ -303,7 +310,10 @@ export function ScheduleCalendar({
               {days.map((d) => {
                 const cell = cellShifts(row.key, d);
                 return (
-                  <div key={d} className="border-border group/cell relative min-h-14 border-b px-1.5 py-1.5">
+                  <div
+                    key={d}
+                    className="border-border group/cell relative min-h-14 border-b px-1.5 py-1.5"
+                  >
                     <div className="flex flex-col gap-1">
                       {cell.map((s) => (
                         <ShiftChip
@@ -348,7 +358,11 @@ export function ScheduleCalendar({
       ) : null}
 
       {showHistory ? (
-        <HistoryDialog entries={auditTrail} employees={employees} onClose={() => setShowHistory(false)} />
+        <HistoryDialog
+          entries={auditTrail}
+          employees={employees}
+          onClose={() => setShowHistory(false)}
+        />
       ) : null}
 
       {showSwaps ? (
@@ -400,7 +414,7 @@ function ShiftChip({
         hard
           ? "border-destructive/50 bg-destructive/10 text-destructive"
           : open
-            ? "border-warning/40 bg-warning/10 text-warning"
+            ? "border-warning/50 border-dashed bg-warning/10 text-warning hover:bg-warning/15"
             : "border-primary/30 bg-primary/10 text-primary hover:bg-primary/15",
       ].join(" ")}
     >
@@ -488,7 +502,12 @@ function EditShiftDialog({
     if (locked) return { ok: false, message: "Shift can't be edited." } as const;
     // Persist whichever parts changed.
     if (dirtyTimes) {
-      const r = await updateShiftTimes({ shiftId: shift.id, startsAt, endsAt, breakMinutes: shift.breakMinutes });
+      const r = await updateShiftTimes({
+        shiftId: shift.id,
+        startsAt,
+        endsAt,
+        breakMinutes: shift.breakMinutes,
+      });
       if (!r.ok) return r;
     }
     if (dirtyEmployee) {
@@ -534,15 +553,30 @@ function EditShiftDialog({
           <div className="grid grid-cols-3 gap-3">
             <label className="space-y-1.5">
               <span className="text-muted-foreground text-xs font-medium">Date</span>
-              <Input type="date" value={startDate} disabled={locked} onChange={(e) => setStartDate(e.target.value)} />
+              <Input
+                type="date"
+                value={startDate}
+                disabled={locked}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
             </label>
             <label className="space-y-1.5">
               <span className="text-muted-foreground text-xs font-medium">From</span>
-              <Input type="time" value={startTime} disabled={locked} onChange={(e) => setStartTime(e.target.value)} />
+              <Input
+                type="time"
+                value={startTime}
+                disabled={locked}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
             </label>
             <label className="space-y-1.5">
               <span className="text-muted-foreground text-xs font-medium">To</span>
-              <Input type="time" value={endTime} disabled={locked} onChange={(e) => setEndTime(e.target.value)} />
+              <Input
+                type="time"
+                value={endTime}
+                disabled={locked}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
             </label>
           </div>
 
@@ -553,7 +587,9 @@ function EditShiftDialog({
               This schedule is published. Reopen it for edits to make changes.
             </p>
           ) : shift.locked ? (
-            <p className="text-muted-foreground text-sm">This shift is locked. Unlock it to make changes.</p>
+            <p className="text-muted-foreground text-sm">
+              This shift is locked. Unlock it to make changes.
+            </p>
           ) : null}
         </div>
 
@@ -564,7 +600,10 @@ function EditShiftDialog({
                 type="button"
                 variant="outline"
                 onClick={() =>
-                  run(() => toggleShiftLock({ shiftId: shift.id, locked: !shift.locked }), shift.locked ? "Shift unlocked." : "Shift locked.")
+                  run(
+                    () => toggleShiftLock({ shiftId: shift.id, locked: !shift.locked }),
+                    shift.locked ? "Shift unlocked." : "Shift locked.",
+                  )
                 }
                 disabled={pending}
               >
@@ -582,7 +621,12 @@ function EditShiftDialog({
               <Button
                 type="button"
                 onClick={() => run(save, "Shift updated.")}
-                disabled={pending || shift.locked || hardPreview.length > 0 || (!dirtyTimes && !dirtyEmployee)}
+                disabled={
+                  pending ||
+                  shift.locked ||
+                  hardPreview.length > 0 ||
+                  (!dirtyTimes && !dirtyEmployee)
+                }
               >
                 {pending ? "Saving…" : "Save"}
               </Button>
@@ -894,8 +938,8 @@ function PublishDialog({
           <DialogHeader>
             <DialogTitle>Publish schedule</DialogTitle>
             <DialogDescription>
-              Publishing locks in this schedule as the approved version. (Employees are notified in a
-              later step.)
+              Publishing locks in this schedule as the approved version. (Employees are notified in
+              a later step.)
             </DialogDescription>
           </DialogHeader>
 
@@ -904,17 +948,23 @@ function PublishDialog({
               <div className="border-destructive/40 bg-destructive/10 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
                 <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
                 <span>
-                  Fix {hardCount} conflict{hardCount > 1 ? "s" : ""} before publishing. Conflicts are
-                  flagged in red on the calendar.
+                  Fix {hardCount} conflict{hardCount > 1 ? "s" : ""} before publishing. Conflicts
+                  are flagged in red on the calendar.
                 </span>
               </div>
             ) : needsAck ? (
               <label className="border-warning/40 bg-warning/10 flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
-                <Checkbox checked={ack} onCheckedChange={(v) => setAck(v === true)} className="mt-0.5" />
+                <Checkbox
+                  checked={ack}
+                  onCheckedChange={(v) => setAck(v === true)}
+                  className="mt-0.5"
+                />
                 <span className="text-foreground">
                   Publish with{" "}
                   {[
-                    openShiftCount > 0 ? `${openShiftCount} open shift${openShiftCount > 1 ? "s" : ""}` : null,
+                    openShiftCount > 0
+                      ? `${openShiftCount} open shift${openShiftCount > 1 ? "s" : ""}`
+                      : null,
                     softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
                   ]
                     .filter(Boolean)
@@ -1039,7 +1089,11 @@ function SwapReviewDialog({ swaps, onClose }: { swaps: EscalatedSwap[]; onClose:
       setPendingId(null);
       toast.add({
         title: "Swap",
-        description: res.ok ? (approve ? "Swap approved." : "Swap denied.") : (res.message ?? "Couldn't update."),
+        description: res.ok
+          ? approve
+            ? "Swap approved."
+            : "Swap denied."
+          : (res.message ?? "Couldn't update."),
       });
       if (res.ok) router.refresh();
     });
@@ -1050,7 +1104,9 @@ function SwapReviewDialog({ swaps, onClose }: { swaps: EscalatedSwap[]; onClose:
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Shift swaps to review</DialogTitle>
-          <DialogDescription>Swaps an agent couldn&apos;t auto-approve. Approve to apply, or deny.</DialogDescription>
+          <DialogDescription>
+            Swaps an agent couldn&apos;t auto-approve. Approve to apply, or deny.
+          </DialogDescription>
         </DialogHeader>
         {swaps.length === 0 ? (
           <p className="text-muted-foreground text-sm">Nothing to review.</p>
@@ -1061,21 +1117,33 @@ function SwapReviewDialog({ swaps, onClose }: { swaps: EscalatedSwap[]; onClose:
               return (
                 <li key={s.requestId} className="border-border rounded-lg border p-3">
                   <p className="text-sm">
-                    <strong>{s.claimantName}</strong> would take <strong>{s.requesterName}</strong>&apos;s{" "}
-                    <span className="tabular-nums">{s.shiftLabel}</span> shift
+                    <strong>{s.claimantName}</strong> would take <strong>{s.requesterName}</strong>
+                    &apos;s <span className="tabular-nums">{s.shiftLabel}</span> shift
                     {s.tradeForLabel ? (
                       <>
                         {" "}
-                        in exchange for their <span className="tabular-nums">{s.tradeForLabel}</span> shift
+                        in exchange for their{" "}
+                        <span className="tabular-nums">{s.tradeForLabel}</span> shift
                       </>
                     ) : null}
                     .
                   </p>
                   <div className="mt-2 flex gap-2">
-                    <Button type="button" size="sm" onClick={() => act(s.requestId, true)} disabled={busy}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => act(s.requestId, true)}
+                      disabled={busy}
+                    >
                       {busy ? "…" : "Approve"}
                     </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => act(s.requestId, false)} disabled={busy}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => act(s.requestId, false)}
+                      disabled={busy}
+                    >
                       Deny
                     </Button>
                   </div>
@@ -1103,7 +1171,11 @@ const TIME_OFF_BAND_LABEL: Record<string, string> = {
 /** "Jun 15 – Jun 18" (or "Jun 15" for a single day) from YYYY-MM-DD. */
 function timeOffRangeLabel(startDate: string, endDate: string): string {
   const fmt = (d: string) =>
-    new Date(`${d}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+    new Date(`${d}T00:00:00Z`).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
   return startDate === endDate ? fmt(startDate) : `${fmt(startDate)} – ${fmt(endDate)}`;
 }
 
@@ -1160,30 +1232,59 @@ function TimeOffReviewDialog({
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm">
                       <strong>{r.employeeName}</strong>{" "}
-                      <span className="tabular-nums">{timeOffRangeLabel(r.startDate, r.endDate)}</span>
-                      {approved ? <span className="text-emerald-600 dark:text-emerald-400"> · approved{r.autoDecided ? " (auto)" : ""}</span> : null}
+                      <span className="tabular-nums">
+                        {timeOffRangeLabel(r.startDate, r.endDate)}
+                      </span>
+                      {approved ? (
+                        <span className="text-emerald-600 dark:text-emerald-400">
+                          {" "}
+                          · approved{r.autoDecided ? " (auto)" : ""}
+                        </span>
+                      ) : null}
                     </p>
                     {r.impactBand ? (
-                      <Badge variant={r.impactBand === "high" ? "warning" : "secondary"} className="shrink-0">
+                      <Badge
+                        variant={r.impactBand === "high" ? "warning" : "secondary"}
+                        className="shrink-0"
+                      >
                         {TIME_OFF_BAND_LABEL[r.impactBand] ?? r.impactBand}
                       </Badge>
                     ) : null}
                   </div>
-                  {r.reason ? <p className="text-muted-foreground mt-1 text-xs">{r.reason}</p> : null}
+                  {r.reason ? (
+                    <p className="text-muted-foreground mt-1 text-xs">{r.reason}</p>
+                  ) : null}
                   {r.recommendation ? (
                     <p className="text-muted-foreground mt-1 text-xs italic">{r.recommendation}</p>
                   ) : null}
                   <div className="mt-2 flex gap-2">
                     {approved ? (
-                      <Button type="button" size="sm" variant="ghost" onClick={() => act(r.id, "reverse")} disabled={busy}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => act(r.id, "reverse")}
+                        disabled={busy}
+                      >
                         {busy ? "…" : "Reverse"}
                       </Button>
                     ) : (
                       <>
-                        <Button type="button" size="sm" onClick={() => act(r.id, "approve")} disabled={busy}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => act(r.id, "approve")}
+                          disabled={busy}
+                        >
                           {busy ? "…" : "Approve"}
                         </Button>
-                        <Button type="button" size="sm" variant="ghost" onClick={() => act(r.id, "deny")} disabled={busy}>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => act(r.id, "deny")}
+                          disabled={busy}
+                        >
                           Deny
                         </Button>
                       </>
@@ -1229,7 +1330,11 @@ function GenerateDialog({ defaultStart, primary }: { defaultStart: string; prima
 
   return (
     <>
-      <Button variant={primary ? "default" : "outline"} size={primary ? "default" : "sm"} onClick={() => setOpen(true)}>
+      <Button
+        variant={primary ? "default" : "outline"}
+        size={primary ? "default" : "sm"}
+        onClick={() => setOpen(true)}
+      >
         <CalendarRange className="size-4" /> Generate draft
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -1237,8 +1342,8 @@ function GenerateDialog({ defaultStart, primary }: { defaultStart: string; prima
           <DialogHeader>
             <DialogTitle>Generate a draft schedule</DialogTitle>
             <DialogDescription>
-              The assistant builds a draft for this period from availability, staffing needs, and your
-              labor rules. You can adjust it afterward.
+              The assistant builds a draft for this period from availability, staffing needs, and
+              your labor rules. You can adjust it afterward.
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-3">
@@ -1249,13 +1354,19 @@ function GenerateDialog({ defaultStart, primary }: { defaultStart: string; prima
                 value={periodStart}
                 onChange={(e) => {
                   setPeriodStart(e.target.value);
-                  if (e.target.value > periodEnd) setPeriodEnd(addDays(e.target.value, WINDOW_DAYS - 1));
+                  if (e.target.value > periodEnd)
+                    setPeriodEnd(addDays(e.target.value, WINDOW_DAYS - 1));
                 }}
               />
             </label>
             <label className="space-y-1.5">
               <span className="text-muted-foreground text-xs font-medium">End</span>
-              <Input type="date" value={periodEnd} min={periodStart} onChange={(e) => setPeriodEnd(e.target.value)} />
+              <Input
+                type="date"
+                value={periodEnd}
+                min={periodStart}
+                onChange={(e) => setPeriodEnd(e.target.value)}
+              />
             </label>
           </div>
           {error ? <FormMessage>{error}</FormMessage> : null}
