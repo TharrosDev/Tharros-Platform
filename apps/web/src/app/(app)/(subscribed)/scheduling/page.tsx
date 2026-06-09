@@ -63,6 +63,12 @@ export default async function SchedulingPage() {
             >
               Analytics
             </Link>
+            <Link
+              href="/scheduling/activity"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Activity log
+            </Link>
             <Link href="/scheduling/setup" className={buttonVariants({ variant: "outline" })}>
               Edit setup
             </Link>
