@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { font, palette } from "./theme";
 
 /**
- * Shared shell for every Tharros email. Maple Pure-styled, light-mode only,
+ * Shared shell for every Tharros email. Workshop-styled, light-mode only,
  * inline styles (email clients ignore external/embedded CSS). Renders both as a
  * React element (app-sent mail via lib/email/send) and to a static HTML string
  * for Supabase Auth templates (via @react-email/render).
@@ -41,9 +41,7 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
           </Section>
           <Section style={card}>{children}</Section>
           <Section style={footer}>
-            <Text style={footerText}>
-              Tharros, the AI operating layer for small businesses.
-            </Text>
+            <Text style={footerText}>Tharros, the AI operating layer for small businesses.</Text>
             <Text style={footerMuted}>
               You received this email because an account action was requested at{" "}
               <Link href="https://tharros.ca" style={footerLink}>
@@ -67,13 +65,7 @@ export function EmailText({ children }: { children: ReactNode }) {
   return <Text style={paragraph}>{children}</Text>;
 }
 
-export function EmailButton({
-  href,
-  children,
-}: {
-  href: string;
-  children: ReactNode;
-}) {
+export function EmailButton({ href, children }: { href: string; children: ReactNode }) {
   // Hand-rolled anchor button (not <Button>) so the literal Go-template href
   // used by Supabase ({{ .SiteURL }}/...) passes through render untouched.
   return (
@@ -88,9 +80,7 @@ export function EmailButton({
 export function EmailFallbackLink({ href }: { href: string }) {
   return (
     <>
-      <EmailText>
-        Or copy and paste this link into your browser:
-      </EmailText>
+      <EmailText>Or copy and paste this link into your browser:</EmailText>
       <Text style={fallback}>
         <Link href={href} style={fallbackLink}>
           {href}
