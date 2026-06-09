@@ -34,8 +34,16 @@ const STEPS = [
   { title: "Assistant voice", blurb: "How should the scheduling assistant talk to your team?" },
 ] as const;
 
-export function SchedulingSetupWizard() {
-  const [state, setState] = React.useState<WizardState>(defaultState);
+export function SchedulingSetupWizard({
+  initialState,
+  editing = false,
+}: {
+  /** Prefilled state when reopening the wizard to edit an existing setup. */
+  initialState?: WizardState;
+  /** Edit mode: lets the user jump straight to any step and relabels the submit. */
+  editing?: boolean;
+}) {
+  const [state, setState] = React.useState<WizardState>(() => initialState ?? defaultState());
   const [step, setStep] = React.useState(0);
   const [formState, formAction, pending] = useActionState(completeSchedulingSetup, undefined);
 
@@ -74,7 +82,12 @@ export function SchedulingSetupWizard() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[15rem_1fr]">
-      <StepRail step={step} onJump={(i) => i < step && setStep(i)} />
+      <StepRail
+        step={step}
+        // In edit mode every step is already filled + valid, so allow free jumps.
+        onJump={(i) => (editing || i < step) && setStep(i)}
+        allowJumpAhead={editing}
+      />
 
       <form action={formAction} className="min-w-0">
         <input type="hidden" name="payload" value={payload} />
@@ -106,7 +119,7 @@ export function SchedulingSetupWizard() {
 
           {isLast ? (
             <Button type="submit" disabled={pending}>
-              {pending ? "Saving setup…" : "Finish setup"}
+              {pending ? "Saving…" : editing ? "Save changes" : "Finish setup"}
               {!pending ? <Check /> : null}
             </Button>
           ) : (
@@ -143,7 +156,15 @@ function Step({
   }
 }
 
-function StepRail({ step, onJump }: { step: number; onJump: (i: number) => void }) {
+function StepRail({
+  step,
+  onJump,
+  allowJumpAhead = false,
+}: {
+  step: number;
+  onJump: (i: number) => void;
+  allowJumpAhead?: boolean;
+}) {
   return (
     <nav aria-label="Setup steps" className="lg:sticky lg:top-6 lg:self-start">
       <ol className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-1">
@@ -155,7 +176,7 @@ function StepRail({ step, onJump }: { step: number; onJump: (i: number) => void 
               <button
                 type="button"
                 onClick={() => onJump(i)}
-                disabled={i >= step}
+                disabled={!allowJumpAhead && i >= step}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
                   current && "bg-primary-soft/50 text-foreground font-medium",

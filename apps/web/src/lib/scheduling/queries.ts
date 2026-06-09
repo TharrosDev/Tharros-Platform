@@ -2,6 +2,15 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/observability/logger";
+import {
+  DAYS,
+  blankEmployee,
+  type EmployeeRow,
+  type HoursRow,
+  type StaffingRow,
+  type ToneValue,
+  type WizardState,
+} from "@/components/scheduling/setup/model";
 
 import { defaultLaborRules } from "./presets";
 import { buildSolverInput } from "./solver/build-input";
@@ -133,6 +142,118 @@ export const getSchedulingSummary = cache(async (orgId: string): Promise<Schedul
     persona: { tone: persona.tone ?? "professional", notes: persona.notes ?? "" },
   };
 });
+
+/**
+ * Bugfix — load the saved scheduling setup back into the wizard's state shape so
+ * the onboarding wizard can be reopened to EDIT (it otherwise always started from
+ * blank defaults, which would clobber real hours/staffing/persona on save). This
+ * mirrors the simplified picture the wizard authors (one role per employee, one
+ * staffing requirement per day); the `complete_scheduling_setup` RPC is
+ * idempotent, so re-saving this state updates in place. Member-readable via RLS.
+ */
+export async function getSchedulingSetup(orgId: string): Promise<WizardState> {
+  const supabase = await createClient();
+  const [settingsRes, employeesRes, hoursRes, staffingRes, rules] = await Promise.all([
+    supabase.from("org_settings").select("agent_persona").eq("org_id", orgId).maybeSingle(),
+    supabase
+      .from("employees")
+      .select(
+        "name, email, employment_type, is_minor, target_hours_weekly, employee_role_assignments(roles_certifications(name))",
+      )
+      .eq("org_id", orgId)
+      .eq("active", true)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("business_hours")
+      .select("day_of_week, opens_at, closes_at, is_closed")
+      .eq("org_id", orgId),
+    supabase
+      .from("staffing_requirements")
+      .select("day_of_week, min_staff, roles_certifications(name)")
+      .eq("org_id", orgId)
+      .eq("source", "manual"),
+    getLaborRules(orgId),
+  ]);
+
+  const persona = (settingsRes.data?.agent_persona ?? {}) as { tone?: string; notes?: string };
+
+  // PostgREST nested embeds come back as either an object or a 1-element array
+  // depending on inferred cardinality; normalize to the first name (mirrors the
+  // Day-52 getEmployeeProfile pattern).
+  type RoleRef = { name: string } | { name: string }[] | null | undefined;
+  const roleNameOf = (rc: RoleRef): string => (Array.isArray(rc) ? rc[0]?.name : rc?.name) ?? "";
+
+  const empRows = (employeesRes.data ?? []) as unknown as Array<{
+    name: string | null;
+    email: string | null;
+    employment_type: string | null;
+    is_minor: boolean | null;
+    target_hours_weekly: number | string | null;
+    employee_role_assignments: Array<{ roles_certifications: RoleRef }> | null;
+  }>;
+  const employees: EmployeeRow[] = empRows.map((e, i) => ({
+    key: `emp-${i}`,
+    name: e.name ?? "",
+    email: e.email ?? "",
+    employment_type: (e.employment_type as EmployeeRow["employment_type"]) ?? "part_time",
+    role: roleNameOf(e.employee_role_assignments?.[0]?.roles_certifications),
+    is_minor: e.is_minor ?? false,
+    target_hours_weekly: e.target_hours_weekly == null ? "" : String(e.target_hours_weekly),
+  }));
+
+  const hoursByDay = new Map(
+    (
+      (hoursRes.data ?? []) as Array<{
+        day_of_week: number;
+        opens_at: string | null;
+        closes_at: string | null;
+        is_closed: boolean;
+      }>
+    ).map((h) => [h.day_of_week, h]),
+  );
+  const hours: HoursRow[] = DAYS.map((d) => {
+    const row = hoursByDay.get(d.value);
+    return {
+      day_of_week: d.value,
+      opens_at: (row?.opens_at ?? "09:00").slice(0, 5),
+      closes_at: (row?.closes_at ?? "17:00").slice(0, 5),
+      is_closed: row ? row.is_closed : d.value === 0 || d.value === 6,
+    };
+  });
+
+  // One staffing row per day (the wizard's model); first manual requirement wins.
+  const staffByDay = new Map<number, { min_staff: number | string; role: string }>();
+  for (const s of (staffingRes.data ?? []) as unknown as Array<{
+    day_of_week: number;
+    min_staff: number | string;
+    roles_certifications: RoleRef;
+  }>) {
+    if (!staffByDay.has(s.day_of_week)) {
+      staffByDay.set(s.day_of_week, {
+        min_staff: s.min_staff,
+        role: roleNameOf(s.roles_certifications),
+      });
+    }
+  }
+  const staffing: Record<number, StaffingRow> = {};
+  for (const d of DAYS) {
+    const row = staffByDay.get(d.value);
+    staffing[d.value] = {
+      day_of_week: d.value,
+      min_staff: row ? String(row.min_staff) : "1",
+      role: row?.role ?? "",
+    };
+  }
+
+  return {
+    employees: employees.length > 0 ? employees : [blankEmployee()],
+    hours,
+    staffing,
+    preset: rules.preset,
+    tone: (persona.tone as ToneValue) ?? "professional",
+    personaNotes: persona.notes ?? "",
+  };
+}
 
 /* ---------------------------------------------------------------------------
  * Day 44 — employee availability reads (manager surface).
@@ -414,8 +535,17 @@ export type EscalatedSwap = {
 
 /** "Mon Jun 15, 9:00 AM – 5:00 PM" from local-as-UTC ISO strings (UTC accessors). */
 function swapShiftLabel(startsAt: string, endsAt: string): string {
-  const fmtDay = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
-  const fmtTime = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
+  const fmtDay = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+  const fmtTime = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
   return `${fmtDay.format(new Date(Date.parse(startsAt)))}, ${fmtTime.format(new Date(Date.parse(startsAt)))} – ${fmtTime.format(new Date(Date.parse(endsAt)))}`;
 }
 
@@ -442,18 +572,31 @@ export async function getEscalatedSwaps(orgId: string): Promise<EscalatedSwap[]>
   }>;
   if (rows.length === 0) return [];
 
-  const shiftIds = [...new Set(rows.flatMap((r) => [r.shift_id, r.target_shift_id]).filter((v): v is string => !!v))];
+  const shiftIds = [
+    ...new Set(
+      rows.flatMap((r) => [r.shift_id, r.target_shift_id]).filter((v): v is string => !!v),
+    ),
+  ];
   const empIds = [
-    ...new Set(rows.flatMap((r) => [r.requesting_employee_id, r.target_employee_id]).filter((v): v is string => !!v)),
+    ...new Set(
+      rows
+        .flatMap((r) => [r.requesting_employee_id, r.target_employee_id])
+        .filter((v): v is string => !!v),
+    ),
   ];
   const [{ data: shiftRows }, { data: empRows }] = await Promise.all([
     supabase.from("shifts").select("id, starts_at, ends_at").eq("org_id", orgId).in("id", shiftIds),
     supabase.from("employees").select("id, name").eq("org_id", orgId).in("id", empIds),
   ]);
   const shiftById = new Map(
-    ((shiftRows ?? []) as Array<{ id: string; starts_at: string; ends_at: string }>).map((s) => [s.id, s]),
+    ((shiftRows ?? []) as Array<{ id: string; starts_at: string; ends_at: string }>).map((s) => [
+      s.id,
+      s,
+    ]),
   );
-  const nameById = new Map(((empRows ?? []) as Array<{ id: string; name: string }>).map((e) => [e.id, e.name]));
+  const nameById = new Map(
+    ((empRows ?? []) as Array<{ id: string; name: string }>).map((e) => [e.id, e.name]),
+  );
 
   return rows.map((r) => {
     const x = shiftById.get(r.shift_id);
@@ -461,7 +604,9 @@ export async function getEscalatedSwaps(orgId: string): Promise<EscalatedSwap[]>
     return {
       requestId: r.id,
       requesterName: nameById.get(r.requesting_employee_id) ?? "An employee",
-      claimantName: r.target_employee_id ? (nameById.get(r.target_employee_id) ?? "A coworker") : "A coworker",
+      claimantName: r.target_employee_id
+        ? (nameById.get(r.target_employee_id) ?? "A coworker")
+        : "A coworker",
       shiftLabel: x ? swapShiftLabel(x.starts_at, x.ends_at) : "a shift",
       tradeForLabel: y ? swapShiftLabel(y.starts_at, y.ends_at) : null,
       createdAt: r.created_at,
