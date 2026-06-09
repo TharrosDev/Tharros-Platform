@@ -13,10 +13,16 @@ on:
   push:
     branches: [main]
 
-# A newer push to the same branch/PR cancels the in-flight run.
+# CI shares ONE dedicated test Supabase project, so only one run may touch it at
+# a time. The group is workflow-wide (NOT per-ref) so a PR run and the subsequent
+# push-to-main run serialize instead of racing — concurrent runs otherwise clobber
+# each other's rows (the global `jobs` harness wipes the whole table in beforeEach,
+# which once deleted another run's in-flight job → "cannot coerce ... single object").
+# Queue rather than cancel-in-progress so an in-flight run always finishes its
+# teardown cleanly and never leaves half-written state behind.
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
   ci:
