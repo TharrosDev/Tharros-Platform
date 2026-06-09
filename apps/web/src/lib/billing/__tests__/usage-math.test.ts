@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { capDecision, currentUsagePeriodStart, NEAR_LIMIT_THRESHOLD } from "../usage-math";
+import {
+  capDecision,
+  currentUsagePeriodStart,
+  NEAR_LIMIT_THRESHOLD,
+  usageBannerState,
+} from "../usage-math";
 
 /**
  * Day 33 — pure cap + period math. Provider-free; the DB-touching metering
@@ -35,6 +40,26 @@ describe("capDecision", () => {
   it("blocks everything when the cap is non-positive (no plan/allowance)", () => {
     expect(capDecision(0, 0)).toMatchObject({ allowed: false, nearLimit: false });
     expect(capDecision(5, -1).allowed).toBe(false);
+  });
+});
+
+describe("usageBannerState (Day 61)", () => {
+  it("shows nothing with plenty of headroom", () => {
+    expect(usageBannerState(capDecision(10, 500))).toBeNull();
+  });
+
+  it("warns at/above the near-limit threshold while still allowed", () => {
+    expect(usageBannerState(capDecision(400, 500))).toEqual({ tone: "warning", used: 400, cap: 500 });
+    expect(usageBannerState(capDecision(450, 500))?.tone).toBe("warning");
+  });
+
+  it("flips to 'reached' once the cap is hit", () => {
+    expect(usageBannerState(capDecision(500, 500))).toEqual({ tone: "reached", used: 500, cap: 500 });
+    expect(usageBannerState(capDecision(520, 500))?.tone).toBe("reached");
+  });
+
+  it("never shows a banner when there is no plan/cap", () => {
+    expect(usageBannerState(capDecision(0, 0))).toBeNull();
   });
 });
 

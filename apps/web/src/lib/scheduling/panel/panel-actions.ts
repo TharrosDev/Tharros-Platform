@@ -3,6 +3,7 @@
 import { getOrgContext } from "@/lib/org/queries";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { logger } from "@/lib/observability/logger";
+import { checkQueryCap } from "@/lib/billing/usage";
 
 import { runSchedulePanelHandler } from "./panel-handler";
 import type { AgentInputs } from "../orchestrator/types";
@@ -38,6 +39,18 @@ export async function runSchedulePanel(args: {
   }
   if (args.periodEnd < args.periodStart) {
     return { ok: false, message: "The end date must be on or after the start date." };
+  }
+
+  // Cost control (Day 61): schedule generation is the heaviest AI spend (the
+  // candidate panel + optimize-loop), so it counts against the org's monthly AI
+  // cap like an assistant query. Block before spending any tokens when over cap.
+  const cap = await checkQueryCap(activeOrg.id);
+  if (!cap.allowed) {
+    return {
+      ok: false,
+      message:
+        "You've reached your plan's monthly AI limit. It resets at the start of next month — or upgrade your plan for a higher limit.",
+    };
   }
 
   try {

@@ -6,6 +6,8 @@ import {
   TRIAL_DAYS,
   formatMonthly,
   getPlan,
+  hasFeature,
+  minTierForFeature,
   planByPriceId,
   queryCapFor,
 } from "../plans";
@@ -44,6 +46,33 @@ describe("billing plans", () => {
     const highlighted = PLANS.filter((p) => p.highlight);
     expect(highlighted).toHaveLength(1);
     expect(highlighted[0].tier).toBe("growth");
+  });
+
+  it("gates Scheduling to Growth and Pro (Day 61) — Starter is solo-owner only", () => {
+    expect(hasFeature("starter", "scheduling")).toBe(false);
+    expect(hasFeature("growth", "scheduling")).toBe(true);
+    expect(hasFeature("pro", "scheduling")).toBe(true);
+    // The Assistant ships on every paid tier.
+    expect(PLANS.every((p) => hasFeature(p.tier, "assistant"))).toBe(true);
+    // Null tier (no subscription) never has a feature.
+    expect(hasFeature(null, "scheduling")).toBe(false);
+  });
+
+  it("resolves the lowest tier that unlocks a feature", () => {
+    expect(minTierForFeature("scheduling")?.tier).toBe("growth");
+    expect(minTierForFeature("assistant")?.tier).toBe("starter");
+    expect(minTierForFeature("workflows")?.tier).toBe("pro");
+  });
+
+  it("keeps the scheduling entitlement consistent with the marketing copy", () => {
+    // Any tier that advertises scheduling must actually unlock it, and vice versa.
+    for (const plan of PLANS) {
+      const copySaysScheduling = plan.features.some((f) => /scheduling/i.test(f));
+      const inheritsFromLower = plan.features.some((f) => /everything in/i.test(f));
+      if (hasFeature(plan.tier, "scheduling")) {
+        expect(copySaysScheduling || inheritsFromLower).toBe(true);
+      }
+    }
   });
 
   it("getPlan throws on an unknown tier", () => {

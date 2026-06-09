@@ -38,3 +38,26 @@ export function capDecision(used: number, cap: number): CapDecision {
 export function currentUsagePeriodStart(now: Date = new Date()): Date {
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
 }
+
+/** App-wide AI-usage banner state derived from a cap decision (Day 61). */
+export type UsageBannerState = {
+  tone: "warning" | "reached";
+  used: number;
+  cap: number;
+} | null;
+
+/**
+ * Pure: turn a {@link CapDecision} into the app-wide usage banner state.
+ *   - cap reached (`!allowed` with a real cap, used ≥ cap) → "reached" (hard).
+ *   - near the limit (≥ 80%) but still allowed → "warning".
+ *   - otherwise (plenty of headroom, or no plan/cap) → null (no banner).
+ * A non-positive cap (no/unknown plan) never shows a banner — the route gates
+ * handle the un-subscribed case.
+ */
+export function usageBannerState(decision: CapDecision): UsageBannerState {
+  const { allowed, used, cap, nearLimit } = decision;
+  if (cap <= 0) return null;
+  if (!allowed && used >= cap) return { tone: "reached", used, cap };
+  if (nearLimit) return { tone: "warning", used, cap };
+  return null;
+}
