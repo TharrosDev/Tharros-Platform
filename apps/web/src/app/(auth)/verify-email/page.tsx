@@ -38,7 +38,7 @@ export default async function VerifyEmailPage({
         <ResendVerification email={email} next={safeNext} />
       ) : (
         <p className="text-muted-foreground text-sm">
-          Didn&apos;t get it? Check your spam folder, or{" "}
+          No verification email? Check your spam folder, or{" "}
           <Link className="text-primary hover:underline" href="/signup">
             try signing up again
           </Link>

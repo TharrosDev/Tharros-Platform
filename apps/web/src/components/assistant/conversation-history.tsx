@@ -157,7 +157,7 @@ export function ConversationHistory({
           <nav className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
             {items.length === 0 ? (
               <p className="text-muted-foreground px-2 py-6 text-center text-sm">
-                No conversations yet.
+                No conversations yet. Ask your first question and it will show up here.
               </p>
             ) : (
               <ul className="space-y-0.5">

@@ -46,7 +46,7 @@ export function SwapInbox({ incoming, open }: { incoming: PortalSwap[]; open: Po
   if (incoming.length === 0 && open.length === 0) return null;
 
   return (
-    <div className="mb-6 space-y-6">
+    <div className="space-y-6">
       {incoming.length > 0 ? (
         <section className="space-y-2">
           <h2 className="text-foreground flex items-center gap-2 type-meta font-medium">

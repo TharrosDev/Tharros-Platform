@@ -98,7 +98,7 @@ export default async function UsagePage() {
             <CardDescription>
               {sub?.tier
                 ? `Your ${sub.tier} plan includes ${numberFmt.format(cap)} AI queries per month.`
-                : "No active plan."}
+                : "No active plan — choose one on the Billing page to start using the assistant."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

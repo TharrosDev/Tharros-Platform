@@ -71,9 +71,9 @@ export function CitationFooter({
 
 export function NotGroundedNote() {
   return (
-    <p className="text-muted-foreground mt-3 flex items-center gap-1.5 text-xs">
-      <span aria-hidden className="bg-muted-foreground/50 size-1.5 rounded-full" />
-      Not based on your documents
+    <p className="border-border bg-muted/40 text-muted-foreground mt-3 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs">
+      <span aria-hidden className="bg-muted-foreground/50 size-1.5 shrink-0 rounded-full" />
+      This answer isn&apos;t based on your documents — double-check it before relying on it.
     </p>
   );
 }

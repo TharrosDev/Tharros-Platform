@@ -62,7 +62,7 @@ export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
   }
 
   return (
-    <section className="mb-6 space-y-2">
+    <section className="space-y-2">
       <h2 className="text-foreground flex items-center gap-2 type-meta font-medium">
         <CalendarClock className="size-4" /> Open shifts you can pick up
       </h2>
