@@ -513,7 +513,7 @@ export async function openReplacement(
 
 export type AcceptOfferResult =
   | { ok: true; outcome: "accepted"; shiftId: string }
-  | { ok: false; outcome: "already_filled" | "invalid"; message: string };
+  | { ok: false; outcome: "already_filled" | "conflict" | "invalid"; message: string };
 
 /**
  * Claim an offer via the atomic first-accept-wins RPC. On a win, re-arm the Day-53
@@ -543,6 +543,13 @@ export async function acceptOffer(
   }
   if (outcome === "already_filled") {
     return { ok: false, outcome: "already_filled", message: "That shift was just filled by someone else." };
+  }
+  if (outcome === "conflict") {
+    return {
+      ok: false,
+      outcome: "conflict",
+      message: "You're already scheduled for a shift that overlaps this one.",
+    };
   }
   return { ok: false, outcome: "invalid", message: "That offer is no longer available." };
 }

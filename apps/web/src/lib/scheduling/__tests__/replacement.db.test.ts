@@ -294,6 +294,63 @@ describe("claim_replacement_offer (first-accept-wins)", () => {
   });
 });
 
+describe("claim_replacement_offer (Day 60 overlap conflict guard)", () => {
+  it("rejects a claim that would double-book the employee against an overlapping shift", async () => {
+    const date = isoIn(11).slice(0, 10);
+    // emp2 already holds a published shift 09:00–13:00 that day.
+    await admin.from("shifts").insert({
+      org_id: orgA,
+      schedule_id: scheduleId,
+      employee_id: emp2,
+      starts_at: `${date}T09:00:00Z`,
+      ends_at: `${date}T13:00:00Z`,
+      break_minutes: 0,
+      status: "published",
+    });
+    // An OPEN shift 10:00–12:00 (overlaps emp2's shift) is offered to emp2.
+    const { data: openShift } = await admin
+      .from("shifts")
+      .insert({
+        org_id: orgA,
+        schedule_id: scheduleId,
+        employee_id: null,
+        starts_at: `${date}T10:00:00Z`,
+        ends_at: `${date}T12:00:00Z`,
+        break_minutes: 0,
+        status: "open",
+      })
+      .select("id")
+      .single();
+    const openId = openShift!.id as string;
+    const { data: offer } = await admin
+      .from("replacement_pool_events")
+      .insert({ org_id: orgA, shift_id: openId, employee_id: emp2, status: "offered", expires_at: isoIn(11) })
+      .select("id")
+      .single();
+
+    // emp2 tries to take it → the guard rejects with 'conflict'.
+    const res = await acceptOffer(admin, { offerId: offer!.id as string, employeeId: emp2, orgId: orgA });
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.outcome).toBe("conflict");
+
+    // The open shift stays open + unassigned; the offer is expired (not retryable).
+    const { data: stillOpen } = await admin
+      .from("shifts")
+      .select("employee_id, status")
+      .eq("id", openId)
+      .single();
+    expect(stillOpen!.employee_id).toBeNull();
+    expect(stillOpen!.status).toBe("open");
+
+    const { data: offerAfter } = await admin
+      .from("replacement_pool_events")
+      .select("status")
+      .eq("id", offer!.id as string)
+      .single();
+    expect(offerAfter!.status).toBe("expired");
+  });
+});
+
 describe("escalateReplacement", () => {
   it("expires outstanding offers, escalates the sick-call, and notifies managers", async () => {
     const { shiftId, sickCallId } = await openShiftWithOffers(9, { withSickCall: true });
