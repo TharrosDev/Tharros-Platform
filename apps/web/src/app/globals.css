@@ -237,3 +237,21 @@
     font-feature-settings: "tnum";
   }
 }
+
+/*
+  Reduced motion. Collapse animations and transitions to a near-instant
+  duration rather than zeroing them: Base UI overlays (dialog, sheet, dropdown,
+  tooltip) drive their unmount on the transition/animation end event, so a true
+  `none` would leave them mounted. ~0.01ms still fires the end event while being
+  imperceptible.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

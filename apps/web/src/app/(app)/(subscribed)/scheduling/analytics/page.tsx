@@ -12,8 +12,8 @@ import {
   ANALYTICS_WINDOWS,
 } from "@/lib/analytics/queries";
 import { formatPercent, reliabilityBand } from "@/lib/analytics/metrics";
-import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
+import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -76,47 +76,47 @@ export default async function SchedulingAnalyticsPage({
         ))}
       </div>
 
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Stat
-          icon={GaugeCircle}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard
+          icon={<GaugeCircle />}
           label="Labor utilization"
           value={formatPercent(org.laborUtilization)}
           hint={`${org.assignedHours}h staffed of ${org.assignedHours + org.openHours}h scheduled`}
         />
-        <Stat
-          icon={CalendarX2}
+        <StatCard
+          icon={<CalendarX2 />}
           label="Schedule efficiency"
           value={formatPercent(org.scheduleEfficiency)}
           hint={`${org.assignedShifts} of ${org.totalShifts} shifts filled`}
         />
-        <Stat
-          icon={TriangleAlert}
+        <StatCard
+          icon={<TriangleAlert />}
           label="Staffing gap"
           value={String(org.staffingGap.openShifts)}
           hint={`${org.staffingGap.openHours}h across open shifts`}
         />
-        <Stat
-          icon={Repeat2}
+        <StatCard
+          icon={<Repeat2 />}
           label="Replacement acceptance"
           value={formatPercent(org.acceptanceRate)}
           hint="Offers accepted of offers sent"
         />
-        <Stat
-          icon={AlarmClock}
+        <StatCard
+          icon={<AlarmClock />}
           label="Sick calls"
           value={String(org.sickCalls)}
           hint={`${org.swaps} swaps · ${org.timeOff} time-off requests`}
         />
-        <Stat
-          icon={Users}
+        <StatCard
+          icon={<Users />}
           label="People scheduled"
           value={String(employees.filter((e) => e.assignedShifts > 0).length)}
           hint={`${employees.length} on the roster`}
         />
-      </dl>
+      </div>
 
       <section className="space-y-3">
-        <h2 className="type-h2 text-lg font-semibold">By employee</h2>
+        <h2 className="type-h2">By employee</h2>
         {employees.length === 0 ? (
           <p className="text-muted-foreground text-sm">
             No employees on the roster yet. Add your team to see per-person analytics.
@@ -176,27 +176,4 @@ function ReliabilityCell({ rate }: { rate: number | null }) {
   const band = reliabilityBand(rate);
   if (band === "none") return <span className="text-muted-foreground">—</span>;
   return <Badge variant={BAND_VARIANT[band]}>{formatPercent(rate)}</Badge>;
-}
-
-function Stat({
-  icon: Icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-  hint: string;
-}) {
-  return (
-    <div className="bg-card rounded-lg border p-5 shadow-xs">
-      <div className="flex items-center justify-between">
-        <dt className="text-muted-foreground text-sm">{label}</dt>
-        <Icon className="text-muted-foreground size-5" />
-      </div>
-      <dd className={cn("mt-3 text-2xl font-semibold tracking-tight")}>{value}</dd>
-      <p className="text-muted-foreground mt-0.5 text-xs">{hint}</p>
-    </div>
-  );
 }

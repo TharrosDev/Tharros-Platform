@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { CalendarDays, Clock, ScrollText, Users } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
+import { StatCard } from "@/components/stat-card";
 import { buttonVariants } from "@/components/ui/button";
 import { getOrgContext } from "@/lib/org/queries";
 import { getSchedulingSummary } from "@/lib/scheduling/queries";
@@ -57,16 +58,10 @@ export default async function SchedulingPage() {
             >
               Conversations
             </Link>
-            <Link
-              href="/scheduling/analytics"
-              className={buttonVariants({ variant: "outline" })}
-            >
+            <Link href="/scheduling/analytics" className={buttonVariants({ variant: "outline" })}>
               Analytics
             </Link>
-            <Link
-              href="/scheduling/activity"
-              className={buttonVariants({ variant: "outline" })}
-            >
+            <Link href="/scheduling/activity" className={buttonVariants({ variant: "outline" })}>
               Activity log
             </Link>
             <Link href="/scheduling/setup" className={buttonVariants({ variant: "outline" })}>
@@ -76,47 +71,27 @@ export default async function SchedulingPage() {
         }
       />
 
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryStat icon={Users} label="Team members" value={String(summary.employeeCount)} />
-        <SummaryStat icon={Clock} label="Open days / week" value={String(summary.openDays)} />
-        <SummaryStat
-          icon={ScrollText}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard icon={<Users />} label="Team members" value={String(summary.employeeCount)} />
+        <StatCard icon={<Clock />} label="Open days / week" value={String(summary.openDays)} />
+        <StatCard
+          icon={<ScrollText />}
           label="Labor rules"
           value={PRESET_LABEL[summary.preset] ?? summary.preset}
         />
-        <SummaryStat
-          icon={CalendarDays}
+        <StatCard
+          icon={<CalendarDays />}
           label="Assistant voice"
           value={TONE_LABEL[summary.persona.tone] ?? summary.persona.tone}
         />
-      </dl>
+      </div>
 
       {summary.persona.notes ? (
         <section className="bg-card max-w-prose rounded-lg border p-5 shadow-xs">
-          <h2 className="text-sm font-medium">Assistant guidance</h2>
-          <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-            {summary.persona.notes}
-          </p>
+          <h2 className="type-meta text-muted-foreground">Assistant guidance</h2>
+          <p className="text-foreground/90 type-body mt-2">{summary.persona.notes}</p>
         </section>
       ) : null}
-    </div>
-  );
-}
-
-function SummaryStat({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="bg-card rounded-lg border p-5 shadow-xs">
-      <Icon className="text-muted-foreground size-5" />
-      <dd className="mt-3 text-2xl font-semibold tracking-tight">{value}</dd>
-      <dt className="text-muted-foreground mt-0.5 text-sm">{label}</dt>
     </div>
   );
 }
