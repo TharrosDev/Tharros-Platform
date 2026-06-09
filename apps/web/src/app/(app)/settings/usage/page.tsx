@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { getOrgContext } from "@/lib/org/queries";
 import { getSubscription } from "@/lib/billing/entitlements";
 import { queryCapFor } from "@/lib/billing/plans";
-import { estimateCostCents, formatUsd } from "@/lib/billing/ai-pricing";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -16,7 +15,7 @@ import {
 import { FormMessage } from "@/components/auth/auth-card";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Usage & cost" };
+export const metadata: Metadata = { title: "Usage" };
 
 /** Shape of the per-model entry in the ai_usage_summary `by_model` jsonb. */
 type ModelUsage = {
@@ -44,7 +43,7 @@ export default async function UsagePage() {
   if (!activeOrg) {
     return (
       <>
-        <PageHeader title="Usage & cost" description="Your AI usage this month." />
+        <PageHeader title="Usage" description="Your AI usage this month." />
         <p className="text-muted-foreground type-body">Select or create an organization first.</p>
       </>
     );
@@ -54,10 +53,8 @@ export default async function UsagePage() {
   if (activeOrg.role !== "owner") {
     return (
       <>
-        <PageHeader title="Usage & cost" description="Your AI usage this month." />
-        <FormMessage tone="error">
-          Only the organization owner can view usage and cost.
-        </FormMessage>
+        <PageHeader title="Usage" description="Your AI usage this month." />
+        <FormMessage tone="error">Only the organization owner can view usage.</FormMessage>
       </>
     );
   }
@@ -81,26 +78,18 @@ export default async function UsagePage() {
   const used = summary.query_count;
   const pct = cap > 0 ? Math.min(100, Math.round((used / cap) * 100)) : 0;
 
-  const byModel = Object.entries(summary.by_model ?? {});
-  const totalCostCents = byModel.reduce(
-    (sum, [model, m]) =>
-      sum +
-      estimateCostCents({
-        model,
-        inputTokens: m.inputTokens,
-        outputTokens: m.outputTokens,
-        cacheReadTokens: m.cacheReadTokens,
-        cacheCreationTokens: m.cacheCreationTokens,
-      }),
-    0,
-  );
+  const totalTokens =
+    summary.input_tokens +
+    summary.output_tokens +
+    summary.cache_read_tokens +
+    summary.cache_creation_tokens;
+  const avgTokensPerQuery = used > 0 ? Math.round(totalTokens / used) : 0;
+  const cachedShare =
+    totalTokens > 0 ? Math.round((summary.cache_read_tokens / totalTokens) * 100) : 0;
 
   return (
     <>
-      <PageHeader
-        title="Usage & cost"
-        description="AI assistant usage for the current calendar month."
-      />
+      <PageHeader title="Usage" description="AI assistant usage for the current calendar month." />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -137,14 +126,11 @@ export default async function UsagePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Estimated cost</CardTitle>
-            <CardDescription>
-              Approximate Claude API spend in USD this month. An estimate from token usage, not the
-              CAD you&apos;re billed.
-            </CardDescription>
+            <CardTitle>Token usage</CardTitle>
+            <CardDescription>Tokens the assistant processed this month.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <span className="type-h1">{formatUsd(totalCostCents)}</span>
+            <span className="type-h1">{numberFmt.format(totalTokens)}</span>
             <dl className="text-muted-foreground space-y-1.5 text-sm">
               <div className="flex justify-between">
                 <dt>Input tokens</dt>
@@ -158,40 +144,35 @@ export default async function UsagePage() {
                 <dt>Cached (read) tokens</dt>
                 <dd className="text-foreground">{numberFmt.format(summary.cache_read_tokens)}</dd>
               </div>
+              <div className="flex justify-between">
+                <dt>Cached (written) tokens</dt>
+                <dd className="text-foreground">
+                  {numberFmt.format(summary.cache_creation_tokens)}
+                </dd>
+              </div>
             </dl>
           </CardContent>
         </Card>
       </div>
 
-      {byModel.length > 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>By model</CardTitle>
-            <CardDescription>How queries split across models this month.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="divide-border divide-y text-sm">
-              {byModel.map(([model, m]) => (
-                <div key={model} className="flex items-center justify-between py-2.5">
-                  <dt className="text-foreground font-medium">{model}</dt>
-                  <dd className="text-muted-foreground">
-                    {numberFmt.format(m.queryCount)} queries ·{" "}
-                    {formatUsd(
-                      estimateCostCents({
-                        model,
-                        inputTokens: m.inputTokens,
-                        outputTokens: m.outputTokens,
-                        cacheReadTokens: m.cacheReadTokens,
-                        cacheCreationTokens: m.cacheCreationTokens,
-                      }),
-                    )}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </CardContent>
-        </Card>
-      ) : null}
+      <Card>
+        <CardHeader>
+          <CardTitle>Activity</CardTitle>
+          <CardDescription>How the assistant is being used this month.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <dl className="divide-border divide-y text-sm">
+            <div className="flex items-center justify-between py-2.5">
+              <dt className="text-foreground font-medium">Average tokens per query</dt>
+              <dd className="text-muted-foreground">{numberFmt.format(avgTokensPerQuery)}</dd>
+            </div>
+            <div className="flex items-center justify-between py-2.5">
+              <dt className="text-foreground font-medium">Cached share of tokens</dt>
+              <dd className="text-muted-foreground">{cachedShare}%</dd>
+            </div>
+          </dl>
+        </CardContent>
+      </Card>
     </>
   );
 }

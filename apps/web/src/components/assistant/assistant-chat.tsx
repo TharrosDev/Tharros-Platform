@@ -194,12 +194,7 @@ export function AssistantChat({
     <div className="flex min-h-[calc(100vh-16rem)] flex-col">
       <div className="flex-1">
         {showEmpty ? (
-          <EmptyState
-            hasDocuments={hasDocuments}
-            onPick={send}
-            onPickTemplate={setActiveTemplate}
-            readOnly={readOnly}
-          />
+          <EmptyState hasDocuments={hasDocuments} onPick={send} readOnly={readOnly} />
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
             {olderTruncated ? (
@@ -275,12 +270,10 @@ export function AssistantChat({
 function EmptyState({
   hasDocuments,
   onPick,
-  onPickTemplate,
   readOnly,
 }: {
   hasDocuments: boolean;
   onPick: (q: string) => void;
-  onPickTemplate: (id: TemplateId) => void;
   readOnly: boolean;
 }) {
   return (
@@ -309,12 +302,6 @@ function EmptyState({
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-3">
-            <span className="border-border h-px flex-1 border-t" />
-            <span className="text-muted-foreground text-xs">or generate something</span>
-            <span className="border-border h-px flex-1 border-t" />
-          </div>
-          <TemplateChips active={null} onPick={onPickTemplate} disabled={false} />
         </div>
       ) : (
         <div className="border-border bg-card shadow-card mt-7 flex w-full flex-col gap-4 rounded-xl border p-5 text-left">

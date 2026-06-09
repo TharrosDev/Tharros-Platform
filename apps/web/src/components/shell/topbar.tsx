@@ -6,7 +6,7 @@ import { ChevronDown, CreditCard, LogOut, Search, Settings, User } from "lucide-
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Kbd } from "@/components/ui/kbd";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -78,6 +78,7 @@ function Topbar({
             aria-label="Open account menu"
           >
             <Avatar className="size-7">
+              <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
               <AvatarFallback className="text-xs">
                 {user.initials}
               </AvatarFallback>

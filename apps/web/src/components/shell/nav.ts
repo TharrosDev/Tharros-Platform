@@ -25,13 +25,13 @@ export const primaryNav: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutGrid },
   { label: "AI Assistant", href: "/assistant", icon: Sparkles },
   { label: "Scheduling", href: "/scheduling", icon: CalendarDays },
-  { label: "Knowledge", href: "/knowledge", icon: BookOpen },
   { label: "Lead Capture", href: "/leads", icon: Users, badge: "3 new" },
   { label: "Automations", href: "/automations", icon: Workflow },
 ];
 
 /** Account-level navigation, pinned to the bottom of the sidebar. */
 export const footerNav: NavItem[] = [
+  { label: "Knowledge", href: "/knowledge", icon: BookOpen },
   { label: "Profile", href: "/profile", icon: User },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Billing", href: "/billing", icon: CreditCard },

@@ -40,7 +40,7 @@ export default async function NotificationsSettingsPage() {
         description={`Which emails ${activeOrg.name} sends.`}
       />
 
-      <Card className="max-w-xl">
+      <Card>
         <CardHeader>
           <CardTitle>Email preferences</CardTitle>
           <CardDescription>

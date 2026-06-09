@@ -20,7 +20,7 @@ export default async function PortalPage() {
   const session = await getPortalSession();
 
   return (
-    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
+    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8 lg:max-w-3xl lg:px-8 lg:py-12">
       <header className="mb-8 flex items-center justify-between">
         <TharrosWordmark />
         {session ? (
@@ -41,9 +41,10 @@ export default async function PortalPage() {
             availability below.
           </p>
 
+          <div className="mt-8 grid gap-3 lg:grid-cols-2 lg:gap-4">
           <Link
             href="/portal/schedule"
-            className="group border-primary/30 bg-primary-soft/40 hover:bg-primary-soft/70 mt-8 flex items-center gap-3 rounded-xl border p-4 transition-colors"
+            className="group border-primary/30 bg-primary-soft/40 hover:bg-primary-soft/70 flex items-center gap-3 rounded-xl border p-4 transition-colors lg:items-start lg:p-5"
           >
             <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
               <CalendarDays className="size-4.5" aria-hidden />
@@ -62,7 +63,7 @@ export default async function PortalPage() {
 
           <Link
             href="/portal/availability"
-            className="group border-border bg-card hover:bg-accent/40 mt-3 flex items-center gap-3 rounded-xl border p-4 transition-colors"
+            className="group border-border bg-card hover:bg-accent/40 flex items-center gap-3 rounded-xl border p-4 transition-colors lg:items-start lg:p-5"
           >
             <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
               <Clock className="size-4.5" aria-hidden />
@@ -78,6 +79,7 @@ export default async function PortalPage() {
               aria-hidden
             />
           </Link>
+          </div>
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center text-center">

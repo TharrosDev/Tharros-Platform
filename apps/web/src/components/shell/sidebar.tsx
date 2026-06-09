@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TharrosWordmark } from "@/components/brand/logo";
 import { OrgSwitcher } from "@/components/shell/org-switcher";
 import { primaryNav, footerNav, type NavItem } from "@/components/shell/nav";
@@ -52,6 +52,7 @@ function Sidebar({
       <Separator className="my-3" />
       <div className="flex items-center gap-3 px-2 py-1">
         <Avatar>
+          <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
           <AvatarFallback>{user.initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">

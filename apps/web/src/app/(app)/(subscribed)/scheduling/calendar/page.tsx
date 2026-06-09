@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { ScheduleCalendar } from "@/components/scheduling/calendar/schedule-calendar";
 import { getOrgContext } from "@/lib/org/queries";
@@ -60,6 +62,11 @@ export default async function ScheduleCalendarPage() {
       <PageHeader
         title="Schedule"
         description="Review, adjust, and publish. Edits are checked against your rules as you make them."
+        actions={
+          <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
+            Back to scheduling
+          </Link>
+        }
       />
       <ScheduleCalendar
         schedule={schedule}

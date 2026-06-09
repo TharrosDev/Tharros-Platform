@@ -20,7 +20,7 @@ export default async function PortalAvailabilityPage() {
   const session = await getPortalSession();
 
   return (
-    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
+    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8 lg:max-w-2xl lg:px-8 lg:py-12">
       <header className="mb-8 flex items-center justify-between">
         <TharrosWordmark />
         {session ? (
