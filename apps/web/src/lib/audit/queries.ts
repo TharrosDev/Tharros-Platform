@@ -56,3 +56,60 @@ export async function getActivityPage(
 
   return { rows, nextBefore, source };
 }
+
+/**
+ * The schedule-changes-only feed for plain members. `scheduling_audit_log` is
+ * member-read under RLS, so this reads it directly (no RPC) — members never see
+ * the agent_audit_log half (model calls, tool steps), which stays manager-only
+ * via `org_activity_log`. Maps the raw row into the same `ActivityRow` shape the
+ * presenter consumes (`source: 'schedule'`, no model).
+ */
+export async function getScheduleActivityPage(
+  orgId: string,
+  opts?: { before?: string | null },
+): Promise<ActivityPage> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("scheduling_audit_log")
+    .select("id, actor_type, action, entity_type, entity_id, detail, created_at")
+    .eq("org_id", orgId)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(ACTIVITY_PAGE_SIZE + 1);
+  if (opts?.before) query = query.lt("created_at", opts.before);
+
+  const { data, error } = await query;
+  if (error) {
+    logger.error("audit.schedule_activity_failed", { org_id: orgId, error: error.message });
+    return { rows: [], nextBefore: null, source: "schedule" };
+  }
+
+  const mapped: ActivityRow[] = (
+    (data ?? []) as Array<{
+      id: string;
+      actor_type: string;
+      action: string;
+      entity_type: string | null;
+      entity_id: string | null;
+      detail: Record<string, unknown> | null;
+      created_at: string;
+    }>
+  ).map((r) => ({
+    id: r.id,
+    source: "schedule",
+    actor: r.actor_type,
+    action: r.action,
+    entity_type: r.entity_type,
+    entity_id: r.entity_id,
+    model: null,
+    detail: r.detail,
+    created_at: r.created_at,
+  }));
+
+  const hasMore = mapped.length > ACTIVITY_PAGE_SIZE;
+  const rows = mapped.slice(0, ACTIVITY_PAGE_SIZE);
+  const nextBefore = hasMore ? rows[rows.length - 1]?.created_at ?? null : null;
+
+  return { rows, nextBefore, source: "schedule" };
+}

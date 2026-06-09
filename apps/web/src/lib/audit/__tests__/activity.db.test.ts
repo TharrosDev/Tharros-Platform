@@ -140,3 +140,20 @@ describe("org_activity_log", () => {
     expect((data ?? []) as unknown[]).toHaveLength(0);
   });
 });
+
+describe("member schedule-only feed (the schedule_activity variant)", () => {
+  it("a plain member reads the schedule trail directly but never the agent trail", async () => {
+    // The member variant reads scheduling_audit_log directly (member-read RLS) —
+    // it sees schedule changes...
+    const sched = await clientMember
+      .from("scheduling_audit_log")
+      .select("id, action")
+      .eq("org_id", orgA);
+    expect(sched.error).toBeNull();
+    expect((sched.data ?? []).map((r) => r.action)).toContain("schedule.published");
+
+    // ...but agent_audit_log is deny-all, so the agent half stays manager-only.
+    const agent = await clientMember.from("agent_audit_log").select("id").eq("org_id", orgA);
+    expect((agent.data ?? []) as unknown[]).toHaveLength(0);
+  });
+});
