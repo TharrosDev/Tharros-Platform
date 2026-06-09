@@ -192,6 +192,21 @@ export async function assignShift(args: {
     return { ok: false, message: "Couldn't save the change. Please try again." };
   }
 
+  // The shift is no longer open → expire any outstanding replacement offers so
+  // they can't linger as 'offered' (e.g. a manager reopened a published schedule
+  // and assigned a shift while a replacement was mid-flight). The atomic claim +
+  // escalation paths already expire offers; this covers the manual-assign path.
+  // Best-effort: a transient failure here must not fail the assignment itself.
+  if (args.employeeId) {
+    const admin = createAdminClient();
+    const { error: expErr } = await admin
+      .from("replacement_pool_events")
+      .update({ status: "expired", responded_at: new Date().toISOString() })
+      .eq("shift_id", args.shiftId)
+      .eq("status", "offered");
+    if (expErr) logger.warn("assignShift: expire stale offers failed", { err: expErr, shiftId: args.shiftId });
+  }
+
   await audit(auth.orgId, auth.userId, "shift.assigned", {
     entityType: "shift",
     entityId: args.shiftId,
