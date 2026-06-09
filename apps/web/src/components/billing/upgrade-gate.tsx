@@ -28,11 +28,14 @@ export function UpgradeGate({
         <Lock className="size-5" aria-hidden />
       </span>
       <div className="space-y-1.5">
-        <h1 className="type-h2 text-lg font-semibold">{feature} is a {requiredPlanName} feature</h1>
+        <h1 className="type-h2">
+          {feature} is a {requiredPlanName} feature
+        </h1>
         <p className="text-muted-foreground text-sm">{blurb}</p>
       </div>
       <p className="text-muted-foreground text-sm">
-        Upgrade to <span className="text-foreground font-medium">{requiredPlanName}</span> to unlock it.
+        Upgrade to <span className="text-foreground font-medium">{requiredPlanName}</span> to unlock
+        it.
       </p>
       <Link href="/billing" className={cn(buttonVariants(), "mt-1")}>
         Upgrade plan

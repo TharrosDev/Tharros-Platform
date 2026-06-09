@@ -159,7 +159,7 @@ function ProfileForm({ profile, canManage }: { profile: Profile; canManage: bool
             onChange={(e) => patch({ hire_date: e.target.value })}
           />
         </Field>
-        <Field label="Seniority rank (lower = senior)">
+        <Field label="Seniority rank" hint="Lower number ranks as more senior.">
           <Input
             type="number"
             value={numStr(form.seniority_rank ?? null)}
@@ -175,7 +175,7 @@ function ProfileForm({ profile, canManage }: { profile: Profile; canManage: bool
             onChange={(e) => numField("target_hours_weekly", e.target.value)}
           />
         </Field>
-        <Field label="Performance score (0–100)">
+        <Field label="Performance score" hint="A number from 0 to 100.">
           <Input
             type="number"
             value={numStr(form.performance_score ?? null)}
@@ -346,11 +346,20 @@ function AttendanceCard({ attendance }: { attendance: AttendanceHistory }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="space-y-1.5">
-      <span className="text-muted-foreground text-xs font-medium">{label}</span>
+      <span className="block text-xs font-medium">{label}</span>
       {children}
+      {hint ? <span className="text-muted-foreground block text-xs">{hint}</span> : null}
     </label>
   );
 }
