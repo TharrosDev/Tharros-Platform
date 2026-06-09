@@ -5,7 +5,7 @@ import { Bot, CalendarClock, ScrollText } from "lucide-react";
 
 import { getOrgContext } from "@/lib/org/queries";
 import { getSchedulingStatus } from "@/lib/scheduling/queries";
-import { getActivityPage } from "@/lib/audit/queries";
+import { getActivityPage, getScheduleActivityPage } from "@/lib/audit/queries";
 import { presentActivityFeed, type ActivitySource, type ActivityCategory } from "@/lib/audit/present";
 import { formatTimestamp } from "@/lib/notifications/types";
 import { cn } from "@/lib/utils";
@@ -33,11 +33,12 @@ function resolveSource(value: string | undefined): ActivitySource | "all" {
 }
 
 /**
- * Day 62 — full traceability surface. A unified, owner/admin-only timeline of
- * every agent decision (agent_audit_log) and every schedule change
- * (scheduling_audit_log), via the gated `org_activity_log` RPC. Cursor-paginated
- * (one page per view) with a source filter; the RPC and this page both gate to
- * managers, so a member is sent back to the scheduling home.
+ * Day 62 — traceability surface. Owners/admins get the full unified timeline of
+ * every agent decision (agent_audit_log) + schedule change (scheduling_audit_log)
+ * via the gated `org_activity_log` RPC, with a source filter. Plain members get a
+ * schedule-changes-only view (read directly from the member-readable
+ * scheduling_audit_log) — the agent internals (model calls, tool steps) stay
+ * manager-only. Cursor-paginated, one page per view.
  */
 export default async function ActivityLogPage({
   searchParams,
@@ -50,12 +51,14 @@ export default async function ActivityLogPage({
   const { onboardedAt } = await getSchedulingStatus(activeOrg.id);
   if (!onboardedAt) redirect("/scheduling/setup");
 
-  // Agent internals are management-level — members don't get the audit view.
-  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") redirect("/scheduling");
-
-  const source = resolveSource(sp.source);
+  const canManage = activeOrg.role === "owner" || activeOrg.role === "admin";
   const before = typeof sp.before === "string" ? sp.before : null;
-  const page = await getActivityPage(activeOrg.id, { source, before });
+  // Managers: the full unified feed + source filter. Members: schedule changes
+  // only (their RLS-readable trail), with no source filter to choose.
+  const source = canManage ? resolveSource(sp.source) : "schedule";
+  const page = canManage
+    ? await getActivityPage(activeOrg.id, { source, before })
+    : await getScheduleActivityPage(activeOrg.id, { before });
   const events = presentActivityFeed(page.rows);
 
   const href = (params: { source?: string; before?: string }) => {
@@ -70,7 +73,11 @@ export default async function ActivityLogPage({
     <div className="space-y-8">
       <PageHeader
         title="Activity log"
-        description="A complete, auditable trail of every agent decision and schedule change in your workspace."
+        description={
+          canManage
+            ? "A complete, auditable trail of every agent decision and schedule change in your workspace."
+            : "An auditable trail of every schedule change in your workspace."
+        }
         actions={
           <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
             Back to scheduling
@@ -78,18 +85,20 @@ export default async function ActivityLogPage({
         }
       />
 
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter activity">
-        {SOURCES.map((s) => (
-          <Link
-            key={s.key}
-            href={href({ source: s.key })}
-            aria-current={s.key === source ? "page" : undefined}
-            className={buttonVariants({ variant: s.key === source ? "default" : "outline", size: "sm" })}
-          >
-            {s.label}
-          </Link>
-        ))}
-      </div>
+      {canManage ? (
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter activity">
+          {SOURCES.map((s) => (
+            <Link
+              key={s.key}
+              href={href({ source: s.key })}
+              aria-current={s.key === source ? "page" : undefined}
+              className={buttonVariants({ variant: s.key === source ? "default" : "outline", size: "sm" })}
+            >
+              {s.label}
+            </Link>
+          ))}
+        </div>
+      ) : null}
 
       {events.length === 0 ? (
         <div className="bg-card flex flex-col items-center gap-3 rounded-lg border px-6 py-16 text-center">
