@@ -63,6 +63,7 @@ export function AvailabilityManager({
           <Label htmlFor="employee-picker">Team member</Label>
           <Select
             value={selectedId ?? ""}
+            items={employees.map((e) => ({ value: e.id, label: e.name }))}
             onValueChange={(v) =>
               router.push(`/scheduling/availability?employee=${encodeURIComponent(String(v))}`)
             }

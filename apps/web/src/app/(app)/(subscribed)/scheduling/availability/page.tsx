@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { AvailabilityManager } from "@/components/scheduling/availability/availability-manager";
 import { getOrgContext } from "@/lib/org/queries";
@@ -35,6 +37,11 @@ export default async function AvailabilityPage({
       <PageHeader
         title="Availability"
         description="Set when each team member can work. The scheduler only assigns shifts inside these times."
+        actions={
+          <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
+            Back to scheduling
+          </Link>
+        }
       />
       <AvailabilityManager
         employees={roster.employees.map((e) => ({ id: e.id, name: e.name, email: e.email }))}

@@ -42,7 +42,7 @@ export default async function PortalSchedulePage() {
     : [[], [], "optional" as const, [], [], [], []];
 
   return (
-    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
+    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8 lg:max-w-6xl lg:px-10 lg:py-12">
       <header className="mb-8 flex items-center justify-between">
         <TharrosWordmark />
         {session ? (
@@ -66,16 +66,20 @@ export default async function PortalSchedulePage() {
           <h1 className="type-h1 mt-1">Your schedule</h1>
           <p className="text-muted-foreground mt-2 type-body">Your shifts for the next two weeks.</p>
 
-          <div className="mt-6">
-            <ReplacementOffers offers={offers} />
-            <SwapInbox incoming={incomingSwaps} open={openSwaps} />
-            <TimeOffSection requests={timeOff} />
-            <PortalSchedule
-              shifts={shifts}
-              orgName={session.orgName}
-              reasonPolicy={reasonPolicy}
-              coworkers={coworkers}
-            />
+          <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-10">
+            <div className="lg:order-2">
+              <ReplacementOffers offers={offers} />
+              <SwapInbox incoming={incomingSwaps} open={openSwaps} />
+              <TimeOffSection requests={timeOff} />
+            </div>
+            <div className="min-w-0 lg:order-1">
+              <PortalSchedule
+                shifts={shifts}
+                orgName={session.orgName}
+                reasonPolicy={reasonPolicy}
+                coworkers={coworkers}
+              />
+            </div>
           </div>
         </div>
       ) : (

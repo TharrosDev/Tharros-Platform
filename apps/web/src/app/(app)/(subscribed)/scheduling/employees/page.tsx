@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { buttonVariants } from "@/components/ui/button";
 import { getOrgContext } from "@/lib/org/queries";
 import { getRoster } from "@/lib/employees/queries";
 import { getSchedulingStatus } from "@/lib/scheduling/queries";
@@ -37,6 +39,11 @@ export default async function SchedulingEmployeesPage() {
       <PageHeader
         title="Team"
         description="Your scheduling roster. Open a profile to set employment details, role certifications, and availability."
+        actions={
+          <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
+            Back to scheduling
+          </Link>
+        }
       />
 
       {canManage ? (

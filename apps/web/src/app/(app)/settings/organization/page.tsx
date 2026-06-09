@@ -51,7 +51,7 @@ export default async function OrganizationSettingsPage() {
         description="How your business is described across Tharros."
       />
 
-      <Card className="max-w-xl">
+      <Card>
         <CardHeader>
           <CardTitle>{activeOrg.name}</CardTitle>
           <CardDescription>Name, industry, and team size.</CardDescription>

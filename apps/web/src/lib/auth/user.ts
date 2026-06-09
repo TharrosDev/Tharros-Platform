@@ -6,6 +6,8 @@ export type DisplayUser = {
   email: string;
   /** 1–2 letters for the avatar fallback. */
   initials: string;
+  /** Public avatar image URL, when the user has uploaded one. */
+  avatarUrl: string | null;
   /** Active org name — populated by the (app) layout from the org context. */
   company: string | null;
 };
@@ -29,10 +31,16 @@ export function getDisplayUser(user: User): DisplayUser {
       ? user.user_metadata.full_name.trim()
       : "") || email.split("@")[0];
 
+  const avatarUrl =
+    typeof user.user_metadata?.avatar_url === "string" && user.user_metadata.avatar_url
+      ? user.user_metadata.avatar_url
+      : null;
+
   return {
     name: fullName,
     email,
     initials: initialsFrom(fullName),
+    avatarUrl,
     company: null,
   };
 }

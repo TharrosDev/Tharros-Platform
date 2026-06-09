@@ -11,12 +11,12 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-[13rem_1fr] lg:gap-10">
+    <div className="grid gap-6 lg:grid-cols-[12rem_minmax(0,46rem)] lg:gap-8">
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <p className="type-meta text-muted-foreground mb-3 hidden px-1 lg:block">Settings</p>
         <SettingsNav />
       </aside>
-      <div className="min-w-0 space-y-8">{children}</div>
+      <div className="min-w-0 space-y-6">{children}</div>
     </div>
   );
 }
