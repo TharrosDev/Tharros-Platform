@@ -34,7 +34,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_CLASS: Record<string, string> = {
   pending: "text-muted-foreground",
-  approved: "text-emerald-600 dark:text-emerald-400",
+  approved: "text-success",
   denied: "text-destructive",
 };
 
@@ -87,7 +87,7 @@ export function TimeOffSection({ requests }: { requests: MyTimeOff[] }) {
   return (
     <section className="mb-6">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="type-h3">Time off</h2>
+        <h2 className="type-h2">Time off</h2>
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -110,7 +110,9 @@ export function TimeOffSection({ requests }: { requests: MyTimeOff[] }) {
                   <p className="text-muted-foreground truncate text-xs">{r.reason}</p>
                 ) : null}
               </div>
-              <span className={`type-meta shrink-0 font-medium ${STATUS_CLASS[r.status] ?? "text-muted-foreground"}`}>
+              <span
+                className={`type-meta shrink-0 font-medium ${STATUS_CLASS[r.status] ?? "text-muted-foreground"}`}
+              >
                 {STATUS_LABEL[r.status] ?? r.status}
               </span>
             </li>

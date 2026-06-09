@@ -129,8 +129,7 @@ function RequestAvailabilityButton({
       toast.add({
         title: res.error ? "Couldn't send request" : "Availability requested",
         description:
-          res.error ??
-          `We emailed ${employeeName ?? "them"} a link to set their availability.`,
+          res.error ?? `We emailed ${employeeName ?? "them"} a link to set their availability.`,
       });
     });
   }
@@ -200,7 +199,7 @@ function WeeklyGrid({
 
       <div className="flex items-center gap-2">
         <CalendarClock className="text-muted-foreground size-5" />
-        <h2 className="type-h3">Weekly availability</h2>
+        <h2 className="type-h2">Weekly availability</h2>
       </div>
       <p className="text-muted-foreground -mt-2 text-sm">
         Turn on the days {employeeName} can work. Leave the times blank for the whole day.
@@ -301,7 +300,7 @@ function TemporaryOverrides({
   return (
     <section className="space-y-4">
       <div className="space-y-1">
-        <h2 className="type-h3">Date overrides</h2>
+        <h2 className="type-h2">Date overrides</h2>
         <p className="text-muted-foreground text-sm">
           One-off exceptions — block a vacation, or open up an extra day. These win over the weekly
           pattern.

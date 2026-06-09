@@ -1236,7 +1236,7 @@ function TimeOffReviewDialog({
                         {timeOffRangeLabel(r.startDate, r.endDate)}
                       </span>
                       {approved ? (
-                        <span className="text-emerald-600 dark:text-emerald-400">
+                        <span className="text-success">
                           {" "}
                           · approved{r.autoDecided ? " (auto)" : ""}
                         </span>
