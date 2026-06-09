@@ -85,7 +85,7 @@ export function TimeOffSection({ requests }: { requests: MyTimeOff[] }) {
   }
 
   return (
-    <section className="mb-6">
+    <section>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="type-h2">Time off</h2>
         <button

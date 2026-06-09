@@ -80,7 +80,8 @@ export default async function NotificationsPage() {
                         <input type="hidden" name="id" value={n.id} />
                         <button
                           type="submit"
-                          className="text-muted-foreground hover:text-foreground text-xs outline-none"
+                          aria-label={`Mark "${n.title}" as read`}
+                          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 rounded-sm text-xs outline-none focus-visible:ring-[3px]"
                         >
                           Mark read
                         </button>
@@ -90,7 +91,8 @@ export default async function NotificationsPage() {
                       <input type="hidden" name="id" value={n.id} />
                       <button
                         type="submit"
-                        className="text-muted-foreground hover:text-destructive text-xs outline-none"
+                        aria-label={`Dismiss "${n.title}"`}
+                        className="text-muted-foreground hover:text-destructive focus-visible:ring-ring/40 rounded-sm text-xs outline-none focus-visible:ring-[3px]"
                       >
                         Dismiss
                       </button>

@@ -21,7 +21,7 @@ export default async function KnowledgePage() {
     <div className="space-y-8">
       <PageHeader
         title="Knowledge"
-        description="Upload the documents your AI Assistant should learn from: SOPs, policies, price lists, FAQs."
+        description="Upload the documents your AI Assistant should learn from: how-to guides, policies, price lists, FAQs."
       />
       {total < 3 ? <FirstDocumentsProgress count={total} /> : null}
       <DocumentUploader />

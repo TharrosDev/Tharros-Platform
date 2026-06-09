@@ -87,7 +87,12 @@ function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming
 /** Pre-first-token indicator: three cobalt dots breathing. */
 function ThinkingDots() {
   return (
-    <span className="flex items-center gap-1 py-1.5" aria-label="Thinking">
+    <span
+      role="status"
+      aria-live="polite"
+      aria-label="The assistant is thinking"
+      className="flex items-center gap-1 py-1.5"
+    >
       {[0, 1, 2].map((i) => (
         <span
           key={i}

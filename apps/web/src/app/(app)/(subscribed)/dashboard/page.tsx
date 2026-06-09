@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
@@ -91,12 +92,15 @@ export default async function DashboardPage() {
         <div className="grid gap-px sm:grid-cols-[minmax(0,15rem)_1fr]">
           {/* Count rail */}
           <div className="bg-primary text-primary-foreground flex flex-col justify-between gap-6 p-5 sm:p-6">
-            <div className="type-meta text-primary-foreground/80">Waiting on you</div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="type-meta text-primary-foreground/90">Waiting on you</span>
+              <Badge variant="secondary">Sample preview</Badge>
+            </div>
             <div>
               <div className="num text-5xl font-bold leading-none tracking-tight">
                 {waiting.length}
               </div>
-              <p className="text-primary-foreground/85 type-small mt-2 max-w-[18ch]">
+              <p className="text-primary-foreground/90 type-small mt-2 max-w-[18ch]">
                 Replies and approvals that need a human. Everything else is handled.
               </p>
             </div>
@@ -137,8 +141,13 @@ export default async function DashboardPage() {
       <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Lately</CardTitle>
-            <CardDescription>What Tharros has been doing on its own.</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              Lately
+              <Badge variant="secondary">Sample preview</Badge>
+            </CardTitle>
+            <CardDescription>
+              A preview of what this feed looks like once lead capture and automations go live.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-1">
             {activity.map((a, i) => (
@@ -163,7 +172,10 @@ export default async function DashboardPage() {
           {/* Quiet weekly pulse — deliberately not a hero-metric card. */}
           <Card>
             <CardHeader>
-              <CardTitle>This week</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                This week
+                <Badge variant="secondary">Sample preview</Badge>
+              </CardTitle>
               <CardDescription>New leads captured for you.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
