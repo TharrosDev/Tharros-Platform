@@ -1,6 +1,7 @@
 import { cache } from "react";
 
 import { ACTIVE_STATUSES, type SubscriptionStatus, type Tier } from "@/lib/billing/schemas";
+import { hasFeature, type ProductFeature } from "@/lib/billing/plans";
 import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 
@@ -82,3 +83,37 @@ export const getSubscription = cache(
 export const getEntitlement = cache(async (): Promise<Entitlement> => {
   return entitlementFor(await getSubscription());
 });
+
+/* --------------------------- Feature gating (Day 61) ---------------------- */
+
+export type FeatureAccess = {
+  /** True only when the subscription is active AND the tier unlocks the feature. */
+  entitled: boolean;
+  /** Why access was denied (for the UI): needs a subscription, or a higher tier. */
+  reason: "ok" | "no_subscription" | "not_in_plan";
+  /** The org's current tier, if any. */
+  tier: Tier | null;
+};
+
+/**
+ * Pure feature gate: an active subscription is necessary but not sufficient — the
+ * tier must also unlock the product feature. Layered on `entitlementFor` so the
+ * billing-status rules (past_due blocks, etc.) stay in one place. Exported for
+ * unit testing.
+ */
+export function featureAccessFor(
+  sub: SubscriptionSnapshot | null,
+  feature: ProductFeature,
+): FeatureAccess {
+  const tier = sub?.tier ?? null;
+  if (!entitlementFor(sub).allowed) return { entitled: false, reason: "no_subscription", tier };
+  if (!hasFeature(tier, feature)) return { entitled: false, reason: "not_in_plan", tier };
+  return { entitled: true, reason: "ok", tier };
+}
+
+/** The active org's access decision for one product feature. Deduped per request. */
+export const getFeatureAccess = cache(
+  async (feature: ProductFeature): Promise<FeatureAccess> => {
+    return featureAccessFor(await getSubscription(), feature);
+  },
+);

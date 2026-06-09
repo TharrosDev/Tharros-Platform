@@ -4,10 +4,13 @@ import { getAuthUser } from "@/lib/auth/current-user";
 import { getDisplayUser } from "@/lib/auth/user";
 import { getOrgContext } from "@/lib/org/queries";
 import { getEntitlement } from "@/lib/billing/entitlements";
+import { checkQueryCap } from "@/lib/billing/usage";
+import { usageBannerState } from "@/lib/billing/usage-math";
 import { getUnreadCount, listNotifications } from "@/lib/notifications/queries";
 import { Sidebar } from "@/components/shell/sidebar";
 import { Topbar } from "@/components/shell/topbar";
 import { BillingBanner } from "@/components/billing/billing-banner";
+import { UsageBanner } from "@/components/billing/usage-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ToastProvider, Toaster } from "@/components/ui/toast";
 
@@ -33,6 +36,13 @@ export default async function AppLayout({
   // with the (subscribed) gate's read within the same request.
   const entitlement = await getEntitlement();
 
+  // AI-usage banner (Day 61): show a near-limit warning / cap-reached notice once
+  // the org crosses 80% of its monthly AI cap. Only meaningful for a subscribed
+  // org (cap 0 → no banner), so skip the count entirely when access is blocked.
+  const usageBanner = entitlement.allowed && activeOrg
+    ? usageBannerState(await checkQueryCap(activeOrg.id))
+    : null;
+
   // In-app notification inbox for the topbar bell (RLS scopes to this user).
   const [notifications, unreadCount] = await Promise.all([
     listNotifications({ limit: 10 }),
@@ -56,6 +66,7 @@ export default async function AppLayout({
               unreadCount={unreadCount}
             />
             <BillingBanner entitlement={entitlement} />
+            <UsageBanner state={usageBanner} />
             <main className="mx-auto w-full max-w-5xl flex-1 space-y-8 px-4 py-8 sm:px-6 sm:py-10">
               {children}
             </main>

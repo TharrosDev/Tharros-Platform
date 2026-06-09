@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { entitlementFor, type SubscriptionSnapshot } from "../entitlements";
+import { entitlementFor, featureAccessFor, type SubscriptionSnapshot } from "../entitlements";
 
 /**
  * Day 19 — entitlement state machine. Pure: status → access + banner. The gate
@@ -74,4 +74,39 @@ describe("entitlementFor", () => {
       expect(e.banner).toBeNull();
     },
   );
+});
+
+describe("featureAccessFor (Day 61 feature gate)", () => {
+  it("denies when there is no active subscription", () => {
+    expect(featureAccessFor(null, "scheduling")).toEqual({
+      entitled: false,
+      reason: "no_subscription",
+      tier: null,
+    });
+    // past_due is active-ish but entitlementFor blocks it → no_subscription.
+    const pastDue = featureAccessFor(sub({ status: "past_due", tier: "growth" }), "scheduling");
+    expect(pastDue.entitled).toBe(false);
+    expect(pastDue.reason).toBe("no_subscription");
+  });
+
+  it("denies a subscribed tier that doesn't include the feature", () => {
+    const starter = featureAccessFor(sub({ status: "active", tier: "starter" }), "scheduling");
+    expect(starter).toEqual({ entitled: false, reason: "not_in_plan", tier: "starter" });
+  });
+
+  it("grants a subscribed tier that includes the feature", () => {
+    expect(featureAccessFor(sub({ status: "active", tier: "growth" }), "scheduling")).toEqual({
+      entitled: true,
+      reason: "ok",
+      tier: "growth",
+    });
+    // A trialing Pro org still gets the feature (trial counts as allowed).
+    expect(featureAccessFor(sub({ status: "trialing", tier: "pro" }), "scheduling").entitled).toBe(true);
+  });
+
+  it("grants the assistant on every paid tier", () => {
+    for (const tier of ["starter", "growth", "pro"] as const) {
+      expect(featureAccessFor(sub({ status: "active", tier }), "assistant").entitled).toBe(true);
+    }
+  });
 });

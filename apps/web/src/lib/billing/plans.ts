@@ -24,11 +24,22 @@ export const TRIAL_DAYS = 14;
 /** ISO 4217 currency for all Prices. Canadian SMB product. */
 export const BILLING_CURRENCY = "cad" as const;
 
+/**
+ * Product capabilities a plan unlocks (Day 61 feature gating). Distinct from the
+ * marketing `features` bullets: this is the typed set the route gates read.
+ * `assistant` ships on every paid plan; `scheduling` is a team feature (Growth+,
+ * since Starter targets solo owners with no staff to schedule); `leads` /
+ * `workflows` are reserved for their later phases.
+ */
+export type ProductFeature = "assistant" | "scheduling" | "leads" | "workflows";
+
 export type Plan = {
   tier: Tier;
   name: string;
   /** Monthly amount in cents (Stripe `unit_amount`). */
   priceMonthly: number;
+  /** Typed product capabilities this tier unlocks — the feature-gate source. */
+  products: readonly ProductFeature[];
   /** Stable Stripe Price `lookup_key`, independent of test/live. */
   lookupKey: string;
   /** Resolved Stripe Price ID for the current mode; undefined until vaulted. */
@@ -52,6 +63,7 @@ export const PLANS: readonly Plan[] = [
     tier: "starter",
     name: "Starter",
     priceMonthly: 14900,
+    products: ["assistant"],
     lookupKey: "tharros_starter_monthly",
     priceId: env.STRIPE_PRICE_STARTER,
     blurb: "For solo owners getting their first systems in place.",
@@ -68,12 +80,14 @@ export const PLANS: readonly Plan[] = [
     tier: "growth",
     name: "Growth",
     priceMonthly: 34900,
+    products: ["assistant", "scheduling"],
     lookupKey: "tharros_growth_monthly",
     priceId: env.STRIPE_PRICE_GROWTH,
     blurb: "For growing teams capturing and following up on leads.",
     highlight: true,
     features: [
       "Everything in Starter",
+      "AI Workforce Scheduling",
       "Lead Capture + AI Follow-Up agent",
       "Up to 5 connected tools",
       "Up to 5,000 AI queries / month",
@@ -85,6 +99,7 @@ export const PLANS: readonly Plan[] = [
     tier: "pro",
     name: "Pro",
     priceMonthly: 69900,
+    products: ["assistant", "scheduling", "workflows"],
     lookupKey: "tharros_pro_monthly",
     priceId: env.STRIPE_PRICE_PRO,
     blurb: "For businesses automating work across every tool.",
@@ -123,6 +138,21 @@ export function planByPriceId(priceId: string | null | undefined): Plan | undefi
  */
 export function queryCapFor(tier: Tier): number {
   return getPlan(tier).monthlyQueryCap;
+}
+
+/**
+ * Whether a tier unlocks a product feature (Day 61 gating). Null/undefined tier
+ * (no/unknown subscription) never has a feature. Pure — the route gate + the
+ * pricing page both read it.
+ */
+export function hasFeature(tier: Tier | null | undefined, feature: ProductFeature): boolean {
+  if (!tier) return false;
+  return getPlan(tier).products.includes(feature);
+}
+
+/** The lowest tier that unlocks `feature` (for "upgrade to X" copy), or undefined. */
+export function minTierForFeature(feature: ProductFeature): Plan | undefined {
+  return PLANS.find((p) => p.products.includes(feature));
 }
 
 /** Format a cents amount as a whole-dollar CAD string, e.g. 14900 → "$149". */
