@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays, ChevronRight, Clock, Plane } from "lucide-react";
+import { CalendarDays, ChevronRight, Clock } from "lucide-react";
 
 import { getPortalSession } from "@/lib/portal/session";
 import { signOutPortal } from "@/lib/portal/actions";
@@ -15,14 +15,6 @@ export const metadata: Metadata = {
 
 // The session is read from a cookie + validated against the DB on every load.
 export const dynamic = "force-dynamic";
-
-const COMING_SOON = [
-  {
-    icon: Plane,
-    title: "Time off & swaps",
-    body: "Request time off, pick up open shifts, and swap with teammates.",
-  },
-];
 
 export default async function PortalPage() {
   const session = await getPortalSession();
@@ -59,7 +51,7 @@ export default async function PortalPage() {
             <div className="min-w-0 flex-1">
               <p className="text-foreground font-medium">Your schedule</p>
               <p className="text-muted-foreground text-sm">
-                See your shifts for the next two weeks, with add-to-calendar.
+                See your shifts, request time off, swap shifts, and add them to your calendar.
               </p>
             </div>
             <ChevronRight
@@ -86,31 +78,13 @@ export default async function PortalPage() {
               aria-hidden
             />
           </Link>
-
-          <ul className="mt-3 flex flex-col gap-3">
-            {COMING_SOON.map(({ icon: Icon, title, body }) => (
-              <li
-                key={title}
-                className="border-border bg-card flex items-start gap-3 rounded-xl border p-4"
-              >
-                <span className="bg-primary-soft text-primary-soft-foreground mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg">
-                  <Icon className="size-4.5" aria-hidden />
-                </span>
-                <div className="min-w-0">
-                  <p className="text-foreground font-medium">{title}</p>
-                  <p className="text-muted-foreground text-sm">{body}</p>
-                  <p className="text-muted-foreground/80 mt-1 text-xs font-medium">Coming soon</p>
-                </div>
-              </li>
-            ))}
-          </ul>
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <h1 className="type-h2">This link isn&apos;t active</h1>
           <p className="text-muted-foreground mt-3 max-w-xs type-body">
-            Your portal link may have expired or been replaced. Ask your manager to send you
-            a fresh link, then open it from your email.
+            Your portal link may have expired or been replaced. Ask your manager to send you a fresh
+            link, then open it from your email.
           </p>
         </div>
       )}

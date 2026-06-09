@@ -6,6 +6,7 @@ import { recordUsage } from "@/lib/billing/usage";
 import { chatCompletion } from "@/lib/deepseek/client";
 import { SCHEDULING_MODEL } from "@/lib/deepseek/models";
 import { mapDeepSeekUsage } from "@/lib/deepseek/usage";
+import { DeepSeekStructuredError } from "@/lib/deepseek/structured";
 
 import { getPortalSession } from "./session";
 import {
@@ -78,10 +79,15 @@ export async function submitAvailabilityText(
     return { status: "preview", parsed, sourceText: text };
   } catch (err) {
     logger.error("portal.availability_parse_failed", { err, employeeId: session.employeeId });
+    // A DeepSeekStructuredError means the model genuinely couldn't fit the input to
+    // the schema — ask the employee to rephrase. Anything else (missing API key,
+    // network, 5xx) is our side being unavailable, so don't blame their wording.
+    const isParseFailure = err instanceof DeepSeekStructuredError;
     return {
       status: "error",
-      message:
-        "Sorry, I couldn't read that. Try rephrasing, for example “Mon to Fri 9 to 5, off June 20 to 25”.",
+      message: isParseFailure
+        ? "Sorry, I couldn't read that. Try rephrasing, for example “Mon to Fri 9 to 5, off June 20 to 25”."
+        : "The scheduling assistant is unavailable right now. Please try again in a few minutes.",
       sourceText: text,
     };
   }

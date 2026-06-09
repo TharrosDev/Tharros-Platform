@@ -89,6 +89,16 @@ test("scheduling spine", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Activity log" })).toBeVisible();
   });
 
+  await test.step("the setup wizard reopens prefilled for editing (no redirect bounce)", async () => {
+    await page.goto("/scheduling/setup");
+    // Onboarded orgs used to be redirected straight back to /scheduling; the wizard
+    // must now stay open so settings are editable.
+    await expect(page).toHaveURL(/\/scheduling\/setup$/);
+    await expect(page.getByRole("heading", { name: "Edit scheduling setup" })).toBeVisible();
+    // ...and the roster step is prefilled with the seeded team (it used to start blank).
+    await expect(page.locator("#name-emp-0")).toHaveValue(EMP1);
+  });
+
   await test.step("an employee opens their portal magic link and sees their shift", async () => {
     // /portal/enter sets the httpOnly cookie + redirects to the deep link.
     await page.goto(`/portal/enter?token=${portalToken}&next=/portal/schedule`);
