@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   attendanceReliability,
+  dailyAssignedHours,
   deriveEmployeeAnalytics,
   deriveOrgAnalytics,
   formatPercent,
@@ -122,5 +123,40 @@ describe("deriveEmployeeAnalytics", () => {
   it("nulls acceptance when never offered a replacement", () => {
     const e = deriveEmployeeAnalytics({ ...raw, offers: 0, offers_accepted: 0 });
     expect(e.acceptanceRate).toBeNull();
+  });
+});
+
+describe("dailyAssignedHours", () => {
+  it("buckets net hours by start date over the trailing window", () => {
+    const rows = [
+      { starts_at: "2026-06-09T09:00:00Z", ends_at: "2026-06-09T17:00:00Z", employee_id: "a", break_minutes: 30 },
+      { starts_at: "2026-06-09T10:00:00Z", ends_at: "2026-06-09T14:00:00Z", employee_id: "b", break_minutes: null },
+      { starts_at: "2026-06-10T09:00:00Z", ends_at: "2026-06-10T12:00:00Z", employee_id: "a", break_minutes: 0 },
+    ];
+    const out = dailyAssignedHours(rows, "2026-06-10", 3);
+    expect(out).toEqual([
+      { date: "2026-06-08", hours: 0 },
+      { date: "2026-06-09", hours: 11.5 },
+      { date: "2026-06-10", hours: 3 },
+    ]);
+  });
+
+  it("ignores open shifts, out-of-window days, and malformed rows", () => {
+    const rows = [
+      { starts_at: "2026-06-10T09:00:00Z", ends_at: "2026-06-10T17:00:00Z", employee_id: null, break_minutes: 0 },
+      { starts_at: "2026-05-01T09:00:00Z", ends_at: "2026-05-01T17:00:00Z", employee_id: "a", break_minutes: 0 },
+      { starts_at: "bad", ends_at: "2026-06-10T17:00:00Z", employee_id: "a", break_minutes: 0 },
+      { starts_at: "2026-06-10T17:00:00Z", ends_at: "2026-06-10T09:00:00Z", employee_id: "a", break_minutes: 0 },
+    ];
+    const out = dailyAssignedHours(rows, "2026-06-10", 2);
+    expect(out).toEqual([
+      { date: "2026-06-09", hours: 0 },
+      { date: "2026-06-10", hours: 0 },
+    ]);
+  });
+
+  it("returns empty for a nonsense window", () => {
+    expect(dailyAssignedHours([], "not-a-date", 7)).toEqual([]);
+    expect(dailyAssignedHours([], "2026-06-10", 0)).toEqual([]);
   });
 });

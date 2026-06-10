@@ -3,12 +3,15 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/observability/logger";
 import {
+  dailyAssignedHours,
   deriveEmployeeAnalytics,
   deriveOrgAnalytics,
+  type DailyHours,
   type EmployeeAnalytics,
   type EmployeeRaw,
   type OrgAnalytics,
   type OverviewRaw,
+  type ShiftHoursRow,
 } from "@/lib/analytics/metrics";
 
 /**
@@ -55,6 +58,32 @@ export async function getOrgAnalytics(orgId: string, days: number): Promise<OrgA
     return deriveOrgAnalytics(ZERO_OVERVIEW);
   }
   return deriveOrgAnalytics((data as OverviewRaw) ?? ZERO_OVERVIEW);
+}
+
+/**
+ * Net staffed hours per day over the trailing window, for the trend strip.
+ * Reads the member-readable `shifts` table directly (same RLS the calendar
+ * relies on) and derives in pure TS — no new RPC or schema.
+ */
+export async function getDailyStaffedHours(orgId: string, days: number): Promise<DailyHours[]> {
+  const supabase = await createClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const from = new Date(Date.parse(`${today}T00:00:00Z`) - (days - 1) * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+
+  const { data, error } = await supabase
+    .from("shifts")
+    .select("starts_at, ends_at, employee_id, break_minutes")
+    .eq("org_id", orgId)
+    .gte("starts_at", `${from}T00:00:00Z`)
+    .lt("starts_at", `${today}T23:59:59Z`);
+
+  if (error) {
+    logger.error("analytics.daily_hours_failed", { org_id: orgId, error: error.message });
+    return [];
+  }
+  return dailyAssignedHours((data ?? []) as ShiftHoursRow[], today, days);
 }
 
 export async function getEmployeeAnalytics(

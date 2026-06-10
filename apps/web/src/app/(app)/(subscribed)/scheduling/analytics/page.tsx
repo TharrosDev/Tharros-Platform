@@ -6,24 +6,19 @@ import { AlarmClock, CalendarX2, GaugeCircle, Repeat2, TriangleAlert, Users } fr
 import { getOrgContext } from "@/lib/org/queries";
 import { getSchedulingStatus } from "@/lib/scheduling/queries";
 import {
+  getDailyStaffedHours,
   getEmployeeAnalytics,
   getOrgAnalytics,
   resolveWindow,
   ANALYTICS_WINDOWS,
 } from "@/lib/analytics/queries";
-import { formatPercent, reliabilityBand } from "@/lib/analytics/metrics";
+import { formatPercent } from "@/lib/analytics/metrics";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { BarStrip } from "@/components/charts/bar-strip";
+import { EmployeeAnalyticsTable } from "@/components/analytics/employee-table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = { title: "Scheduling analytics" };
 
@@ -46,10 +41,12 @@ export default async function SchedulingAnalyticsPage({
   if (!onboardedAt) redirect("/scheduling/setup");
 
   const days = resolveWindow(sp.days);
-  const [org, employees] = await Promise.all([
+  const [org, employees, dailyHours] = await Promise.all([
     getOrgAnalytics(activeOrg.id, days),
     getEmployeeAnalytics(activeOrg.id, days),
+    getDailyStaffedHours(activeOrg.id, days),
   ]);
+  const totalStaffedHours = Math.round(dailyHours.reduce((sum, d) => sum + d.hours, 0));
 
   return (
     <div className="space-y-8">
@@ -58,13 +55,22 @@ export default async function SchedulingAnalyticsPage({
         description={`Workforce oversight over the last ${days} days — coverage, reliability, and disruption.`}
       />
 
-      <div className="flex items-center gap-2" role="group" aria-label="Time window">
+      <div
+        className="bg-muted inline-flex items-center gap-1 rounded-lg p-1"
+        role="group"
+        aria-label="Time window"
+      >
         {ANALYTICS_WINDOWS.map((w) => (
           <Link
             key={w}
             href={`/scheduling/analytics?days=${w}`}
             aria-current={w === days ? "page" : undefined}
-            className={buttonVariants({ variant: w === days ? "default" : "outline", size: "sm" })}
+            className={cn(
+              "focus-visible:ring-ring/40 rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+              w === days
+                ? "bg-card text-foreground shadow-xs"
+                : "text-muted-foreground hover:text-foreground",
+            )}
           >
             {w} days
           </Link>
@@ -110,6 +116,31 @@ export default async function SchedulingAnalyticsPage({
         />
       </div>
 
+      {dailyHours.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Staffed hours by day</CardTitle>
+            <CardDescription>
+              {totalStaffedHours}h staffed over the last {days} days
+              {org.acceptanceRate !== null
+                ? `, with ${formatPercent(org.acceptanceRate)} of replacement offers accepted`
+                : ""}
+              .
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <BarStrip
+              points={dailyHours.map((d) => ({ label: d.date, value: d.hours }))}
+              unit="h"
+            />
+            <div className="text-muted-foreground mt-1 flex justify-between text-xs tabular-nums">
+              <span>{dailyHours[0].date}</span>
+              <span>{dailyHours[dailyHours.length - 1].date}</span>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <section className="space-y-3">
         <h2 className="type-h2">By employee</h2>
         {employees.length === 0 ? (
@@ -117,58 +148,9 @@ export default async function SchedulingAnalyticsPage({
             No employees on the roster yet. Add your team to see per-person analytics.
           </p>
         ) : (
-          <div className="overflow-hidden rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Employee</TableHead>
-                  <TableHead className="text-right">Shifts</TableHead>
-                  <TableHead className="text-right">Hours</TableHead>
-                  <TableHead className="text-right">Reliability</TableHead>
-                  <TableHead className="text-right">Sick calls</TableHead>
-                  <TableHead className="text-right">Acceptance</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {employees.map((e) => (
-                  <TableRow key={e.employeeId}>
-                    <TableCell className="font-medium">
-                      <Link
-                        href={`/scheduling/employees/${e.employeeId}`}
-                        className="hover:underline"
-                      >
-                        {e.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">{e.assignedShifts}</TableCell>
-                    <TableCell className="text-right tabular-nums">{e.assignedHours}</TableCell>
-                    <TableCell className="text-right">
-                      <ReliabilityCell rate={e.reliability} />
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">{e.sickCalls}</TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {formatPercent(e.acceptanceRate)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <EmployeeAnalyticsTable employees={employees} />
         )}
       </section>
     </div>
   );
-}
-
-const BAND_VARIANT = {
-  good: "secondary",
-  watch: "outline",
-  poor: "destructive",
-  none: "outline",
-} as const;
-
-function ReliabilityCell({ rate }: { rate: number | null }) {
-  const band = reliabilityBand(rate);
-  if (band === "none") return <span className="text-muted-foreground">—</span>;
-  return <Badge variant={BAND_VARIANT[band]}>{formatPercent(rate)}</Badge>;
 }

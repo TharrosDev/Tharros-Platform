@@ -71,6 +71,7 @@ export function EmployeeRoster({
   return (
     <section className="space-y-3">
       <h2 className="type-h2">Roster</h2>
+      <div className="bg-card shadow-card overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -85,10 +86,24 @@ export function EmployeeRoster({
               <TableCell>
                 <Link
                   href={`/scheduling/employees/${e.id}`}
-                  className="flex flex-col hover:underline"
+                  className="group flex items-center gap-3"
                 >
-                  <span className="text-foreground font-medium">{e.name}</span>
-                  <span className="text-muted-foreground text-xs">{e.email}</span>
+                  <span
+                    aria-hidden
+                    className="bg-secondary text-secondary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                  >
+                    {e.name
+                      .split(/\s+/)
+                      .slice(0, 2)
+                      .map((part) => part[0]?.toUpperCase() ?? "")
+                      .join("")}
+                  </span>
+                  <span className="flex min-w-0 flex-col">
+                    <span className="text-foreground truncate font-medium group-hover:underline">
+                      {e.name}
+                    </span>
+                    <span className="text-muted-foreground truncate text-xs">{e.email}</span>
+                  </span>
                 </Link>
               </TableCell>
               <TableCell>
@@ -134,6 +149,7 @@ export function EmployeeRoster({
           ))}
         </TableBody>
       </Table>
+      </div>
 
       <Dialog open={confirm !== null} onOpenChange={(open) => !open && setConfirm(null)}>
         <DialogContent className="max-w-md">
