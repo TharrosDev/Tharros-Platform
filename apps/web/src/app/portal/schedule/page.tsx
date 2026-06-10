@@ -15,6 +15,7 @@ import {
 import { signOutPortal } from "@/lib/portal/actions";
 import { TharrosWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import { RefreshButton } from "@/components/portal/refresh-button";
 import { PortalSchedule } from "@/components/portal/portal-schedule";
 import { ReplacementOffers } from "@/components/portal/replacement-offers";
 import { SwapInbox } from "@/components/portal/swap-inbox";
@@ -63,7 +64,10 @@ export default async function PortalSchedulePage() {
             <ChevronLeft className="size-4" /> Portal
           </Link>
           <p className="text-muted-foreground type-meta">{session.orgName}</p>
-          <h1 className="type-h1 mt-1">Your schedule</h1>
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+            <h1 className="type-h1">Your schedule</h1>
+            <RefreshButton />
+          </div>
           <p className="text-muted-foreground mt-2 type-body">Your shifts for the next two weeks.</p>
 
           <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-10">
