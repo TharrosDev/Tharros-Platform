@@ -47,6 +47,8 @@ const T = {
   warning: [0.5, 0.1, 75],
   info: [0.52, 0.15, 255],
   destructive: [0.53, 0.2, 27],
+  surface2: [0.962, 0.005, 264],
+  surface2Fg: [0.24, 0.014, 264],
   // light — grounded warm-graphite chrome + cobalt active pill
   sidebar: [0.235, 0.008, 70],
   sidebarFg: [0.96, 0.004, 70],
@@ -60,6 +62,8 @@ const T = {
   dMutedFg: [0.72, 0.012, 70],
   dPrimary: [0.66, 0.15, 264],
   dPrimaryFg: [0.18, 0.02, 264],
+  dSurface2: [0.26, 0.007, 70],
+  dSurface2Fg: [0.96, 0.004, 70],
   // dark — sidebar
   dSidebar: [0.215, 0.007, 70],
   dSidebarFg: [0.96, 0.004, 70],
@@ -83,6 +87,8 @@ console.log(need(contrast(T.success, T.card), 4.5, "success text on card"));
 console.log(need(contrast(T.warning, T.card), 4.5, "warning text on card"));
 console.log(need(contrast(T.info, T.card), 4.5, "info text on card"));
 console.log(need(contrast(T.destructive, T.card), 4.5, "destructive text on card"));
+console.log(need(contrast(T.surface2Fg, T.surface2), 4.5, "ink on surface-2"));
+console.log(need(contrast(T.mutedFg, T.surface2), 4.5, "muted on surface-2"));
 
 console.log("\nLIGHT — warm-graphite chrome");
 console.log(need(contrast(T.sidebarFg, T.sidebar), 4.5, "sidebar text on sidebar"));
@@ -97,6 +103,8 @@ console.log(need(contrast(T.dMutedFg, T.dCard), 4.5, "muted on card"));
 console.log(need(contrast(T.dMutedFg, T.dBg), 4.5, "muted on canvas"));
 console.log(need(contrast(T.dPrimaryFg, T.dPrimary), 4.5, "ink on cobalt (btn text)"));
 console.log(need(contrast(T.dPrimary, T.dCard), 3, "cobalt on card (large)"));
+console.log(need(contrast(T.dSurface2Fg, T.dSurface2), 4.5, "ink on surface-2"));
+console.log(need(contrast(T.dMutedFg, T.dSurface2), 4.5, "muted on surface-2"));
 
 console.log("\nDARK — sidebar");
 console.log(need(contrast(T.dSidebarFg, T.dSidebar), 4.5, "sidebar text on sidebar"));

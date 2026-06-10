@@ -5,6 +5,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { MotionProvider } from "@/components/motion";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,7 +41,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <MotionProvider>{children}</MotionProvider>
         </ThemeProvider>
         {/* Vercel Web Analytics + Core Web Vitals. No-op off Vercel. */}
         <Analytics />

@@ -104,6 +104,51 @@ Shell components live in `src/components/shell/`:
 - `coming-soon.tsx`, `new-automation-button.tsx` — the shared empty state and the
   toast-demo action island.
 
+## Layering
+
+Three light surfaces, used deliberately: the **canvas** (`--background`), the
+**card** (`--card`, lifts above the canvas on `--shadow-card`), and the new
+**inset layer** `--surface-2` (a panel seated INTO a card: list rows inside a
+focal card, code/quote wells, grouped form sections). The elevation ramp is
+`--shadow-xs < card < card-hover < raised < popover < modal`; `raised` is for
+sticky in-page chrome (sub-navs, floating selection bars), `modal` for the
+heaviest overlays. Z-index is semantic only: `z-subnav` (20) < `z-topbar` (30)
+< `z-overlay` (50) < `z-toast` (60). Never an arbitrary `z-40`/`z-[999]`.
+
+## Motion
+
+Motion is part of the build, not garnish: it conveys state (selection moved,
+row left, panel opened), lands in the 150-300ms window, and always eases out.
+The stack is two-layer:
+
+- **CSS / Base UI data-attributes** for overlay enter/exit
+  (`data-[starting-style]` / `data-[ending-style]`), as before.
+- **`motion`** (`motion/react`) for springs, layout animation, and presence.
+  `MotionProvider` (in `components/motion/`, mounted once in the root layout)
+  wraps the app in `LazyMotion strict` + `MotionConfig reducedMotion="user"`.
+  Always import `m.*`, never `motion.*` (strict mode throws).
+
+**The Base UI / motion treaty — one pattern per job, never both on one element:**
+
+| Job | Pattern |
+| --- | --- |
+| Base UI overlays (dialog, sheet, dropdown, tooltip, select, toast, popover) | CSS `data-[starting-style]` / `data-[ending-style]` ONLY. Never wrap a Base UI Popup in `AnimatePresence`; both drive unmount and they fight. |
+| In-page conditional content (filter chips, selection bars, rows leaving a list) | `AnimatePresence` + `m.div` |
+| Position changes inside a view (active-nav pill, tab indicator, a shift chip moving cells) | `layout` / `layoutId` |
+| Expand / collapse | `AnimateHeight` |
+
+Shared vocabulary lives in `components/motion/springs.ts` (`spring.snappy`,
+`spring.gentle`, `ease.standard`, `ease.fast`) — pick from it instead of
+inventing per-component timings. Primitives: `FadeIn`, `StaggerGroup`/`StaggerItem`
+(state-driven lists only — page-load choreography stays banned in the app),
+`AnimateHeight`, `PressScale` (card-shaped hit areas; buttons keep CSS
+`active:`), `CountUp` (stats; renders the real value server-side).
+
+**Reduced motion is two-layer and both are required:** the global CSS clamp in
+`globals.css` (0.01ms) covers CSS transitions, and `MotionConfig
+reducedMotion="user"` covers motion's JS springs. Primitives additionally use
+`useReducedMotion()` where an opacity-only fallback reads better than nothing.
+
 ## Theming
 
 Light/dark is handled by **next-themes** (`components/theme-provider.tsx`, mounted
