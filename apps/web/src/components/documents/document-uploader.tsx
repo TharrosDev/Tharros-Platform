@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { AnimatePresence, m } from "motion/react";
 import { AlertCircle, CheckCircle2, Loader2, UploadCloud, X } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -153,12 +154,19 @@ export function DocumentUploader() {
           if (e.dataTransfer.files?.length) void handleFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-12 text-center transition-colors",
+          "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-12 text-center transition-all duration-150 ease-out motion-reduce:transition-none",
           "hover:border-primary/60 hover:bg-primary-soft/40 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2",
-          dragging ? "border-primary bg-primary-soft/60" : "border-border",
+          dragging
+            ? "border-primary bg-primary-soft/60 scale-[1.01] motion-reduce:scale-100"
+            : "border-border",
         )}
       >
-        <span className="bg-primary-soft text-primary-soft-foreground flex size-12 items-center justify-center rounded-xl [&>svg]:size-6">
+        <span
+          className={cn(
+            "bg-primary-soft text-primary-soft-foreground flex size-12 items-center justify-center rounded-xl transition-transform duration-150 ease-out motion-reduce:transition-none [&>svg]:size-6",
+            dragging && "scale-110 motion-reduce:scale-100",
+          )}
+        >
           <UploadCloud />
         </span>
         <div className="space-y-1">
@@ -184,9 +192,14 @@ export function DocumentUploader() {
 
       {items.length > 0 ? (
         <ul className="space-y-1.5" aria-label="Upload progress">
+          <AnimatePresence initial={false}>
           {items.map((it) => (
-            <li
+            <m.li
               key={it.key}
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               className="bg-card flex items-center gap-3 rounded-lg border px-3 py-2 text-sm"
             >
               <StatusIcon status={it.status} />
@@ -206,8 +219,9 @@ export function DocumentUploader() {
                   <X className="size-4" />
                 </button>
               ) : null}
-            </li>
+            </m.li>
           ))}
+          </AnimatePresence>
         </ul>
       ) : null}
     </div>

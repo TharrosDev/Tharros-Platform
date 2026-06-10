@@ -74,13 +74,25 @@ export function ChatComposer({
           disabled={!streaming && !canSend}
           aria-label={streaming ? "Stop generating" : "Send message"}
           className={cn(
-            "mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-all duration-150 outline-none focus-visible:ring-ring/40 focus-visible:ring-[3px]",
+            "relative mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-all duration-150 outline-none focus-visible:ring-ring/40 focus-visible:ring-[3px] active:scale-95",
             streaming
               ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40",
           )}
         >
-          {streaming ? <Square className="size-3.5 fill-current" /> : <ArrowUp className="size-4" />}
+          {/* Crossfade between send and stop so the state change reads as one control. */}
+          <ArrowUp
+            className={cn(
+              "absolute size-4 transition-all duration-150 ease-out",
+              streaming ? "scale-50 opacity-0" : "scale-100 opacity-100",
+            )}
+          />
+          <Square
+            className={cn(
+              "absolute size-3.5 fill-current transition-all duration-150 ease-out",
+              streaming ? "scale-100 opacity-100" : "scale-50 opacity-0",
+            )}
+          />
         </button>
       </div>
       <p className="text-muted-foreground mt-1.5 px-1 text-center text-xs">

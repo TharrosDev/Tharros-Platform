@@ -11,6 +11,7 @@ import { createFrameDecoder } from "@/lib/assistant/stream-protocol";
 import { TEMPLATES, type TemplateId } from "@/lib/assistant/templates";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { FadeIn } from "@/components/motion";
 import { ChatTurn } from "@/components/assistant/chat-message";
 import { ChatComposer } from "@/components/assistant/chat-composer";
 
@@ -69,6 +70,9 @@ export function AssistantChat({
   const pendingRef = React.useRef<Pending | null>(null);
   const abortRef = React.useRef<AbortController | null>(null);
   const bottomRef = React.useRef<HTMLDivElement | null>(null);
+  // Turns loaded from the server render statically; only turns appended in
+  // this session animate in. Captured once on mount.
+  const [initialCount] = React.useState(initialMessages.length);
 
   // Keep the latest turn in view as content streams in.
   React.useEffect(() => {
@@ -202,15 +206,21 @@ export function AssistantChat({
                 Showing the most recent messages in this conversation.
               </p>
             ) : null}
-            {messages.map((m, i) => (
-              <ChatTurn
-                key={m.id}
-                message={m}
-                streaming={
-                  streaming && m.role === "assistant" && i === messages.length - 1
-                }
-              />
-            ))}
+            {messages.map((m, i) => {
+              const turn = (
+                <ChatTurn
+                  message={m}
+                  streaming={
+                    streaming && m.role === "assistant" && i === messages.length - 1
+                  }
+                />
+              );
+              return i >= initialCount ? (
+                <FadeIn key={m.id}>{turn}</FadeIn>
+              ) : (
+                <React.Fragment key={m.id}>{turn}</React.Fragment>
+              );
+            })}
             <div ref={bottomRef} />
           </div>
         )}

@@ -143,6 +143,74 @@ export async function deleteDocument(id: string): Promise<{ error?: string }> {
 }
 
 /**
+ * Bulk delete for the library's multi-select. Loops the single-row delete so
+ * every row gets the same auth + storage-first ordering; reports how many
+ * landed so the client can reconcile partial failures.
+ */
+export async function deleteDocuments(
+  ids: string[],
+): Promise<{ deletedIds: string[]; error?: string }> {
+  const deletedIds: string[] = [];
+  for (const id of ids) {
+    const res = await deleteDocument(id);
+    if (!res?.error) deletedIds.push(id);
+  }
+  if (deletedIds.length < ids.length) {
+    return {
+      deletedIds,
+      error:
+        deletedIds.length === 0
+          ? "Could not delete the documents. Please try again."
+          : `Deleted ${deletedIds.length} of ${ids.length} documents. Try the rest again.`,
+    };
+  }
+  return { deletedIds };
+}
+
+/**
+ * Bulk tag for the library's multi-select: adds `tags` to each document's
+ * existing set (normalized + capped by normalizeTags, same as single edit).
+ */
+export async function addTagsToDocuments(
+  ids: string[],
+  tags: string[],
+): Promise<{ updated: { id: string; tags: string[] }[]; error?: string }> {
+  const { activeOrg } = await getOrgContext();
+  if (!activeOrg) {
+    return { updated: [], error: "No active organization. Try refreshing the page." };
+  }
+
+  const additions = normalizeTags(Array.isArray(tags) ? tags : []);
+  if (additions.length === 0) return { updated: [] };
+
+  const supabase = await createClient();
+  const { data: rows, error: readErr } = await supabase
+    .from("documents")
+    .select("id, tags")
+    .in("id", ids);
+  if (readErr) {
+    logger.error("documents.bulk_tag_read_failed", { error: readErr.message });
+    return { updated: [], error: "Could not update tags. Please try again." };
+  }
+
+  const updated: { id: string; tags: string[] }[] = [];
+  for (const row of (rows ?? []) as { id: string; tags: string[] | null }[]) {
+    const merged = normalizeTags([...(row.tags ?? []), ...additions]);
+    const { error } = await supabase.from("documents").update({ tags: merged }).eq("id", row.id);
+    if (error) {
+      logger.error("documents.bulk_tag_failed", { document_id: row.id, error: error.message });
+      continue;
+    }
+    updated.push({ id: row.id, tags: merged });
+  }
+
+  revalidatePath(KNOWLEDGE_PATH);
+  return updated.length === ids.length
+    ? { updated }
+    : { updated, error: `Tagged ${updated.length} of ${ids.length} documents.` };
+}
+
+/**
  * Day 24 (perf) — keyset page of the org's documents for the library's search +
  * "Load more". Membership is enforced by the `search_documents` RPC (a non-member
  * gets an empty page), and we re-derive the active org from the caller's session

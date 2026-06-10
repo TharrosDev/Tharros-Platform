@@ -1,15 +1,23 @@
 "use client";
 
 import * as React from "react";
+import { AnimatePresence, m } from "motion/react";
 import { FileText, MoreHorizontal, RefreshCw, Search, Tag, Trash2, X } from "lucide-react";
 
-import { deleteDocument, searchDocuments, setDocumentTags } from "@/lib/documents/actions";
+import {
+  addTagsToDocuments,
+  deleteDocument,
+  deleteDocuments,
+  searchDocuments,
+  setDocumentTags,
+} from "@/lib/documents/actions";
 import type { Document, DocumentStatus } from "@/lib/documents/types";
 import { formatBytes } from "@/lib/documents/validation";
 import { normalizeTags, MAX_TAGS } from "@/lib/documents/tags";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -83,6 +91,36 @@ export function DocumentList({
   const [confirm, setConfirm] = React.useState<Document | null>(null);
   const [tagDoc, setTagDoc] = React.useState<Document | null>(null);
   const [busyId, setBusyId] = React.useState<string | null>(null);
+  // Bulk selection (Set of document ids). Cleared on search, kept across
+  // "Load more" so a long multi-select survives pagination.
+  const [selected, setSelected] = React.useState<ReadonlySet<string>>(new Set());
+  const [bulkConfirm, setBulkConfirm] = React.useState(false);
+  const [bulkTagOpen, setBulkTagOpen] = React.useState(false);
+  const [bulkBusy, setBulkBusy] = React.useState(false);
+
+  function toggleSelected(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const visibleIds = docs.map((d) => d.id);
+  const allVisibleSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
+
+  function toggleAllVisible() {
+    setSelected((prev) => {
+      if (allVisibleSelected) {
+        const next = new Set(prev);
+        for (const id of visibleIds) next.delete(id);
+        return next;
+      }
+      return new Set([...prev, ...visibleIds]);
+    });
+  }
 
   // Debounced server-side search. The effect body only schedules a timer (no
   // synchronous setState); the fetch + setState run in the async callback.
@@ -98,6 +136,7 @@ export function DocumentList({
         const res = await searchDocuments(query, null);
         setDocs(res.documents);
         setCursor(res.nextCursor);
+        setSelected(new Set());
         setSearching(false);
       })();
     }, 300);
@@ -131,9 +170,53 @@ export function DocumentList({
         toast.add({ title: "Something went wrong", description: res.error });
       } else {
         setDocs((prev) => prev.filter((d) => d.id !== doc.id));
+        setSelected((prev) => {
+          if (!prev.has(doc.id)) return prev;
+          const next = new Set(prev);
+          next.delete(doc.id);
+          return next;
+        });
         toast.add({ title: "Document deleted", description: `${doc.filename} was removed.` });
       }
     });
+  }
+
+  async function runBulkDelete() {
+    const ids = [...selected];
+    setBulkConfirm(false);
+    setBulkBusy(true);
+    const res = await deleteDocuments(ids);
+    setBulkBusy(false);
+    const gone = new Set(res.deletedIds);
+    setDocs((prev) => prev.filter((d) => !gone.has(d.id)));
+    setSelected(new Set());
+    if (res.error) {
+      toast.add({ title: "Some documents remain", description: res.error });
+    } else {
+      toast.add({
+        title: "Documents deleted",
+        description: `${res.deletedIds.length} document${res.deletedIds.length === 1 ? "" : "s"} removed.`,
+      });
+    }
+  }
+
+  async function runBulkTag(tags: string[]) {
+    const ids = [...selected];
+    setBulkTagOpen(false);
+    setBulkBusy(true);
+    const res = await addTagsToDocuments(ids, tags);
+    setBulkBusy(false);
+    const byId = new Map(res.updated.map((u) => [u.id, u.tags]));
+    setDocs((prev) => prev.map((d) => (byId.has(d.id) ? { ...d, tags: byId.get(d.id)! } : d)));
+    setSelected(new Set());
+    if (res.error) {
+      toast.add({ title: "Partly tagged", description: res.error });
+    } else {
+      toast.add({
+        title: "Tags added",
+        description: `${res.updated.length} document${res.updated.length === 1 ? "" : "s"} updated.`,
+      });
+    }
   }
 
   // Re-index = re-run the ingestion chain (extract → embed), reusing the Day-25/26
@@ -202,6 +285,15 @@ export function DocumentList({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={allVisibleSelected}
+                    onCheckedChange={toggleAllVisible}
+                    aria-label={
+                      allVisibleSelected ? "Clear selection" : "Select all documents"
+                    }
+                  />
+                </TableHead>
                 <TableHead>Document</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="hidden text-right md:table-cell">Cited</TableHead>
@@ -211,11 +303,25 @@ export function DocumentList({
               </TableRow>
             </TableHeader>
             <TableBody>
+              <AnimatePresence initial={false}>
               {docs.map((doc) => {
                 const meta = STATUS_META[doc.status];
                 const busy = busyId === doc.id;
                 return (
-                  <TableRow key={doc.id}>
+                  <m.tr
+                    key={doc.id}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    data-selected={selected.has(doc.id) || undefined}
+                    className="border-b border-border/60 transition-colors hover:bg-muted/40 data-[selected]:bg-primary-soft/30"
+                  >
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(doc.id)}
+                        onCheckedChange={() => toggleSelected(doc.id)}
+                        aria-label={`Select ${doc.filename}`}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-start gap-2.5">
                         <FileText className="text-muted-foreground mt-0.5 size-4 shrink-0" />
@@ -297,9 +403,10 @@ export function DocumentList({
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
-                  </TableRow>
+                  </m.tr>
                 );
               })}
+              </AnimatePresence>
             </TableBody>
           </Table>
 
@@ -312,6 +419,79 @@ export function DocumentList({
           ) : null}
         </>
       )}
+
+      {/* Floating bulk-action bar; present only while a selection exists. */}
+      <AnimatePresence>
+        {selected.size > 0 ? (
+          <m.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="bg-card shadow-raised z-subnav fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-xl border border-border px-3 py-2"
+          >
+            <span className="text-foreground px-1 text-sm font-medium whitespace-nowrap">
+              {selected.size} selected
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkBusy}
+              onClick={() => setBulkTagOpen(true)}
+            >
+              <Tag className="size-3.5" />
+              Add tags
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={bulkBusy}
+              className="text-destructive hover:text-destructive"
+              onClick={() => setBulkConfirm(true)}
+            >
+              <Trash2 className="size-3.5" />
+              Delete
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={bulkBusy}
+              onClick={() => setSelected(new Set())}
+              aria-label="Clear selection"
+            >
+              <X className="size-3.5" />
+            </Button>
+          </m.div>
+        ) : null}
+      </AnimatePresence>
+
+      <Dialog open={bulkConfirm} onOpenChange={(open) => !open && setBulkConfirm(false)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete {selected.size} documents</DialogTitle>
+            <DialogDescription>
+              This removes the files and anything the Assistant learned from them. This
+              can&apos;t be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkConfirm(false)} disabled={bulkBusy}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => void runBulkDelete()} disabled={bulkBusy}>
+              Delete documents
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <BulkTagDialog
+        open={bulkTagOpen}
+        count={selected.size}
+        busy={bulkBusy}
+        onClose={() => setBulkTagOpen(false)}
+        onSave={(tags) => void runBulkTag(tags)}
+      />
 
       <TagEditorDialog
         doc={tagDoc}
@@ -341,6 +521,111 @@ export function DocumentList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+
+/** Tag entry for the bulk bar: collects tags, applies them to every selected
+ * document. Keyed remount on open gives fresh state without reset-in-effect. */
+function BulkTagDialog({
+  open,
+  count,
+  busy,
+  onClose,
+  onSave,
+}: {
+  open: boolean;
+  count: number;
+  busy: boolean;
+  onClose: () => void;
+  onSave: (tags: string[]) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        {open ? <BulkTagBody count={count} busy={busy} onClose={onClose} onSave={onSave} /> : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BulkTagBody({
+  count,
+  busy,
+  onClose,
+  onSave,
+}: {
+  count: number;
+  busy: boolean;
+  onClose: () => void;
+  onSave: (tags: string[]) => void;
+}) {
+  const [tags, setTags] = React.useState<string[]>([]);
+  const [draft, setDraft] = React.useState("");
+
+  function commitDraft() {
+    const next = normalizeTags([...tags, draft]);
+    setTags(next);
+    setDraft("");
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      commitDraft();
+    } else if (e.key === "Backspace" && draft === "" && tags.length > 0) {
+      setTags(tags.slice(0, -1));
+    }
+  }
+
+  const final = normalizeTags(draft ? [...tags, draft] : tags);
+
+  return (
+    <>
+      <DialogHeader>
+        <DialogTitle>Add tags to {count} documents</DialogTitle>
+        <DialogDescription>
+          These tags are added to each selected document&apos;s existing tags. Press Enter
+          or comma to add one.
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="border-input bg-card flex flex-wrap items-center gap-1.5 rounded-lg border p-2">
+        {tags.map((t) => (
+          <span
+            key={t}
+            className="bg-muted text-foreground inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs"
+          >
+            {t}
+            <button
+              type="button"
+              onClick={() => setTags(tags.filter((x) => x !== t))}
+              aria-label={`Remove ${t}`}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="size-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={onKeyDown}
+          onBlur={() => draft && commitDraft()}
+          placeholder={tags.length ? "" : "e.g. policy, hr, refunds"}
+          aria-label="Add a tag"
+          className="text-foreground min-w-24 flex-1 bg-transparent px-1 py-0.5 text-sm outline-none"
+        />
+      </div>
+
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose} disabled={busy}>
+          Cancel
+        </Button>
+        <Button onClick={() => onSave(final)} disabled={busy || final.length === 0}>
+          Add tags
+        </Button>
+      </DialogFooter>
     </>
   );
 }
