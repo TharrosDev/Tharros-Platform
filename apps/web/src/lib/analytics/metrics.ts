@@ -152,3 +152,46 @@ export function reliabilityBand(rate: number | null): "good" | "watch" | "poor" 
   if (rate >= 0.75) return "watch";
   return "poor";
 }
+
+/** A shift row as the daily-hours helper needs it (snake_case, straight off the table). */
+export type ShiftHoursRow = {
+  starts_at: string;
+  ends_at: string;
+  employee_id: string | null;
+  break_minutes: number | null;
+};
+
+export type DailyHours = { date: string; hours: number };
+
+/**
+ * Net staffed hours per calendar day over a trailing window ending today
+ * (UTC date math, matching the schedule's local-as-UTC convention). A shift
+ * counts on the day it starts; break minutes come off its net hours; open
+ * (unassigned) shifts don't count as staffed. Pure, null-safe.
+ */
+export function dailyAssignedHours(
+  rows: ShiftHoursRow[],
+  windowEndDate: string,
+  days: number,
+): DailyHours[] {
+  const end = Date.parse(`${windowEndDate}T00:00:00Z`);
+  if (!Number.isFinite(end) || days <= 0) return [];
+
+  const byDate = new Map<string, number>();
+  for (let i = days - 1; i >= 0; i--) {
+    byDate.set(new Date(end - i * 86_400_000).toISOString().slice(0, 10), 0);
+  }
+
+  for (const row of rows) {
+    if (!row.employee_id) continue;
+    const start = Date.parse(row.starts_at);
+    const finish = Date.parse(row.ends_at);
+    if (!Number.isFinite(start) || !Number.isFinite(finish) || finish <= start) continue;
+    const date = row.starts_at.slice(0, 10);
+    if (!byDate.has(date)) continue;
+    const net = Math.max(0, (finish - start) / 3_600_000 - (row.break_minutes ?? 0) / 60);
+    byDate.set(date, (byDate.get(date) ?? 0) + net);
+  }
+
+  return [...byDate.entries()].map(([date, hours]) => ({ date, hours: round(hours, 2) }));
+}
