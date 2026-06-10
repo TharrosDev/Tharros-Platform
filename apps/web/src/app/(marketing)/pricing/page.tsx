@@ -170,7 +170,7 @@ function QuietPlan({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur-sm",
+        "flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur-sm transition-colors duration-200 ease-out hover:bg-white/[0.06] motion-reduce:transition-none",
         side === "left" ? "lg:rounded-r-none lg:border-r-0" : "lg:rounded-l-none lg:border-l-0",
       )}
     >
