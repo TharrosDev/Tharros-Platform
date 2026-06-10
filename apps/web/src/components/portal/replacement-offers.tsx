@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { AnimatePresence, m } from "motion/react";
 import { CalendarClock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -36,9 +37,12 @@ function offerLabel(startsAt: string, endsAt: string): string {
 export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
   const toast = useToast();
   const [pendingId, setPendingId] = useState<string | null>(null);
+  // Locally resolved offers animate out immediately; revalidation confirms.
+  const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
   const [, startTransition] = useTransition();
 
-  if (offers.length === 0) return null;
+  const visible = offers.filter((o) => !gone.has(o.offerId));
+  if (visible.length === 0) return null;
 
   function accept(offerId: string) {
     setPendingId(offerId);
@@ -50,6 +54,7 @@ export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
           ? { title: "Shift claimed", description: res.message }
           : { title: "Couldn't claim it", description: res.message },
       );
+      if (res.ok) setGone((prev) => new Set([...prev, offerId]));
     });
   }
 
@@ -58,6 +63,7 @@ export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
     startTransition(async () => {
       await declineReplacement(offerId);
       setPendingId(null);
+      setGone((prev) => new Set([...prev, offerId]));
     });
   }
 
@@ -67,12 +73,15 @@ export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
         <CalendarClock className="size-4" /> Open shifts you can pick up
       </h2>
       <ul className="space-y-2">
-        {offers.map((o) => {
+        <AnimatePresence initial={false}>
+        {visible.map((o) => {
           const busy = pendingId === o.offerId;
           return (
-            <li
+            <m.li
               key={o.offerId}
-              className="border-primary/30 bg-primary/5 flex flex-col gap-3 rounded-xl border p-4"
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="border-primary/30 bg-primary/5 flex flex-col gap-3 overflow-hidden rounded-xl border p-4"
             >
               <div className="min-w-0">
                 <p className="text-foreground font-medium tabular-nums">
@@ -104,9 +113,10 @@ export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
                   Decline
                 </Button>
               </div>
-            </li>
+            </m.li>
           );
         })}
+        </AnimatePresence>
       </ul>
     </section>
   );

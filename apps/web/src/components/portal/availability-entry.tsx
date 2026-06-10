@@ -8,6 +8,7 @@ import { CalendarClock, CalendarOff, Check, CircleCheck, Pencil, Wand2 } from "l
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { FadeIn } from "@/components/motion";
 import { useToast } from "@/components/ui/toast";
 import { DAYS } from "@/components/scheduling/setup/model";
 import type { ParsedAvailability } from "@/lib/scheduling/availability-parse";
@@ -75,7 +76,11 @@ export function AvailabilityEntry({ employeeName }: { employeeName: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {preview ? <AvailabilityPreview parsed={preview} dimmed={editing} /> : null}
+      {preview ? (
+        <FadeIn>
+          <AvailabilityPreview parsed={preview} dimmed={editing} />
+        </FadeIn>
+      ) : null}
 
       {showForm ? (
         <form action={action} className="flex flex-col gap-3">

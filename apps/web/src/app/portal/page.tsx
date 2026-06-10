@@ -1,11 +1,30 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays, ChevronRight, Clock } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronRight, Clock } from "lucide-react";
 
 import { getPortalSession } from "@/lib/portal/session";
 import { signOutPortal } from "@/lib/portal/actions";
+import { getPortalSchedule, type PortalShift } from "@/lib/portal/schedule";
 import { TharrosWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+
+const fmtNextDay = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+const fmtNextTime = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "UTC",
+});
+
+function nextShiftLabel(shift: PortalShift): string {
+  const start = new Date(Date.parse(shift.startsAt));
+  const end = new Date(Date.parse(shift.endsAt));
+  return `${fmtNextDay.format(start)} · ${fmtNextTime.format(start)} – ${fmtNextTime.format(end)}`;
+}
 
 export const metadata: Metadata = {
   title: "Employee portal",
@@ -18,6 +37,9 @@ export const dynamic = "force-dynamic";
 
 export default async function PortalPage() {
   const session = await getPortalSession();
+  const nextShift = session
+    ? (await getPortalSchedule(session.employeeId, session.orgId))[0] ?? null
+    : null;
 
   return (
     <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8 lg:max-w-3xl lg:px-8 lg:py-12">
@@ -41,7 +63,31 @@ export default async function PortalPage() {
             availability below.
           </p>
 
-          <div className="mt-8 grid gap-3 lg:grid-cols-2 lg:gap-4">
+          {/* The one thing most visits are about: when do I work next. */}
+          <Link
+            href="/portal/schedule"
+            className="group bg-primary text-primary-foreground shadow-card hover:bg-primary/92 mt-8 block rounded-xl p-5 transition-colors"
+          >
+            <p className="type-meta text-primary-foreground/80">Your next shift</p>
+            {nextShift ? (
+              <>
+                <p className="mt-1.5 text-xl font-bold tracking-tight tabular-nums">
+                  {nextShiftLabel(nextShift)}
+                </p>
+                {nextShift.roleName ? (
+                  <p className="text-primary-foreground/85 mt-0.5 text-sm">{nextShift.roleName}</p>
+                ) : null}
+              </>
+            ) : (
+              <p className="mt-1.5 text-xl font-bold tracking-tight">Nothing scheduled yet</p>
+            )}
+            <span className="text-primary-foreground/90 mt-3 inline-flex items-center gap-1 text-sm font-medium">
+              {nextShift ? "See your full schedule" : "Open your schedule"}
+              <ArrowRight className="size-4 transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+            </span>
+          </Link>
+
+          <div className="mt-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
           <Link
             href="/portal/schedule"
             className="group border-primary/30 bg-primary-soft/40 hover:bg-primary-soft/70 flex items-center gap-3 rounded-xl border p-4 transition-colors lg:items-start lg:p-5"
