@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { m } from "motion/react";
 import {
   ArrowLeftRight,
   CalendarClock,
@@ -11,9 +12,13 @@ import {
   History,
   Lock,
   LockOpen,
+  Move,
   Plus,
   TriangleAlert,
+  X,
 } from "lucide-react";
+
+import { DayList, type DayListShift } from "@/components/scheduling/calendar/day-list";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,17 +140,34 @@ export function ScheduleCalendar({
   // the page and feeds fresh props — no local mirror of the shift list to drift.
   const shifts = initialShifts;
 
+  const router = useRouter();
+  const toast = useToast();
+  const [movePending, startMove] = React.useTransition();
+
   const [windowStart, setWindowStart] = React.useState(schedule?.periodStart ?? "");
   const [editing, setEditing] = React.useState<CalendarShift | null>(null);
   const [adding, setAdding] = React.useState<{ day: string; employeeId: string | null } | null>(
     null,
   );
+  // Click-to-move: the shift being relocated. Eligible target cells highlight;
+  // clicking one commits via the same assign/retime actions the dialog uses.
+  const [moving, setMoving] = React.useState<CalendarShift | null>(null);
   const [showHistory, setShowHistory] = React.useState(false);
   const [showSwaps, setShowSwaps] = React.useState(false);
   const [showTimeOff, setShowTimeOff] = React.useState(false);
   const pendingTimeOffCount = timeOffRequests.filter((r) => r.status === "pending").length;
 
   const roleName = React.useMemo(() => new Map(roles.map((r) => [r.id, r.name])), [roles]);
+
+  // Esc backs out of move mode.
+  React.useEffect(() => {
+    if (!moving) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setMoving(null);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [moving]);
 
   // Live validation over the whole board → per-shift + totals.
   const boardViolations = React.useMemo<EditViolation[]>(
@@ -164,6 +186,37 @@ export function ScheduleCalendar({
   }, [boardViolations]);
   const hardCount = boardViolations.filter((v) => v.severity === "hard").length;
   const softCount = boardViolations.length - hardCount;
+
+  // Move mode: which (row, day) targets accept the moving shift without a new
+  // hard violation. Computed once per move via the same validateEdits the
+  // dialogs use; keys are `${rowKey}|${day}`.
+  const moveTargets = React.useMemo<Set<string> | null>(() => {
+    if (!moving || !validation) return null;
+    const days = Array.from({ length: WINDOW_DAYS }, (_, i) => addDays(windowStart, i));
+    const rowKeys = [...employees.map((e) => e.id), OPEN_ROW];
+    const startTime = timeOf(moving.startsAt);
+    const endTime = timeOf(moving.endsAt);
+    const targets = new Set<string>();
+    for (const rowKey of rowKeys) {
+      const employeeId = rowKey === OPEN_ROW ? null : rowKey;
+      for (const day of days) {
+        if (employeeId === moving.employeeId && day === dateOf(moving.startsAt)) continue;
+        const startsAt = isoOf(day, startTime);
+        const endsAt = isoOf(endTime <= startTime ? addDays(day, 1) : day, endTime);
+        const next = shifts.map((s) =>
+          s.id === moving.id ? { ...toEditShift(s), employeeId, startsAt, endsAt } : toEditShift(s),
+        );
+        const hard = validateEdits(next, validation).some(
+          (v) =>
+            v.severity === "hard" &&
+            (v.shiftId === moving.id ||
+              (v.rule === "double_booking" && v.employeeId === employeeId)),
+        );
+        if (!hard) targets.add(`${rowKey}|${day}`);
+      }
+    }
+    return targets;
+  }, [moving, validation, shifts, employees, windowStart]);
 
   if (!schedule) {
     return <EmptyState canManage={canManage} />;
@@ -188,6 +241,50 @@ export function ScheduleCalendar({
     ...employees.map((e) => ({ key: e.id, name: e.name })),
     { key: OPEN_ROW, name: "Open shifts" },
   ];
+
+  function commitMove(rowKey: string, day: string) {
+    if (!moving || movePending) return;
+    const target = moving;
+    const employeeId = rowKey === OPEN_ROW ? null : rowKey;
+    const startTime = timeOf(target.startsAt);
+    const endTime = timeOf(target.endsAt);
+    const startsAt = isoOf(day, startTime);
+    const endsAt = isoOf(endTime <= startTime ? addDays(day, 1) : day, endTime);
+    startMove(async () => {
+      let ok = true;
+      let message: string | undefined;
+      if (startsAt !== target.startsAt || endsAt !== target.endsAt) {
+        const r = await updateShiftTimes({
+          shiftId: target.id,
+          startsAt,
+          endsAt,
+          breakMinutes: target.breakMinutes,
+        });
+        if (!r.ok) {
+          ok = false;
+          message = r.message;
+        }
+      }
+      if (ok && employeeId !== target.employeeId) {
+        const r = await assignShift({ shiftId: target.id, employeeId });
+        if (!r.ok) {
+          ok = false;
+          message = r.message;
+        }
+      }
+      setMoving(null);
+      if (ok) {
+        toast.add({ title: "Shift moved" });
+        router.refresh();
+      } else {
+        toast.add({ title: "Couldn't move the shift", description: message });
+      }
+    });
+  }
+
+  const movingLabel = moving
+    ? `${timeOf(moving.startsAt)}–${timeOf(moving.endsAt)} on ${shortDate(dateOf(moving.startsAt))}`
+    : null;
 
   return (
     <div className="space-y-5">
@@ -282,8 +379,23 @@ export function ScheduleCalendar({
         </p>
       ) : null}
 
-      {/* The grid */}
-      <div className="bg-card overflow-x-auto rounded-lg border shadow-xs">
+      {moving ? (
+        <div
+          role="status"
+          className="border-primary/40 bg-primary-soft/50 text-primary-soft-foreground flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+        >
+          <Move className="size-4 shrink-0" aria-hidden />
+          <span className="min-w-0 flex-1">
+            Moving the {movingLabel} shift. Click a highlighted spot, or press Esc to cancel.
+          </span>
+          <Button variant="ghost" size="sm" onClick={() => setMoving(null)}>
+            <X className="size-3.5" /> Cancel
+          </Button>
+        </div>
+      ) : null}
+
+      {/* The grid (hidden on small screens in favour of the day list below) */}
+      <div className="bg-card hidden overflow-x-auto rounded-lg border shadow-xs md:block">
         <div
           className="grid min-w-[64rem]"
           style={{ gridTemplateColumns: `12rem repeat(${WINDOW_DAYS}, minmax(6rem, 1fr))` }}
@@ -309,6 +421,12 @@ export function ScheduleCalendar({
               </div>
               {days.map((d) => {
                 const cell = cellShifts(row.key, d);
+                const targetKey = `${row.key}|${d}`;
+                const isSource =
+                  moving !== null &&
+                  (moving.employeeId ?? OPEN_ROW) === row.key &&
+                  dateOf(moving.startsAt) === d;
+                const isTarget = moving !== null && moveTargets?.has(targetKey) === true;
                 return (
                   <div
                     key={d}
@@ -321,11 +439,12 @@ export function ScheduleCalendar({
                           shift={s}
                           roleName={s.roleId ? (roleName.get(s.roleId) ?? null) : null}
                           violations={byShift.get(s.id) ?? []}
-                          onClick={() => canManage && setEditing(s)}
+                          dimmed={moving !== null && moving.id !== s.id}
+                          onClick={() => canManage && !moving && setEditing(s)}
                         />
                       ))}
                     </div>
-                    {editable ? (
+                    {editable && !moving ? (
                       <button
                         type="button"
                         aria-label="Add shift"
@@ -337,6 +456,18 @@ export function ScheduleCalendar({
                         <Plus className="size-3.5" />
                       </button>
                     ) : null}
+                    {moving && isTarget ? (
+                      <button
+                        type="button"
+                        disabled={movePending}
+                        onClick={() => commitMove(row.key, d)}
+                        aria-label={`Move shift to ${row.name} on ${shortDate(d)}`}
+                        className="bg-primary-soft/40 ring-primary/50 hover:bg-primary-soft/70 focus-visible:bg-primary-soft/70 absolute inset-0.5 rounded-md ring-2 outline-none transition-colors"
+                      />
+                    ) : null}
+                    {moving && !isTarget && !isSource ? (
+                      <div aria-hidden className="bg-background/55 absolute inset-0" />
+                    ) : null}
                   </div>
                 );
               })}
@@ -344,6 +475,45 @@ export function ScheduleCalendar({
           ))}
         </div>
       </div>
+
+      {/* Mobile: agenda view of the same window, same actions. */}
+      <DayList
+        className="md:hidden"
+        days={days}
+        dayLabel={shortDate}
+        shiftsFor={(day) =>
+          shifts
+            .filter((s) => dateOf(s.startsAt) === day)
+            .map((s): DayListShift => {
+              const violations = byShift.get(s.id) ?? [];
+              const open = s.employeeId === null;
+              return {
+                id: s.id,
+                timeLabel: `${timeOf(s.startsAt)}–${timeOf(s.endsAt)}`,
+                title: open
+                  ? "Open shift"
+                  : (employees.find((e) => e.id === s.employeeId)?.name ?? "Assigned"),
+                subtitle: s.roleId ? (roleName.get(s.roleId) ?? null) : null,
+                tone: violations.some((v) => v.severity === "hard")
+                  ? "violation"
+                  : open
+                    ? "open"
+                    : "normal",
+                locked: s.locked,
+              };
+            })
+        }
+        onShiftClick={
+          canManage
+            ? (id) => {
+                const shift = shifts.find((s) => s.id === id);
+                if (shift) setEditing(shift);
+              }
+            : undefined
+        }
+        onAddShift={editable ? (day) => setAdding({ day, employeeId: null }) : undefined}
+        emptyLabel="No shifts"
+      />
 
       {editing ? (
         <EditShiftDialog
@@ -353,6 +523,10 @@ export function ScheduleCalendar({
           roleName={roleName}
           validation={validation}
           editable={editable}
+          onStartMove={(shift) => {
+            setEditing(null);
+            setMoving(shift);
+          }}
           onClose={() => setEditing(null)}
         />
       ) : null}
@@ -395,22 +569,27 @@ function ShiftChip({
   shift,
   roleName,
   violations,
+  dimmed = false,
   onClick,
 }: {
   shift: CalendarShift;
   roleName: string | null;
   violations: EditViolation[];
+  /** Move mode: every chip except the one being moved fades back. */
+  dimmed?: boolean;
   onClick: () => void;
 }) {
   const hard = violations.some((v) => v.severity === "hard");
   const open = shift.employeeId === null;
   return (
-    <button
+    <m.button
+      layoutId={`shift-${shift.id}`}
       type="button"
       onClick={onClick}
       title={violations.map((v) => v.message).join("\n") || undefined}
       className={[
-        "w-full rounded-md border px-2 py-1 text-left text-xs leading-tight transition-colors",
+        "w-full rounded-md border px-2 py-1 text-left text-xs leading-tight transition-[color,background-color,border-color,opacity]",
+        dimmed ? "opacity-40" : "",
         hard
           ? "border-destructive/50 bg-destructive/10 text-destructive"
           : open
@@ -424,7 +603,7 @@ function ShiftChip({
         {hard ? <TriangleAlert className="size-3" aria-hidden /> : null}
       </span>
       {roleName ? <span className="block truncate opacity-80">{roleName}</span> : null}
-    </button>
+    </m.button>
   );
 }
 
@@ -437,6 +616,7 @@ function EditShiftDialog({
   roleName,
   validation,
   editable,
+  onStartMove,
   onClose,
 }: {
   shift: CalendarShift;
@@ -445,6 +625,7 @@ function EditShiftDialog({
   roleName: Map<string, string>;
   validation: ValidationContext | null;
   editable: boolean;
+  onStartMove?: (shift: CalendarShift) => void;
   onClose: () => void;
 }) {
   const router = useRouter();
@@ -596,6 +777,17 @@ function EditShiftDialog({
         <DialogFooter>
           {editable ? (
             <>
+              {onStartMove && !shift.locked ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onStartMove(shift)}
+                  disabled={pending}
+                >
+                  <Move className="size-4" />
+                  Move on grid
+                </Button>
+              ) : null}
               <Button
                 type="button"
                 variant="outline"

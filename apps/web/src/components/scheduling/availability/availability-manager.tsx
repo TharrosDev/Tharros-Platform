@@ -6,10 +6,12 @@ import { useActionState } from "react";
 import { CalendarClock, Send, Trash2, UserCog } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { SaveButton } from "@/components/ui/save-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { FadeIn } from "@/components/motion";
 import { FormMessage } from "@/components/auth/auth-card";
 import { useToast } from "@/components/ui/toast";
 import {
@@ -212,7 +214,11 @@ function WeeklyGrid({
         {DAYS.map((d) => {
           const day = grid[d.value];
           return (
-            <div key={d.value} className="flex flex-wrap items-center gap-3 px-4 py-3">
+            <div
+              key={d.value}
+              data-on={day.is_available || undefined}
+              className="data-[on]:bg-primary-soft/20 flex flex-wrap items-center gap-3 px-4 py-3 transition-colors"
+            >
               <label className="flex w-40 items-center gap-3">
                 <Switch
                   checked={day.is_available}
@@ -222,7 +228,7 @@ function WeeklyGrid({
                 <span className="text-sm font-medium">{d.label}</span>
               </label>
               {day.is_available ? (
-                <div className="flex items-center gap-2">
+                <FadeIn rise={0} className="flex items-center gap-2">
                   <Input
                     type="time"
                     aria-label={`${d.label} from`}
@@ -240,7 +246,7 @@ function WeeklyGrid({
                     onChange={(e) => patch(d.value, { end_time: e.target.value })}
                     className="w-[7.5rem]"
                   />
-                </div>
+                </FadeIn>
               ) : (
                 <span className="text-muted-foreground text-sm">Not available</span>
               )}
@@ -250,9 +256,7 @@ function WeeklyGrid({
       </div>
 
       {canManage ? (
-        <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Save weekly availability"}
-        </Button>
+        <SaveButton pending={pending}>Save weekly availability</SaveButton>
       ) : null}
     </form>
   );
