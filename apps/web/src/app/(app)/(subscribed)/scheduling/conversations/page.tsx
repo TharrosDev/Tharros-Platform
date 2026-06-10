@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MessagesSquare } from "lucide-react";
 
 import { getOrgContext } from "@/lib/org/queries";
 import { getSchedulingStatus } from "@/lib/scheduling/queries";
 import { listOrgThreads } from "@/lib/agents/queries";
-import {
-  threadKindLabel,
-  threadStatusBadge,
-} from "@/lib/agents/present";
-import { formatTimestamp } from "@/lib/notifications/types";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { ThreadList } from "@/components/agents/thread-list";
 
 export const metadata: Metadata = { title: "Conversations" };
 
@@ -37,11 +30,6 @@ export default async function ConversationsPage() {
       <PageHeader
         title="Conversations"
         description="Every AI conversation your scheduling agents are running. Step in to take over, reply, or override a decision."
-        actions={
-          <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
-            Back to scheduling
-          </Link>
-        }
       />
 
       {threads.length === 0 ? (
@@ -54,34 +42,7 @@ export default async function ConversationsPage() {
           </p>
         </div>
       ) : (
-        <ul className="divide-border/60 overflow-hidden rounded-lg border divide-y">
-          {threads.map((t) => {
-            const badge = threadStatusBadge(t);
-            return (
-              <li key={t.id} className="bg-card hover:bg-muted/40 transition-colors">
-                <Link
-                  href={`/scheduling/conversations/${t.id}`}
-                  className="flex items-start gap-4 px-4 py-3.5"
-                >
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="truncate text-sm font-medium">{t.title}</span>
-                      <Badge variant="secondary">{threadKindLabel(t.kind)}</Badge>
-                      <Badge variant={badge.tone}>{badge.label}</Badge>
-                    </div>
-                    {t.lastSnippet ? (
-                      <p className="text-muted-foreground line-clamp-1 text-sm">{t.lastSnippet}</p>
-                    ) : null}
-                    <p className="text-muted-foreground text-xs">
-                      {t.turnCount} {t.turnCount === 1 ? "message" : "messages"} ·{" "}
-                      {formatTimestamp(t.updatedAt)}
-                    </p>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+        <ThreadList threads={threads} />
       )}
     </div>
   );

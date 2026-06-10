@@ -78,21 +78,25 @@ export default async function ActivityLogPage({
             ? "A complete, auditable trail of every agent decision and schedule change in your workspace."
             : "An auditable trail of every schedule change in your workspace."
         }
-        actions={
-          <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
-            Back to scheduling
-          </Link>
-        }
       />
 
       {canManage ? (
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filter activity">
+        <div
+          className="bg-muted inline-flex flex-wrap items-center gap-1 rounded-lg p-1"
+          role="group"
+          aria-label="Filter activity"
+        >
           {SOURCES.map((s) => (
             <Link
               key={s.key}
               href={href({ source: s.key })}
               aria-current={s.key === source ? "page" : undefined}
-              className={buttonVariants({ variant: s.key === source ? "default" : "outline", size: "sm" })}
+              className={cn(
+                "focus-visible:ring-ring/40 rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                s.key === source
+                  ? "bg-card text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
             >
               {s.label}
             </Link>
@@ -111,16 +115,30 @@ export default async function ActivityLogPage({
           </p>
         </div>
       ) : (
-        <ul className="divide-border/60 overflow-hidden rounded-lg border divide-y">
-          {events.map((e) => {
+        <ul className="bg-card shadow-card overflow-hidden rounded-lg border">
+          {events.map((e, index) => {
             const badge = CATEGORY_BADGE[e.category];
             const Icon = e.source === "agent" ? Bot : CalendarClock;
             return (
-              <li key={e.id} className="bg-card flex items-start gap-3 px-4 py-3.5">
+              <li key={e.id} className="relative flex items-start gap-3 px-4 py-3.5">
+                {/* Timeline rail connecting this event to the next one. */}
+                {index < events.length - 1 ? (
+                  <span
+                    aria-hidden
+                    className="bg-border absolute top-11 bottom-0 left-[1.85rem] w-px"
+                  />
+                ) : null}
                 <span
                   className={cn(
-                    "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full",
-                    e.source === "agent" ? "bg-primary-soft/40 text-primary" : "bg-muted text-muted-foreground",
+                    "relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full ring-2",
+                    e.source === "agent"
+                      ? "bg-primary-soft/40 text-primary"
+                      : "bg-muted text-muted-foreground",
+                    e.category === "escalation"
+                      ? "ring-destructive/40"
+                      : e.category === "decision"
+                        ? "ring-primary/30"
+                        : "ring-transparent",
                   )}
                   aria-hidden
                 >
