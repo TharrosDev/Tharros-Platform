@@ -9,6 +9,7 @@ import {
   CalendarRange,
   CheckCircle2,
   Clock,
+  Eraser,
   History,
   Lock,
   LockOpen,
@@ -47,6 +48,7 @@ import {
   approveSwap,
   approveTimeOff,
   assignShift,
+  clearSchedule,
   deleteShift,
   denySwap,
   denyTimeOff,
@@ -360,6 +362,13 @@ export function ScheduleCalendar({
               </Button>
             ) : null}
             {canManage && isPublished ? <ReopenButton scheduleId={schedule.id} /> : null}
+            {editable && shifts.some((s) => !s.locked) ? (
+              <ClearScheduleButton
+                scheduleId={schedule.id}
+                unlockedCount={shifts.filter((s) => !s.locked).length}
+                lockedCount={shifts.filter((s) => s.locked).length}
+              />
+            ) : null}
             {canManage && isDraft ? (
               <PublishDialog
                 scheduleId={schedule.id}
@@ -386,7 +395,7 @@ export function ScheduleCalendar({
         >
           <Move className="size-4 shrink-0" aria-hidden />
           <span className="min-w-0 flex-1">
-            Moving the {movingLabel} shift. Click a highlighted spot, or press Esc to cancel.
+            Moving the {movingLabel} shift. Drop it or click a highlighted spot; Esc cancels.
           </span>
           <Button variant="ghost" size="sm" onClick={() => setMoving(null)}>
             <X className="size-3.5" /> Cancel
@@ -431,6 +440,19 @@ export function ScheduleCalendar({
                   <div
                     key={d}
                     className="border-border group/cell relative min-h-14 border-b px-1.5 py-1.5"
+                    // Drop side of drag-to-reassign: only validated targets
+                    // accept the drop (same moveTargets the click path uses).
+                    onDragOver={
+                      moving && isTarget ? (event) => event.preventDefault() : undefined
+                    }
+                    onDrop={
+                      moving && isTarget
+                        ? (event) => {
+                            event.preventDefault();
+                            commitMove(row.key, d);
+                          }
+                        : undefined
+                    }
                   >
                     <div className="flex flex-col gap-1">
                       {cell.map((s) => (
@@ -440,6 +462,9 @@ export function ScheduleCalendar({
                           roleName={s.roleId ? (roleName.get(s.roleId) ?? null) : null}
                           violations={byShift.get(s.id) ?? []}
                           dimmed={moving !== null && moving.id !== s.id}
+                          draggable={editable && !s.locked}
+                          onDragStart={() => setMoving(s)}
+                          onDragEnd={() => setMoving(null)}
                           onClick={() => canManage && !moving && setEditing(s)}
                         />
                       ))}
@@ -570,6 +595,9 @@ function ShiftChip({
   roleName,
   violations,
   dimmed = false,
+  draggable = false,
+  onDragStart,
+  onDragEnd,
   onClick,
 }: {
   shift: CalendarShift;
@@ -577,19 +605,38 @@ function ShiftChip({
   violations: EditViolation[];
   /** Move mode: every chip except the one being moved fades back. */
   dimmed?: boolean;
+  /** Drag-to-reassign (desktop): picking the chip up enters move mode. */
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
   onClick: () => void;
 }) {
   const hard = violations.some((v) => v.severity === "hard");
   const open = shift.employeeId === null;
+  // The layout animation lives on a wrapper m.div: motion components replace
+  // onDragStart/onDragEnd with their pan-gesture API, so the native HTML5
+  // drag attributes must sit on a plain <button>.
   return (
-    <m.button
-      layoutId={`shift-${shift.id}`}
+    <m.div layoutId={`shift-${shift.id}`}>
+    <button
       type="button"
       onClick={onClick}
+      draggable={draggable}
+      onDragStart={
+        draggable
+          ? (event: React.DragEvent) => {
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", shift.id);
+              onDragStart?.();
+            }
+          : undefined
+      }
+      onDragEnd={draggable ? onDragEnd : undefined}
       title={violations.map((v) => v.message).join("\n") || undefined}
       className={[
         "w-full rounded-md border px-2 py-1 text-left text-xs leading-tight transition-[color,background-color,border-color,opacity]",
         dimmed ? "opacity-40" : "",
+        draggable ? "cursor-grab active:cursor-grabbing" : "",
         hard
           ? "border-destructive/50 bg-destructive/10 text-destructive"
           : open
@@ -603,7 +650,8 @@ function ShiftChip({
         {hard ? <TriangleAlert className="size-3" aria-hidden /> : null}
       </span>
       {roleName ? <span className="block truncate opacity-80">{roleName}</span> : null}
-    </m.button>
+    </button>
+    </m.div>
   );
 }
 
@@ -836,6 +884,77 @@ function EditShiftDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * "Clear schedule" with a deliberate double-check: one click opens an
+ * are-you-sure dialog; only an explicit Yes wipes the draft's unlocked
+ * shifts (via the clearSchedule action). Locked shifts are pinned and stay.
+ */
+function ClearScheduleButton({
+  scheduleId,
+  unlockedCount,
+  lockedCount,
+}: {
+  scheduleId: string;
+  unlockedCount: number;
+  lockedCount: number;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const [open, setOpen] = React.useState(false);
+  const [pending, start] = React.useTransition();
+
+  function confirmClear() {
+    start(async () => {
+      const res = await clearSchedule({ scheduleId });
+      setOpen(false);
+      if (res.ok) {
+        toast.add({
+          title: "Schedule cleared",
+          description: `${unlockedCount} shift${unlockedCount === 1 ? "" : "s"} removed.`,
+        });
+        router.refresh();
+      } else {
+        toast.add({ title: "Couldn't clear the schedule", description: res.message });
+      }
+    });
+  }
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        className="text-destructive hover:text-destructive"
+        onClick={() => setOpen(true)}
+      >
+        <Eraser className="size-4" /> Clear schedule
+      </Button>
+
+      <Dialog open={open} onOpenChange={(o) => !o && !pending && setOpen(false)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogDescription>
+              This removes all {unlockedCount} shift{unlockedCount === 1 ? "" : "s"} from this
+              draft{lockedCount > 0
+                ? `. Your ${lockedCount} locked shift${lockedCount === 1 ? " stays" : "s stay"} pinned`
+                : ""}. You can&apos;t undo it, but you can always generate a fresh draft.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>
+              No, keep it
+            </Button>
+            <Button variant="destructive" onClick={confirmClear} disabled={pending}>
+              {pending ? "Clearing…" : "Yes, clear it"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

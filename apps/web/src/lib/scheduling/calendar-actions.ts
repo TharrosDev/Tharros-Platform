@@ -377,6 +377,42 @@ export async function deleteShift(args: { shiftId: string }): Promise<CalendarAc
   return { ok: true };
 }
 
+/**
+ * Clear every unlocked shift from a draft schedule in one action (the
+ * calendar's "Clear schedule" button, behind an are-you-sure dialog). Locked
+ * shifts are pinned on purpose and survive the sweep, consistent with the
+ * single-shift delete refusing locked shifts. Draft-only, like every edit.
+ */
+export async function clearSchedule(args: { scheduleId: string }): Promise<CalendarActionResult> {
+  const auth = await requireManager();
+  if (!auth.ok) return auth;
+  if (!args.scheduleId) return { ok: false, message: "Missing schedule." };
+  if ((await scheduleStatusOf(args.scheduleId)) !== "draft") {
+    return { ok: false, message: REOPEN_TO_EDIT };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("shifts")
+    .delete()
+    .eq("schedule_id", args.scheduleId)
+    .eq("locked", false)
+    .select("id");
+  if (error) {
+    logger.error("clearSchedule: delete failed", { err: error, scheduleId: args.scheduleId });
+    return { ok: false, message: "Couldn't clear the schedule. Please try again." };
+  }
+
+  await audit(auth.orgId, auth.userId, "schedule.cleared", {
+    entityType: "schedule",
+    entityId: args.scheduleId,
+    scheduleId: args.scheduleId,
+    detail: { removedShifts: (data ?? []).length },
+  });
+  revalidatePath(CALENDAR_PATH);
+  return { ok: true };
+}
+
 /** Lock or unlock a shift (pins it against edits + future re-solves). */
 export async function toggleShiftLock(args: {
   shiftId: string;
