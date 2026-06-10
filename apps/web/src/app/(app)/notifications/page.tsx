@@ -40,14 +40,14 @@ export default async function NotificationsPage() {
           You have no notifications yet. Updates from your workspace will show up here.
         </p>
       ) : (
-        <ul className="divide-border/60 overflow-hidden rounded-lg border border-border/60 divide-y">
+        <ul className="divide-border/60 bg-card shadow-card overflow-hidden rounded-lg border border-border/60 divide-y">
           {notifications.map((n) => {
             const link = notificationLink(n.data);
             return (
               <li
                 key={n.id}
                 className={cn(
-                  "flex items-start gap-3 px-4 py-3.5",
+                  "flex items-start gap-3 px-4 py-3.5 transition-colors",
                   n.readAt ? "bg-card" : "bg-primary-soft/30",
                 )}
               >

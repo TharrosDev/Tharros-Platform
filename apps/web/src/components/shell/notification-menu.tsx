@@ -43,8 +43,15 @@ export function NotificationMenu({
       >
         <Bell className="size-4" />
         {unreadCount > 0 ? (
-          <span className="bg-primary text-primary-foreground absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold">
-            {badge}
+          <span className="absolute -top-0.5 -right-0.5">
+            {/* One soft ping when the badge appears, then steady. */}
+            <span
+              aria-hidden
+              className="bg-primary/40 absolute inset-0 animate-ping rounded-full [animation-iteration-count:2] motion-reduce:animate-none"
+            />
+            <span className="bg-primary text-primary-foreground relative flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold">
+              {badge}
+            </span>
           </span>
         ) : null}
       </DropdownMenuTrigger>

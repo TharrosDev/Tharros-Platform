@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { SaveButton } from "@/components/ui/save-button";
 import { FieldError, FormMessage } from "@/components/auth/auth-card";
 import { useToast } from "@/components/ui/toast";
 
@@ -148,9 +149,7 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
           </div>
         </div>
 
-        <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Save changes"}
-        </Button>
+        <SaveButton pending={pending}>Save changes</SaveButton>
       </form>
     </div>
   );

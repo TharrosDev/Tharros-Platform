@@ -63,7 +63,7 @@ export function DangerZone({
   return (
     <div className="space-y-6">
       {isOwner ? (
-        <Card className="border-destructive/40">
+        <Card className="border-destructive/40 bg-destructive/[0.03] dark:bg-destructive/[0.06]">
           <CardHeader>
             <CardTitle>Delete this organization</CardTitle>
             <CardDescription>

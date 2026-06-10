@@ -5,7 +5,7 @@ import { useActionState } from "react";
 
 import { updateNotifications } from "@/lib/org/actions";
 import { NOTIFICATION_OPTIONS, type Notifications } from "@/lib/org/schemas";
-import { Button } from "@/components/ui/button";
+import { SaveButton } from "@/components/ui/save-button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { FormMessage } from "@/components/auth/auth-card";
@@ -59,9 +59,7 @@ export function NotificationsForm({
       </div>
 
       {canManage ? (
-        <Button type="submit" disabled={pending}>
-          {pending ? "Saving…" : "Save preferences"}
-        </Button>
+        <SaveButton pending={pending}>Save preferences</SaveButton>
       ) : null}
     </form>
   );
