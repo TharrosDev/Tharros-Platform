@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { env } from "@/env";
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { profileSchema, type ProfileFormState } from "@/lib/profile/schemas";
@@ -77,12 +78,15 @@ export async function updateProfile(
  * row and the auth metadata the shell renders from.
  */
 export async function setAvatarUrl(avatarUrl: string): Promise<{ error?: string }> {
-  if (!/^https:\/\//.test(avatarUrl) || avatarUrl.length > 500) {
-    return { error: "Invalid avatar URL." };
-  }
-
   const user = await getAuthUser();
   if (!user) return { error: "You must be signed in." };
+
+  // Only accept URLs into this user's own folder of our public avatars bucket —
+  // anything else could smuggle an arbitrary external image into the shell.
+  const allowedPrefix = `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${user.id}/`;
+  if (!avatarUrl.startsWith(allowedPrefix) || avatarUrl.length > 500) {
+    return { error: "Invalid avatar URL." };
+  }
 
   const supabase = await createClient();
 
