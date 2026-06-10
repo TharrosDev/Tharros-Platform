@@ -3,9 +3,16 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { visit, SKIP } from "unist-util-visit";
 
+import { FileText } from "lucide-react";
+
 import type { Citation } from "@/lib/documents/rag-prompt";
 import { splitCitationText } from "@/lib/assistant/citation-markers";
 import { cn } from "@/lib/utils";
+import {
+  PreviewCard,
+  PreviewCardContent,
+  PreviewCardTrigger,
+} from "@/components/ui/preview-card";
 
 /**
  * Day 29 — markdown for assistant turns, mapped to the Workshop type scale.
@@ -91,26 +98,62 @@ const BASE_COMPONENTS: Components = {
 
 const REMARK_PLUGINS = [remarkGfm, remarkCitationMarkers];
 
-/** A clickable cobalt source chip rendered in place of a `[n]` marker. */
+/**
+ * A clickable cobalt source chip rendered in place of a `[n]` marker. Hovering
+ * (or focusing) shows a preview card with the source document, so the reader
+ * can check a citation without leaving the answer; clicking still opens the
+ * full sources dialog (and is the touch path).
+ */
 function CitationMarker({
   n,
   filename,
+  passages,
   onClick,
 }: {
   n: number;
   filename?: string;
+  passages?: number;
   onClick: () => void;
 }) {
+  const chip = (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={filename ? `Source ${n}: ${filename}` : `Source ${n}`}
+      className="text-primary bg-primary-soft hover:bg-primary-soft/70 focus-visible:ring-ring/40 inline-flex min-w-[1.1em] items-center justify-center rounded px-1 text-[0.7em] font-semibold tabular-nums outline-none transition-colors focus-visible:ring-2"
+    >
+      {n}
+    </button>
+  );
+
+  if (!filename) return <sup className="mx-px">{chip}</sup>;
+
   return (
     <sup className="mx-px">
-      <button
-        type="button"
-        onClick={onClick}
-        aria-label={filename ? `Source ${n}: ${filename}` : `Source ${n}`}
-        className="text-primary bg-primary-soft hover:bg-primary-soft/70 focus-visible:ring-ring/40 inline-flex min-w-[1.1em] items-center justify-center rounded px-1 text-[0.7em] font-semibold tabular-nums outline-none transition-colors focus-visible:ring-2"
-      >
-        {n}
-      </button>
+      <PreviewCard>
+        <PreviewCardTrigger render={chip} />
+        <PreviewCardContent>
+          <div className="flex items-start gap-2.5">
+            <span className="text-primary bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
+              {n}
+            </span>
+            <div className="min-w-0">
+              <p className="text-foreground flex items-center gap-1.5 text-sm font-medium">
+                <FileText className="text-muted-foreground size-3.5 shrink-0" />
+                <span className="truncate" title={filename}>
+                  {filename}
+                </span>
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                {passages && passages > 0
+                  ? `${passages} passage${passages === 1 ? "" : "s"} from this document. `
+                  : null}
+                Click to see every source.
+              </p>
+            </div>
+          </div>
+        </PreviewCardContent>
+      </PreviewCard>
     </sup>
   );
 }
@@ -135,7 +178,12 @@ export const AssistantMarkdown = React.memo(function AssistantMarkdown({
           // Unknown source number → render the literal marker, never a dead link.
           if (!cite && citations.length > 0) return <>[{n}]</>;
           return (
-            <CitationMarker n={n} filename={cite?.filename} onClick={() => onCite?.(n)} />
+            <CitationMarker
+              n={n}
+              filename={cite?.filename}
+              passages={cite?.chunkIndices.length}
+              onClick={() => onCite?.(n)}
+            />
           );
         }
         return (

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Sparkles, Users, Workflow } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CalendarDays, Sparkles, Users, Workflow } from "lucide-react";
 
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getDisplayUser } from "@/lib/auth/user";
@@ -17,6 +17,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
 import { NewAutomationButton } from "@/components/shell/new-automation-button";
+import { CountUp } from "@/components/motion";
 
 const products = [
   {
@@ -24,6 +25,12 @@ const products = [
     href: "/assistant",
     blurb: "Answers your customers in plain language, day or night.",
     icon: Sparkles,
+  },
+  {
+    name: "Scheduling",
+    href: "/scheduling",
+    blurb: "Builds the week's schedule and handles sick calls and swaps.",
+    icon: CalendarDays,
   },
   {
     name: "Lead Capture",
@@ -98,7 +105,7 @@ export default async function DashboardPage() {
             </div>
             <div>
               <div className="num text-5xl font-bold leading-none tracking-tight">
-                {waiting.length}
+                <CountUp value={waiting.length} />
               </div>
               <p className="text-primary-foreground/90 type-small mt-2 max-w-[18ch]">
                 Replies and approvals that need a human. Everything else is handled.
@@ -107,12 +114,12 @@ export default async function DashboardPage() {
           </div>
 
           {/* The actual items */}
-          <ul className="divide-border bg-card divide-y">
+          <ul className="divide-border bg-surface-2 divide-y">
             {waiting.map((item) => (
               <li key={item.who}>
                 <Link
                   href={item.href}
-                  className="group hover:bg-accent focus-visible:ring-ring/40 flex items-center gap-3.5 px-5 py-3.5 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-inset sm:px-6"
+                  className="group hover:bg-card focus-visible:ring-ring/40 flex items-center gap-3.5 px-5 py-3.5 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-inset sm:px-6"
                 >
                   <Avatar className="size-9 shrink-0">
                     <AvatarFallback className="text-xs">{item.initials}</AvatarFallback>
@@ -180,7 +187,9 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-baseline gap-2">
-                <span className="num text-foreground text-3xl font-bold tracking-tight">24</span>
+                <span className="num text-foreground text-3xl font-bold tracking-tight">
+                  <CountUp value={24} />
+                </span>
                 <span className="text-success type-small font-medium">+50% vs last week</span>
               </div>
               <div className="flex h-10 items-end gap-1" aria-hidden="true">
