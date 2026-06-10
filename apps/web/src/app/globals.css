@@ -49,6 +49,10 @@
   --accent: oklch(0.94 0.008 264); /* hover surface */
   --accent-foreground: oklch(0.3 0.014 264);
 
+  /* Inset layer — panels seated INTO a card (below canvas, above muted) */
+  --surface-2: oklch(0.962 0.005 264);
+  --surface-2-foreground: oklch(0.24 0.014 264);
+
   /* Semantics — tuned to read AA as text on light surfaces */
   --destructive: oklch(0.53 0.2 27);
   --success: oklch(0.51 0.13 150);
@@ -73,7 +77,9 @@
   --shadow-xs: 0 1px 2px oklch(0.24 0.02 264 / 0.06);
   --shadow-card: 0 1px 1px oklch(0.24 0.02 264 / 0.05), 0 2px 4px oklch(0.24 0.02 264 / 0.06);
   --shadow-card-hover: 0 2px 4px oklch(0.24 0.02 264 / 0.07), 0 6px 14px oklch(0.24 0.02 264 / 0.1);
+  --shadow-raised: 0 3px 6px oklch(0.24 0.02 264 / 0.08), 0 8px 20px oklch(0.24 0.02 264 / 0.11);
   --shadow-popover: 0 6px 16px oklch(0.24 0.02 264 / 0.12), 0 12px 28px oklch(0.24 0.02 264 / 0.12);
+  --shadow-modal: 0 8px 20px oklch(0.24 0.02 264 / 0.14), 0 20px 48px oklch(0.24 0.02 264 / 0.18);
 }
 
 .dark {
@@ -99,6 +105,10 @@
   --accent: oklch(0.3 0.008 70);
   --accent-foreground: oklch(0.96 0.004 70);
 
+  /* Inset layer — between canvas and card */
+  --surface-2: oklch(0.26 0.007 70);
+  --surface-2-foreground: oklch(0.96 0.004 70);
+
   /* Semantics — brightened for dark surfaces */
   --destructive: oklch(0.7 0.19 25);
   --success: oklch(0.72 0.14 150);
@@ -123,7 +133,9 @@
   --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.3);
   --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 12px oklch(0 0 0 / 0.36);
   --shadow-card-hover: 0 2px 4px oklch(0 0 0 / 0.36), 0 12px 28px oklch(0 0 0 / 0.46);
+  --shadow-raised: 0 3px 6px oklch(0 0 0 / 0.38), 0 8px 20px oklch(0 0 0 / 0.42);
   --shadow-popover: 0 4px 8px oklch(0 0 0 / 0.4), 0 16px 36px oklch(0 0 0 / 0.55);
+  --shadow-modal: 0 8px 20px oklch(0 0 0 / 0.44), 0 24px 56px oklch(0 0 0 / 0.6);
 }
 
 @theme inline {
@@ -148,6 +160,8 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-surface-2: var(--surface-2);
+  --color-surface-2-foreground: var(--surface-2-foreground);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -167,7 +181,18 @@
   --shadow-xs: var(--shadow-xs);
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-raised: var(--shadow-raised);
   --shadow-popover: var(--shadow-popover);
+  --shadow-modal: var(--shadow-modal);
+
+  /*
+    Semantic z scale (classes z-subnav, z-topbar, z-overlay, z-toast).
+    Never reach for an arbitrary z-40/z-50/z-[999] in app code.
+  */
+  --z-index-subnav: 20;
+  --z-index-topbar: 30;
+  --z-index-overlay: 50;
+  --z-index-toast: 60;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
