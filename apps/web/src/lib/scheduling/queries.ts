@@ -613,3 +613,89 @@ export async function getEscalatedSwaps(orgId: string): Promise<EscalatedSwap[]>
     };
   });
 }
+
+/** A sick call whose replacement broadcast found no taker — needs a manager. */
+export type EscalatedReplacement = {
+  sickCallId: string;
+  shiftId: string;
+  employeeName: string;
+  shiftLabel: string;
+  reportedAt: string;
+};
+
+/**
+ * Sick calls escalated to the manager (Day 55: the offer pool expired or was
+ * empty) whose vacated shift is still open and in the future, so "Find
+ * replacement" can act on it. Member-readable via RLS, same join-in-JS shape
+ * as getEscalatedSwaps.
+ */
+export async function getEscalatedReplacements(orgId: string): Promise<EscalatedReplacement[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sick_call_events")
+    .select("id, employee_id, shift_id, reported_at")
+    .eq("org_id", orgId)
+    .eq("status", "escalated")
+    .not("shift_id", "is", null)
+    .order("reported_at", { ascending: true });
+  if (error) {
+    logger.error("getEscalatedReplacements: query failed", { err: error, orgId });
+    return [];
+  }
+  const rows = (data ?? []) as Array<{
+    id: string;
+    employee_id: string;
+    shift_id: string;
+    reported_at: string;
+  }>;
+  if (rows.length === 0) return [];
+
+  const [{ data: shiftRows }, { data: empRows }] = await Promise.all([
+    supabase
+      .from("shifts")
+      .select("id, starts_at, ends_at, status, employee_id")
+      .eq("org_id", orgId)
+      .in("id", [...new Set(rows.map((r) => r.shift_id))]),
+    supabase
+      .from("employees")
+      .select("id, name")
+      .eq("org_id", orgId)
+      .in("id", [...new Set(rows.map((r) => r.employee_id))]),
+  ]);
+  const shiftById = new Map(
+    (
+      (shiftRows ?? []) as Array<{
+        id: string;
+        starts_at: string;
+        ends_at: string;
+        status: string;
+        employee_id: string | null;
+      }>
+    ).map((s) => [s.id, s]),
+  );
+  const nameById = new Map(
+    ((empRows ?? []) as Array<{ id: string; name: string }>).map((e) => [e.id, e.name]),
+  );
+
+  return rows.flatMap((r) => {
+    const shift = shiftById.get(r.shift_id);
+    // Only shifts a manager can still act on: open, unassigned, in the future.
+    if (
+      !shift ||
+      shift.status !== "open" ||
+      shift.employee_id !== null ||
+      Date.parse(shift.starts_at) <= Date.now()
+    ) {
+      return [];
+    }
+    return [
+      {
+        sickCallId: r.id,
+        shiftId: r.shift_id,
+        employeeName: nameById.get(r.employee_id) ?? "An employee",
+        shiftLabel: swapShiftLabel(shift.starts_at, shift.ends_at),
+        reportedAt: r.reported_at,
+      },
+    ];
+  });
+}

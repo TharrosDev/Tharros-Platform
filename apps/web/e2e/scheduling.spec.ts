@@ -89,6 +89,13 @@ test("scheduling spine", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Activity log" })).toBeVisible();
   });
 
+  await test.step("the approvals inbox renders for the manager", async () => {
+    await page.goto("/scheduling/approvals");
+    await expect(page.getByRole("heading", { name: "Approvals" })).toBeVisible();
+    // The seeded org has no escalations, so the calm empty state shows.
+    await expect(page.getByText("Nothing needs your call")).toBeVisible();
+  });
+
   await test.step("the setup wizard reopens prefilled for editing (no redirect bounce)", async () => {
     await page.goto("/scheduling/setup");
     // Onboarded orgs used to be redirected straight back to /scheduling; the wizard

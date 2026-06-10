@@ -1,60 +1,36 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  CalendarClock,
+  ArrowRight,
   CalendarDays,
-  ChartColumn,
-  ChevronRight,
+  CheckSquare,
   Clock,
-  History,
-  MessagesSquare,
   ScrollText,
   Users,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/stat-card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { getOrgContext } from "@/lib/org/queries";
-import { getSchedulingSummary } from "@/lib/scheduling/queries";
-
-const MANAGE_LINKS = [
-  {
-    href: "/scheduling/employees",
-    icon: Users,
-    label: "Team",
-    description: "Roster, roles, and portal access",
-  },
-  {
-    href: "/scheduling/availability",
-    icon: CalendarClock,
-    label: "Availability",
-    description: "When each person can work",
-  },
-  {
-    href: "/scheduling/conversations",
-    icon: MessagesSquare,
-    label: "Conversations",
-    description: "Agent threads you can take over",
-  },
-  {
-    href: "/scheduling/analytics",
-    icon: ChartColumn,
-    label: "Analytics",
-    description: "Coverage, reliability, and disruption",
-  },
-  {
-    href: "/scheduling/activity",
-    icon: History,
-    label: "Activity log",
-    description: "Every agent decision and schedule change",
-  },
-] as const;
+import { getRoster } from "@/lib/employees/queries";
+import {
+  getEscalatedReplacements,
+  getEscalatedSwaps,
+  getLatestSchedule,
+  getSchedulingSummary,
+} from "@/lib/scheduling/queries";
+import { getPendingTimeOff } from "@/lib/scheduling/time-off";
+import { getScheduleActivityPage } from "@/lib/audit/queries";
+import { presentActivityFeed } from "@/lib/audit/present";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * Day 43 — scheduling home. Routes the owner to the setup wizard until it's been
- * completed; afterward shows a short summary of what was configured. The real
- * scheduling surfaces (availability, schedule generation) land in later days.
+ * Scheduling overview: setup summary stats, what needs the manager (linking
+ * to the Approvals inbox), the latest schedule's state, and a strip of recent
+ * activity. Routes to the setup wizard until setup completes.
  */
 const PRESET_LABEL: Record<string, string> = {
   ontario: "Ontario (ESA)",
@@ -69,6 +45,11 @@ const TONE_LABEL: Record<string, string> = {
   direct: "Direct",
 };
 
+const SCHEDULE_STATUS: Record<string, { label: string; variant: "secondary" | "success" }> = {
+  draft: { label: "Draft in progress", variant: "secondary" },
+  published: { label: "Published", variant: "success" },
+};
+
 export default async function SchedulingPage() {
   const { activeOrg } = await getOrgContext();
   if (!activeOrg) redirect("/dashboard");
@@ -76,11 +57,33 @@ export default async function SchedulingPage() {
   const summary = await getSchedulingSummary(activeOrg.id);
   if (!summary.onboardedAt) redirect("/scheduling/setup");
 
+  const roster = await getRoster();
+  const canManage = roster.viewerRole === "owner" || roster.viewerRole === "admin";
+
+  const [schedule, activityPage] = await Promise.all([
+    getLatestSchedule(activeOrg.id),
+    getScheduleActivityPage(activeOrg.id),
+  ]);
+  const recentActivity = presentActivityFeed(activityPage.rows.slice(0, 5));
+
+  let pendingApprovals = 0;
+  if (canManage) {
+    const [swaps, timeOff, replacements] = await Promise.all([
+      getEscalatedSwaps(activeOrg.id),
+      getPendingTimeOff(createAdminClient(), activeOrg.id),
+      getEscalatedReplacements(activeOrg.id),
+    ]);
+    pendingApprovals =
+      swaps.length + timeOff.filter((t) => t.status === "pending").length + replacements.length;
+  }
+
+  const status = schedule ? SCHEDULE_STATUS[schedule.status] : null;
+
   return (
     <div className="space-y-8">
       <PageHeader
         title="Scheduling"
-        description="Your scheduling workspace is set up. Availability and schedule generation arrive next."
+        description="The agent collects availability, drafts the schedule, and handles disruptions. You approve."
         actions={
           <>
             <Link href="/scheduling/setup" className={buttonVariants({ variant: "ghost" })}>
@@ -92,6 +95,38 @@ export default async function SchedulingPage() {
           </>
         }
       />
+
+      {canManage ? (
+        <Card className="overflow-hidden p-0">
+          <Link
+            href="/scheduling/approvals"
+            className="hover:bg-accent focus-visible:ring-ring/40 group flex items-center gap-4 p-5 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-inset"
+          >
+            <span
+              className={
+                pendingApprovals > 0
+                  ? "bg-warning/15 text-warning flex size-10 shrink-0 items-center justify-center rounded-lg [&>svg]:size-5"
+                  : "bg-success/15 text-success flex size-10 shrink-0 items-center justify-center rounded-lg [&>svg]:size-5"
+              }
+            >
+              <CheckSquare />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium">
+                {pendingApprovals > 0
+                  ? `${pendingApprovals} decision${pendingApprovals === 1 ? "" : "s"} waiting on you`
+                  : "Nothing needs your call"}
+              </span>
+              <span className="text-muted-foreground type-small block">
+                {pendingApprovals > 0
+                  ? "Swaps, time off, and unfilled shifts the agent flagged for a human."
+                  : "Escalations from the agent will land in your Approvals inbox."}
+              </span>
+            </span>
+            <ArrowRight className="text-muted-foreground/60 group-hover:text-muted-foreground size-4 shrink-0 transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
+          </Link>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={<Users />} label="Team members" value={String(summary.employeeCount)} />
@@ -108,27 +143,61 @@ export default async function SchedulingPage() {
         />
       </div>
 
-      <section className="space-y-3">
-        <h2 className="type-meta text-muted-foreground">Manage</h2>
-        <nav className="bg-card divide-border divide-y overflow-hidden rounded-lg border shadow-xs">
-          {MANAGE_LINKS.map(({ href, icon: Icon, label, description }) => (
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-2">
+              Latest schedule
+              {status ? <Badge variant={status.variant}>{status.label}</Badge> : null}
+            </CardTitle>
+            <CardDescription>
+              {schedule
+                ? `Covers ${schedule.periodStart} to ${schedule.periodEnd}.`
+                : "No schedule yet. Generate a draft from the calendar to get started."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
             <Link
-              key={href}
-              href={href}
-              className="hover:bg-accent focus-visible:bg-accent focus-visible:ring-ring/50 group flex items-center gap-4 px-5 py-4 transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-inset"
+              href="/scheduling/calendar"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-md [&>svg]:size-4.5">
-                <Icon />
-              </span>
-              <span className="min-w-0">
-                <span className="block font-medium">{label}</span>
-                <span className="text-muted-foreground type-small block">{description}</span>
-              </span>
-              <ChevronRight className="text-muted-foreground/60 group-hover:text-muted-foreground ml-auto size-4 shrink-0 transition-colors" />
+              {schedule ? "Review on the calendar" : "Generate a draft"}
             </Link>
-          ))}
-        </nav>
-      </section>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent activity</CardTitle>
+            <CardDescription>The last few schedule changes and agent decisions.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {recentActivity.length === 0 ? (
+              <p className="text-muted-foreground type-small">No activity yet.</p>
+            ) : (
+              <>
+                <ul className="space-y-2">
+                  {recentActivity.map((entry) => (
+                    <li key={entry.id} className="flex items-baseline gap-2 text-sm">
+                      <span className="bg-primary/60 mt-1.5 size-1.5 shrink-0 self-start rounded-full" />
+                      <span className="min-w-0 flex-1 truncate">
+                        {entry.title}
+                        <span className="text-muted-foreground"> · {entry.actorLabel}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/scheduling/activity"
+                  className="text-primary inline-block text-xs font-medium hover:underline"
+                >
+                  View the full activity log
+                </Link>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       {summary.persona.notes ? (
         <section className="bg-card max-w-prose rounded-lg border p-5 shadow-xs">

@@ -56,11 +56,6 @@ export default async function SchedulingAnalyticsPage({
       <PageHeader
         title="Scheduling analytics"
         description={`Workforce oversight over the last ${days} days — coverage, reliability, and disruption.`}
-        actions={
-          <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
-            Back to scheduling
-          </Link>
-        }
       />
 
       <div className="flex items-center gap-2" role="group" aria-label="Time window">

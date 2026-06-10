@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { SchedulingSetupWizard } from "@/components/scheduling/setup/setup-wizard";
 import { getOrgContext } from "@/lib/org/queries";
@@ -30,11 +28,6 @@ export default async function SchedulingSetupPage() {
           editing
             ? "Update your team, hours, staffing, labor rules, or assistant voice. Jump to any step and save your changes."
             : "A few quick questions so the assistant can build schedules that fit your business. You can change any of this later."
-        }
-        actions={
-          <Link href="/scheduling" className={buttonVariants({ variant: "outline" })}>
-            Back to scheduling
-          </Link>
         }
       />
       <SchedulingSetupWizard initialState={initialState} editing={editing} />
