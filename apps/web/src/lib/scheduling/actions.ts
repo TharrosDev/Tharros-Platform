@@ -62,6 +62,9 @@ export async function completeSchedulingSetup(
   if (!activeOrg) {
     return { message: "No active organization. Try refreshing the page." };
   }
+  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+    return { message: "Only an owner or admin can configure scheduling." };
+  }
 
   let raw: unknown;
   try {

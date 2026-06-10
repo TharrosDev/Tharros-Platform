@@ -130,7 +130,8 @@ export async function getOpenOffers(employeeId: string, orgId: string): Promise<
       if (!shift) return null;
       // Only a still-open, future shift is offerable.
       if (shift.status !== "open" || shift.employee_id !== null) return null;
-      if (Date.parse(shift.starts_at) <= Date.now()) return null;
+      const startMs = Date.parse(shift.starts_at);
+      if (Number.isNaN(startMs) || startMs <= Date.now()) return null;
       const rc = Array.isArray(shift.roles_certifications)
         ? shift.roles_certifications[0]
         : shift.roles_certifications;

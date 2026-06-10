@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Tharros Platform — "the AI operating layer for small businesses." A Turborepo monorepo; the product is a Next.js app at `apps/web` (`@tharros/web`) serving `tharros.ca`. Phase 2 (the AI Business Assistant) is largely shipped: a RAG pipeline over documents a business uploads, fronted by a streaming chat UI with inline citations, generation templates, knowledge management, and per-org AI usage metering tied to plan caps.
+Tharros Platform — "the AI operating layer for small businesses." A Turborepo monorepo; the product is a Next.js app at `apps/web` (`@tharros/web`) serving `tharros.ca`. Shipped so far: **Phase 1** (auth, multi-tenancy, Stripe billing with plan caps), **Phase 2** (the AI Business Assistant — a RAG pipeline over uploaded documents with a streaming, citing chat UI, generation templates, knowledge management, per-org AI usage metering), and **Phase 3** (AI Workforce Scheduling — DeepSeek-assisted setup + availability collection, a constraint solver with candidate panel + judge, schedule calendar with publish/versioning, the token-authed employee portal with sick calls / replacement offers / shift swaps / time off, schedule delivery + reminder emails, scheduling analytics, and the org activity log). Next up: Phase 4, the connector foundation (Nango + n8n).
 
 ## ⚠️ Read first: this Next.js is modified
 
@@ -44,8 +44,9 @@ The `*-rls.test.ts` / `*.db.test.ts` suites hit a **real Supabase project** (the
 - `(marketing)` — public, indexable (`/` and `/pricing`).
 - `(auth)` — login/signup/reset/verify-email; Server Actions + `useActionState`.
 - `(onboarding)` — post-signup org onboarding flow.
-- `(app)` — auth-gated shell (dashboard, settings, profile, billing). `(app)/(subscribed)` is a nested group whose layout redirects to `/billing` unless the org has an active subscription; it holds the product surfaces (`assistant`, `knowledge`, `leads`, `automations`). `git mv`-ing a page in/out of it changes gating **without changing the URL** (route groups don't affect paths).
-- `api` — route handlers. The document ingestion routes (`api/documents/[id]/extract`, `.../embed`) and the streaming assistant route (`api/assistant/query`) run on `runtime = "nodejs"`.
+- `(app)` — auth-gated shell (dashboard, settings, profile, billing, notifications). `(app)/(subscribed)` is a nested group whose layout redirects to `/billing` unless the org has an active subscription; it holds the product surfaces (`assistant`, `knowledge`, `scheduling/*`, `leads`, `automations`). `git mv`-ing a page in/out of it changes gating **without changing the URL** (route groups don't affect paths).
+- `portal` — the account-less employee portal (`/portal`, `/portal/schedule`, `/portal/availability`). Auth is a magic-link token validated per request via the `validate_portal_token` RPC and stored in an httpOnly cookie (`lib/portal/session.ts`); employees have no Supabase auth user. Data access goes through the admin client, scoped strictly to the session's employee + org.
+- `api` — route handlers. The document ingestion routes (`api/documents/[id]/extract`, `.../embed`) and the streaming assistant route (`api/assistant/query`) run on `runtime = "nodejs"`. `api/cron/jobs/run` is the pg_cron-driven worker tick for the durable `jobs` queue.
 
 ### Auth + multi-tenancy (the spine everything sits on)
 - Supabase SSR. Two clients: `lib/supabase/server.ts` (user-session, **RLS applies**) and `lib/supabase/admin.ts` (service-role, **bypasses RLS** — `server-only`, the sole writer to deny-all/member-read-only tables).
@@ -64,6 +65,17 @@ Lifecycle on `documents.status`: `uploaded → extracting → extracted → chun
 The chat layer over the RAG pipeline. `api/assistant/query` (Node runtime) streams an answer as NDJSON frames (`stream-protocol.ts`), persisting each turn per org/user. A new conversation is created on the first turn; its id returns in the `meta` frame so the client can route to it.
 - `conversations.ts` — server data access for threads/messages (org-scoped; the org owner can read members' threads). `types.ts` — pure domain types (no `server-only`) shared with client islands.
 - `templates.ts` — generation templates (draft email / write SOP / summarize policy); a template swaps the grounding system prompt for a deliverable-shaped one. `citation-markers.ts` — numbered inline `[n]` markers. `export.ts` — thread export.
+
+### Workforce scheduling (`apps/web/src/lib/scheduling/` + `lib/portal/` + `lib/employees/`, Phase 3)
+The headline product. Manager surfaces live under `(app)/(subscribed)/scheduling/*` (hub, setup wizard, availability, calendar, team, conversations, analytics, activity); the employee side is the token-authed `/portal`.
+- `solver/` — pure constraint solver (availability, certifications, labor rules) generating candidate schedules; `panel/` — candidate panel + DeepSeek judge that scores candidates; `orchestrator/` — the generation pipeline gluing forecast → solve → judge → persist.
+- Disruption flows: `replacement-engine` (sick calls → ranked replacement offers), `swaps.ts` (targeted + open shift swaps with escalation), `time-off.ts`. All apply atomically via SECURITY DEFINER RPCs with race-condition guards.
+- `delivery.ts` + `lib/jobs/` — schedule publish emails and shift reminders ride the durable `jobs` queue (deny-all RLS, claimed by `claim_due_jobs`, ticked by pg_cron → `api/cron/jobs/run`).
+- `lib/deepseek/` — the DeepSeek seam (`structured.ts` for schema-validated calls). DeepSeek handles cheap structured parsing (availability text, setup assists, judging); usage is metered into `ai_usage_events` like Claude calls.
+
+### Storage buckets
+- `documents` (private) — RAG source files at `<org_id>/<document_id>/<filename>`; the org-id-first path segment is load-bearing for Storage RLS.
+- `avatars` (public-read) — profile photos at `<user_id>/avatar-<ts>.<ext>`; writes are owner-gated by the first path segment. `setAvatarUrl` only accepts URLs inside the caller's own folder.
 
 ### Model seam + cost/rate controls
 - `lib/anthropic/` — the Claude seam. `client.ts` holds the SDK instance (`server-only`); `models.ts` is pure/testable and defines `DEFAULT_MODEL` (`claude-sonnet-4-6`, grounded Q&A — at **high** reasoning effort via `output_config.effort` in `buildRagRequest`) + `CHEAP_MODEL` (`claude-haiku-4-5`, templated generation), routed by `modelForTemplate`. Opus is reserved for later internal integration-management work, not the chatbot/scheduling path.
