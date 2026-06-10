@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { MobileNav } from "@/components/shell/mobile-nav";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { CommandPalette } from "@/components/shell/command-palette";
 import { NotificationMenu } from "@/components/shell/notification-menu";
 import { signOut } from "@/lib/auth/actions";
@@ -52,20 +53,22 @@ function Topbar({
   }, []);
 
   return (
-    <header className="bg-background/80 sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 px-4 backdrop-blur sm:px-6">
+    <header className="bg-background/80 sticky top-0 z-topbar flex h-16 items-center gap-3 border-b border-border/60 px-4 backdrop-blur sm:px-6">
       <MobileNav user={user} orgs={orgs} activeOrg={activeOrg} />
 
-      <button
-        type="button"
-        onClick={() => setCmdOpen(true)}
-        className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/40 flex h-9 flex-1 items-center gap-2.5 rounded-lg border border-border/60 px-3 text-sm outline-none transition-colors focus-visible:ring-[3px] sm:max-w-72 sm:flex-initial"
-      >
-        <Search className="size-4 shrink-0" />
-        <span className="hidden truncate sm:inline">Search or jump to…</span>
-        <Kbd className="ml-auto hidden sm:inline-flex">⌘K</Kbd>
-      </button>
+      <Breadcrumbs className="hidden min-w-0 flex-1 md:block" />
 
       <div className="ml-auto flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setCmdOpen(true)}
+          className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/40 flex h-9 items-center gap-2.5 rounded-lg border border-border/60 px-3 text-sm outline-none transition-colors focus-visible:ring-[3px] lg:w-64"
+          aria-label="Search or jump to"
+        >
+          <Search className="size-4 shrink-0" />
+          <span className="hidden truncate lg:inline">Search or jump to…</span>
+          <Kbd className="ml-auto hidden lg:inline-flex">⌘K</Kbd>
+        </button>
         <NotificationMenu notifications={notifications} unreadCount={unreadCount} />
         <ThemeToggle />
 

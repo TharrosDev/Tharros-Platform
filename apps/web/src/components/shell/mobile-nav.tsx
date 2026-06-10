@@ -37,6 +37,7 @@ function MobileNav({
           user={user}
           orgs={orgs}
           activeOrg={activeOrg}
+          ns="mobile"
           onNavigate={() => setOpen(false)}
         />
       </SheetContent>

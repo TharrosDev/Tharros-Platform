@@ -4,8 +4,9 @@ import { Badge } from "@/components/ui/badge";
 
 /**
  * Shared empty state for product pages that ship in a later phase. A calm,
- * on-brand placeholder: a cobalt-soft icon tile, an "In the works" tag, and a
- * line that tells the owner what will live here.
+ * on-brand placeholder seated on the inset surface-2 layer: a cobalt-soft
+ * icon tile, an "In the works" tag, and a line that tells the owner what
+ * will live here.
  */
 function ComingSoon({
   icon: Icon,
@@ -15,15 +16,17 @@ function ComingSoon({
   message: string;
 }) {
   return (
-    <Card className="flex flex-col items-center justify-center gap-4 border-dashed py-20 text-center">
-      <span className="bg-primary-soft text-primary-soft-foreground flex size-14 items-center justify-center rounded-xl [&>svg]:size-7">
-        <Icon />
-      </span>
-      <Badge variant="outline" className="gap-1.5">
-        <span className="bg-primary size-1.5 rounded-full" />
-        In the works
-      </Badge>
-      <p className="text-muted-foreground max-w-sm text-pretty">{message}</p>
+    <Card className="overflow-hidden border-dashed p-0">
+      <div className="bg-surface-2 flex flex-col items-center justify-center gap-4 px-6 py-20 text-center">
+        <span className="bg-primary-soft text-primary-soft-foreground shadow-xs flex size-14 items-center justify-center rounded-xl [&>svg]:size-7">
+          <Icon />
+        </span>
+        <Badge variant="outline" className="bg-card gap-1.5">
+          <span className="bg-primary size-1.5 rounded-full" />
+          In the works
+        </Badge>
+        <p className="text-muted-foreground max-w-sm text-pretty">{message}</p>
+      </div>
     </Card>
   );
 }
