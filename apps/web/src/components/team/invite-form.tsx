@@ -7,7 +7,7 @@ import { sendInvite } from "@/lib/team/actions";
 import { INVITE_ROLE_OPTIONS } from "@/lib/team/schemas";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { SaveButton } from "@/components/ui/save-button";
 import {
   Select,
   SelectContent,
@@ -73,9 +73,9 @@ export function InviteForm() {
 
         <div className="space-y-1.5">
           <Label className="hidden sm:block">&nbsp;</Label>
-          <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-            {pending ? "Sending…" : "Send invite"}
-          </Button>
+          <SaveButton pending={pending} pendingLabel="Sending…" className="w-full sm:w-auto">
+            Send invite
+          </SaveButton>
         </div>
       </div>
     </form>

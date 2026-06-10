@@ -4,7 +4,7 @@ import * as React from "react";
 import { useActionState } from "react";
 
 import { updateOrganization } from "@/lib/org/actions";
-import { Button } from "@/components/ui/button";
+import { SaveButton } from "@/components/ui/save-button";
 import { FormMessage } from "@/components/auth/auth-card";
 import { OrgFields } from "@/components/org/org-fields";
 import { useToast } from "@/components/ui/toast";
@@ -36,9 +36,7 @@ export function OrgSettingsForm({
     <form action={action} className="space-y-4" noValidate>
       {state?.message && !state.ok ? <FormMessage>{state.message}</FormMessage> : null}
       <OrgFields state={state} />
-      <Button type="submit" disabled={pending}>
-        {pending ? "Saving…" : "Save changes"}
-      </Button>
+      <SaveButton pending={pending}>Save changes</SaveButton>
     </form>
   );
 }
