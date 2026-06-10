@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FadeIn } from "@/components/motion";
 
 /**
  * Shared shell for the auth screens: a titled card with an optional footer link
@@ -49,7 +50,7 @@ export function FieldError({ id, message }: { id?: string; message?: string }) {
   );
 }
 
-/** Form-level error / status banner. */
+/** Form-level error / status banner. Eases in so a new message reads as an event. */
 export function FormMessage({
   tone = "error",
   children,
@@ -58,15 +59,17 @@ export function FormMessage({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      role={tone === "error" ? "alert" : "status"}
-      className={
-        tone === "error"
-          ? "bg-destructive/10 text-destructive rounded-lg px-3 py-2 text-sm"
-          : "bg-success/10 text-success rounded-lg px-3 py-2 text-sm"
-      }
-    >
-      {children}
-    </div>
+    <FadeIn rise={4}>
+      <div
+        role={tone === "error" ? "alert" : "status"}
+        className={
+          tone === "error"
+            ? "bg-destructive/10 text-destructive rounded-lg px-3 py-2 text-sm"
+            : "bg-success/10 text-success rounded-lg px-3 py-2 text-sm"
+        }
+      >
+        {children}
+      </div>
+    </FadeIn>
   );
 }
