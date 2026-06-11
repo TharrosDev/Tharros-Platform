@@ -26,9 +26,9 @@ describe("billing plans", () => {
   });
 
   it("prices the tiers at the agreed CA$ amounts", () => {
-    expect(getPlan("starter").priceMonthly).toBe(14900);
-    expect(getPlan("growth").priceMonthly).toBe(34900);
-    expect(getPlan("pro").priceMonthly).toBe(69900);
+    expect(getPlan("starter").priceMonthly).toBe(9900);
+    expect(getPlan("growth").priceMonthly).toBe(29900);
+    expect(getPlan("pro").priceMonthly).toBe(49900);
     expect(BILLING_CURRENCY).toBe("cad");
   });
 
@@ -87,8 +87,8 @@ describe("billing plans", () => {
   });
 
   it("formatMonthly renders whole-dollar CAD", () => {
-    expect(formatMonthly(14900)).toBe("$149");
-    expect(formatMonthly(69900)).toBe("$699");
+    expect(formatMonthly(9900)).toBe("$99");
+    expect(formatMonthly(49900)).toBe("$499");
   });
 
   it("sets the monthly query cap (Day 33) to match the ladder", () => {

@@ -62,7 +62,7 @@ export const PLANS: readonly Plan[] = [
   {
     tier: "starter",
     name: "Starter",
-    priceMonthly: 14900,
+    priceMonthly: 9900,
     products: ["assistant"],
     lookupKey: "tharros_starter_monthly",
     priceId: env.STRIPE_PRICE_STARTER,
@@ -79,7 +79,7 @@ export const PLANS: readonly Plan[] = [
   {
     tier: "growth",
     name: "Growth",
-    priceMonthly: 34900,
+    priceMonthly: 29900,
     products: ["assistant", "scheduling"],
     lookupKey: "tharros_growth_monthly",
     priceId: env.STRIPE_PRICE_GROWTH,
@@ -98,7 +98,7 @@ export const PLANS: readonly Plan[] = [
   {
     tier: "pro",
     name: "Pro",
-    priceMonthly: 69900,
+    priceMonthly: 49900,
     products: ["assistant", "scheduling", "workflows"],
     lookupKey: "tharros_pro_monthly",
     priceId: env.STRIPE_PRICE_PRO,
@@ -155,7 +155,7 @@ export function minTierForFeature(feature: ProductFeature): Plan | undefined {
   return PLANS.find((p) => p.products.includes(feature));
 }
 
-/** Format a cents amount as a whole-dollar CAD string, e.g. 14900 → "$149". */
+/** Format a cents amount as a whole-dollar CAD string, e.g. 9900 → "$99". */
 export function formatMonthly(cents: number): string {
   return `$${Math.round(cents / 100)}`;
 }

@@ -21,6 +21,7 @@ import {
   type DeepSeekUsage,
 } from "@/lib/deepseek/structured";
 import { SCHEDULING_MODEL_PRO } from "@/lib/deepseek/models";
+import { gradeCandidates, nearIdentical, type LetterGrade } from "./grade";
 import type { CandidateLabel, CandidateMetrics, JudgeVerdict } from "./types";
 
 export type JudgeCandidateInput = { label: CandidateLabel; metrics: CandidateMetrics };
@@ -56,37 +57,62 @@ function deterministicRanking(candidates: JudgeCandidateInput[]): CandidateLabel
 
 function fallbackVerdict(candidates: JudgeCandidateInput[]): JudgeVerdict {
   const ranking = deterministicRanking(candidates);
+  const grades = gradeCandidates(candidates);
+  const winnerLabel = ranking[0];
+  const grade = winnerLabel ? grades.get(winnerLabel) : undefined;
   return {
-    winnerLabel: ranking[0],
+    winnerLabel,
     ranking,
-    rationale:
-      "Selected by the deterministic tie-break: most coverage, then lowest solver score, then profile order.",
+    rationale: grade
+      ? `Picked the ${winnerLabel} schedule (grade ${grade}) by the deterministic tie-break: best coverage first, then the strongest overall grade.`
+      : "Selected by the deterministic tie-break: most coverage, then profile order.",
   };
 }
 
-function buildSystemPrompt(): string {
+function buildSystemPrompt(simple: boolean): string {
   return [
     "You are the judge in a staff-scheduling candidate panel. Several schedules were",
     "generated under different objective weightings; EVERY candidate is already legal",
     "(no labor-rule violations). Choose the single best schedule on the soft / human",
-    "trade-offs and explain why in 2-4 plain sentences a small-business manager would",
+    "trade-offs and explain why in plain language a small-business manager would",
     "understand.",
+    "",
+    "Each candidate carries an overall letter grade from the optimizer (A+ is best,",
+    "F is worst). Refer to candidates by their grade when comparing quality; NEVER",
+    "mention numeric optimizer scores, internal metrics names, or invent numbers.",
     "",
     "Priorities, in order: (1) coverage — fewer unfilled shifts (totalMissing) is",
     "better; (2) then the human trade-offs — fairness (lower fairnessStdDev is fairer),",
     "overtime/cost (lower overtimeHours is cheaper), seniority (lower",
-    "meanSeniorityRankByHours means senior staff got the hours). Use solverScore",
-    "(lower = better) only to break near-ties.",
+    "meanSeniorityRankByHours means senior staff got the hours). Use the letter grade",
+    "to break near-ties.",
+    "",
+    simple
+      ? "These candidates are nearly identical — keep the rationale to 1-2 short sentences; do not manufacture differences."
+      : "Keep the rationale to 1-2 sentences when the choice is clear-cut; use 3-4 only when there is a genuine trade-off worth flagging.",
     "",
     "Rank EVERY candidate exactly once using its label. winnerLabel must be one of the",
     "provided labels and must be ranking[0].",
   ].join("\n");
 }
 
-function buildUserContent(candidates: JudgeCandidateInput[]): string {
+/** The judge-facing view of a candidate: letter grade in, raw solver score out. */
+function judgeView(c: JudgeCandidateInput, grade: LetterGrade | undefined) {
+  const { solverScore: _solverScore, ...metrics } = c.metrics;
+  return { label: c.label, grade, metrics };
+}
+
+function buildUserContent(
+  candidates: JudgeCandidateInput[],
+  grades: Map<CandidateLabel, LetterGrade>,
+): string {
   return [
-    "Candidates (label → metrics):",
-    JSON.stringify(candidates, null, 2),
+    "Candidates (label → grade + metrics):",
+    JSON.stringify(
+      candidates.map((c) => judgeView(c, grades.get(c.label))),
+      null,
+      2,
+    ),
     "",
     `Valid labels: ${candidates.map((c) => c.label).join(", ")}.`,
   ].join("\n");
@@ -103,14 +129,15 @@ export async function judgeCandidates(
   if (candidates.length <= 1) return fallbackVerdict(candidates);
 
   const labels = new Set<string>(candidates.map((c) => c.label));
+  const grades = gradeCandidates(candidates);
 
   let data: z.infer<typeof verdictSchema>;
   try {
     ({ data } = await generateStructuredDeepSeek({
       chat: deps.chat,
       schema: verdictSchema,
-      system: buildSystemPrompt(),
-      userContent: buildUserContent(candidates),
+      system: buildSystemPrompt(nearIdentical(candidates, grades)),
+      userContent: buildUserContent(candidates, grades),
       model: deps.model ?? SCHEDULING_MODEL_PRO,
       toolName: "record_judge_verdict",
       toolDescription: "Record the ranking, winner, and rationale.",

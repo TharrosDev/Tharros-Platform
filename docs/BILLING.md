@@ -13,9 +13,9 @@ by the script below. Keep the two in sync.
 
 | Tier    | Monthly (CAD) | Stripe `lookup_key`        | env var                |
 | ------- | ------------- | -------------------------- | ---------------------- |
-| Starter | $149          | `tharros_starter_monthly`  | `STRIPE_PRICE_STARTER` |
-| Growth  | $349          | `tharros_growth_monthly`   | `STRIPE_PRICE_GROWTH`  |
-| Pro     | $699          | `tharros_pro_monthly`      | `STRIPE_PRICE_PRO`     |
+| Starter | $99           | `tharros_starter_monthly`  | `STRIPE_PRICE_STARTER` |
+| Growth  | $299          | `tharros_growth_monthly`   | `STRIPE_PRICE_GROWTH`  |
+| Pro     | $499          | `tharros_pro_monthly`      | `STRIPE_PRICE_PRO`     |
 
 ## Catalog setup script
 

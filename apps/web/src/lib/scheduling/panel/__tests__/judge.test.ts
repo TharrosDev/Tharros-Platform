@@ -90,6 +90,20 @@ describe("judgeCandidates", () => {
     const v = await judgeCandidates(CANDS, { chat });
     expect(v.winnerLabel).toBe("fairness");
     expect(v.rationale).toMatch(/tie-break/i);
+    // Grade-based, never the raw solver score.
+    expect(v.rationale).toMatch(/grade [A-F][+-]?/);
+    expect(v.rationale).not.toMatch(/\d{3,}/);
+  });
+
+  it("sends letter grades to the model and never the raw solver score", async () => {
+    const chat = vi.fn(async () =>
+      toolCall({ winnerLabel: "fairness", ranking: ["fairness", "seniority", "balanced"], rationale: "x" }),
+    );
+    await judgeCandidates(CANDS, { chat });
+    const payload = JSON.stringify(chat.mock.calls[0]);
+    expect(payload).not.toContain("solverScore");
+    expect(payload).toMatch(/\\"grade\\": \\"A\+\\"/); // per-candidate grade in the user content
+    expect(payload).toMatch(/letter grade/i);
   });
 
   it("does not call the model when there is a single candidate", async () => {
