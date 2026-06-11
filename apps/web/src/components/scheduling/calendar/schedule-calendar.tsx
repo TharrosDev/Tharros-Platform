@@ -15,6 +15,7 @@ import {
   LockOpen,
   Move,
   Plus,
+  Sparkles,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -290,8 +291,9 @@ export function ScheduleCalendar({
 
   return (
     <div className="space-y-5">
-      {/* Header row: period nav + validation summary + actions */}
-      <div className="flex flex-wrap items-center gap-3">
+      {/* Toolbar: period nav + state on the left, actions on the right, all
+          seated in one bar so nothing floats loose. */}
+      <div className="bg-card shadow-xs flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border px-4 py-3">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -307,39 +309,39 @@ export function ScheduleCalendar({
           >
             Next
           </Button>
-          <span className="text-muted-foreground ml-1 text-sm tabular-nums">
-            {windowStart} – {windowEnd}
-          </span>
+        </div>
+        <span className="text-foreground text-sm font-semibold tabular-nums">
+          {windowStart} – {windowEnd}
+        </span>
+
+        <div className="flex items-center gap-2">
+          {isPublished ? (
+            <Badge variant="success">
+              <CheckCircle2 className="size-3.5" aria-hidden /> Published
+              {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
+            </Badge>
+          ) : (
+            <Badge variant="secondary">Draft</Badge>
+          )}
+          {hardCount > 0 ? (
+            <Badge variant="destructive">
+              <TriangleAlert className="size-3.5" aria-hidden /> {hardCount} to fix
+            </Badge>
+          ) : softCount > 0 || openShiftCount > 0 ? (
+            <Badge variant="warning">
+              {[
+                openShiftCount > 0 ? `${openShiftCount} open` : null,
+                softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Badge>
+          ) : (
+            <Badge variant="success">All covered</Badge>
+          )}
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-2">
-          <div className="flex items-center gap-2">
-            {isPublished ? (
-              <Badge variant="success">
-                <CheckCircle2 className="size-3.5" aria-hidden /> Published
-                {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
-              </Badge>
-            ) : (
-              <Badge variant="secondary">Draft</Badge>
-            )}
-            {hardCount > 0 ? (
-              <Badge variant="destructive">
-                <TriangleAlert className="size-3.5" aria-hidden /> {hardCount} to fix
-              </Badge>
-            ) : softCount > 0 || openShiftCount > 0 ? (
-              <Badge variant="warning">
-                {[
-                  openShiftCount > 0 ? `${openShiftCount} open` : null,
-                  softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </Badge>
-            ) : (
-              <Badge variant="success">All covered</Badge>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
               <History className="size-4" /> History
             </Button>
@@ -378,14 +380,25 @@ export function ScheduleCalendar({
               />
             ) : null}
             {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
-          </div>
         </div>
       </div>
 
+      {/* The judge's rationale: a designed AI panel, not an orphan paragraph. */}
       {schedule.optimizationSummary ? (
-        <p className="text-muted-foreground max-w-prose text-sm leading-relaxed">
-          {schedule.optimizationSummary}
-        </p>
+        <div className="border-primary/25 bg-primary-soft/30 flex gap-3 rounded-lg border p-4">
+          <span
+            aria-hidden
+            className="bg-primary-soft text-primary mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md"
+          >
+            <Sparkles className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="type-meta text-primary-soft-foreground">Why this schedule</p>
+            <p className="text-foreground/90 type-body mt-1.5 max-w-prose leading-relaxed">
+              {schedule.optimizationSummary}
+            </p>
+          </div>
+        </div>
       ) : null}
 
       {moving ? (
