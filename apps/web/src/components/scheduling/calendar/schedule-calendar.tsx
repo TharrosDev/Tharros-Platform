@@ -640,7 +640,11 @@ function ShiftChip({
           ? (event: React.DragEvent) => {
               event.dataTransfer.effectAllowed = "move";
               event.dataTransfer.setData("text/plain", shift.id);
-              onDragStart?.();
+              // Defer entering move mode: a synchronous setState re-renders the
+              // grid (overlays mount, add-buttons unmount) during dragstart, and
+              // Chrome cancels a native drag when the DOM under the pointer
+              // mutates mid-event. One frame later the drag is established.
+              window.requestAnimationFrame(() => onDragStart?.());
             }
           : undefined
       }

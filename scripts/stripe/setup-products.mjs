@@ -51,21 +51,21 @@ const TIERS = [
     name: "Tharros Starter",
     description: "AI Business Assistant for solo owners.",
     lookupKey: "tharros_starter_monthly",
-    unitAmount: 14900,
+    unitAmount: 9900,
   },
   {
     tier: "growth",
     name: "Tharros Growth",
     description: "Assistant + Lead Capture & AI Follow-Up for growing teams.",
     lookupKey: "tharros_growth_monthly",
-    unitAmount: 34900,
+    unitAmount: 29900,
   },
   {
     tier: "pro",
     name: "Tharros Pro",
     description: "All three products + workflow automation for scaling businesses.",
     lookupKey: "tharros_pro_monthly",
-    unitAmount: 69900,
+    unitAmount: 49900,
   },
 ];
 
