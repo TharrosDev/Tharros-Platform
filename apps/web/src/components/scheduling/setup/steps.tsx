@@ -237,25 +237,36 @@ export function HoursStep({ state, actions }: { state: WizardState; actions: Ste
 /* ------------------------------ Staffing minimums ----------------------------- */
 
 export function StaffingStep({ state, actions }: { state: WizardState; actions: StepActions }) {
-  const openDays = DAYS.filter(
-    (d) => !state.hours.find((h) => h.day_of_week === d.value)?.is_closed,
-  );
   const roles = rosterRoles(state.employees);
-
-  if (openDays.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm">
-        No open days yet. Set your operating hours first and staffing minimums will appear here.
-      </p>
-    );
-  }
 
   return (
     <div className="space-y-2">
       <p className="text-muted-foreground text-sm">
-        The fewest people you need working on a typical day. You can fine-tune time blocks later.
+        The fewest people you need working on a typical day. Closed days (like weekends, by
+        default) can be opened right here. You can fine-tune time blocks later.
       </p>
-      {openDays.map((d) => {
+      {DAYS.map((d) => {
+        const hoursRow = state.hours.find((h) => h.day_of_week === d.value);
+        if (hoursRow?.is_closed) {
+          return (
+            <div
+              key={d.value}
+              className="border-border flex flex-wrap items-center gap-3 rounded-lg border border-dashed px-4 py-3"
+            >
+              <span className="text-muted-foreground w-24 text-sm font-medium">{d.label}</span>
+              <span className="text-muted-foreground text-sm">Closed</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="ml-auto"
+                onClick={() => actions.updateHours(d.value, { is_closed: false })}
+              >
+                Open this day
+              </Button>
+            </div>
+          );
+        }
         const row = state.staffing[d.value];
         return (
           <div

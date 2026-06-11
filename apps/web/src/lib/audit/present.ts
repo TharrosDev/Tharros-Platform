@@ -43,6 +43,7 @@ const ACTION_META: Record<string, { title: string; category: ActivityCategory }>
   // scheduling_audit_log
   "schedule.created": { title: "Schedule draft created", category: "change" },
   "schedule.published": { title: "Schedule published", category: "change" },
+  "schedule.cleared": { title: "Schedule cleared", category: "change" },
   "shift.reassigned": { title: "Shift reassigned", category: "change" },
   "candidate_panel.judged": { title: "Schedule candidates judged", category: "decision" },
   "replacement.offered": { title: "Replacement offered", category: "change" },

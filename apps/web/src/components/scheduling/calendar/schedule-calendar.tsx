@@ -9,11 +9,13 @@ import {
   CalendarRange,
   CheckCircle2,
   Clock,
+  Eraser,
   History,
   Lock,
   LockOpen,
   Move,
   Plus,
+  Sparkles,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -47,6 +49,7 @@ import {
   approveSwap,
   approveTimeOff,
   assignShift,
+  clearSchedule,
   deleteShift,
   denySwap,
   denyTimeOff,
@@ -288,8 +291,9 @@ export function ScheduleCalendar({
 
   return (
     <div className="space-y-5">
-      {/* Header row: period nav + validation summary + actions */}
-      <div className="flex flex-wrap items-center gap-3">
+      {/* Toolbar: period nav + state on the left, actions on the right, all
+          seated in one bar so nothing floats loose. */}
+      <div className="bg-card shadow-xs flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border px-4 py-3">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -305,39 +309,39 @@ export function ScheduleCalendar({
           >
             Next
           </Button>
-          <span className="text-muted-foreground ml-1 text-sm tabular-nums">
-            {windowStart} – {windowEnd}
-          </span>
+        </div>
+        <span className="text-foreground text-sm font-semibold tabular-nums">
+          {windowStart} – {windowEnd}
+        </span>
+
+        <div className="flex items-center gap-2">
+          {isPublished ? (
+            <Badge variant="success">
+              <CheckCircle2 className="size-3.5" aria-hidden /> Published
+              {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
+            </Badge>
+          ) : (
+            <Badge variant="secondary">Draft</Badge>
+          )}
+          {hardCount > 0 ? (
+            <Badge variant="destructive">
+              <TriangleAlert className="size-3.5" aria-hidden /> {hardCount} to fix
+            </Badge>
+          ) : softCount > 0 || openShiftCount > 0 ? (
+            <Badge variant="warning">
+              {[
+                openShiftCount > 0 ? `${openShiftCount} open` : null,
+                softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </Badge>
+          ) : (
+            <Badge variant="success">All covered</Badge>
+          )}
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-2">
-          <div className="flex items-center gap-2">
-            {isPublished ? (
-              <Badge variant="success">
-                <CheckCircle2 className="size-3.5" aria-hidden /> Published
-                {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
-              </Badge>
-            ) : (
-              <Badge variant="secondary">Draft</Badge>
-            )}
-            {hardCount > 0 ? (
-              <Badge variant="destructive">
-                <TriangleAlert className="size-3.5" aria-hidden /> {hardCount} to fix
-              </Badge>
-            ) : softCount > 0 || openShiftCount > 0 ? (
-              <Badge variant="warning">
-                {[
-                  openShiftCount > 0 ? `${openShiftCount} open` : null,
-                  softCount > 0 ? `${softCount} warning${softCount > 1 ? "s" : ""}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </Badge>
-            ) : (
-              <Badge variant="success">All covered</Badge>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
               <History className="size-4" /> History
             </Button>
@@ -360,6 +364,13 @@ export function ScheduleCalendar({
               </Button>
             ) : null}
             {canManage && isPublished ? <ReopenButton scheduleId={schedule.id} /> : null}
+            {editable && shifts.some((s) => !s.locked) ? (
+              <ClearScheduleButton
+                scheduleId={schedule.id}
+                unlockedCount={shifts.filter((s) => !s.locked).length}
+                lockedCount={shifts.filter((s) => s.locked).length}
+              />
+            ) : null}
             {canManage && isDraft ? (
               <PublishDialog
                 scheduleId={schedule.id}
@@ -369,14 +380,25 @@ export function ScheduleCalendar({
               />
             ) : null}
             {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
-          </div>
         </div>
       </div>
 
+      {/* The judge's rationale: a designed AI panel, not an orphan paragraph. */}
       {schedule.optimizationSummary ? (
-        <p className="text-muted-foreground max-w-prose text-sm leading-relaxed">
-          {schedule.optimizationSummary}
-        </p>
+        <div className="border-primary/25 bg-primary-soft/30 flex gap-3 rounded-lg border p-4">
+          <span
+            aria-hidden
+            className="bg-primary-soft text-primary mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md"
+          >
+            <Sparkles className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="type-meta text-primary-soft-foreground">Why this schedule</p>
+            <p className="text-foreground/90 type-body mt-1.5 max-w-prose leading-relaxed">
+              {schedule.optimizationSummary}
+            </p>
+          </div>
+        </div>
       ) : null}
 
       {moving ? (
@@ -386,7 +408,7 @@ export function ScheduleCalendar({
         >
           <Move className="size-4 shrink-0" aria-hidden />
           <span className="min-w-0 flex-1">
-            Moving the {movingLabel} shift. Click a highlighted spot, or press Esc to cancel.
+            Moving the {movingLabel} shift. Drop it or click a highlighted spot; Esc cancels.
           </span>
           <Button variant="ghost" size="sm" onClick={() => setMoving(null)}>
             <X className="size-3.5" /> Cancel
@@ -431,6 +453,19 @@ export function ScheduleCalendar({
                   <div
                     key={d}
                     className="border-border group/cell relative min-h-14 border-b px-1.5 py-1.5"
+                    // Drop side of drag-to-reassign: only validated targets
+                    // accept the drop (same moveTargets the click path uses).
+                    onDragOver={
+                      moving && isTarget ? (event) => event.preventDefault() : undefined
+                    }
+                    onDrop={
+                      moving && isTarget
+                        ? (event) => {
+                            event.preventDefault();
+                            commitMove(row.key, d);
+                          }
+                        : undefined
+                    }
                   >
                     <div className="flex flex-col gap-1">
                       {cell.map((s) => (
@@ -440,6 +475,9 @@ export function ScheduleCalendar({
                           roleName={s.roleId ? (roleName.get(s.roleId) ?? null) : null}
                           violations={byShift.get(s.id) ?? []}
                           dimmed={moving !== null && moving.id !== s.id}
+                          draggable={editable && !s.locked}
+                          onDragStart={() => setMoving(s)}
+                          onDragEnd={() => setMoving(null)}
                           onClick={() => canManage && !moving && setEditing(s)}
                         />
                       ))}
@@ -570,6 +608,9 @@ function ShiftChip({
   roleName,
   violations,
   dimmed = false,
+  draggable = false,
+  onDragStart,
+  onDragEnd,
   onClick,
 }: {
   shift: CalendarShift;
@@ -577,19 +618,38 @@ function ShiftChip({
   violations: EditViolation[];
   /** Move mode: every chip except the one being moved fades back. */
   dimmed?: boolean;
+  /** Drag-to-reassign (desktop): picking the chip up enters move mode. */
+  draggable?: boolean;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
   onClick: () => void;
 }) {
   const hard = violations.some((v) => v.severity === "hard");
   const open = shift.employeeId === null;
+  // The layout animation lives on a wrapper m.div: motion components replace
+  // onDragStart/onDragEnd with their pan-gesture API, so the native HTML5
+  // drag attributes must sit on a plain <button>.
   return (
-    <m.button
-      layoutId={`shift-${shift.id}`}
+    <m.div layoutId={`shift-${shift.id}`}>
+    <button
       type="button"
       onClick={onClick}
+      draggable={draggable}
+      onDragStart={
+        draggable
+          ? (event: React.DragEvent) => {
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", shift.id);
+              onDragStart?.();
+            }
+          : undefined
+      }
+      onDragEnd={draggable ? onDragEnd : undefined}
       title={violations.map((v) => v.message).join("\n") || undefined}
       className={[
         "w-full rounded-md border px-2 py-1 text-left text-xs leading-tight transition-[color,background-color,border-color,opacity]",
         dimmed ? "opacity-40" : "",
+        draggable ? "cursor-grab active:cursor-grabbing" : "",
         hard
           ? "border-destructive/50 bg-destructive/10 text-destructive"
           : open
@@ -603,7 +663,8 @@ function ShiftChip({
         {hard ? <TriangleAlert className="size-3" aria-hidden /> : null}
       </span>
       {roleName ? <span className="block truncate opacity-80">{roleName}</span> : null}
-    </m.button>
+    </button>
+    </m.div>
   );
 }
 
@@ -836,6 +897,77 @@ function EditShiftDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * "Clear schedule" with a deliberate double-check: one click opens an
+ * are-you-sure dialog; only an explicit Yes wipes the draft's unlocked
+ * shifts (via the clearSchedule action). Locked shifts are pinned and stay.
+ */
+function ClearScheduleButton({
+  scheduleId,
+  unlockedCount,
+  lockedCount,
+}: {
+  scheduleId: string;
+  unlockedCount: number;
+  lockedCount: number;
+}) {
+  const router = useRouter();
+  const toast = useToast();
+  const [open, setOpen] = React.useState(false);
+  const [pending, start] = React.useTransition();
+
+  function confirmClear() {
+    start(async () => {
+      const res = await clearSchedule({ scheduleId });
+      setOpen(false);
+      if (res.ok) {
+        toast.add({
+          title: "Schedule cleared",
+          description: `${unlockedCount} shift${unlockedCount === 1 ? "" : "s"} removed.`,
+        });
+        router.refresh();
+      } else {
+        toast.add({ title: "Couldn't clear the schedule", description: res.message });
+      }
+    });
+  }
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        className="text-destructive hover:text-destructive"
+        onClick={() => setOpen(true)}
+      >
+        <Eraser className="size-4" /> Clear schedule
+      </Button>
+
+      <Dialog open={open} onOpenChange={(o) => !o && !pending && setOpen(false)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Are you sure?</DialogTitle>
+            <DialogDescription>
+              This removes all {unlockedCount} shift{unlockedCount === 1 ? "" : "s"} from this
+              draft{lockedCount > 0
+                ? `. Your ${lockedCount} locked shift${lockedCount === 1 ? " stays" : "s stay"} pinned`
+                : ""}. You can&apos;t undo it, but you can always generate a fresh draft.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>
+              No, keep it
+            </Button>
+            <Button variant="destructive" onClick={confirmClear} disabled={pending}>
+              {pending ? "Clearing…" : "Yes, clear it"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
