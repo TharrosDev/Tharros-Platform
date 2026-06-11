@@ -82,14 +82,38 @@ export async function getMonthlyQueryCount(orgId: string): Promise<number> {
 }
 
 /**
+ * Extra queries awarded to the org for the current month (approved feedback
+ * rewards). Deny-all table, read via the admin client. Fails closed to 0 —
+ * a bonus is a perk, not an entitlement, so a read error never widens the cap.
+ */
+export async function getMonthlyBonusQueries(orgId: string): Promise<number> {
+  const admin = createAdminClient();
+  const month = currentUsagePeriodStart().toISOString().slice(0, 10);
+  const { data, error } = await admin
+    .from("usage_bonuses")
+    .select("queries")
+    .eq("org_id", orgId)
+    .eq("month", month);
+
+  if (error) {
+    logger.warn("usage.bonus_read_failed", { org_id: orgId, err: error });
+    return 0;
+  }
+  return ((data ?? []) as Array<{ queries: number }>).reduce((sum, b) => sum + b.queries, 0);
+}
+
+/**
  * Decide whether `orgId` may run another assistant query this period, based on
- * its plan tier's monthly cap. An org with no tier (no/unknown subscription)
- * gets cap 0 → blocked; in practice the (subscribed) route group has already
- * required an active/trialing subscription before this runs.
+ * its plan tier's monthly cap plus any approved feedback bonus queries. An org
+ * with no tier (no/unknown subscription) gets cap 0 → blocked; in practice the
+ * (subscribed) route group has already required an active/trialing
+ * subscription before this runs.
  */
 export async function checkQueryCap(orgId: string): Promise<CapDecision> {
   const sub = await getSubscription();
-  const cap = sub?.tier ? queryCapFor(sub.tier) : 0;
+  const planCap = sub?.tier ? queryCapFor(sub.tier) : 0;
+  // A bonus extends a real plan's cap; it never unlocks an unsubscribed org.
+  const bonus = planCap > 0 ? await getMonthlyBonusQueries(orgId) : 0;
   const used = await getMonthlyQueryCount(orgId);
-  return capDecision(used, cap);
+  return capDecision(used, planCap + bonus);
 }

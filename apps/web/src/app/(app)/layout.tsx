@@ -7,8 +7,10 @@ import { getEntitlement } from "@/lib/billing/entitlements";
 import { checkQueryCap } from "@/lib/billing/usage";
 import { usageBannerState } from "@/lib/billing/usage-math";
 import { getUnreadCount, listNotifications } from "@/lib/notifications/queries";
+import { isPlatformAdmin } from "@/lib/auth/admin";
 import { Sidebar } from "@/components/shell/sidebar";
 import { Topbar } from "@/components/shell/topbar";
+import { FeedbackWidget } from "@/components/feedback/feedback-widget";
 import { BillingBanner } from "@/components/billing/billing-banner";
 import { UsageBanner } from "@/components/billing/usage-banner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -54,7 +56,12 @@ export default async function AppLayout({
       <TooltipProvider>
         <div className="bg-background flex min-h-screen">
           <aside className="bg-sidebar text-sidebar-foreground sticky top-0 hidden h-screen w-64 shrink-0 border-r border-sidebar-border lg:block">
-            <Sidebar user={displayUser} orgs={orgs} activeOrg={activeOrg} />
+            <Sidebar
+              user={displayUser}
+              orgs={orgs}
+              activeOrg={activeOrg}
+              showAdmin={isPlatformAdmin(user.email)}
+            />
           </aside>
 
           <div className="flex min-w-0 flex-1 flex-col">
@@ -72,6 +79,7 @@ export default async function AppLayout({
             </main>
           </div>
         </div>
+        <FeedbackWidget />
         <Toaster />
       </TooltipProvider>
     </ToastProvider>

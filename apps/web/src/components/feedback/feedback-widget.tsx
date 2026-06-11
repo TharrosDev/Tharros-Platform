@@ -1,0 +1,306 @@
+"use client";
+
+import * as React from "react";
+import { AnimatePresence, m } from "motion/react";
+import { Bug, CheckCircle2, Lightbulb, Minus, Send, Sparkles, Star } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { spring } from "@/components/motion";
+import { TharrosMark } from "@/components/brand/logo";
+import { Textarea } from "@/components/ui/textarea";
+import { sendFeedbackTurn } from "@/lib/feedback/actions";
+import type { FeedbackKind, FeedbackMessage } from "@/lib/feedback/agent";
+
+/**
+ * The Suggestions/Questions widget: a docked pill in the bottom-right that
+ * expands into a small two-tab panel. "Ask" answers questions about the
+ * platform; "Suggest" walks a suggestion, bug report, or wish through the
+ * feedback agent (which may ask a guiding question or two) and logs it for
+ * review. Rewards are decided by the team on review, so the widget never
+ * promises one.
+ */
+
+const KIND_OPTIONS: { value: FeedbackKind; label: string; icon: typeof Bug }[] = [
+  { value: "suggestion", label: "Suggestion", icon: Lightbulb },
+  { value: "bug", label: "Bug", icon: Bug },
+  { value: "wish", label: "Wish", icon: Star },
+];
+
+const ASK_INTRO =
+  "Hi! Ask me how anything in Tharros works. For ideas or problems, hop over to the Suggest tab.";
+const SUGGEST_INTRO =
+  "Found a bug, or have an idea? Pick what kind of feedback this is, describe it, and I'll log it for the team. Useful submissions can earn bonus AI usage.";
+
+type TabState = {
+  messages: FeedbackMessage[];
+  logged: boolean;
+};
+
+export function FeedbackWidget() {
+  const [open, setOpen] = React.useState(false);
+  const [tab, setTab] = React.useState<"ask" | "suggest">("ask");
+  const [kind, setKind] = React.useState<FeedbackKind | null>(null);
+  const [ask, setAsk] = React.useState<TabState>({ messages: [], logged: false });
+  const [suggest, setSuggest] = React.useState<TabState>({ messages: [], logged: false });
+  const [input, setInput] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+  const [pending, startTransition] = React.useTransition();
+  const bottomRef = React.useRef<HTMLDivElement>(null);
+
+  const state = tab === "ask" ? ask : suggest;
+  const setState = tab === "ask" ? setAsk : setSuggest;
+
+  React.useEffect(() => {
+    bottomRef.current?.scrollIntoView({ block: "end" });
+  }, [ask.messages.length, suggest.messages.length, pending]);
+
+  const canSend =
+    input.trim().length > 0 && !pending && !(tab === "suggest" && (kind === null || state.logged));
+
+  function send() {
+    if (!canSend) return;
+    const text = input.trim();
+    const nextMessages: FeedbackMessage[] = [...state.messages, { role: "user", content: text }];
+    setState({ ...state, messages: nextMessages });
+    setInput("");
+    setError(null);
+
+    const activeTab = tab;
+    const activeKind = kind ?? undefined;
+    startTransition(async () => {
+      const res = await sendFeedbackTurn({
+        tab: activeTab,
+        kind: activeTab === "suggest" ? activeKind : undefined,
+        messages: nextMessages,
+      });
+      const apply = activeTab === "ask" ? setAsk : setSuggest;
+      if (res.ok) {
+        apply({
+          messages: [...nextMessages, { role: "assistant", content: res.reply }],
+          logged: res.logged,
+        });
+      } else {
+        setError(res.message);
+      }
+    });
+  }
+
+  function resetSuggest() {
+    setSuggest({ messages: [], logged: false });
+    setKind(null);
+    setError(null);
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  }
+
+  return (
+    <div className="z-widget fixed right-4 bottom-4">
+      <AnimatePresence initial={false} mode="popLayout">
+        {open ? (
+          <m.div
+            key="panel"
+            layoutId="feedback-widget"
+            transition={spring.gentle}
+            className="bg-card shadow-modal flex h-[30rem] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border max-h-[calc(100dvh-6rem)]"
+            role="dialog"
+            aria-label="Help and feedback"
+          >
+            {/* Header */}
+            <div className="border-border/60 flex items-center gap-2.5 border-b px-4 py-3">
+              <span className="text-primary bg-primary-soft flex size-7 items-center justify-center rounded-md">
+                <TharrosMark className="size-3.5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm leading-tight font-semibold">Help &amp; ideas</p>
+                <p className="text-muted-foreground text-xs leading-tight">
+                  Questions, suggestions, and bug reports
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Minimize"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 rounded-md p-1.5 outline-none transition-colors focus-visible:ring-[3px]"
+              >
+                <Minus className="size-4" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="border-border/60 flex gap-1 border-b px-3 py-2">
+              {(["ask", "suggest"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => {
+                    setTab(t);
+                    setError(null);
+                  }}
+                  aria-current={tab === t ? "page" : undefined}
+                  className={cn(
+                    "focus-visible:ring-ring/40 relative rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                    tab === t ? "text-primary-soft-foreground" : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tab === t ? (
+                    <m.span
+                      layoutId="feedback-tab"
+                      transition={spring.snappy}
+                      className="bg-primary-soft absolute inset-0 rounded-md"
+                      aria-hidden
+                    />
+                  ) : null}
+                  <span className="relative">{t === "ask" ? "Ask" : "Suggest"}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Conversation */}
+            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+              <AgentBubble>{tab === "ask" ? ASK_INTRO : SUGGEST_INTRO}</AgentBubble>
+
+              {tab === "suggest" && !state.logged ? (
+                <div className="flex flex-wrap gap-1.5 pl-8">
+                  {KIND_OPTIONS.map(({ value, label, icon: Icon }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setKind(value)}
+                      data-active={kind === value || undefined}
+                      className={cn(
+                        "focus-visible:ring-ring/40 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                        kind === value
+                          ? "border-primary/40 bg-primary-soft text-primary-soft-foreground"
+                          : "border-border text-muted-foreground hover:bg-accent hover:text-foreground",
+                      )}
+                    >
+                      <Icon className="size-3" aria-hidden />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {state.messages.map((msg, i) =>
+                msg.role === "user" ? (
+                  <div key={i} className="flex justify-end">
+                    <div className="bg-primary-soft text-primary-soft-foreground max-w-[85%] rounded-lg rounded-br-sm px-3 py-2 text-sm whitespace-pre-wrap">
+                      {msg.content}
+                    </div>
+                  </div>
+                ) : (
+                  <AgentBubble key={i}>{msg.content}</AgentBubble>
+                ),
+              )}
+
+              {pending ? (
+                <AgentBubble>
+                  <span className="flex items-center gap-1 py-0.5" aria-label="Thinking">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="bg-muted-foreground/60 size-1.5 animate-pulse rounded-full motion-reduce:animate-none"
+                        style={{ animationDelay: `${i * 160}ms` }}
+                      />
+                    ))}
+                  </span>
+                </AgentBubble>
+              ) : null}
+
+              {state.logged && tab === "suggest" ? (
+                <div className="bg-success/10 text-success flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden />
+                  <span className="text-foreground/90">
+                    Logged for the team. Valuable submissions can earn bonus AI usage, applied to
+                    your workspace after review.{" "}
+                    <button
+                      type="button"
+                      onClick={resetSuggest}
+                      className="text-primary font-medium hover:underline"
+                    >
+                      Send another
+                    </button>
+                  </span>
+                </div>
+              ) : null}
+
+              {error ? (
+                <p className="bg-destructive/10 text-destructive rounded-lg px-3 py-2 text-sm">
+                  {error}
+                </p>
+              ) : null}
+              <div ref={bottomRef} />
+            </div>
+
+            {/* Composer */}
+            <div className="border-border/60 border-t p-3">
+              <div className="border-input bg-background focus-within:border-ring focus-within:ring-ring/40 flex items-end gap-2 rounded-lg border p-1.5 transition-[box-shadow,border-color] focus-within:ring-[3px]">
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={onKeyDown}
+                  rows={1}
+                  disabled={tab === "suggest" && state.logged}
+                  placeholder={
+                    tab === "ask"
+                      ? "Ask how something works…"
+                      : state.logged
+                        ? "Submission logged."
+                        : kind
+                          ? `Describe your ${kind}…`
+                          : "Pick a type above, then describe it…"
+                  }
+                  aria-label={tab === "ask" ? "Ask a question" : "Describe your feedback"}
+                  className="max-h-28 min-h-9 resize-none border-0 bg-transparent px-2 py-1.5 text-sm shadow-none focus-visible:ring-0"
+                />
+                <button
+                  type="button"
+                  onClick={send}
+                  disabled={!canSend}
+                  aria-label="Send"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/40 mb-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md outline-none transition-all duration-150 focus-visible:ring-[3px] disabled:opacity-40"
+                >
+                  <Send className="size-3.5" />
+                </button>
+              </div>
+            </div>
+          </m.div>
+        ) : (
+          <m.button
+            key="pill"
+            layoutId="feedback-widget"
+            transition={spring.gentle}
+            type="button"
+            onClick={() => setOpen(true)}
+            className="bg-primary text-primary-foreground shadow-raised hover:bg-primary/90 focus-visible:ring-ring/40 flex items-center gap-2 rounded-full py-2.5 pr-4 pl-3 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]"
+            aria-label="Open help and feedback"
+          >
+            <Sparkles className="size-4" aria-hidden />
+            Suggest
+          </m.button>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function AgentBubble({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex gap-2">
+      <span
+        aria-hidden
+        className="text-primary bg-primary-soft mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md"
+      >
+        <TharrosMark className="size-3" />
+      </span>
+      <div className="bg-surface-2 text-foreground/90 max-w-[85%] rounded-lg rounded-tl-sm px-3 py-2 text-sm whitespace-pre-wrap">
+        {children}
+      </div>
+    </div>
+  );
+}
