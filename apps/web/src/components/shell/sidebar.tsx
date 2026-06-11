@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { m } from "motion/react";
+import { Inbox } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
@@ -28,6 +29,8 @@ function Sidebar({
    * pill would animate between the two copies.
    */
   ns = "desktop",
+  /** Platform admin (email allowlist): shows the cross-org admin section. */
+  showAdmin = false,
 }: {
   user: DisplayUser;
   orgs: UserOrg[];
@@ -35,6 +38,7 @@ function Sidebar({
   onNavigate?: () => void;
   className?: string;
   ns?: string;
+  showAdmin?: boolean;
 }) {
   const pathname = usePathname();
   const inScheduling = pathname.startsWith("/scheduling");
@@ -50,7 +54,16 @@ function Sidebar({
       </div>
 
       <nav className="mt-6 flex flex-1 flex-col overflow-y-auto">
-        {navSections.map((section, index) => (
+        {(showAdmin
+          ? [
+              ...navSections,
+              {
+                label: "Admin",
+                items: [{ label: "Feedback inbox", href: "/admin/feedback", icon: Inbox }],
+              },
+            ]
+          : navSections
+        ).map((section, index) => (
           <div key={section.label} className={cn(index > 0 && "mt-6")}>
             <p className="type-meta text-sidebar-muted-foreground/70 px-3 pb-2">
               {section.label}

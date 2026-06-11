@@ -37,6 +37,8 @@ const SEGMENT_LABELS: Record<string, string> = {
   profile: "Profile",
   leads: "Lead Capture",
   automations: "Automations",
+  admin: "Admin",
+  feedback: "Feedback inbox",
 };
 
 function labelFor(segment: string): string {

@@ -191,6 +191,7 @@
   */
   --z-index-subnav: 20;
   --z-index-topbar: 30;
+  --z-index-widget: 40;
   --z-index-overlay: 50;
   --z-index-toast: 60;
 
