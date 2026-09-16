@@ -5,7 +5,11 @@ import { ArrowRight, Check } from "lucide-react";
 import { PLANS, TRIAL_DAYS, formatMonthly } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { TharrosWordmark } from "@/components/brand/logo";
+import {
+  MarketingBackdrop,
+  MarketingFooter,
+  MarketingHeader,
+} from "@/components/marketing/marketing-chrome";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -35,36 +39,8 @@ export default function PricingPage() {
 
   return (
     <main className="bg-sidebar text-sidebar-foreground relative flex min-h-screen flex-col overflow-hidden">
-      {/* Workshop brand atmosphere — same world as the marketing home */}
-      <div
-        aria-hidden
-        className="text-sidebar-foreground pointer-events-none absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-      <div
-        aria-hidden
-        className="bg-primary pointer-events-none absolute -top-40 left-1/2 size-[36rem] -translate-x-1/2 rounded-full opacity-15 blur-3xl"
-      />
-
-      <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
-        <Link href="/" aria-label="Tharros home">
-          <TharrosWordmark markClassName="size-7" />
-        </Link>
-        <nav className="flex items-center gap-1 sm:gap-2">
-          <Link
-            href="/login"
-            className="text-sidebar-muted-foreground hover:text-sidebar-foreground rounded-md px-3 py-2 text-sm font-medium transition-colors"
-          >
-            Sign in
-          </Link>
-          <Link href="/signup" className={cn(buttonVariants({ size: "sm" }))}>
-            Get started
-          </Link>
-        </nav>
-      </header>
+      <MarketingBackdrop />
+      <MarketingHeader />
 
       <section className="relative mx-auto w-full max-w-6xl px-6 pt-14 pb-20 sm:pt-20">
         <div className="max-w-2xl">
@@ -72,9 +48,9 @@ export default function PricingPage() {
             One flat price. No per-seat math.
           </h1>
           <p className="text-sidebar-muted-foreground mt-5 max-w-xl text-lg leading-relaxed text-pretty">
-            Pick the plan that matches where your business is today, and change it
-            whenever that changes. Every plan starts with a {TRIAL_DAYS}-day free
-            trial. Prices in CAD; tax calculated at checkout.
+            Pick the plan that matches where your business is today, and change it whenever that
+            changes. Every plan starts with a {TRIAL_DAYS}-day free trial. Prices in CAD; tax
+            calculated at checkout.
           </p>
         </div>
 
@@ -108,10 +84,7 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <Link
-                href="/signup"
-                className={cn(buttonVariants({ size: "lg" }), "mt-8 w-full")}
-              >
+              <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "mt-8 w-full")}>
                 Start your {TRIAL_DAYS}-day free trial
                 <ArrowRight className="size-4" aria-hidden />
               </Link>
@@ -137,9 +110,7 @@ export default function PricingPage() {
           {FAQ.map((item) => (
             <div key={item.q}>
               <h3 className="text-sm font-semibold">{item.q}</h3>
-              <p className="text-sidebar-muted-foreground mt-2 text-sm leading-relaxed">
-                {item.a}
-              </p>
+              <p className="text-sidebar-muted-foreground mt-2 text-sm leading-relaxed">{item.a}</p>
             </div>
           ))}
         </div>
@@ -148,29 +119,24 @@ export default function PricingPage() {
           Not sure which plan fits?{" "}
           <Link
             href="/signup"
-            className="text-sidebar-foreground underline underline-offset-4 hover:no-underline"
+            className="text-sidebar-foreground focus-visible:ring-sidebar-ring/50 rounded-sm underline underline-offset-4 outline-none hover:no-underline focus-visible:ring-[3px]"
           >
             Start the trial
           </Link>{" "}
           — you can switch plans at any point.
         </p>
       </section>
+      <MarketingFooter />
     </main>
   );
 }
 
 /** The flanking plans: quiet, translucent panels that frame the light Growth card. */
-function QuietPlan({
-  plan,
-  side,
-}: {
-  plan: (typeof PLANS)[number];
-  side: "left" | "right";
-}) {
+function QuietPlan({ plan, side }: { plan: (typeof PLANS)[number]; side: "left" | "right" }) {
   return (
     <div
       className={cn(
-        "flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur-sm transition-colors duration-200 ease-out hover:bg-white/[0.06] motion-reduce:transition-none",
+        "flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-7",
         side === "left" ? "lg:rounded-r-none lg:border-r-0" : "lg:rounded-l-none lg:border-l-0",
       )}
     >
@@ -187,10 +153,7 @@ function QuietPlan({
       <ul className="mt-7 flex-1 space-y-3">
         {plan.features.map((feature) => (
           <li key={feature} className="flex items-start gap-2.5">
-            <Check
-              aria-hidden
-              className="text-sidebar-muted-foreground mt-0.5 size-4 shrink-0"
-            />
+            <Check aria-hidden className="text-sidebar-muted-foreground mt-0.5 size-4 shrink-0" />
             <span className="text-sidebar-foreground/90 text-sm">{feature}</span>
           </li>
         ))}

@@ -18,8 +18,9 @@ rest, obvious under pressure. Generous air, crisp surfaces, cobalt used sparingl
   app and gives it weight; the top bar and content sit light above it. The active
   nav item is a solid **cobalt pill** — the signature move.
 - **Crisp, seated surfaces.** Cards sit on a tight, low cool shadow with a defined
-  border (`--border`), not a soft floating glow. Radius is a tight, tool-like
-  `--radius: 0.4rem`, not pillowy. No glassmorphism.
+  border (`--border`), not a soft floating glow. Radius is a measured, tool-like
+  `--radius: 0.75rem`, substantial enough for touch-first controls without becoming
+  pillowy. No glassmorphism.
 - **One accent: cobalt, decisive.** A confident blue for the primary action,
   current selection, and state only — never a soft decorative wash. Never more
   than one cobalt CTA competing in a view.
@@ -35,17 +36,17 @@ All tokens are OKLCH CSS variables in `src/app/globals.css`, reusing shadcn
 variable names so every component inherits them. The whole neutral ramp and the
 accent share the same families (cobalt ~264 + graphite ~70); change a token and the app re-skins.
 
-| Token | Role |
-| --- | --- |
-| `--background` / `--foreground` | warm-stone canvas / warm ink |
+| Token                                                                       | Role                                                                                            |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `--background` / `--foreground`                                             | warm-stone canvas / warm ink                                                                    |
 | `--sidebar` (+ `-foreground` / `-muted-foreground` / `-accent` / `-border`) | grounded **dark** chrome anchor; `-muted-foreground` is the on-dark muted text for inactive nav |
-| `--card` / `--popover` | near-white surfaces that sit on `--shadow-card` |
-| `--primary` / `--primary-foreground` | deep cobalt action colour / text on it |
-| `--primary-soft` / `--primary-soft-foreground` | soft cobalt wash / text on it (used sparingly) |
-| `--secondary` `--muted` `--accent` | quiet warm neutrals (hover, fills) |
-| `--success` `--warning` `--info` `--destructive` | semantics, tuned to read AA as text |
-| `--border` `--input` `--ring` | crisp hairlines and cobalt focus ring |
-| `--shadow-xs` `--shadow-card` `--shadow-card-hover` `--shadow-popover` | seated warm elevation scale |
+| `--card` / `--popover`                                                      | near-white surfaces that sit on `--shadow-card`                                                 |
+| `--primary` / `--primary-foreground`                                        | deep cobalt action colour / text on it                                                          |
+| `--primary-soft` / `--primary-soft-foreground`                              | soft cobalt wash / text on it (used sparingly)                                                  |
+| `--secondary` `--muted` `--accent`                                          | quiet warm neutrals (hover, fills)                                                              |
+| `--success` `--warning` `--info` `--destructive`                            | semantics, tuned to read AA as text                                                             |
+| `--border` `--input` `--ring`                                               | crisp hairlines and cobalt focus ring                                                           |
+| `--shadow-xs` `--shadow-card` `--shadow-card-hover` `--shadow-popover`      | seated warm elevation scale                                                                     |
 
 ## Type scale
 
@@ -79,6 +80,10 @@ tile with a cut-out "T", single-colour via `currentColor`) and `TharrosWordmark`
 
 **Layout helpers:** `components/page-header.tsx`, `components/stat-card.tsx`,
 `components/theme-toggle.tsx`.
+
+**Browser surfaces:** selection, text carets, focus scroll margins, tap highlights,
+and scrollbars are themed from the same token ramp. Skeletons use one restrained
+surface shimmer with a reduced-motion fallback instead of unrelated spinners.
 
 ## App shell & routes (Day 6)
 
@@ -130,12 +135,12 @@ The stack is two-layer:
 
 **The Base UI / motion treaty — one pattern per job, never both on one element:**
 
-| Job | Pattern |
-| --- | --- |
-| Base UI overlays (dialog, sheet, dropdown, tooltip, select, toast, popover) | CSS `data-[starting-style]` / `data-[ending-style]` ONLY. Never wrap a Base UI Popup in `AnimatePresence`; both drive unmount and they fight. |
-| In-page conditional content (filter chips, selection bars, rows leaving a list) | `AnimatePresence` + `m.div` |
-| Position changes inside a view (active-nav pill, tab indicator, a shift chip moving cells) | `layout` / `layoutId` |
-| Expand / collapse | `AnimateHeight` |
+| Job                                                                                        | Pattern                                                                                                                                       |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Base UI overlays (dialog, sheet, dropdown, tooltip, select, toast, popover)                | CSS `data-[starting-style]` / `data-[ending-style]` ONLY. Never wrap a Base UI Popup in `AnimatePresence`; both drive unmount and they fight. |
+| In-page conditional content (filter chips, selection bars, rows leaving a list)            | `AnimatePresence` + `m.div`                                                                                                                   |
+| Position changes inside a view (active-nav pill, tab indicator, a shift chip moving cells) | `layout` / `layoutId`                                                                                                                         |
+| Expand / collapse                                                                          | `AnimateHeight`                                                                                                                               |
 
 Shared vocabulary lives in `components/motion/springs.ts` (`spring.snappy`,
 `spring.gentle`, `ease.standard`, `ease.fast`) — pick from it instead of

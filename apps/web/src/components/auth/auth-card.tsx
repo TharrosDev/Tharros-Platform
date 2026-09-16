@@ -1,12 +1,6 @@
 import * as React from "react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { FadeIn } from "@/components/motion";
 
 /**
@@ -25,17 +19,17 @@ export function AuthCard({
   footer?: React.ReactNode;
 }) {
   return (
-    <div className="w-full max-w-sm space-y-4">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="type-h2">{title}</CardTitle>
+    <div className="w-full max-w-md space-y-5">
+      <Card className="shadow-raised">
+        <CardHeader className="px-6 text-center sm:px-8">
+          <h1 data-slot="card-title" className="type-h2">
+            {title}
+          </h1>
           {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
-        <CardContent>{children}</CardContent>
+        <CardContent className="px-6 sm:px-8">{children}</CardContent>
       </Card>
-      {footer ? (
-        <p className="text-muted-foreground text-center text-sm">{footer}</p>
-      ) : null}
+      {footer ? <p className="text-muted-foreground text-center text-sm">{footer}</p> : null}
     </div>
   );
 }
@@ -44,7 +38,7 @@ export function AuthCard({
 export function FieldError({ id, message }: { id?: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} className="text-destructive text-sm">
+    <p id={id} className="text-destructive mt-1 text-sm leading-relaxed">
       {message}
     </p>
   );
@@ -64,8 +58,8 @@ export function FormMessage({
         role={tone === "error" ? "alert" : "status"}
         className={
           tone === "error"
-            ? "bg-destructive/10 text-destructive rounded-lg px-3 py-2 text-sm"
-            : "bg-success/10 text-success rounded-lg px-3 py-2 text-sm"
+            ? "border-destructive/20 bg-destructive/10 text-destructive rounded-lg border px-3.5 py-3 text-sm leading-relaxed"
+            : "border-success/20 bg-success/10 text-success rounded-lg border px-3.5 py-3 text-sm leading-relaxed"
         }
       >
         {children}

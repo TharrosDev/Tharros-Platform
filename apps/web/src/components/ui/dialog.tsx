@@ -18,7 +18,7 @@ function DialogBackdrop({
   return (
     <DialogPrimitive.Backdrop
       className={cn(
-        "bg-foreground/25 fixed inset-0 z-50 backdrop-blur-[2px] transition-opacity duration-200 ease-out",
+        "bg-sidebar/60 fixed inset-0 z-overlay backdrop-blur-[3px] transition-opacity duration-200 ease-out",
         "data-[starting-style]:opacity-0 data-[ending-style]:opacity-0",
         className,
       )}
@@ -38,10 +38,10 @@ function DialogContent({
   return (
     <DialogPortal>
       <DialogBackdrop />
-      <DialogPrimitive.Viewport className="fixed inset-0 z-50 flex min-h-full items-center justify-center overflow-y-auto p-4">
+      <DialogPrimitive.Viewport className="fixed inset-0 z-overlay flex min-h-full items-center justify-center overflow-y-auto p-4 sm:p-6">
         <DialogPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover relative w-full max-w-lg rounded-lg border border-border p-6 outline-none",
+            "bg-popover text-popover-foreground shadow-modal relative w-full max-w-lg rounded-xl border border-border/70 p-5 outline-none sm:p-6",
             "transition-all duration-200 ease-out",
             "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",
@@ -52,7 +52,7 @@ function DialogContent({
           {children}
           {showClose ? (
             <DialogClose
-              className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 absolute right-3 top-3 inline-flex size-10 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-[3px] sm:right-4 sm:top-4"
               aria-label="Close"
             >
               <X className="size-4" />
@@ -65,30 +65,19 @@ function DialogContent({
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("mb-4 flex flex-col gap-1.5 pr-8", className)}
-      {...props}
-    />
-  );
+  return <div className={cn("mb-4 flex flex-col gap-1.5 pr-8", className)} {...props} />;
 }
 
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        "mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className,
-      )}
+      className={cn("mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
       {...props}
     />
   );
 }
 
-function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
+function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
       className={cn("text-lg font-semibold leading-none tracking-tight", className)}

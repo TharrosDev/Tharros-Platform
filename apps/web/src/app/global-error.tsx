@@ -33,10 +33,9 @@ export default function GlobalError({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily:
-            "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
-          background: "#fbf8f4",
-          color: "#1c1917",
+          fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+          background: "#f7f8fb",
+          color: "#222735",
         }}
       >
         <main style={{ maxWidth: "28rem", padding: "1.5rem", textAlign: "center" }}>
@@ -44,8 +43,7 @@ export default function GlobalError({
             Something went wrong
           </h1>
           <p style={{ margin: "0 0 1.5rem", color: "#57534e", lineHeight: 1.5 }}>
-            Tharros hit an unexpected error. The team has been notified. Please
-            try again.
+            Tharros hit an unexpected error. The team has been notified. Please try again.
           </p>
           <button
             type="button"
@@ -54,11 +52,11 @@ export default function GlobalError({
               appearance: "none",
               border: "none",
               cursor: "pointer",
-              borderRadius: "0.5rem",
-              padding: "0.625rem 1.25rem",
+              borderRadius: "0.75rem",
+              padding: "0.75rem 1.25rem",
               fontSize: "0.875rem",
               fontWeight: 500,
-              background: "#9a3b1f",
+              background: "#315fc8",
               color: "#fff",
             }}
           >

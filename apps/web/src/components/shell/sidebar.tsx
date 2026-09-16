@@ -44,16 +44,16 @@ function Sidebar({
   const inScheduling = pathname.startsWith("/scheduling");
 
   return (
-    <div className={cn("flex h-full flex-col px-3 py-5", className)}>
-      <div className="px-2">
-        <TharrosWordmark />
+    <div className={cn("flex h-full flex-col px-3 py-4", className)}>
+      <div className="flex min-h-11 items-center px-2">
+        <TharrosWordmark markClassName="size-7" />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <OrgSwitcher orgs={orgs} activeOrg={activeOrg} />
       </div>
 
-      <nav className="mt-6 flex flex-1 flex-col overflow-y-auto">
+      <nav className="mt-5 flex flex-1 flex-col overflow-y-auto pr-0.5">
         {(showAdmin
           ? [
               ...navSections,
@@ -64,10 +64,8 @@ function Sidebar({
             ]
           : navSections
         ).map((section, index) => (
-          <div key={section.label} className={cn(index > 0 && "mt-6")}>
-            <p className="type-meta text-sidebar-muted-foreground/70 px-3 pb-2">
-              {section.label}
-            </p>
+          <div key={section.label} className={cn(index > 0 && "mt-5")}>
+            <p className="type-meta text-sidebar-muted-foreground/75 px-3 pb-2">{section.label}</p>
             <div className="flex flex-col gap-0.5">
               {section.items.map((item) => (
                 <div key={item.href}>
@@ -89,31 +87,23 @@ function Sidebar({
       </nav>
 
       <Separator className="my-3 bg-sidebar-border" />
-      <div className="flex items-center gap-3 px-2 py-1">
-        <Avatar>
-          <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
-          <AvatarFallback>{user.initials}</AvatarFallback>
-        </Avatar>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{user.name}</p>
-          <p className="text-sidebar-muted-foreground truncate text-xs">
-            {user.email}
-          </p>
+      <div className="rounded-lg border border-sidebar-border bg-white/[0.035] p-2.5">
+        <div className="flex items-center gap-3">
+          <Avatar>
+            <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
+            <AvatarFallback>{user.initials}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{user.name}</p>
+            <p className="text-sidebar-muted-foreground truncate text-xs">{user.email}</p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function NavLink({
-  item,
-  ns,
-  onNavigate,
-}: {
-  item: NavItem;
-  ns: string;
-  onNavigate?: () => void;
-}) {
+function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNavigate?: () => void }) {
   const pathname = usePathname();
   const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
   const Icon = item.icon;
@@ -124,7 +114,7 @@ function NavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+        "focus-visible:ring-sidebar-ring/50 relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
         active
           ? "text-sidebar-accent-foreground"
           : "text-sidebar-muted-foreground hover:bg-white/5 hover:text-sidebar-foreground",
@@ -138,7 +128,14 @@ function NavLink({
           aria-hidden
         />
       ) : null}
-      <Icon className="relative size-4.5 shrink-0" />
+      <span
+        className={cn(
+          "relative flex size-7 shrink-0 items-center justify-center rounded-md transition-colors",
+          active ? "bg-white/10" : "bg-white/[0.045]",
+        )}
+      >
+        <Icon className="size-4" />
+      </span>
       <span className="relative flex-1">{item.label}</span>
       {item.soon ? (
         <Badge
@@ -155,13 +152,7 @@ function NavLink({
   );
 }
 
-function SubNavLink({
-  item,
-  onNavigate,
-}: {
-  item: NavItem;
-  onNavigate?: () => void;
-}) {
+function SubNavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {
   const pathname = usePathname();
   const active =
     item.href === "/scheduling"
@@ -174,7 +165,7 @@ function SubNavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-3 py-1.5 text-[0.8125rem] transition-colors",
+        "focus-visible:ring-sidebar-ring/50 flex min-h-9 items-center rounded-md px-3 py-2 text-[0.8125rem] outline-none transition-colors focus-visible:ring-[3px]",
         active
           ? "bg-white/10 font-medium text-sidebar-foreground"
           : "text-sidebar-muted-foreground hover:bg-white/5 hover:text-sidebar-foreground",

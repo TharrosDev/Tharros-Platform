@@ -17,18 +17,20 @@ function PageHeader({
     <div
       data-slot="page-header"
       className={cn(
-        "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
+        "border-border/70 flex flex-col gap-5 border-b pb-6 sm:flex-row sm:items-end sm:justify-between sm:pb-7",
         className,
       )}
       {...props}
     >
-      <div className="space-y-1.5">
-        <h1 className="type-h1">{title}</h1>
+      <div className="min-w-0 space-y-2">
+        <h1 className="type-h1 text-balance">{title}</h1>
         {description ? (
           <p className="text-muted-foreground type-body max-w-prose">{description}</p>
         ) : null}
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>
+      ) : null}
     </div>
   );
 }

@@ -106,7 +106,7 @@ export function FeedbackWidget() {
             key="panel"
             layoutId="feedback-widget"
             transition={spring.gentle}
-            className="bg-card shadow-modal flex h-[30rem] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border max-h-[calc(100dvh-6rem)]"
+            className="bg-card shadow-modal flex h-[32rem] w-[25rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border/70 max-h-[calc(100dvh-6rem)]"
             role="dialog"
             aria-label="Help and feedback"
           >
@@ -125,7 +125,7 @@ export function FeedbackWidget() {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Minimize"
-                className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 rounded-md p-1.5 outline-none transition-colors focus-visible:ring-[3px]"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 inline-flex size-10 items-center justify-center rounded-lg outline-none transition-colors focus-visible:ring-[3px]"
               >
                 <Minus className="size-4" />
               </button>
@@ -144,7 +144,9 @@ export function FeedbackWidget() {
                   aria-current={tab === t ? "page" : undefined}
                   className={cn(
                     "focus-visible:ring-ring/40 relative rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
-                    tab === t ? "text-primary-soft-foreground" : "text-muted-foreground hover:text-foreground",
+                    tab === t
+                      ? "text-primary-soft-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {tab === t ? (
@@ -263,7 +265,7 @@ export function FeedbackWidget() {
                   onClick={send}
                   disabled={!canSend}
                   aria-label="Send"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/40 mb-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md outline-none transition-all duration-150 focus-visible:ring-[3px] disabled:opacity-40"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/40 inline-flex size-10 shrink-0 items-center justify-center rounded-lg outline-none transition-all duration-150 focus-visible:ring-[3px] disabled:opacity-40"
                 >
                   <Send className="size-3.5" />
                 </button>
@@ -277,7 +279,7 @@ export function FeedbackWidget() {
             transition={spring.gentle}
             type="button"
             onClick={() => setOpen(true)}
-            className="bg-primary text-primary-foreground shadow-raised hover:bg-primary/90 focus-visible:ring-ring/40 flex items-center gap-2 rounded-full py-2.5 pr-4 pl-3 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]"
+            className="bg-primary text-primary-foreground shadow-raised hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:ring-ring/40 flex min-h-11 items-center gap-2 rounded-full py-2.5 pr-4 pl-3 text-sm font-semibold outline-none transition-[color,background-color,transform] focus-visible:ring-[3px]"
             aria-label="Open help and feedback"
           >
             <Sparkles className="size-4" aria-hidden />

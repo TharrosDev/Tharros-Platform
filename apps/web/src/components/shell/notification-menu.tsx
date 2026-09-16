@@ -36,7 +36,7 @@ export function NotificationMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn(buttonVariants({ variant: "ghost" }), "relative size-9 px-0")}
+        className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "relative")}
         aria-label={
           unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
         }
@@ -62,7 +62,7 @@ export function NotificationMenu({
             <form action={markAllNotificationsRead}>
               <button
                 type="submit"
-                className="text-muted-foreground hover:text-foreground rounded px-1.5 py-0.5 text-xs outline-none"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 min-h-8 rounded-md px-2 py-1 text-xs outline-none transition-colors focus-visible:ring-[3px]"
               >
                 Mark all read
               </button>

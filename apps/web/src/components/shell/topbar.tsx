@@ -53,7 +53,7 @@ function Topbar({
   }, []);
 
   return (
-    <header className="bg-background/80 sticky top-0 z-topbar flex h-16 items-center gap-3 border-b border-border/60 px-4 backdrop-blur sm:px-6">
+    <header className="bg-background/90 sticky top-0 z-topbar flex h-[4.5rem] items-center gap-3 border-b border-border/70 px-3 backdrop-blur-xl sm:px-6">
       <MobileNav user={user} orgs={orgs} activeOrg={activeOrg} />
 
       <Breadcrumbs className="hidden min-w-0 flex-1 md:block" />
@@ -62,7 +62,7 @@ function Topbar({
         <button
           type="button"
           onClick={() => setCmdOpen(true)}
-          className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/40 flex h-9 items-center gap-2.5 rounded-lg border border-border/60 px-3 text-sm outline-none transition-colors focus-visible:ring-[3px] lg:w-64"
+          className="text-muted-foreground hover:bg-card hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/40 flex h-11 items-center gap-2.5 rounded-lg border border-border/70 bg-card/70 px-3 text-sm shadow-xs outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-[3px] lg:w-72"
           aria-label="Search or jump to"
         >
           <Search className="size-4 shrink-0" />
@@ -74,18 +74,16 @@ function Topbar({
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "h-9 gap-2 px-1.5",
-            )}
+            className={cn(buttonVariants({ variant: "ghost" }), "h-11 gap-2 px-1.5")}
             aria-label="Open account menu"
           >
             <Avatar className="size-7">
               <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
-              <AvatarFallback className="text-xs">
-                {user.initials}
-              </AvatarFallback>
+              <AvatarFallback className="text-xs">{user.initials}</AvatarFallback>
             </Avatar>
+            <span className="hidden max-w-36 truncate text-sm font-semibold xl:block">
+              {activeOrg?.name ?? user.name}
+            </span>
             <ChevronDown className="text-muted-foreground hidden size-4 sm:block" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -110,9 +108,7 @@ function Topbar({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <form action={signOut}>
-              <DropdownMenuItem
-                render={<button type="submit" className="w-full" />}
-              >
+              <DropdownMenuItem render={<button type="submit" className="w-full" />}>
                 <LogOut />
                 Sign out
               </DropdownMenuItem>

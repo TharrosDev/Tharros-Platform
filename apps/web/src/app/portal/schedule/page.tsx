@@ -13,8 +13,13 @@ import {
   getMyTimeOff,
 } from "@/lib/portal/schedule";
 import { signOutPortal } from "@/lib/portal/actions";
-import { TharrosWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
+import {
+  PortalFooter,
+  PortalHeader,
+  PortalInactive,
+  PortalShell,
+} from "@/components/portal/portal-chrome";
 import { RefreshButton } from "@/components/portal/refresh-button";
 import { PortalSchedule } from "@/components/portal/portal-schedule";
 import { ReplacementOffers } from "@/components/portal/replacement-offers";
@@ -43,9 +48,8 @@ export default async function PortalSchedulePage() {
     : [[], [], "optional" as const, [], [], [], []];
 
   return (
-    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8 lg:max-w-6xl lg:px-10 lg:py-12">
-      <header className="mb-8 flex items-center justify-between">
-        <TharrosWordmark />
+    <PortalShell className="lg:max-w-6xl lg:px-10">
+      <PortalHeader>
         {session ? (
           <form action={signOutPortal}>
             <Button type="submit" variant="ghost" size="sm">
@@ -53,13 +57,13 @@ export default async function PortalSchedulePage() {
             </Button>
           </form>
         ) : null}
-      </header>
+      </PortalHeader>
 
       {session ? (
         <div className="flex flex-1 flex-col">
           <Link
             href="/portal"
-            className="text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1 text-sm"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 mb-4 inline-flex min-h-10 w-fit items-center gap-1 rounded-lg px-2 text-sm outline-none focus-visible:ring-[3px]"
           >
             <ChevronLeft className="size-4" /> Portal
           </Link>
@@ -68,7 +72,9 @@ export default async function PortalSchedulePage() {
             <h1 className="type-h1">Your schedule</h1>
             <RefreshButton />
           </div>
-          <p className="text-muted-foreground mt-2 type-body">Your shifts for the next two weeks.</p>
+          <p className="text-muted-foreground mt-2 type-body">
+            Your shifts for the next two weeks.
+          </p>
 
           <div className="mt-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-10">
             <div className="space-y-6 lg:order-2">
@@ -87,18 +93,10 @@ export default async function PortalSchedulePage() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <h1 className="type-h2">This link isn&apos;t active</h1>
-          <p className="text-muted-foreground mt-3 max-w-xs type-body">
-            Your portal link may have expired or been replaced. Ask your manager to send you a fresh
-            link, then open it from your email.
-          </p>
-        </div>
+        <PortalInactive />
       )}
 
-      <footer className="text-muted-foreground/70 mt-10 pt-6 text-center text-xs">
-        Powered by Tharros
-      </footer>
-    </main>
+      <PortalFooter />
+    </PortalShell>
   );
 }
