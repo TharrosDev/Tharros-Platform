@@ -58,7 +58,7 @@ function Breadcrumbs({ className }: { className?: string }) {
 
   return (
     <nav aria-label="Breadcrumb" className={cn("min-w-0", className)}>
-      <ol className="flex items-center gap-1 text-sm">
+      <ol className="flex items-center gap-1.5 text-sm">
         {crumbs.map((crumb) => (
           <li key={crumb.href} className="flex min-w-0 items-center gap-1">
             {crumb.last ? (
@@ -69,7 +69,7 @@ function Breadcrumbs({ className }: { className?: string }) {
               <>
                 <Link
                   href={crumb.href}
-                  className="text-muted-foreground hover:text-foreground truncate transition-colors"
+                  className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 truncate rounded-md px-1.5 py-1 outline-none transition-colors focus-visible:ring-[3px]"
                 >
                   {crumb.label}
                 </Link>

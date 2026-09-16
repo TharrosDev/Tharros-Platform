@@ -24,7 +24,7 @@ function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "border-input bg-card text-foreground flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none",
+        "border-input bg-card text-foreground flex h-11 w-full min-w-0 items-center justify-between gap-2 rounded-lg border px-3.5 py-2 text-sm shadow-xs transition-[color,box-shadow,border-color] outline-none",
         "data-[placeholder]:text-muted-foreground/70",
         "focus-visible:border-ring focus-visible:ring-ring/40 focus-visible:ring-[3px]",
         "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
@@ -64,7 +64,7 @@ function SelectContent({
       >
         <SelectPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover max-h-[min(24rem,var(--available-height))] min-w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-y-auto rounded-lg border border-border/60 p-1 outline-none",
+            "bg-popover text-popover-foreground shadow-popover max-h-[min(24rem,var(--available-height))] min-w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-y-auto rounded-xl border border-border/60 p-1.5 outline-none",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",
@@ -87,7 +87,7 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        "text-foreground data-[highlighted]:bg-accent data-[highlighted]:text-foreground relative flex cursor-default select-none items-center gap-2.5 rounded-md py-2 pl-2.5 pr-8 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "text-foreground data-[highlighted]:bg-accent data-[highlighted]:text-foreground relative flex min-h-10 cursor-default select-none items-center gap-2.5 rounded-lg py-2 pl-3 pr-9 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className,
       )}
       {...props}

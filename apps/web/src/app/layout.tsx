@@ -28,6 +28,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const enableVercelTelemetry = process.env.NODE_ENV === "production" && process.env.VERCEL === "1";
+
   return (
     <html
       lang="en"
@@ -43,9 +45,13 @@ export default function RootLayout({
         >
           <MotionProvider>{children}</MotionProvider>
         </ThemeProvider>
-        {/* Vercel Web Analytics + Core Web Vitals. No-op off Vercel. */}
-        <Analytics />
-        <SpeedInsights />
+        {/* Keep local development quiet; Vercel serves these scripts in production. */}
+        {enableVercelTelemetry ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );

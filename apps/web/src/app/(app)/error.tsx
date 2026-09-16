@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { TriangleAlert } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { captureError } from "@/lib/observability/sentry";
 
 /**
@@ -25,23 +26,22 @@ export default function AppError({
   }, [error]);
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-      <div className="bg-primary-soft text-primary flex size-12 items-center justify-center rounded-full">
-        <TriangleAlert className="size-6" />
-      </div>
-      <h1 className="type-h1 mt-5">Something went wrong</h1>
-      <p className="text-muted-foreground mt-2 max-w-md text-balance">
-        We hit a snag loading this page. The team has been notified. You can try
-        again, and if it keeps happening, reach out and we&apos;ll sort it out.
-      </p>
-      {error.digest ? (
-        <p className="text-muted-foreground mt-3 font-mono text-xs">
-          Reference: {error.digest}
-        </p>
-      ) : null}
-      <div className="mt-6">
-        <Button onClick={() => unstable_retry()}>Try again</Button>
-      </div>
-    </div>
+    <EmptyState
+      icon={<TriangleAlert />}
+      title="Something went wrong"
+      description={
+        <>
+          We hit a snag loading this page. The team has been notified. Try again, and if it keeps
+          happening, reach out and we&apos;ll sort it out.
+          {error.digest ? (
+            <span className="mt-3 block font-mono text-xs">Reference: {error.digest}</span>
+          ) : null}
+        </>
+      }
+      action={<Button onClick={() => unstable_retry()}>Try again</Button>}
+      tone="danger"
+      headingLevel="h1"
+      className="min-h-[60vh]"
+    />
   );
 }

@@ -22,15 +22,10 @@ function DropdownMenuContent({
 }) {
   return (
     <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner
-        sideOffset={sideOffset}
-        align={align}
-        side={side}
-        className="z-50"
-      >
+      <MenuPrimitive.Positioner sideOffset={sideOffset} align={align} side={side} className="z-50">
         <MenuPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover min-w-[12rem] origin-[var(--transform-origin)] rounded-lg border border-border/60 p-1 outline-none",
+            "bg-popover text-popover-foreground shadow-popover min-w-[13rem] origin-[var(--transform-origin)] rounded-xl border border-border/60 p-1.5 outline-none",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",
@@ -51,7 +46,7 @@ function DropdownMenuItem({
   return (
     <MenuPrimitive.Item
       className={cn(
-        "text-muted-foreground data-[highlighted]:bg-accent data-[highlighted]:text-foreground relative flex cursor-default select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+        "text-muted-foreground data-[highlighted]:bg-accent data-[highlighted]:text-foreground relative flex min-h-10 cursor-default select-none items-center gap-2.5 rounded-lg px-3 py-2 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
         inset && "pl-8",
         className,
       )}
@@ -60,16 +55,10 @@ function DropdownMenuItem({
   );
 }
 
-function DropdownMenuLabel({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function DropdownMenuLabel({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        "text-muted-foreground px-2.5 py-1.5 text-xs font-medium",
-        className,
-      )}
+      className={cn("text-muted-foreground px-2.5 py-1.5 text-xs font-medium", className)}
       {...props}
     />
   );
@@ -80,10 +69,7 @@ function DropdownMenuSeparator({
   ...props
 }: React.ComponentProps<typeof MenuPrimitive.Separator>) {
   return (
-    <MenuPrimitive.Separator
-      className={cn("bg-border/70 -mx-1 my-1 h-px", className)}
-      {...props}
-    />
+    <MenuPrimitive.Separator className={cn("bg-border/70 -mx-1 my-1 h-px", className)} {...props} />
   );
 }
 

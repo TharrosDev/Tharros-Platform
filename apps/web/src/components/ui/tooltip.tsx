@@ -20,14 +20,10 @@ function TooltipContent({
 }) {
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Positioner
-        sideOffset={sideOffset}
-        side={side}
-        className="z-50"
-      >
+      <TooltipPrimitive.Positioner sideOffset={sideOffset} side={side} className="z-50">
         <TooltipPrimitive.Popup
           className={cn(
-            "bg-foreground text-background shadow-popover origin-[var(--transform-origin)] rounded-md px-2.5 py-1.5 text-xs font-medium outline-none",
+            "bg-sidebar text-sidebar-foreground shadow-popover origin-[var(--transform-origin)] rounded-lg px-3 py-2 text-xs font-semibold outline-none",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",

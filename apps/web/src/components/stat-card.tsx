@@ -18,17 +18,14 @@ function StatCard({
   icon?: React.ReactNode;
 }) {
   return (
-    <Card
-      data-slot="stat-card"
-      className={cn(
-        "gap-3 py-5 transition-shadow duration-200 hover:shadow-card-hover",
-        className,
-      )}
-      {...props}
-    >
+    <Card data-slot="stat-card" className={cn("gap-3 py-5", className)} {...props}>
       <div className="flex items-start justify-between px-5">
         <span className="type-meta text-muted-foreground">{label}</span>
-        {icon ? <span className="text-muted-foreground/80 [&>svg]:size-4">{icon}</span> : null}
+        {icon ? (
+          <span className="bg-surface-2 text-muted-foreground flex size-8 items-center justify-center rounded-lg [&>svg]:size-4">
+            {icon}
+          </span>
+        ) : null}
       </div>
       <div className="px-5">
         <span className="num text-foreground text-3xl font-bold tracking-tight">{value}</span>

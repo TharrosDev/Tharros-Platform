@@ -4,8 +4,13 @@ import { ArrowLeft } from "lucide-react";
 
 import { getPortalSession } from "@/lib/portal/session";
 import { AvailabilityEntry } from "@/components/portal/availability-entry";
-import { TharrosWordmark } from "@/components/brand/logo";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  PortalFooter,
+  PortalHeader,
+  PortalInactive,
+  PortalShell,
+} from "@/components/portal/portal-chrome";
 
 export const metadata: Metadata = {
   title: "Your availability",
@@ -20,16 +25,15 @@ export default async function PortalAvailabilityPage() {
   const session = await getPortalSession();
 
   return (
-    <main className="bg-background mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8 lg:max-w-2xl lg:px-8 lg:py-12">
-      <header className="mb-8 flex items-center justify-between">
-        <TharrosWordmark />
+    <PortalShell className="lg:max-w-2xl">
+      <PortalHeader>
         {session ? (
           <Link href="/portal" className={buttonVariants({ variant: "ghost", size: "sm" })}>
             <ArrowLeft className="size-4" aria-hidden />
             Portal
           </Link>
         ) : null}
-      </header>
+      </PortalHeader>
 
       {session ? (
         <div className="flex flex-1 flex-col">
@@ -42,18 +46,10 @@ export default async function PortalAvailabilityPage() {
           <AvailabilityEntry employeeName={session.employeeName} />
         </div>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <h1 className="type-h2">This link isn&apos;t active</h1>
-          <p className="text-muted-foreground mt-3 max-w-xs type-body">
-            Your portal link may have expired or been replaced. Ask your manager to send you a fresh
-            link, then open it from your email.
-          </p>
-        </div>
+        <PortalInactive />
       )}
 
-      <footer className="text-muted-foreground/70 mt-10 pt-6 text-center text-xs">
-        Powered by Tharros
-      </footer>
-    </main>
+      <PortalFooter />
+    </PortalShell>
   );
 }

@@ -44,8 +44,9 @@ export function SectionNav({
     <nav
       aria-label={ariaLabel}
       className={cn(
-        "-mx-1 flex gap-1 overflow-x-auto px-1 pb-1",
-        orientation === "responsive" && "lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0",
+        "bg-surface-2/70 -mx-1 flex gap-1 overflow-x-auto rounded-xl p-1",
+        orientation === "responsive" &&
+          "lg:mx-0 lg:flex-col lg:overflow-visible lg:bg-transparent lg:p-0",
       )}
     >
       {items.map(({ href, label, icon: Icon, danger, badge, exact }) => {
@@ -58,7 +59,7 @@ export function SectionNav({
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "focus-visible:ring-ring/40 relative flex shrink-0 items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+              "focus-visible:ring-ring/40 relative flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-colors focus-visible:ring-[3px]",
               active
                 ? danger
                   ? "text-destructive"
@@ -74,7 +75,7 @@ export function SectionNav({
                 layoutId={`section-pill-${ns}`}
                 transition={spring.snappy}
                 className={cn(
-                  "absolute inset-0 rounded-md",
+                  "absolute inset-0 rounded-lg shadow-xs",
                   danger ? "bg-destructive/10" : "bg-primary-soft",
                 )}
                 aria-hidden

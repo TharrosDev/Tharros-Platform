@@ -27,13 +27,7 @@ import { FormMessage } from "@/components/auth/auth-card";
 import { createOrganization, switchOrg } from "@/lib/org/actions";
 import type { UserOrg } from "@/lib/org/queries";
 
-export function OrgSwitcher({
-  orgs,
-  activeOrg,
-}: {
-  orgs: UserOrg[];
-  activeOrg: UserOrg | null;
-}) {
+export function OrgSwitcher({ orgs, activeOrg }: { orgs: UserOrg[]; activeOrg: UserOrg | null }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
@@ -51,7 +45,7 @@ export function OrgSwitcher({
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-left outline-none transition-colors",
+            "flex min-h-12 w-full items-center gap-3 rounded-lg border border-sidebar-border bg-white/[0.035] px-2.5 py-1.5 text-left outline-none transition-colors",
             "hover:bg-white/5 focus-visible:ring-ring/40 focus-visible:ring-[3px]",
             pending && "opacity-60",
           )}

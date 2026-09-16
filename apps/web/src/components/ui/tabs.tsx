@@ -7,14 +7,11 @@ import { cn } from "@/lib/utils";
 
 const Tabs = TabsPrimitive.Root;
 
-function TabsList({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
       className={cn(
-        "bg-muted text-muted-foreground relative inline-flex h-10 items-center justify-center rounded-lg p-1",
+        "bg-surface-3 text-muted-foreground relative inline-flex h-11 items-center justify-center rounded-xl p-1",
         className,
       )}
       {...props}
@@ -22,14 +19,11 @@ function TabsList({
   );
 }
 
-function TabsTab({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Tab>) {
+function TabsTab({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Tab>) {
   return (
     <TabsPrimitive.Tab
       className={cn(
-        "text-muted-foreground data-[selected]:text-foreground focus-visible:ring-ring/40 relative z-10 inline-flex h-8 select-none items-center justify-center rounded-md px-3 text-sm font-medium transition-colors outline-none focus-visible:ring-[3px]",
+        "text-muted-foreground data-[selected]:text-foreground focus-visible:ring-ring/40 relative z-10 inline-flex h-9 select-none items-center justify-center rounded-lg px-3.5 text-sm font-semibold transition-colors outline-none focus-visible:ring-[3px]",
         className,
       )}
       {...props}
@@ -44,7 +38,7 @@ function TabsIndicator({
   return (
     <TabsPrimitive.Indicator
       className={cn(
-        "bg-card shadow-xs absolute left-0 top-1 z-0 h-8 rounded-md transition-all duration-200 ease-out",
+        "bg-card shadow-xs absolute left-0 top-1 z-0 h-9 rounded-lg transition-all duration-200 ease-out",
         className,
       )}
       style={{
@@ -56,10 +50,7 @@ function TabsIndicator({
   );
 }
 
-function TabsPanel({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Panel>) {
+function TabsPanel({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Panel>) {
   return (
     <TabsPrimitive.Panel
       className={cn("focus-visible:ring-ring/40 mt-4 outline-none", className)}
