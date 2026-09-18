@@ -1,30 +1,23 @@
-"use client";
+import Link from "next/link";
+import { Workflow } from "lucide-react";
 
-import { Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/toast";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
- * Dashboard primary action. For now it just demonstrates the toast primitive —
- * the real automation builder lands in a later phase.
+ * Automations are not shipped yet. The dashboard must not present a control
+ * that pretends to create one, so this action navigates to the transparent
+ * roadmap surface instead of firing a fake success/coming-soon toast.
  */
 function NewAutomationButton() {
-  const toast = useToast();
-
   return (
-    <Button
-      size="lg"
-      onClick={() =>
-        toast.add({
-          title: "Coming soon",
-          description: "Automation building is on the way.",
-        })
-      }
+    <Link
+      href="/automations"
+      className={cn(buttonVariants({ size: "lg", variant: "outline" }))}
     >
-      <Plus />
-      New automation
-    </Button>
+      <Workflow />
+      Automation roadmap
+    </Link>
   );
 }
 
