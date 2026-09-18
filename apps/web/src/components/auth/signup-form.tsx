@@ -81,6 +81,18 @@ export function SignupForm({ next }: { next?: string }) {
         <Button type="submit" className="w-full" disabled={pending}>
           {pending ? "Creating account…" : "Create account"}
         </Button>
+
+        <p className="text-muted-foreground text-center text-xs leading-relaxed">
+          By creating an account, you agree to the{" "}
+          <Link className="text-foreground underline underline-offset-2" href="/terms">
+            Terms
+          </Link>{" "}
+          and acknowledge the{" "}
+          <Link className="text-foreground underline underline-offset-2" href="/privacy">
+            Privacy Notice
+          </Link>
+          .
+        </p>
       </form>
     </AuthCard>
   );
