@@ -13,12 +13,6 @@ import {
 } from "../plans";
 import { TIERS } from "../schemas";
 
-/**
- * Day 16 — billing catalog unit checks. Pure constants only; the Stripe API
- * paths (Checkout, webhooks) are exercised in Days 17–18. Price IDs come from
- * env and may be undefined in CI, so assertions here never depend on them.
- */
-
 describe("billing plans", () => {
   it("defines exactly the three tiers, in ladder order", () => {
     expect(PLANS.map((p) => p.tier)).toEqual(["starter", "growth", "pro"]);
@@ -48,24 +42,25 @@ describe("billing plans", () => {
     expect(highlighted[0].tier).toBe("growth");
   });
 
-  it("gates Scheduling to Growth and Pro (Day 61) — Starter is solo-owner only", () => {
+  it("gates Scheduling to Growth and Pro while Assistant ships on every paid tier", () => {
     expect(hasFeature("starter", "scheduling")).toBe(false);
     expect(hasFeature("growth", "scheduling")).toBe(true);
     expect(hasFeature("pro", "scheduling")).toBe(true);
-    // The Assistant ships on every paid tier.
     expect(PLANS.every((p) => hasFeature(p.tier, "assistant"))).toBe(true);
-    // Null tier (no subscription) never has a feature.
     expect(hasFeature(null, "scheduling")).toBe(false);
   });
 
-  it("resolves the lowest tier that unlocks a feature", () => {
-    expect(minTierForFeature("scheduling")?.tier).toBe("growth");
+  it("resolves the lowest tier that unlocks each shipped feature", () => {
     expect(minTierForFeature("assistant")?.tier).toBe("starter");
-    expect(minTierForFeature("workflows")?.tier).toBe("pro");
+    expect(minTierForFeature("scheduling")?.tier).toBe("growth");
+  });
+
+  it("does not advertise unshipped lead, connector, or workflow products", () => {
+    const copy = PLANS.flatMap((p) => p.features).join(" ");
+    expect(copy).not.toMatch(/lead capture|follow-up agent|connected tool|workflow automation/i);
   });
 
   it("keeps the scheduling entitlement consistent with the marketing copy", () => {
-    // Any tier that advertises scheduling must actually unlock it, and vice versa.
     for (const plan of PLANS) {
       const copySaysScheduling = plan.features.some((f) => /scheduling/i.test(f));
       const inheritsFromLower = plan.features.some((f) => /everything in/i.test(f));
@@ -91,13 +86,13 @@ describe("billing plans", () => {
     expect(formatMonthly(49900)).toBe("$499");
   });
 
-  it("sets the monthly query cap (Day 33) to match the ladder", () => {
+  it("sets the monthly query cap to match the ladder", () => {
     expect(queryCapFor("starter")).toBe(500);
     expect(queryCapFor("growth")).toBe(5_000);
     expect(queryCapFor("pro")).toBe(25_000);
   });
 
-  it("keeps each tier's cap consistent with its 'AI queries / month' bullet", () => {
+  it("keeps each tier's cap consistent with its AI-query bullet", () => {
     for (const plan of PLANS) {
       const bullet = plan.features.find((f) => /AI queries \/ month/.test(f));
       expect(bullet, `${plan.tier} should advertise a query cap`).toBeDefined();
