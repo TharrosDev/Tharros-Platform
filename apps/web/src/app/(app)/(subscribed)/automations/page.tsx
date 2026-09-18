@@ -9,6 +9,7 @@ import {
   deleteAutomation,
   runAutomationNow,
   toggleAutomation,
+  updateAutomation,
 } from "@/lib/automations/actions";
 import { listLeads } from "@/lib/leads/queries";
 import { LEAD_STATUSES } from "@/lib/leads/types";
@@ -232,6 +233,102 @@ export default async function AutomationsPage({
                       </div>
                     ) : null}
                   </div>
+
+                  {canManage ? (
+                    <details className="mt-4 border-t border-border/70 pt-4">
+                      <summary className="text-primary cursor-pointer text-xs font-medium">
+                        Edit workflow
+                      </summary>
+                      <form action={updateAutomation} className="mt-3 grid gap-3 sm:grid-cols-2">
+                        <input type="hidden" name="automationId" value={automation.id} />
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <Label htmlFor={`edit-name-${automation.id}`}>Name</Label>
+                          <Input
+                            id={`edit-name-${automation.id}`}
+                            name="name"
+                            defaultValue={automation.name}
+                            maxLength={120}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`edit-trigger-${automation.id}`}>Trigger</Label>
+                          <select
+                            id={`edit-trigger-${automation.id}`}
+                            name="triggerType"
+                            defaultValue={automation.triggerType}
+                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                          >
+                            <option value="lead.created">Lead created</option>
+                            <option value="lead.status_changed">Lead status changed</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`edit-trigger-status-${automation.id}`}>Status filter</Label>
+                          <select
+                            id={`edit-trigger-status-${automation.id}`}
+                            name="triggerStatus"
+                            defaultValue={
+                              typeof automation.triggerConfig.toStatus === "string"
+                                ? automation.triggerConfig.toStatus
+                                : ""
+                            }
+                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                          >
+                            <option value="">Any status</option>
+                            {LEAD_STATUSES.map((status) => (
+                              <option key={status} value={status}>{status}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`edit-action-${automation.id}`}>Action</Label>
+                          <select
+                            id={`edit-action-${automation.id}`}
+                            name="actionType"
+                            defaultValue={automation.actionType}
+                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                          >
+                            <option value="notify_team">Notify owners/admins</option>
+                            <option value="set_lead_status">Set lead status</option>
+                            <option value="draft_follow_up">Prepare AI follow-up draft</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`edit-action-status-${automation.id}`}>Target status</Label>
+                          <select
+                            id={`edit-action-status-${automation.id}`}
+                            name="actionStatus"
+                            defaultValue={
+                              typeof automation.actionConfig.status === "string"
+                                ? automation.actionConfig.status
+                                : ""
+                            }
+                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                          >
+                            <option value="">Choose a status</option>
+                            {LEAD_STATUSES.map((status) => (
+                              <option key={status} value={status}>{status}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <label className="flex items-center gap-2 text-sm sm:col-span-2">
+                          <input
+                            name="email"
+                            type="checkbox"
+                            defaultChecked={automation.actionConfig.email === true}
+                            className="size-4 rounded border-input"
+                          />
+                          Email managers for notification actions
+                        </label>
+                        <div className="sm:col-span-2">
+                          <Button type="submit" variant="outline" size="sm">
+                            Save workflow
+                          </Button>
+                        </div>
+                      </form>
+                    </details>
+                  ) : null}
 
                   {canManage ? (
                     <form action={runAutomationNow} className="mt-4 flex flex-wrap items-end gap-2 border-t border-border/70 pt-4">
