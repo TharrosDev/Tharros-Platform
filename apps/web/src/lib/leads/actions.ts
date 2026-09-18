@@ -14,7 +14,6 @@ import { recordLeadEvent } from "@/lib/leads/events";
 import { generateLeadFollowUpDraft } from "@/lib/leads/follow-up";
 import { LEAD_STATUSES } from "@/lib/leads/types";
 import { logger } from "@/lib/observability/logger";
-import { EMAIL_FROM, resend } from "@/lib/email/client";
 
 const optionalText = (max: number) =>
   z.preprocess(
@@ -298,6 +297,7 @@ export async function sendLeadFollowUp(formData: FormData): Promise<void> {
     redirect(`/leads/${encodeURIComponent(leadId)}?error=missing-draft`);
   }
 
+  const { EMAIL_FROM, resend } = await import("@/lib/email/client");
   const subject = data.follow_up_subject || "Following up";
   const sent = await resend.emails.send({
     from: EMAIL_FROM,
