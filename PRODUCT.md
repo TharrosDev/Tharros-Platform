@@ -3,53 +3,65 @@
 ## Users
 
 Tharros is built for non-technical small-business owners and managers in Canada.
-They need dependable operational software, not an AI demo. Trust, clarity, and
-accurate representation of what the product can do take priority over feature
-count or novelty.
+The product should feel like dependable operating software rather than an AI
+demo. Trust, clarity, tenant isolation and accurate representation of shipped
+capabilities take priority over novelty.
 
-## Product purpose
+## Shipped product
 
-Tharros is an operating workspace for a small business. The production product
-currently has two primary capabilities:
+Tharros is one operating workspace with four connected product surfaces:
 
-1. **AI Business Assistant** — grounded answers and generation over a business's
-   own knowledge base.
-2. **AI Workforce Scheduling** — team setup, availability collection, schedule
-   generation and review, publishing, employee self-service, sick-call coverage,
-   swaps, time off, analytics, and activity history.
+1. **AI Business Assistant** — document ingestion, retrieval, grounded answers,
+   citations and generation over the business knowledge base.
+2. **AI Workforce Scheduling** — setup, availability, schedule generation and
+   review, publishing, employee self-service, sick-call coverage, replacements,
+   swaps, time off, analytics and activity history.
+3. **Lead Capture** — manual leads, public tokenized capture forms/API, pipeline
+   statuses, lead timelines, internal notes and human-reviewed AI follow-up
+   drafts.
+4. **Native Automations** — durable event-driven workflows over lead events.
+   Current actions notify managers, update pipeline status, or prepare an AI
+   follow-up draft. Every execution is recorded.
 
-Lead capture, external-tool connectors, and workflow automation remain future
-product work until their end-to-end implementations are production-ready. They
-must not appear in paid-plan entitlements or public copy as shipped features.
+The four surfaces share organization membership, RLS, billing, AI usage limits,
+notifications, auditability and the durable Postgres jobs runtime.
+
+External SaaS connectors are not a shipped capability yet. Do not advertise
+generic “connected tools”, CRM integrations, Nango, n8n, or automatic customer
+email sending unless those capabilities are implemented end to end.
+
+## Plan ladder
+
+- **Starter** — AI Business Assistant.
+- **Growth** — Starter + Workforce Scheduling + Lead Capture.
+- **Pro** — Growth + Native Automations.
+
+Pricing copy, route-level feature gates and backend actions must remain aligned
+with this ladder.
 
 ## Product principles
 
-- **Truth before breadth.** Public copy, pricing, plan gates, navigation, and the
-  actual product must agree. A roadmap item is never presented as a current
-  entitlement.
-- **Earned trust over flash.** Familiar, legible and predictable. AI output must
-  be bounded, attributable, and honest about uncertainty.
-- **Speak human.** Use plain language and concrete outcomes instead of model,
-  infrastructure, or automation jargon.
-- **Quiet by default, clear under pressure.** Routine work stays calm. Errors,
-  approvals, exceptions, and irreversible actions are unmistakable.
-- **Human control for consequential actions.** Managers can review, edit,
-  approve, reject, retry, or take over important operational decisions.
+- **Truth before breadth.** Public copy, pricing, plan gates, navigation and the
+  actual implementation must agree.
+- **Earned trust over flash.** Familiar, legible and predictable. AI output is
+  bounded and honest about uncertainty.
+- **Human control for consequential actions.** AI follow-up is drafted, not
+  silently sent. Managers review schedules and can pause/test workflows.
+- **Durable automation.** Background work uses the jobs runtime with retries and
+  recorded execution state rather than request-lifetime fire-and-forget work.
 - **Tenant isolation by default.** Organization boundaries are enforced in the
-  database, not left to UI convention.
+  database, not left to client convention.
+- **Real data only.** Production surfaces never fabricate customers, metrics,
+  activity or workflow results.
 
 ## Design direction
 
-The current design system is **Workshop**. It uses warm graphite chrome, a clean
-light working canvas, and a restrained cobalt accent. The product should feel
-like dependable operating software for a busy owner: confident and practical,
-not decorative, developer-centric, or generic beige SaaS.
-
-The canonical implementation guidance lives in
-`apps/web/docs/DESIGN.md`.
+The production design system is **Workshop**: warm graphite chrome, a clean
+working canvas and restrained cobalt state/action colour. The canonical
+implementation guidance lives in `apps/web/docs/DESIGN.md`.
 
 ## Accessibility
 
-WCAG AA is the baseline. Text contrast, visible focus states, keyboard
-navigation, reduced-motion behavior, semantic structure, and non-colour-only
-state communication are product requirements rather than optional polish.
+WCAG AA is the baseline. Text contrast, visible focus, keyboard navigation,
+reduced-motion behavior, semantic structure and non-colour-only state
+communication are product requirements.
