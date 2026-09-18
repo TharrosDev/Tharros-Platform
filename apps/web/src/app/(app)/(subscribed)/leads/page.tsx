@@ -47,6 +47,7 @@ export default async function LeadsPage({
     created?: string;
     drafted?: string;
     "form-created"?: string;
+    q?: string;
   }>;
 }) {
   const [{ activeOrg }, params, access] = await Promise.all([
@@ -57,8 +58,9 @@ export default async function LeadsPage({
   if (!activeOrg) redirect("/dashboard");
   if (!access.entitled) redirect("/billing");
 
+  const search = params.q?.trim() ?? "";
   const [leads, forms] = await Promise.all([
-    listLeads(activeOrg.id, { limit: 200 }),
+    listLeads(activeOrg.id, { query: search || null, limit: 200 }),
     listCaptureForms(activeOrg.id),
   ]);
   const selectedStatus = LEAD_STATUSES.includes(params.status as LeadStatus)
@@ -91,7 +93,7 @@ export default async function LeadsPage({
         {LEAD_STATUSES.map((status) => (
           <Link
             key={status}
-            href={selectedStatus === status ? "/leads" : `/leads?status=${status}`}
+            href={selectedStatus === status ? (search ? `/leads?q=${encodeURIComponent(search)}` : "/leads") : `/leads?status=${status}${search ? `&q=${encodeURIComponent(search)}` : ""}`}
             className={cn(
               "bg-card rounded-xl border p-4 shadow-xs transition-shadow hover:shadow-card-hover",
               selectedStatus === status && "border-primary/40 ring-primary/15 ring-2",
@@ -215,6 +217,35 @@ export default async function LeadsPage({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle>Find leads</CardTitle>
+              <CardDescription>Search by name, email, phone or company.</CardDescription>
+            </div>
+            {search ? (
+              <Link href="/leads" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                Clear search
+              </Link>
+            ) : null}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <form action="/leads" className="flex gap-2">
+            {selectedStatus ? <input type="hidden" name="status" value={selectedStatus} /> : null}
+            <Input
+              name="q"
+              defaultValue={search}
+              placeholder="Search leads..."
+              aria-label="Search leads"
+              maxLength={120}
+            />
+            <Button type="submit" variant="outline">Search</Button>
+          </form>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
