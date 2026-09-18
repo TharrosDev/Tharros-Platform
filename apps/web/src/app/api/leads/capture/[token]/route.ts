@@ -4,6 +4,17 @@ import { capturePublicLead } from "@/lib/leads/capture";
 
 export const runtime = "nodejs";
 
+const PUBLIC_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "Cache-Control": "no-store, max-age=0",
+} as const;
+
+export function OPTIONS(): Response {
+  return new Response(null, { status: 204, headers: PUBLIC_HEADERS });
+}
+
 const optional = (max: number) => z.string().trim().max(max).nullable().optional();
 
 const schema = z
@@ -28,14 +39,14 @@ export async function POST(
   try {
     raw = await request.json();
   } catch {
-    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+    return Response.json({ error: "Invalid JSON body" }, { status: 400, headers: PUBLIC_HEADERS });
   }
 
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     return Response.json(
       { error: "Invalid lead payload", issues: parsed.error.flatten().fieldErrors },
-      { status: 400 },
+      { status: 400, headers: PUBLIC_HEADERS },
     );
   }
 
@@ -49,10 +60,10 @@ export async function POST(
 
   if (!result.ok) {
     if (result.reason === "rate_limited") {
-      return Response.json({ error: "Capture form is receiving too many requests" }, { status: 429 });
+      return Response.json({ error: "Capture form is receiving too many requests" }, { status: 429, headers: { ...PUBLIC_HEADERS, "Retry-After": "60" } });
     }
-    return Response.json({ error: "Capture form not found" }, { status: 404 });
+    return Response.json({ error: "Capture form not found" }, { status: 404, headers: PUBLIC_HEADERS });
   }
 
-  return Response.json({ id: result.leadId, status: "captured" }, { status: 201 });
+  return Response.json({ id: result.leadId, status: "captured" }, { status: 201, headers: PUBLIC_HEADERS });
 }
