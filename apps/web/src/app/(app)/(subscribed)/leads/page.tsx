@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ExternalLink, Inbox, Link2, Plus, Sparkles, Users } from "lucide-react";
 
+import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getOrgContext } from "@/lib/org/queries";
 import { getURL } from "@/lib/site-url";
 import { listCaptureForms, listLeads } from "@/lib/leads/queries";
@@ -48,8 +49,13 @@ export default async function LeadsPage({
     "form-created"?: string;
   }>;
 }) {
-  const [{ activeOrg }, params] = await Promise.all([getOrgContext(), searchParams]);
+  const [{ activeOrg }, params, access] = await Promise.all([
+    getOrgContext(),
+    searchParams,
+    getFeatureAccess("leads"),
+  ]);
   if (!activeOrg) redirect("/dashboard");
+  if (!access.entitled) redirect("/billing");
 
   const [leads, forms] = await Promise.all([
     listLeads(activeOrg.id, { limit: 200 }),
@@ -246,7 +252,9 @@ export default async function LeadsPage({
                 {visibleLeads.map((lead) => (
                   <TableRow key={lead.id}>
                     <TableCell>
-                      <div className="font-medium">{lead.name}</div>
+                      <Link href={`/leads/${lead.id}`} className="font-medium hover:underline">
+                        {lead.name}
+                      </Link>
                       <div className="text-muted-foreground max-w-xs truncate text-xs">
                         {lead.company ?? lead.message ?? "No additional details"}
                       </div>
