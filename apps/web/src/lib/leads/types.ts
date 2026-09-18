@@ -32,6 +32,7 @@ export type LeadEvent = {
     | "lead.status_changed"
     | "lead.note_added"
     | "lead.followup_drafted"
+    | "lead.followup_sent"
     | "automation.action";
   data: Record<string, unknown>;
   actorUserId: string | null;
