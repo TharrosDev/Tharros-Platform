@@ -20,18 +20,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://tharros.ca"),
   title: {
-    default: "Tharros — AI business assistant and workforce scheduling",
+    default: "Tharros — AI operating workspace for small businesses",
     template: "%s | Tharros",
   },
   description:
-    "A grounded AI business assistant and workforce scheduling workspace for small teams.",
+    "Business knowledge, workforce scheduling, lead capture and native automation in one operating workspace for small teams.",
   applicationName: "Tharros",
   openGraph: {
     type: "website",
     siteName: "Tharros",
-    title: "Tharros — AI business assistant and workforce scheduling",
+    title: "Tharros — AI operating workspace for small businesses",
     description:
-      "A grounded AI business assistant and workforce scheduling workspace for small teams.",
+      "Business knowledge, workforce scheduling, lead capture and native automation in one operating workspace for small teams.",
   },
 };
 
