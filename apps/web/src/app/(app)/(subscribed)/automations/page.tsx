@@ -4,7 +4,13 @@ import { BellRing, PlayCircle, Sparkles, Trash2, Workflow } from "lucide-react";
 import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getOrgContext } from "@/lib/org/queries";
 import { listAutomations, listAutomationRuns } from "@/lib/automations/queries";
-import { createAutomation, deleteAutomation, toggleAutomation } from "@/lib/automations/actions";
+import {
+  createAutomation,
+  deleteAutomation,
+  runAutomationNow,
+  toggleAutomation,
+} from "@/lib/automations/actions";
+import { listLeads } from "@/lib/leads/queries";
 import { LEAD_STATUSES } from "@/lib/leads/types";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +43,7 @@ function runVariant(status: string) {
 export default async function AutomationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; created?: string }>;
+  searchParams: Promise<{ error?: string; created?: string; queued?: string }>;
 }) {
   const [{ activeOrg }, params, access] = await Promise.all([
     getOrgContext(),
@@ -47,9 +53,10 @@ export default async function AutomationsPage({
   if (!activeOrg) redirect("/dashboard");
   if (!access.entitled) redirect("/billing");
 
-  const [automations, runs] = await Promise.all([
+  const [automations, runs, leads] = await Promise.all([
     listAutomations(activeOrg.id),
     listAutomationRuns(activeOrg.id),
+    listLeads(activeOrg.id, { limit: 100 }),
   ]);
   const canManage = activeOrg.role === "owner" || activeOrg.role === "admin";
   const names = new Map(automations.map((automation) => [automation.id, automation.name]));
@@ -60,6 +67,12 @@ export default async function AutomationsPage({
         title="Automations"
         description="React to lead events with durable native workflows: notify managers, move pipeline status, or prepare AI follow-up drafts for human review."
       />
+
+      {params.queued ? (
+        <div className="border-success/30 bg-success/10 text-success rounded-lg border px-4 py-3 text-sm">
+          Workflow queued. Its result will appear in Recent runs after the jobs worker processes it.
+        </div>
+      ) : null}
 
       {params.error ? (
         <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-lg border px-4 py-3 text-sm">
@@ -219,6 +232,41 @@ export default async function AutomationsPage({
                       </div>
                     ) : null}
                   </div>
+
+                  {canManage ? (
+                    <form action={runAutomationNow} className="mt-4 flex flex-wrap items-end gap-2 border-t border-border/70 pt-4">
+                      <input type="hidden" name="automationId" value={automation.id} />
+                      <div className="min-w-56 flex-1 space-y-1.5">
+                        <Label htmlFor={`run-lead-${automation.id}`}>Run now on lead</Label>
+                        <select
+                          id={`run-lead-${automation.id}`}
+                          name="leadId"
+                          className="border-input bg-card h-9 w-full rounded-md border px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                          defaultValue=""
+                          required
+                          disabled={!automation.enabled || leads.length === 0}
+                        >
+                          <option value="" disabled>
+                            {leads.length ? "Choose a lead" : "No leads available"}
+                          </option>
+                          {leads.map((lead) => (
+                            <option key={lead.id} value={lead.id}>
+                              {lead.name}{lead.company ? ` — ${lead.company}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <Button
+                        type="submit"
+                        variant="outline"
+                        size="sm"
+                        disabled={!automation.enabled || leads.length === 0}
+                      >
+                        <PlayCircle />
+                        Run now
+                      </Button>
+                    </form>
+                  ) : null}
                 </div>
               ))
             ) : (
