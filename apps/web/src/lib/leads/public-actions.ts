@@ -43,16 +43,18 @@ export async function submitPublicLead(token: string, formData: FormData): Promi
   });
   if (!parsed.success) redirect(`/forms/${safeToken}?error=invalid`);
 
+  let result: Awaited<ReturnType<typeof capturePublicLead>>;
   try {
-    const result = await capturePublicLead(token, parsed.data);
-    if (!result.ok) {
-      redirect(
-        `/forms/${safeToken}?error=${result.reason === "rate_limited" ? "busy" : "invalid-form"}`,
-      );
-    }
+    result = await capturePublicLead(token, parsed.data);
   } catch (err) {
     logger.error("leads.public_submit_failed", { err });
     redirect(`/forms/${safeToken}?error=submit`);
+  }
+
+  if (!result.ok) {
+    redirect(
+      `/forms/${safeToken}?error=${result.reason === "rate_limited" ? "busy" : "invalid-form"}`,
+    );
   }
 
   redirect(`/forms/${safeToken}?submitted=1`);
