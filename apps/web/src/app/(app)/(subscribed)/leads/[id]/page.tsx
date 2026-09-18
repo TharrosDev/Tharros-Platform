@@ -3,11 +3,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import {
   ArrowLeft,
-  Building2,
   Clock3,
   Mail,
   MessageSquareText,
-  Phone,
+  Send,
   Sparkles,
   StickyNote,
 } from "lucide-react";
@@ -19,12 +18,15 @@ import { LEAD_STATUSES, type LeadEvent, type LeadStatus } from "@/lib/leads/type
 import {
   addLeadNote,
   generateLeadFollowUp,
+  sendLeadFollowUp,
+  updateLeadDetails,
   updateLeadStatus,
 } from "@/lib/leads/actions";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -46,6 +48,7 @@ function eventTitle(event: LeadEvent): string {
   }
   if (event.type === "lead.note_added") return "Internal note";
   if (event.type === "lead.followup_drafted") return "AI follow-up drafted";
+  if (event.type === "lead.followup_sent") return "Follow-up sent";
   if (event.type === "automation.action") return "Automation action";
   return event.type;
 }
@@ -58,6 +61,9 @@ function eventBody(event: LeadEvent): string | null {
     const from = typeof event.data.from === "string" ? event.data.from : null;
     const to = typeof event.data.to === "string" ? event.data.to : null;
     return from && to ? `${from} → ${to}` : null;
+  }
+  if (event.type === "lead.followup_sent" && typeof event.data.subject === "string") {
+    return `Subject: ${event.data.subject}`;
   }
   if (event.type === "automation.action") {
     const action = typeof event.data.action === "string" ? event.data.action : "workflow action";
@@ -82,7 +88,7 @@ export default async function LeadDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; drafted?: string }>;
+  searchParams: Promise<{ error?: string; drafted?: string; sent?: string }>;
 }) {
   const [{ activeOrg }, { id }, query, access] = await Promise.all([
     getOrgContext(),
@@ -118,59 +124,62 @@ export default async function LeadDetailPage({
           That action could not be completed.
         </div>
       ) : null}
-
       {query.drafted ? (
         <div className="border-success/30 bg-success/10 text-success rounded-lg border px-4 py-3 text-sm">
           A new follow-up draft is ready for review.
         </div>
       ) : null}
+      {query.sent ? (
+        <div className="border-success/30 bg-success/10 text-success rounded-lg border px-4 py-3 text-sm">
+          Follow-up sent and the lead activity timeline was updated.
+        </div>
+      ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
         <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Lead details</CardTitle>
-              <CardDescription>Contact and pipeline information.</CardDescription>
+              <CardDescription>Edit contact information and the original enquiry context.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={statusVariant(lead.status)}>{lead.status}</Badge>
                 <Badge variant="outline">{lead.source.replaceAll("_", " ")}</Badge>
+                <span className="text-muted-foreground ml-auto flex items-center gap-1.5 text-xs">
+                  <Clock3 className="size-3.5" />
+                  {formatDate(lead.createdAt)}
+                </span>
               </div>
 
-              <div className="space-y-3 text-sm">
-                {lead.email ? (
-                  <a href={`mailto:${lead.email}`} className="flex items-center gap-2 hover:underline">
-                    <Mail className="text-muted-foreground size-4" />
-                    {lead.email}
-                  </a>
-                ) : null}
-                {lead.phone ? (
-                  <a href={`tel:${lead.phone}`} className="flex items-center gap-2 hover:underline">
-                    <Phone className="text-muted-foreground size-4" />
-                    {lead.phone}
-                  </a>
-                ) : null}
-                {lead.company ? (
-                  <div className="flex items-center gap-2">
-                    <Building2 className="text-muted-foreground size-4" />
-                    {lead.company}
-                  </div>
-                ) : null}
-                <div className="text-muted-foreground flex items-center gap-2">
-                  <Clock3 className="size-4" />
-                  Received {formatDate(lead.createdAt)}
+              <form action={updateLeadDetails} className="grid gap-4 sm:grid-cols-2">
+                <input type="hidden" name="leadId" value={lead.id} />
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="lead-edit-name">Name</Label>
+                  <Input id="lead-edit-name" name="name" defaultValue={lead.name} maxLength={160} required />
                 </div>
-              </div>
-
-              {lead.message ? (
-                <div className="bg-surface-2 rounded-lg border p-3">
-                  <p className="text-muted-foreground type-meta">Original enquiry</p>
-                  <p className="mt-2 whitespace-pre-wrap text-sm">{lead.message}</p>
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-edit-email">Email</Label>
+                  <Input id="lead-edit-email" name="email" type="email" defaultValue={lead.email ?? ""} maxLength={320} />
                 </div>
-              ) : null}
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-edit-phone">Phone</Label>
+                  <Input id="lead-edit-phone" name="phone" type="tel" defaultValue={lead.phone ?? ""} maxLength={80} />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="lead-edit-company">Company</Label>
+                  <Input id="lead-edit-company" name="company" defaultValue={lead.company ?? ""} maxLength={160} />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="lead-edit-message">Enquiry / context</Label>
+                  <Textarea id="lead-edit-message" name="message" defaultValue={lead.message ?? ""} maxLength={4000} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Button type="submit" variant="outline">Save lead</Button>
+                </div>
+              </form>
 
-              <form action={updateLeadStatus} className="space-y-2">
+              <form action={updateLeadStatus} className="space-y-2 border-t border-border pt-4">
                 <input type="hidden" name="leadId" value={lead.id} />
                 <Label htmlFor="lead-detail-status">Pipeline status</Label>
                 <div className="flex gap-2">
@@ -186,7 +195,7 @@ export default async function LeadDetailPage({
                       </option>
                     ))}
                   </select>
-                  <Button type="submit" variant="outline">Update</Button>
+                  <Button type="submit" variant="outline">Update status</Button>
                 </div>
               </form>
             </CardContent>
@@ -196,10 +205,10 @@ export default async function LeadDetailPage({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="size-4" />
-                Follow-up draft
+                Follow-up
               </CardTitle>
               <CardDescription>
-                AI prepares copy for a person to review. Tharros does not send it automatically.
+                Generate with AI, review the exact copy, then explicitly send it.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -212,6 +221,7 @@ export default async function LeadDetailPage({
                       {lead.followUpDraft ? "Generate a new draft" : "Generate draft"}
                     </Button>
                   </form>
+
                   {lead.followUpDraft ? (
                     <div className="bg-surface-2 rounded-lg border p-4">
                       <p className="font-semibold">{lead.followUpSubject ?? "Following up"}</p>
@@ -223,13 +233,26 @@ export default async function LeadDetailPage({
                           Drafted {formatDate(lead.followUpDraftedAt)}
                         </p>
                       ) : null}
+                      <form action={sendLeadFollowUp} className="mt-4 border-t border-border pt-4">
+                        <input type="hidden" name="leadId" value={lead.id} />
+                        <Button type="submit">
+                          <Send />
+                          Send approved draft to {lead.email}
+                        </Button>
+                      </form>
                     </div>
                   ) : null}
                 </>
               ) : (
-                <p className="text-muted-foreground text-sm">
-                  Add an email address before drafting an email follow-up.
-                </p>
+                <div className="bg-surface-2 rounded-lg border border-dashed p-4">
+                  <p className="flex items-center gap-2 text-sm font-medium">
+                    <Mail className="size-4" />
+                    Email required
+                  </p>
+                  <p className="text-muted-foreground type-small mt-1">
+                    Add an email address above before drafting or sending a follow-up.
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -271,27 +294,30 @@ export default async function LeadDetailPage({
                 Timeline
               </CardTitle>
               <CardDescription>
-                Lead activity, notes, follow-up generation, and automation actions.
+                Lead activity, notes, follow-up generation, sending and automation actions.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {events.length ? (
                 <ol className="space-y-4">
-                  {events.map((event) => (
-                    <li key={event.id} className="border-l-2 border-border pl-4">
-                      <div className="flex flex-wrap items-baseline justify-between gap-2">
-                        <p className="text-sm font-medium">{eventTitle(event)}</p>
-                        <time className="text-muted-foreground type-meta" dateTime={event.createdAt}>
-                          {formatDate(event.createdAt)}
-                        </time>
-                      </div>
-                      {eventBody(event) ? (
-                        <p className="text-muted-foreground mt-1 whitespace-pre-wrap text-sm">
-                          {eventBody(event)}
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
+                  {events.map((event) => {
+                    const body = eventBody(event);
+                    return (
+                      <li key={event.id} className="border-l-2 border-border pl-4">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <p className="text-sm font-medium">{eventTitle(event)}</p>
+                          <time className="text-muted-foreground type-meta" dateTime={event.createdAt}>
+                            {formatDate(event.createdAt)}
+                          </time>
+                        </div>
+                        {body ? (
+                          <p className="text-muted-foreground mt-1 whitespace-pre-wrap text-sm">
+                            {body}
+                          </p>
+                        ) : null}
+                      </li>
+                    );
+                  })}
                 </ol>
               ) : (
                 <p className="text-muted-foreground text-sm">No timeline events yet.</p>
