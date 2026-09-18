@@ -203,3 +203,40 @@ export async function toggleCaptureForm(formData: FormData): Promise<void> {
   if (error) logger.error("leads.capture_form_toggle_failed", { err: error, id });
   revalidatePath("/leads");
 }
+
+
+export async function addLeadNote(formData: FormData): Promise<void> {
+  const { user, activeOrg } = await requireLeadAccess();
+  const leadId = String(formData.get("leadId") ?? "");
+  const note = String(formData.get("note") ?? "").trim();
+
+  if (!leadId || !note || note.length > 4000) {
+    redirect(leadId ? `/leads/${encodeURIComponent(leadId)}?error=invalid-note` : "/leads?error=invalid-note");
+  }
+
+  const supabase = await createClient();
+  const { data: lead } = await supabase
+    .from("leads")
+    .select("id")
+    .eq("id", leadId)
+    .eq("org_id", activeOrg.id)
+    .maybeSingle();
+
+  if (!lead) redirect("/leads?error=missing");
+
+  try {
+    await recordLeadEvent(createAdminClient(), {
+      orgId: activeOrg.id,
+      leadId,
+      type: "lead.note_added",
+      data: { note },
+      actorUserId: user.id,
+      dispatch: false,
+    });
+  } catch (err) {
+    logger.error("leads.note_add_failed", { err, leadId, orgId: activeOrg.id });
+    redirect(`/leads/${encodeURIComponent(leadId)}?error=note`);
+  }
+
+  revalidatePath(`/leads/${leadId}`);
+}
