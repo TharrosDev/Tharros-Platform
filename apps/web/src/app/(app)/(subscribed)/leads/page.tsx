@@ -10,8 +10,11 @@ import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads/types";
 import {
   createCaptureForm,
   createManualLead,
+  deleteCaptureForm,
   generateLeadFollowUp,
+  rotateCaptureFormToken,
   toggleCaptureForm,
+  updateCaptureForm,
   updateLeadStatus,
 } from "@/lib/leads/actions";
 import { PageHeader } from "@/components/page-header";
@@ -191,13 +194,74 @@ export default async function LeadsPage({
                         </Link>
                       </div>
                       {canManageForms ? (
-                        <form action={toggleCaptureForm} className="mt-3">
-                          <input type="hidden" name="formId" value={form.id} />
-                          <input type="hidden" name="active" value={form.active ? "false" : "true"} />
-                          <Button type="submit" variant="outline" size="sm">
-                            {form.active ? "Pause form" : "Enable form"}
-                          </Button>
-                        </form>
+                        <div className="mt-3 space-y-3 border-t border-border/70 pt-3">
+                          <details>
+                            <summary className="text-primary cursor-pointer text-xs font-medium">
+                              Edit form settings
+                            </summary>
+                            <form action={updateCaptureForm} className="mt-3 grid gap-3">
+                              <input type="hidden" name="formId" value={form.id} />
+                              <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`form-name-${form.id}`}>Internal name</Label>
+                                  <Input
+                                    id={`form-name-${form.id}`}
+                                    name="name"
+                                    defaultValue={form.name}
+                                    maxLength={120}
+                                    required
+                                  />
+                                </div>
+                                <div className="space-y-1.5">
+                                  <Label htmlFor={`form-headline-${form.id}`}>Public headline</Label>
+                                  <Input
+                                    id={`form-headline-${form.id}`}
+                                    name="headline"
+                                    defaultValue={form.headline}
+                                    maxLength={240}
+                                  />
+                                </div>
+                              </div>
+                              <div className="space-y-1.5">
+                                <Label htmlFor={`form-success-${form.id}`}>Success message</Label>
+                                <Textarea
+                                  id={`form-success-${form.id}`}
+                                  name="successMessage"
+                                  defaultValue={form.successMessage}
+                                  maxLength={500}
+                                />
+                              </div>
+                              <Button type="submit" variant="outline" size="sm">
+                                Save form settings
+                              </Button>
+                            </form>
+                          </details>
+
+                          <div className="flex flex-wrap gap-2">
+                            <form action={toggleCaptureForm}>
+                              <input type="hidden" name="formId" value={form.id} />
+                              <input type="hidden" name="active" value={form.active ? "false" : "true"} />
+                              <Button type="submit" variant="outline" size="sm">
+                                {form.active ? "Pause form" : "Enable form"}
+                              </Button>
+                            </form>
+                            <form action={rotateCaptureFormToken}>
+                              <input type="hidden" name="formId" value={form.id} />
+                              <Button type="submit" variant="outline" size="sm">
+                                Rotate public link
+                              </Button>
+                            </form>
+                            <form action={deleteCaptureForm}>
+                              <input type="hidden" name="formId" value={form.id} />
+                              <Button type="submit" variant="ghost" size="sm">
+                                Delete form
+                              </Button>
+                            </form>
+                          </div>
+                          <p className="text-muted-foreground text-xs">
+                            Rotating the public link immediately invalidates the previous form and API URL.
+                          </p>
+                        </div>
                       ) : null}
                     </div>
                   );
