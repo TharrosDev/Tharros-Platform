@@ -349,3 +349,93 @@ export async function sendLeadFollowUp(formData: FormData): Promise<void> {
   revalidatePath("/dashboard");
   redirect(`/leads/${encodeURIComponent(leadId)}?sent=1`);
 }
+
+
+export async function updateCaptureForm(formData: FormData): Promise<void> {
+  const { activeOrg } = await requireLeadAccess(true);
+  const formId = String(formData.get("formId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const headline = String(formData.get("headline") ?? "").trim();
+  const successMessage = String(formData.get("successMessage") ?? "").trim();
+
+  if (
+    !formId ||
+    !name ||
+    name.length > 120 ||
+    headline.length > 240 ||
+    successMessage.length > 500
+  ) {
+    redirect("/leads?error=invalid-form");
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("lead_capture_forms")
+    .update({
+      name,
+      headline: headline || "Get in touch",
+      success_message:
+        successMessage || "Thanks. We received your message and will be in touch.",
+    })
+    .eq("id", formId)
+    .eq("org_id", activeOrg.id);
+
+  if (error) {
+    logger.error("leads.capture_form_update_failed", {
+      err: error,
+      formId,
+      orgId: activeOrg.id,
+    });
+    redirect("/leads?error=form-update");
+  }
+
+  revalidatePath("/leads");
+}
+
+export async function rotateCaptureFormToken(formData: FormData): Promise<void> {
+  const { activeOrg } = await requireLeadAccess(true);
+  const formId = String(formData.get("formId") ?? "");
+  if (!formId) return;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("lead_capture_forms")
+    .update({ public_token: crypto.randomUUID() })
+    .eq("id", formId)
+    .eq("org_id", activeOrg.id);
+
+  if (error) {
+    logger.error("leads.capture_form_rotate_failed", {
+      err: error,
+      formId,
+      orgId: activeOrg.id,
+    });
+    redirect("/leads?error=form-rotate");
+  }
+
+  revalidatePath("/leads");
+}
+
+export async function deleteCaptureForm(formData: FormData): Promise<void> {
+  const { activeOrg } = await requireLeadAccess(true);
+  const formId = String(formData.get("formId") ?? "");
+  if (!formId) return;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("lead_capture_forms")
+    .delete()
+    .eq("id", formId)
+    .eq("org_id", activeOrg.id);
+
+  if (error) {
+    logger.error("leads.capture_form_delete_failed", {
+      err: error,
+      formId,
+      orgId: activeOrg.id,
+    });
+    redirect("/leads?error=form-delete");
+  }
+
+  revalidatePath("/leads");
+}
