@@ -18,7 +18,7 @@ const FORM_COLUMNS =
 
 export async function listLeads(
   orgId: string,
-  opts: { status?: LeadStatus | null; limit?: number } = {},
+  opts: { status?: LeadStatus | null; query?: string | null; limit?: number } = {},
 ): Promise<Lead[]> {
   const supabase = await createClient();
   let query = supabase
@@ -29,6 +29,15 @@ export async function listLeads(
     .limit(opts.limit ?? 100);
 
   if (opts.status) query = query.eq("status", opts.status);
+  const search = opts.query?.trim();
+  if (search) {
+    const escaped = search.replace(/[,%()]/g, " ").trim();
+    if (escaped) {
+      query = query.or(
+        `name.ilike.%${escaped}%,email.ilike.%${escaped}%,phone.ilike.%${escaped}%,company.ilike.%${escaped}%`,
+      );
+    }
+  }
 
   const { data, error } = await query;
   if (error) {
