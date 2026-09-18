@@ -23,6 +23,21 @@ export type Lead = {
   updatedAt: string;
 };
 
+export type LeadEvent = {
+  id: string;
+  orgId: string;
+  leadId: string;
+  type:
+    | "lead.created"
+    | "lead.status_changed"
+    | "lead.note_added"
+    | "lead.followup_drafted"
+    | "automation.action";
+  data: Record<string, unknown>;
+  actorUserId: string | null;
+  createdAt: string;
+};
+
 export type CaptureForm = {
   id: string;
   orgId: string;
