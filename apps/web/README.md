@@ -1,57 +1,74 @@
 # @tharros/web
 
-The Tharros web app: the AI operating layer for small businesses. Next.js 16
-(App Router) + React 19 + TypeScript (strict) + Tailwind v4, deployed on Vercel.
-This is the `apps/web` workspace of the `Tharros-Platform` pnpm + Turborepo
-monorepo.
+The production Tharros web application: Next.js 16 (App Router), React 19,
+strict TypeScript, Tailwind v4, Supabase, Stripe, and the Workshop design system.
 
-> **Heads up:** this Next.js 16 build is modified. Read `AGENTS.md` and the local
-> guides in `node_modules/next/dist/docs/` before changing routing or middleware.
-> Notably, middleware is `src/proxy.ts` exporting a `proxy()` function, and
-> `cookies()` from `next/headers` is async.
+> **Framework note:** this repository uses a modified Next.js 16 build. Read
+> `AGENTS.md` and the local framework docs before changing routing or proxy
+> behavior. Middleware is `src/proxy.ts`, exporting `proxy()`, and
+> `cookies()` from `next/headers` is asynchronous.
+
+## Shipped product surfaces
+
+- Dashboard and account workspace
+- AI Business Assistant
+- Knowledge/document ingestion and retrieval
+- AI Workforce Scheduling
+- Employee portal
+- Notifications, profile, team and organization settings
+- Billing and usage
+- Internal feedback/admin workflow
+
+`/leads` and `/automations` are roadmap surfaces, not shipped products yet.
 
 ## Getting started
 
 ```bash
-pnpm install          # from the repo root
+pnpm install
 pnpm --filter @tharros/web dev
 ```
 
 Open http://localhost:3000.
 
-Useful checks (run from the repo root):
+Useful checks from the repository root:
 
 ```bash
-pnpm --filter @tharros/web typecheck
-pnpm --filter @tharros/web lint
-pnpm --filter @tharros/web build
-node scripts/contrast-check.mjs    # WCAG contrast over the design tokens
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+pnpm --filter @tharros/web test:e2e
+node scripts/contrast-check.mjs
 ```
 
-## Layout
+Many Vitest suites make real calls to the dedicated Supabase test project.
+Those tests require the Supabase test environment variables and are intentionally
+serialized.
+
+## Source layout
 
 ```
 src/
-  app/
-    layout.tsx          root layout: fonts + next-themes provider
-    (marketing)/        public surface — / landing placeholder
-    (app)/              authed product shell
-      layout.tsx        sidebar + top bar + toast/tooltip providers
-      dashboard/        the dashboard
-      assistant/ leads/ automations/ settings/ billing/   stubs
-  components/
-    ui/                 design-system primitives (Maple Pure + Base UI overlays)
-    shell/              sidebar, top bar, mobile nav, command palette
-    brand/              logo mark + wordmark
-  lib/supabase/         @supabase/ssr clients
-  proxy.ts              Next 16 middleware (Supabase session refresh)
-  env.ts                build-time env validation (@t3-oss/env-nextjs + zod)
+  app/                  route groups, API routes and employee portal
+  components/           product UI, shell and design-system components
+  lib/
+    assistant/          conversations, streaming protocol and generation
+    documents/          upload, extraction, chunking, embeddings and retrieval
+    scheduling/         solver, orchestration, calendar and disruption flows
+    portal/             employee portal session and schedule operations
+    billing/            plans, Stripe state and AI usage limits
+    jobs/               durable job queue
+    supabase/           user-session and service-role clients
+  eval/                 offline RAG evaluation harness
+  proxy.ts              session refresh and optimistic route protection
+  env.ts                validated environment variables
 ```
 
-## Docs
+## Documentation
 
-- `docs/DESIGN.md` — the "Maple Pure" design system, components, shell, theming.
-- `docs/SECRETS.md` — environment variables and where they live.
-- Root `PRODUCT.md` — product register, users, principles, anti-references.
-
-The day-by-day build roadmap lives outside the repo (founder's notes).
+- `../../README.md` — repository architecture and operations overview
+- `../../PRODUCT.md` — authoritative product principles and shipped scope
+- `docs/DESIGN.md` — Workshop design system
+- `../../docs/CI.md` — CI and integration-test setup
+- `../../docs/SECRETS.md` — environment configuration
+- `../../docs/JOBS.md` — durable job runner operations
