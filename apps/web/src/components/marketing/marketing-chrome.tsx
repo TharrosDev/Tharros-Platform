@@ -7,7 +7,6 @@ import { buttonVariants } from "@/components/ui/button";
 const quietLinkClass =
   "text-sidebar-muted-foreground hover:text-sidebar-foreground focus-visible:ring-sidebar-ring/50 inline-flex min-h-10 items-center rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]";
 
-/** Shared atmosphere for the public Workshop surfaces. */
 function MarketingBackdrop() {
   return (
     <>
@@ -43,6 +42,9 @@ function MarketingHeader({ showPricing = false }: { showPricing?: boolean }) {
             Pricing
           </Link>
         ) : null}
+        <Link href="/security" className={cn(quietLinkClass, "hidden md:inline-flex")}>
+          Security
+        </Link>
         <Link href="/login" className={quietLinkClass}>
           Sign in
         </Link>
@@ -77,11 +79,17 @@ function MarketingFooter() {
           <Link href="/pricing" className={quietLinkClass}>
             Pricing
           </Link>
+          <Link href="/security" className={quietLinkClass}>
+            Security
+          </Link>
+          <Link href="/privacy" className={quietLinkClass}>
+            Privacy
+          </Link>
+          <Link href="/terms" className={quietLinkClass}>
+            Terms
+          </Link>
           <Link href="/login" className={quietLinkClass}>
             Sign in
-          </Link>
-          <Link href="/signup" className={quietLinkClass}>
-            Create an account
           </Link>
         </nav>
       </div>

@@ -8,7 +8,6 @@ import { Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
 import { AnimateHeight } from "@/components/motion";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { TharrosWordmark } from "@/components/brand/logo";
@@ -137,17 +136,6 @@ function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNaviga
         <Icon className="size-4" />
       </span>
       <span className="relative flex-1">{item.label}</span>
-      {item.soon ? (
-        <Badge
-          variant="outline"
-          className={cn(
-            "relative border-white/15 px-1.5 py-0 text-[0.625rem]",
-            active ? "text-sidebar-accent-foreground/80" : "text-sidebar-muted-foreground",
-          )}
-        >
-          Soon
-        </Badge>
-      ) : null}
     </Link>
   );
 }

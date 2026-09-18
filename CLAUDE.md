@@ -1,98 +1,202 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Repository guidance for AI coding agents working on Tharros.
 
-## What this is
+## Product scope
 
-Tharros Platform — "the AI operating layer for small businesses." A Turborepo monorepo; the product is a Next.js app at `apps/web` (`@tharros/web`) serving `tharros.ca`. Shipped so far: **Phase 1** (auth, multi-tenancy, Stripe billing with plan caps), **Phase 2** (the AI Business Assistant — a RAG pipeline over uploaded documents with a streaming, citing chat UI, generation templates, knowledge management, per-org AI usage metering), and **Phase 3** (AI Workforce Scheduling — DeepSeek-assisted setup + availability collection, a constraint solver with candidate panel + judge, schedule calendar with publish/versioning, the token-authed employee portal with sick calls / replacement offers / shift swaps / time off, schedule delivery + reminder emails, scheduling analytics, and the org activity log). Next up: Phase 4, the connector foundation (Nango + n8n).
+Tharros is a multi-tenant SaaS for small businesses with four shipped product
+surfaces:
 
-## ⚠️ Read first: this Next.js is modified
+1. **AI Business Assistant** — grounded document knowledge and generation.
+2. **AI Workforce Scheduling** — manager + employee scheduling operations.
+3. **Lead Capture** — manual/public lead capture, pipeline, timeline/notes and
+   human-reviewed AI follow-up drafts.
+4. **Native Automations** — durable lead-event workflows and execution history.
 
-`apps/web/AGENTS.md` is mandatory before writing app code. The repo runs a **modified Next.js 16** — APIs differ from stock. Read `apps/web/node_modules/next/dist/docs/` before relying on framework behavior. The biggest divergence: **`middleware.ts` is renamed to `proxy.ts`** (root or `src/`), exporting a function named `proxy`; build output lists it as `ƒ Proxy (Middleware)`. `cookies()` from `next/headers` is async.
+Lead Capture is Growth+ and Automations is Pro. Route actions and public capture
+must enforce those entitlements, not only hide navigation.
+
+Generic external SaaS connectors, Nango/n8n integration, and automatic customer
+email sending are not shipped. Do not claim them without an end-to-end
+implementation.
+
+## Read before app work
+
+`apps/web/AGENTS.md` is mandatory. This repository uses a modified Next.js 16
+build. In particular:
+
+- middleware is `src/proxy.ts`, exporting `proxy()`;
+- `cookies()` from `next/headers` is async;
+- consult the installed Next.js docs before assuming stock framework behavior.
 
 ## Commands
 
-Run from the repo root (Turborepo fans out to workspaces):
+Run from the repository root:
 
-- `pnpm dev` — dev server (`next dev` in `apps/web`)
-- `pnpm build` — production build
-- `pnpm lint` — ESLint
-- `pnpm typecheck` — `tsc --noEmit`
-- `pnpm test` — Vitest (see caveat below)
-- `pnpm format` / `pnpm format:check` — Prettier
+```bash
+pnpm dev
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+pnpm format:check
+pnpm --filter @tharros/web test:e2e
+```
 
-Scope to the web app or target a single test:
-- `pnpm --filter @tharros/web build`
-- `pnpm --filter @tharros/web exec vitest run src/lib/documents/__tests__/chunk.test.ts`
-- `pnpm --filter @tharros/web exec vitest run -t "match_document_chunks"`
-- E2E (Playwright): `pnpm --filter @tharros/web test:e2e` (specs live in `apps/web/e2e/`, excluded from Vitest)
+Use Node 22+ and the pnpm version pinned in `package.json`.
 
-Package manager is **pnpm 11.5.0**, Node ≥20. Native build scripts are gated — a new dependency with a postinstall must be allow-listed under `allowBuilds:` in `pnpm-workspace.yaml` before `pnpm install` will run it.
+Database-backed Vitest suites use the dedicated Supabase test project and run
+serially. Provider-backed evaluation code under `src/eval` is not part of the
+normal CI suite.
 
-### Tests are mostly live integration tests
+## Repository structure
 
-The `*-rls.test.ts` / `*.db.test.ts` suites hit a **real Supabase project** (the dedicated CI test project), seeding and tearing down auth users via the service-role key. They need `apps/web/.env.local` populated (`NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SECRET_KEY`, etc.). They are serial (`fileParallelism: false`) and slow. CI supplies only the Supabase + Stripe-test secrets, so suites that need other providers (e.g. OpenAI embeddings) must **not** be exercised in committed tests — verify those paths with a throwaway script and keep committed tests provider-free (crafted vectors, mocks).
+- `apps/web` — the only deployable application.
+- `apps/web/src/app` — Next.js routes.
+- `apps/web/src/components` — Workshop UI primitives and product components.
+- `apps/web/src/lib` — domain logic and provider/infrastructure seams.
+- `supabase/migrations` — database schema source of truth.
+- `docs` — operator documentation.
+- `packages` — shared TypeScript/ESLint configuration.
 
-## Architecture
+## Routing and access
 
-### Monorepo
-- `apps/web` — the Next.js App Router app (the only deployable). Source under `src/`.
-- `packages/eslint-config`, `packages/tsconfig` — shared config consumed via workspace deps.
-- Vercel project `tharros-platform`, root directory `apps/web`, deploys from `main`.
+- `(marketing)` — public/indexable home, pricing, privacy, terms and security.
+- `(auth)` — login/signup/reset/verification.
+- `(onboarding)` — organization onboarding.
+- `(app)` — authenticated shell.
+- `(app)/(subscribed)` — paid product surfaces: assistant, knowledge, scheduling,
+  leads and automations. Product pages add tier-specific feature gates.
+- `portal` — account-less employee portal using a token-scoped server session.
+- `api` — route handlers including assistant streaming, document processing,
+  Stripe webhooks, health and durable-job ticks.
 
-### Route groups (`apps/web/src/app`)
-- `(marketing)` — public, indexable (`/` and `/pricing`).
-- `(auth)` — login/signup/reset/verify-email; Server Actions + `useActionState`.
-- `(onboarding)` — post-signup org onboarding flow.
-- `(app)` — auth-gated shell (dashboard, settings, profile, billing, notifications). `(app)/(subscribed)` is a nested group whose layout redirects to `/billing` unless the org has an active subscription; it holds the product surfaces (`assistant`, `knowledge`, `scheduling/*`, `leads`, `automations`). `git mv`-ing a page in/out of it changes gating **without changing the URL** (route groups don't affect paths).
-- `portal` — the account-less employee portal (`/portal`, `/portal/schedule`, `/portal/availability`). Auth is a magic-link token validated per request via the `validate_portal_token` RPC and stored in an httpOnly cookie (`lib/portal/session.ts`); employees have no Supabase auth user. Data access goes through the admin client, scoped strictly to the session's employee + org.
-- `api` — route handlers. The document ingestion routes (`api/documents/[id]/extract`, `.../embed`) and the streaming assistant route (`api/assistant/query`) run on `runtime = "nodejs"`. `api/cron/jobs/run` is the pg_cron-driven worker tick for the durable `jobs` queue.
+The proxy is an optimistic UX gate. Authoritative authorization belongs in
+server code and the database. Public unauthenticated endpoints must be accounted
+for in both the proxy matcher and public-path logic when applicable.
 
-### Auth + multi-tenancy (the spine everything sits on)
-- Supabase SSR. Two clients: `lib/supabase/server.ts` (user-session, **RLS applies**) and `lib/supabase/admin.ts` (service-role, **bypasses RLS** — `server-only`, the sole writer to deny-all/member-read-only tables).
-- Tenancy: `profiles` / `organizations` / `memberships`. A signup trigger auto-provisions a personal org + owner membership.
-- RLS reuses two SECURITY DEFINER helpers — **`public.current_user_orgs()`** (org-scoped reads: `org_id in (select public.current_user_orgs())`) and **`public.current_user_role(org)`** (write/role gating). New tables follow this pattern; new SECURITY DEFINER RPCs pin `set search_path = ''`, schema-qualify everything, and `revoke execute ... from anon, public`.
-- The `proxy.ts` gate redirects unauthenticated requests (including `/api/*`) to `/login`. A route that must accept unauthenticated callers (e.g. the Stripe webhook) must be excluded in **both** the `proxy.ts` matcher and `PUBLIC_PATHS`.
+## Multi-tenancy and database security
 
-### RAG document pipeline (`apps/web/src/lib/documents/`, Phase 2)
-Lifecycle on `documents.status`: `uploaded → extracting → extracted → chunking → embedding → ready`, with `needs_ocr` (scanned PDFs) and `failed` branches. Bytes live in the private `documents` Storage bucket at `<org_id>/<document_id>/<filename>` (the org-id-first path segment is load-bearing for the Storage RLS).
-- `validation.ts` — isomorphic upload guard (extensions, size). `actions.ts` — reserve `documents` row server-side before the browser uploads to Storage. `queries.ts` — document/library reads. `tags.ts` — knowledge tagging.
-- `extract.ts` — unpdf (PDF) / mammoth (DOCX) / decode (TXT/MD); `chunk.ts` — token-aware chunking (gpt-tokenizer cl100k); `embeddings.ts` — the swappable embeddings seam (OpenAI `text-embedding-3-small`, 1536-dim); `retrieval.ts` — `searchChunks` over the `match_document_chunks` RPC.
-- `rag.ts` — the query pipeline: `retrieveGroundingChunks` (top-k chunks joined to filenames) → `buildRagRequest` → Claude, with a cite-or-say-"I don't know" prompt. `rag-prompt.ts` — single source of prompt assembly (`SYSTEM_PROMPT`, `buildContextBlock`, `buildCitations`, `NO_CONTEXT_ANSWER`), shared by the one-shot and streaming paths.
-- `document_chunks.embedding` is `vector(1536)` (pgvector in schema `extensions`). The pgvector operators (`<=>`) are NOT visible under `search_path = ''` — inside SECURITY DEFINER functions use `OPERATOR(extensions.<=>)`. Pass vectors to PostgREST as the string literal `[a,b,c]`, not a JS array.
+Supabase has two client classes:
 
-### AI assistant (`apps/web/src/lib/assistant/`, Phase 2)
-The chat layer over the RAG pipeline. `api/assistant/query` (Node runtime) streams an answer as NDJSON frames (`stream-protocol.ts`), persisting each turn per org/user. A new conversation is created on the first turn; its id returns in the `meta` frame so the client can route to it.
-- `conversations.ts` — server data access for threads/messages (org-scoped; the org owner can read members' threads). `types.ts` — pure domain types (no `server-only`) shared with client islands.
-- `templates.ts` — generation templates (draft email / write SOP / summarize policy); a template swaps the grounding system prompt for a deliverable-shaped one. `citation-markers.ts` — numbered inline `[n]` markers. `export.ts` — thread export.
+- user-session client: RLS applies;
+- admin/service-role client: bypasses RLS and must stay server-only.
 
-### Workforce scheduling (`apps/web/src/lib/scheduling/` + `lib/portal/` + `lib/employees/`, Phase 3)
-The headline product. Manager surfaces live under `(app)/(subscribed)/scheduling/*` (hub, setup wizard, availability, calendar, team, conversations, analytics, activity); the employee side is the token-authed `/portal`.
-- `solver/` — pure constraint solver (availability, certifications, labor rules) generating candidate schedules; `panel/` — candidate panel + DeepSeek judge that scores candidates; `orchestrator/` — the generation pipeline gluing forecast → solve → judge → persist.
-- Disruption flows: `replacement-engine` (sick calls → ranked replacement offers), `swaps.ts` (targeted + open shift swaps with escalation), `time-off.ts`. All apply atomically via SECURITY DEFINER RPCs with race-condition guards.
-- `delivery.ts` + `lib/jobs/` — schedule publish emails and shift reminders ride the durable `jobs` queue (deny-all RLS, claimed by `claim_due_jobs`, ticked by pg_cron → `api/cron/jobs/run`).
-- `lib/deepseek/` — the DeepSeek seam (`structured.ts` for schema-validated calls). DeepSeek handles cheap structured parsing (availability text, setup assists, judging); usage is metered into `ai_usage_events` like Claude calls.
+Organization data is scoped through `organizations`, `memberships` and the RLS
+helpers `public.current_user_orgs()` and `public.current_user_role(org)`.
 
-### Storage buckets
-- `documents` (private) — RAG source files at `<org_id>/<document_id>/<filename>`; the org-id-first path segment is load-bearing for Storage RLS.
-- `avatars` (public-read) — profile photos at `<user_id>/avatar-<ts>.<ext>`; writes are owner-gated by the first path segment. `setAvatarUrl` only accepts URLs inside the caller's own folder.
+For new SECURITY DEFINER functions:
 
-### Model seam + cost/rate controls
-- `lib/anthropic/` — the Claude seam. `client.ts` holds the SDK instance (`server-only`); `models.ts` is pure/testable and defines `DEFAULT_MODEL` (`claude-sonnet-4-6`, grounded Q&A — at **high** reasoning effort via `output_config.effort` in `buildRagRequest`) + `CHEAP_MODEL` (`claude-haiku-4-5`, templated generation), routed by `modelForTemplate`. Opus is reserved for later internal integration-management work, not the chatbot/scheduling path.
-- `lib/billing/usage.ts` — per-org AI metering. After each Claude call, token usage is written to `ai_usage_events` via the **service-role admin client** (no user-write RLS, mirroring `subscriptions` / `document_chunks`). `checkQueryCap` enforces the plan's monthly query cap before answering; `/settings/usage` reads the member-readable `ai_usage_summary` RPC. `ai-pricing.ts` / `usage-math.ts` keep cost math pure and testable.
+- pin `search_path = ''`;
+- schema-qualify objects;
+- perform role checks inside the function;
+- revoke broad execute permissions;
+- add RLS/integration coverage.
 
-### RAG eval harness (`apps/web/src/eval/`)
-Offline quality harness — **not** part of CI (it needs OpenAI + Anthropic). `fixtures/` is a small document corpus, `questions.ts` the labelled question set (incl. negatives), `metrics.ts` the scoring, `rag-eval.live.ts` the runner. It sweeps chunk size × top-k and scores retrieval (recall/precision/MRR) and answers (citation accuracy, faithfulness, negative handling); `results/latest.md` is the committed snapshot that drove the current chunking + top-k defaults.
+Do not replace database isolation with client-side filtering.
 
-### Environment & secrets
-- Validated through `apps/web/src/env.ts` (t3-env). A var read at build time must **also** be listed in the `build` task's `env` array in `turbo.json`, or Turbo strips it and the Vercel build fails. The authoritative store is Vercel project env; see `docs/SECRETS.md`.
-- Deferred/just-added services are `.optional()` in `env.ts` until vaulted in Vercel for all environments, then promoted to required.
-- `server-only` modules **throw under Vitest** — keep `import "server-only"` on the secret-holding leaf, not on logic a test imports.
+## Knowledge and assistant
 
-### Database migrations
-SQL files in `supabase/migrations/` are the repo source of truth. Apply them via the **Supabase MCP `execute_sql`** (NOT `apply_migration`, to keep Supabase's own migration history clean), to **both** the prod project and the CI test project, so schemas stay in lockstep. PR migrations are also run on a Supabase preview branch by CI.
+Document lifecycle:
 
-## Conventions
+`uploaded → extracting → extracted → chunking → embedding → ready`
 
-- Per-day workflow (the project is built on a day-by-day roadmap): branch off `main`, one PR per day, wait for CI (`typecheck · lint · test · build` + `e2e` + Supabase Preview) green, merge, sync `main`.
-- Match surrounding style (Base UI components, `buttonVariants` over wrapping `<Button>`, toast via `useToast`). Reference docs: `docs/CI.md`, `docs/BILLING.md`, `docs/SECRETS.md`, `apps/web/docs/DESIGN.md`.
+with `needs_ocr` and `failed` branches.
+
+Important seams:
+
+- `lib/documents/extract.ts`
+- `lib/documents/chunk.ts`
+- `lib/documents/embeddings.ts`
+- `lib/documents/retrieval.ts`
+- `lib/documents/rag.ts`
+- `lib/assistant/*`
+- `app/api/assistant/query/route.ts`
+
+Document vectors are 1536-dimensional pgvector values. Inside SECURITY DEFINER
+SQL with an empty search path, use `OPERATOR(extensions.<=>)` for vector
+distance. PostgREST vector RPC parameters are passed as vector literals, not raw
+JS arrays.
+
+Assistant answers are org-scoped, usage-metered and expected to cite retrieved
+context or decline when context is insufficient.
+
+## Scheduling
+
+Scheduling lives under `lib/scheduling`, with employee-facing code under
+`lib/portal` and `lib/employees`.
+
+Key areas:
+
+- `solver/` — deterministic constraint solver;
+- `panel/` — candidate grading/judging;
+- `orchestrator/` — generation pipeline;
+- `calendar-actions.ts` — manager edits;
+- `replacement.ts`, `swaps.ts`, `time-off.ts` — disruption flows;
+- `delivery.ts` + `lib/jobs` — durable email/reminder work.
+
+Consequential changes remain manager-reviewable. Race-sensitive operations
+belong in atomic database functions, not read-then-write client logic.
+
+## Leads and native automations
+
+Lead code lives under `lib/leads`:
+
+- `capture.ts` — server-only anonymous capture seam using opaque form tokens;
+- `queries.ts` / `actions.ts` — RLS-backed CRM reads and mutations;
+- `events.ts` — immutable lead event creation + automation job dispatch;
+- `follow-up.ts` — human-reviewable AI email draft generation.
+
+Automation code lives under `lib/automations`. Supported triggers currently are
+lead-created and lead-status-changed. Supported actions are manager notification,
+lead status updates and AI follow-up draft preparation. Execution runs are
+recorded in `automation_runs`; the handler is invoked by the durable
+`automation-dispatch` job. Manual runs are targeted to exactly one automation.
+
+Never make public capture a raw anonymous database insert. It must pass through
+the server-only capture seam, rate limiting, form state and Growth/Pro
+subscription check.
+
+## Providers and configuration
+
+- Anthropic: assistant generation.
+- OpenAI: embeddings.
+- DeepSeek: scheduling structured tasks.
+- Stripe: subscriptions.
+- Resend: transactional email.
+- Supabase: database/auth/storage.
+- Sentry: optional observability.
+
+The production env contract is in `apps/web/src/env.ts`. Build-time env names
+must also be listed in `turbo.json`. See `docs/SECRETS.md`.
+
+## Testing and CI
+
+CI always runs typecheck, lint and a production build. Live Supabase integration
+and Playwright suites run when the dedicated test project is reachable. A
+skipped live suite is an infrastructure warning, not release approval.
+
+When changing a domain:
+
+- add pure unit coverage where possible;
+- add database/RLS coverage for authorization or atomicity;
+- extend Playwright only for user journeys worth preserving;
+- do not claim a provider-backed path was tested unless it actually ran.
+
+## UI conventions
+
+Follow `apps/web/docs/DESIGN.md`.
+
+- use existing Base UI/shadcn-style primitives;
+- use semantic tokens, not arbitrary colour values;
+- one primary cobalt action per view;
+- retain keyboard/focus/reduced-motion behavior;
+- use `m.*` from `motion/react` under the shared MotionProvider;
+- keep Base UI overlay transitions CSS-driven;
+- no fake metrics, fake customers or controls that imply unimplemented actions.
+
+## Database changes
+
+SQL migrations in `supabase/migrations` are the repository source of truth.
+Apply schema changes to production and the dedicated CI project in lockstep.
+Never point destructive test setup at production.

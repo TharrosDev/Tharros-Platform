@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { CalendarDays, FileText, MessagesSquare, Sparkles, Users, Workflow } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  FileText,
+  MessagesSquare,
+  Users,
+  Workflow,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,58 +16,51 @@ import {
   MarketingHeader,
 } from "@/components/marketing/marketing-chrome";
 
-/**
- * The interim marketing landing, in the dark Workshop world (graphite + dot
- * grid + cobalt glow, matching /pricing and the auth brand panel). One page:
- * hero, the product trio, how it works, footer. The full marketing site is a
- * Phase 9 launch gate; this carries the brand until then.
- */
-
 const PRODUCTS = [
   {
-    icon: Sparkles,
-    name: "AI Business Assistant",
-    blurb:
-      "Answers questions from your own documents, in plain language, with the source cited every time.",
+    icon: BookOpen,
+    title: "AI Business Assistant",
+    body: "Turn policies, guides and operating documents into grounded answers with citations.",
+    proof: ["Documents indexed", "Answers grounded", "Sources cited"],
   },
   {
     icon: CalendarDays,
-    name: "AI Workforce Scheduling",
-    blurb:
-      "Collects availability, builds a labor-valid schedule, and handles sick calls, swaps, and time off. Only exceptions reach you.",
-    headline: true,
+    title: "AI Workforce Scheduling",
+    body: "Collect availability, generate and review schedules, publish shifts and handle disruptions.",
+    proof: ["Availability collected", "Schedules reviewed", "Changes managed"],
+  },
+  {
+    icon: Users,
+    title: "Lead Capture",
+    body: "Create public capture forms, manage a live lead pipeline, keep notes and prepare AI follow-up drafts for human review.",
+    proof: ["Forms live", "Pipeline tracked", "Drafts reviewed"],
   },
   {
     icon: Workflow,
-    name: "Lead Capture & Automations",
-    blurb:
-      "Catches every enquiry, follows up for you, and runs the busywork between the tools you already use.",
+    title: "Native Automations",
+    body: "React to lead events with durable workflows that notify managers, update pipeline state or prepare follow-up drafts.",
+    proof: ["Events triggered", "Runs durable", "History auditable"],
   },
 ];
 
 const STEPS = [
   {
     icon: FileText,
-    title: "Show it your business",
-    body: "Upload your documents, add your team, and answer a few plain questions about how you run things.",
+    title: "Add your operating context",
+    body: "Upload the documents your team works from, configure your organization, and set the rules Tharros should follow.",
   },
   {
     icon: MessagesSquare,
-    title: "Let it run",
-    body: "Tharros answers questions, drafts the schedule, and chases the follow-ups while you work.",
+    title: "Run the daily work",
+    body: "Ask grounded questions, build schedules, capture enquiries, and keep customer follow-up organized.",
   },
   {
-    icon: Users,
-    title: "Approve the exceptions",
-    body: "The few decisions that genuinely need a human land in one inbox. Everything else is handled.",
+    icon: Workflow,
+    title: "Automate repeatable steps",
+    body: "Use native event-driven workflows where automation is safe, while keeping managers in control of consequential actions.",
   },
 ];
 
-/**
- * Staggered, motion-safe entrance for the hero only (≤ 600ms total). The
- * classes are static so Tailwind emits them; the per-element delay rides an
- * inline style (with backwards fill so delayed elements start hidden).
- */
 const ENTRANCE_CLASS =
   "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500";
 function entranceDelay(delayMs: number): React.CSSProperties {
@@ -81,7 +81,7 @@ export default function MarketingHome() {
           )}
           style={entranceDelay(0)}
         >
-          Your business, running itself.
+          Practical AI for the work behind your business.
         </h1>
         <p
           className={cn(
@@ -90,8 +90,8 @@ export default function MarketingHome() {
           )}
           style={entranceDelay(80)}
         >
-          The AI operating layer for small businesses. Tharros does the busywork between the tools
-          you already use, so you can get back to the work that matters.
+          Tharros brings business knowledge, workforce scheduling, lead capture and native
+          automation into one operating workspace for small teams.
         </p>
         <div
           className={cn("mt-10 flex flex-wrap items-center justify-center gap-3", ENTRANCE_CLASS)}
@@ -111,11 +111,10 @@ export default function MarketingHome() {
           className={cn("text-sidebar-muted-foreground type-small mt-6", ENTRANCE_CLASS)}
           style={entranceDelay(240)}
         >
-          14-day free trial. No credit card to look around.
+          14-day free trial. Features vary by plan.
         </p>
       </section>
 
-      {/* The products */}
       <section
         aria-labelledby="products-heading"
         className="relative mx-auto w-full max-w-6xl px-6 pb-24"
@@ -125,57 +124,41 @@ export default function MarketingHome() {
             id="products-heading"
             className="text-3xl font-bold tracking-tight text-balance sm:text-4xl"
           >
-            One place to keep the day moving.
+            Four connected products, one workspace.
           </h2>
           <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed text-pretty">
-            Tharros brings the work that usually disappears between inboxes, spreadsheets, and
-            conversations into one calm operating view.
+            Each surface runs on the same organization, permissions, billing, notifications and
+            durable job infrastructure.
           </p>
         </div>
 
-        <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] md:grid-cols-[1.15fr_0.85fr]">
-          <div className="border-b border-white/10 p-7 sm:p-9 md:border-r md:border-b-0">
-            <span className="bg-primary text-primary-foreground flex size-11 items-center justify-center rounded-xl shadow-raised">
-              <CalendarDays className="size-5" aria-hidden />
-            </span>
-            <h3 className="mt-8 max-w-md text-3xl font-bold tracking-tight text-balance">
-              AI Workforce Scheduling
-            </h3>
-            <p className="text-sidebar-muted-foreground mt-3 max-w-xl text-base leading-relaxed">
-              Collects availability, builds a labor-valid schedule, and handles sick calls, swaps,
-              and time off. Only exceptions reach you.
-            </p>
-            <div className="mt-9 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
-              {[
-                ["Availability", "Collected"],
-                ["Schedule", "Built"],
-                ["Exceptions", "Ready"],
-              ].map(([label, value]) => (
-                <div key={label} className="bg-sidebar px-4 py-3.5">
-                  <span className="text-sidebar-muted-foreground type-meta block">{label}</span>
-                  <span className="mt-1 block text-sm font-semibold">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="divide-y divide-white/10">
-            {PRODUCTS.filter((product) => !product.headline).map(({ icon: Icon, name, blurb }) => (
-              <div key={name} className="flex min-h-52 flex-col justify-center p-7 sm:p-9">
-                <span className="flex size-10 items-center justify-center rounded-lg bg-white/10 text-sidebar-foreground">
-                  <Icon className="size-5" aria-hidden />
-                </span>
-                <h3 className="mt-5 text-lg font-bold tracking-tight">{name}</h3>
-                <p className="text-sidebar-muted-foreground mt-2 text-sm leading-relaxed">
-                  {blurb}
-                </p>
+        <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] md:grid-cols-2">
+          {PRODUCTS.map(({ icon: Icon, title, body, proof }, index) => (
+            <div
+              key={title}
+              className={cn(
+                "p-7 sm:p-9",
+                index % 2 === 0 && "md:border-r md:border-white/10",
+                index < 2 && "border-b border-white/10",
+              )}
+            >
+              <span className="bg-primary/15 text-primary-soft-foreground flex size-11 items-center justify-center rounded-xl">
+                <Icon className="size-5" aria-hidden />
+              </span>
+              <h3 className="mt-7 text-2xl font-bold tracking-tight">{title}</h3>
+              <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed">{body}</p>
+              <div className="mt-7 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
+                {proof.map((item) => (
+                  <div key={item} className="bg-sidebar px-3 py-3 text-center">
+                    <span className="text-sidebar-muted-foreground type-meta">{item}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* How it works */}
       <section
         aria-labelledby="how-heading"
         className="relative border-t border-white/10 bg-black/20"
@@ -185,7 +168,8 @@ export default function MarketingHome() {
             How it works
           </h2>
           <p className="text-sidebar-muted-foreground mt-2 max-w-xl text-sm leading-relaxed">
-            Built for owners, not operators of software. Three steps, then it quietly runs.
+            Configure the context once, use the live products, and keep a person in control of
+            consequential decisions.
           </p>
           <ol className="mt-8 grid gap-6 md:grid-cols-3">
             {STEPS.map(({ icon: Icon, title, body }, index) => (

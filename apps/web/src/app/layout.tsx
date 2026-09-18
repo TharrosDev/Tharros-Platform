@@ -18,9 +18,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tharros: Your business, running itself",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://tharros.ca"),
+  title: {
+    default: "Tharros — AI operating workspace for small businesses",
+    template: "%s | Tharros",
+  },
   description:
-    "The AI operating layer for small businesses. Local and Canadian, built to do the busywork so you can get back to the work that matters.",
+    "Business knowledge, workforce scheduling, lead capture and native automation in one operating workspace for small teams.",
+  applicationName: "Tharros",
+  openGraph: {
+    type: "website",
+    siteName: "Tharros",
+    title: "Tharros — AI operating workspace for small businesses",
+    description:
+      "Business knowledge, workforce scheduling, lead capture and native automation in one operating workspace for small teams.",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +40,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const enableVercelTelemetry = process.env.NODE_ENV === "production" && process.env.VERCEL === "1";
+  const enableVercelTelemetry =
+    process.env.NODE_ENV === "production" && process.env.VERCEL === "1";
 
   return (
     <html
@@ -45,7 +58,6 @@ export default function RootLayout({
         >
           <MotionProvider>{children}</MotionProvider>
         </ThemeProvider>
-        {/* Keep local development quiet; Vercel serves these scripts in production. */}
         {enableVercelTelemetry ? (
           <>
             <Analytics />

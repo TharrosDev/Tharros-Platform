@@ -1,88 +1,102 @@
 # Tharros Platform
 
-**The AI operating layer for small businesses.** A multi-tenant SaaS with two shipped products and more on the way:
+**The AI operating workspace for small businesses.**
 
-- **AI Business Assistant** — a business uploads its documents (how-to guides, policies, FAQs, price lists) and gets a grounded, cited AI assistant that answers from them: streaming chat, inline citations, generation templates (draft email / write SOP / summarize policy), and knowledge management.
-- **AI Workforce Scheduling** — plain-language setup and availability collection, a constraint solver with an AI-judged candidate panel, a publishable schedule calendar, and a token-authed employee portal covering sick calls, replacement offers, shift swaps, and time off — with schedule delivery and reminder emails, analytics, and a full activity log.
-- **Coming next:** the connector foundation (Nango + n8n) powering lead capture and workflow automations.
+Tharros ships four connected products:
 
-Production: [tharros.ca](https://tharros.ca) · Private repo (`TharrosDev/Tharros-Platform`).
+- **AI Business Assistant** — grounded answers and generation over uploaded
+  business knowledge with citations.
+- **AI Workforce Scheduling** — setup, availability, schedule generation,
+  review/publishing, employee self-service, disruption handling, analytics and
+  activity history.
+- **Lead Capture** — public capture forms/API, manual lead entry, a live
+  pipeline, timelines, internal notes and human-reviewed AI follow-up drafts.
+- **Native Automations** — durable lead-event workflows with execution history,
+  manager notifications, pipeline actions and AI draft preparation.
+
+External SaaS connectors are intentionally outside the current shipped scope.
+
+Production: [tharros.ca](https://tharros.ca)
 
 ## Stack
 
-- **Turborepo** monorepo, **pnpm** workspaces
-- **Next.js 16** (App Router, React 19) — note: a *modified* build, see [`apps/web/AGENTS.md`](apps/web/AGENTS.md)
-- **TypeScript** (strict), **Tailwind CSS v4**, **Base UI** + shadcn-style primitives
-- **Supabase** — Postgres + Auth (SSR) + Storage + **pgvector**, with Row-Level Security
-- **Stripe** — subscriptions (Checkout + Customer Portal), with per-plan AI usage caps
-- **OpenAI** (`text-embedding-3-small`, 1536-dim) for embeddings · **Anthropic Claude** for generation (Sonnet 4.6 for grounded Q&A, Haiku 4.5 for templated generation) · **DeepSeek** for cheap structured parsing and schedule judging
-- **Resend** + React Email for transactional email · a durable **jobs queue** (Postgres + pg_cron) for delivery/reminders
-- **Sentry** observability · **Vercel** hosting/CI · **Vitest** + **Playwright** tests
+- **Turborepo** + **pnpm** workspaces
+- **Next.js 16**, React 19, strict TypeScript, Tailwind CSS v4
+- **Supabase** Postgres/Auth/Storage/pgvector with Row-Level Security
+- **Stripe** subscriptions and plan-aware AI usage limits
+- **Anthropic Claude** for grounded generation and lead follow-up drafting
+- **OpenAI embeddings** for document retrieval
+- **DeepSeek** for structured scheduling tasks and candidate judging
+- **Resend** + React Email for transactional email
+- Durable **Postgres jobs queue** driven by pg_cron/pg_net
+- **Sentry**, Vercel, Vitest and Playwright
+
+> The web app uses a modified Next.js 16 build. Read
+> [`apps/web/AGENTS.md`](apps/web/AGENTS.md) before changing framework-level
+> routing or proxy behavior.
 
 ## Repository layout
 
 ```
-apps/web/              # the Next.js application (the only deployable)
-  src/app/             # routes: (marketing) (auth) (onboarding) (app)/(subscribed) portal api
-  src/lib/             # supabase clients, auth, billing, documents (RAG),
-                       #   assistant (chat), scheduling (solver/panel/orchestrator),
-                       #   portal (employee portal), jobs (durable queue),
-                       #   anthropic + deepseek (model seams), email…
-  src/eval/            # offline RAG eval harness (fixtures, questions, metrics)
-  e2e/                 # Playwright specs
-packages/eslint-config # shared ESLint config
-packages/tsconfig      # shared TS config
-supabase/migrations/   # SQL migrations — the source of truth for the DB schema
-docs/                  # BILLING.md, CI.md, SECRETS.md
+apps/web/              Next.js application
+  src/app/             route groups, APIs, public lead forms and employee portal
+  src/components/      Workshop UI system and product components
+  src/lib/             domain logic and infrastructure seams
+  src/eval/            RAG evaluation harness
+  e2e/                 Playwright browser journeys
+packages/              shared ESLint/TypeScript configuration
+supabase/migrations/   database schema source of truth
+docs/                  operations, CI, billing and secrets documentation
+scripts/               repository/operator utilities
 ```
 
-## Getting started
+## Local development
 
-**Prerequisites:** Node ≥ 20, pnpm 11.5.0 (`corepack enable`).
+Prerequisites: Node 22+ and pnpm 11.5.0.
 
 ```bash
+corepack enable
 pnpm install
-cp apps/web/.env.example apps/web/.env.local   # then fill in real values
-pnpm dev                                        # http://localhost:3000
+cp apps/web/.env.example apps/web/.env.local
+pnpm dev
 ```
 
-Environment variables are documented in [`apps/web/.env.example`](apps/web/.env.example) and [`docs/SECRETS.md`](docs/SECRETS.md). The authoritative store is the Vercel project environment; `.env.local` is for local dev and integration tests.
+Environment variables are documented in
+[`apps/web/.env.example`](apps/web/.env.example) and
+[`docs/SECRETS.md`](docs/SECRETS.md).
 
-## Scripts
-
-Run from the repo root (Turborepo orchestrates the workspaces):
-
-| Command | What it does |
-| --- | --- |
-| `pnpm dev` | Start the dev server |
-| `pnpm build` | Production build |
-| `pnpm lint` | ESLint |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test` | Vitest (unit + live integration) |
-| `pnpm format` | Prettier write |
-
-Scope to the app or a single test:
+## Quality checks
 
 ```bash
-pnpm --filter @tharros/web build
-pnpm --filter @tharros/web exec vitest run src/lib/documents/__tests__/chunk.test.ts
-pnpm --filter @tharros/web test:e2e        # Playwright
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+pnpm --filter @tharros/web test:e2e
+node scripts/contrast-check.mjs
 ```
 
-> **Heads-up:** many Vitest suites are **live integration tests** that seed/tear-down against a real Supabase project, so they require a populated `apps/web/.env.local` and run serially.
+Many integration suites use the dedicated Supabase test project. CI distinguishes
+an unavailable external test dependency from deterministic source/build
+failures, but a skipped live suite is not release approval. See
+[`docs/CI.md`](docs/CI.md).
 
 ## Architecture notes
 
-- **Multi-tenant + RLS.** Every domain table is org-scoped; access is enforced in the database via Row-Level Security helpers (`current_user_orgs()`, `current_user_role()`). The user-session Supabase client respects RLS; a service-role client (server-only) is the sole writer to internal pipeline tables.
-- **RAG pipeline** (`apps/web/src/lib/documents/`): `upload → extract → chunk → embed → retrieve`, tracked on `documents.status`, with vectors stored in pgvector and searched via a `match_document_chunks` RPC.
-- **AI assistant** (`apps/web/src/lib/assistant/`): a streaming chat endpoint (`api/assistant/query`, NDJSON frames) that retrieves grounding chunks, prompts Claude to cite-or-decline, persists each turn, and returns numbered inline citations. Generation templates route to a cheaper model; per-org token usage is metered and enforced against plan caps.
-- **Workforce scheduling** (`apps/web/src/lib/scheduling/`): a pure constraint solver (availability, certifications, labor rules) generates candidate schedules; a DeepSeek judge scores the panel; the orchestrator persists the winner for review, manual edits, and publish/versioning. Disruption flows (sick calls → ranked replacement offers, targeted/open shift swaps, time off) apply atomically via SECURITY DEFINER RPCs with race-condition guards.
-- **Employee portal** (`apps/web/src/app/portal/`): account-less magic-link access — a portal token is validated against the database on every request; employees see their schedule, claim open shifts, respond to swaps, request time off, and set availability in plain language.
-- **RAG eval** (`apps/web/src/eval/`): an offline harness over fixture corpora that sweeps chunk size × top-k and scores retrieval + answer quality (recall, citation accuracy, faithfulness, negative-question handling).
-- **Migrations** in `supabase/migrations/` are the source of truth and are applied to both the production and CI-test Supabase projects.
+- **Tenant isolation:** organization-scoped data is protected by Postgres RLS.
+- **Knowledge:** upload → extraction → chunking → embeddings → pgvector retrieval
+  → grounded assistant generation.
+- **Scheduling:** deterministic constraint solving plus AI-assisted structured
+  tasks, with manager review and atomic disruption flows.
+- **Lead Capture:** authenticated CRM reads/writes stay under RLS; anonymous
+  capture uses opaque form tokens through a narrowly scoped server-only seam and
+  respects plan state.
+- **Automations:** lead events enqueue `automation-dispatch` jobs. Runs are
+  idempotently recorded in `automation_runs`; managers can pause workflows and
+  queue targeted manual runs for testing.
+- **Jobs:** all deferred operational work uses the durable database queue.
+- **Observability:** Sentry, structured logging and health checks cover runtime
+  failures and shipped configuration.
 
-See [`CLAUDE.md`](CLAUDE.md) for a deeper architecture orientation and the project's conventions.
-
-## Deployment
-
-Hosted on Vercel (project `tharros-platform`, root directory `apps/web`); production deploys from `main`. Each PR gets a preview deployment and must pass CI (`typecheck · lint · test · build`, Playwright e2e, and a Supabase migration preview) before merge. See [`docs/CI.md`](docs/CI.md).
+Read [`PRODUCT.md`](PRODUCT.md) for product principles and [`CLAUDE.md`](CLAUDE.md)
+for implementation guidance.
