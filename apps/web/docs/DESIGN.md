@@ -76,6 +76,8 @@ Primary navigation contains only production product/workspace surfaces:
 - Dashboard
 - AI Assistant
 - Scheduling
+- Lead Capture
+- Automations
 - Knowledge
 - Notifications
 - Profile
@@ -85,8 +87,9 @@ Primary navigation contains only production product/workspace surfaces:
 Scheduling has its own sub-navigation for overview, schedule, team,
 availability, conversations, analytics and activity.
 
-Public marketing surfaces are home, pricing, security, privacy and terms.
-Unshipped roadmap products do not appear as disabled primary navigation.
+Public marketing surfaces are home, pricing, security, privacy and terms. Paid
+product surfaces are shown only when they are genuinely implemented; tier gates
+handle access to Lead Capture and Automations.
 
 ## Layering
 
