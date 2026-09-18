@@ -2,19 +2,19 @@
 
 **The AI operating workspace for small businesses.**
 
-Tharros currently ships two production products:
+Tharros ships four connected products:
 
-- **AI Business Assistant** — businesses upload policies, guides, FAQs and other
-  operating documents, then ask grounded questions and generate work with
-  citations back to the source material.
-- **AI Workforce Scheduling** — plain-language setup and availability, schedule
-  generation and manager review, publishing/versioning, employee self-service,
-  sick calls and replacements, swaps, time off, delivery/reminders, analytics
-  and a full activity trail.
+- **AI Business Assistant** — grounded answers and generation over uploaded
+  business knowledge with citations.
+- **AI Workforce Scheduling** — setup, availability, schedule generation,
+  review/publishing, employee self-service, disruption handling, analytics and
+  activity history.
+- **Lead Capture** — public capture forms/API, manual lead entry, a live
+  pipeline, timelines, internal notes and human-reviewed AI follow-up drafts.
+- **Native Automations** — durable lead-event workflows with execution history,
+  manager notifications, pipeline actions and AI draft preparation.
 
-Lead capture, third-party connectors and workflow automation remain roadmap work
-until their end-to-end implementations are production-ready. Public pricing and
-plan entitlements intentionally list only capabilities that ship today.
+External SaaS connectors are intentionally outside the current shipped scope.
 
 Production: [tharros.ca](https://tharros.ca)
 
@@ -24,7 +24,7 @@ Production: [tharros.ca](https://tharros.ca)
 - **Next.js 16**, React 19, strict TypeScript, Tailwind CSS v4
 - **Supabase** Postgres/Auth/Storage/pgvector with Row-Level Security
 - **Stripe** subscriptions and plan-aware AI usage limits
-- **Anthropic Claude** for grounded generation
+- **Anthropic Claude** for grounded generation and lead follow-up drafting
 - **OpenAI embeddings** for document retrieval
 - **DeepSeek** for structured scheduling tasks and candidate judging
 - **Resend** + React Email for transactional email
@@ -39,7 +39,7 @@ Production: [tharros.ca](https://tharros.ca)
 
 ```
 apps/web/              Next.js application
-  src/app/             route groups, APIs and employee portal
+  src/app/             route groups, APIs, public lead forms and employee portal
   src/components/      Workshop UI system and product components
   src/lib/             domain logic and infrastructure seams
   src/eval/            RAG evaluation harness
@@ -76,28 +76,27 @@ pnpm --filter @tharros/web test:e2e
 node scripts/contrast-check.mjs
 ```
 
-Many Vitest suites make real calls to a dedicated Supabase integration-test
-project. CI first checks that dependency is reachable; an unavailable external
-test project is reported separately from deterministic source/build failures.
-See [`docs/CI.md`](docs/CI.md).
+Many integration suites use the dedicated Supabase test project. CI distinguishes
+an unavailable external test dependency from deterministic source/build
+failures, but a skipped live suite is not release approval. See
+[`docs/CI.md`](docs/CI.md).
 
 ## Architecture notes
 
 - **Tenant isolation:** organization-scoped data is protected by Postgres RLS.
-  Service-role access is server-only and reserved for internal pipelines or
-  narrowly scoped operations.
-- **Knowledge pipeline:** upload → extraction → chunking → embeddings → pgvector
-  retrieval. The assistant is prompted to answer from retrieved context and
-  cite it, or say when the context is insufficient.
-- **Scheduling:** a constraint solver generates candidates, an AI judging seam
-  compares them, and managers retain review/edit/publish control. Disruption
-  flows use atomic database operations with conflict guards.
-- **Employee portal:** account-less token sessions are validated on every
-  request and strictly scoped to one employee and organization.
-- **Jobs:** schedule delivery, reminders and other deferred work use the durable
-  database queue rather than request-lifetime fire-and-forget work.
-- **Observability:** Sentry and structured logging cover runtime failures; the
-  health endpoint probes real database connectivity.
+- **Knowledge:** upload → extraction → chunking → embeddings → pgvector retrieval
+  → grounded assistant generation.
+- **Scheduling:** deterministic constraint solving plus AI-assisted structured
+  tasks, with manager review and atomic disruption flows.
+- **Lead Capture:** authenticated CRM reads/writes stay under RLS; anonymous
+  capture uses opaque form tokens through a narrowly scoped server-only seam and
+  respects plan state.
+- **Automations:** lead events enqueue `automation-dispatch` jobs. Runs are
+  idempotently recorded in `automation_runs`; managers can pause workflows and
+  queue targeted manual runs for testing.
+- **Jobs:** all deferred operational work uses the durable database queue.
+- **Observability:** Sentry, structured logging and health checks cover runtime
+  failures and shipped configuration.
 
-Read [`PRODUCT.md`](PRODUCT.md) for the authoritative product principles and
-[`CLAUDE.md`](CLAUDE.md) for deeper implementation guidance.
+Read [`PRODUCT.md`](PRODUCT.md) for product principles and [`CLAUDE.md`](CLAUDE.md)
+for implementation guidance.
