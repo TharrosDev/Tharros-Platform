@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { BookOpen, CalendarDays, FileText, MessagesSquare, Users } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  FileText,
+  MessagesSquare,
+  Users,
+  Workflow,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,21 +16,48 @@ import {
   MarketingHeader,
 } from "@/components/marketing/marketing-chrome";
 
-const STEPS = [
+const PRODUCTS = [
   {
-    icon: FileText,
-    title: "Add your business context",
-    body: "Upload the documents your team actually works from and configure how your organization operates.",
+    icon: BookOpen,
+    title: "AI Business Assistant",
+    body: "Turn policies, guides and operating documents into grounded answers with citations.",
+    proof: ["Documents indexed", "Answers grounded", "Sources cited"],
   },
   {
-    icon: MessagesSquare,
-    title: "Use grounded AI",
-    body: "Ask questions against your own knowledge base and get answers with source citations instead of generic guesses.",
+    icon: CalendarDays,
+    title: "AI Workforce Scheduling",
+    body: "Collect availability, generate and review schedules, publish shifts and handle disruptions.",
+    proof: ["Availability collected", "Schedules reviewed", "Changes managed"],
   },
   {
     icon: Users,
-    title: "Run the team",
-    body: "Collect availability, generate schedules, publish shifts, and handle changes without losing manager control.",
+    title: "Lead Capture",
+    body: "Create public capture forms, manage a live lead pipeline, keep notes and prepare AI follow-up drafts for human review.",
+    proof: ["Forms live", "Pipeline tracked", "Drafts reviewed"],
+  },
+  {
+    icon: Workflow,
+    title: "Native Automations",
+    body: "React to lead events with durable workflows that notify managers, update pipeline state or prepare follow-up drafts.",
+    proof: ["Events triggered", "Runs durable", "History auditable"],
+  },
+];
+
+const STEPS = [
+  {
+    icon: FileText,
+    title: "Add your operating context",
+    body: "Upload the documents your team works from, configure your organization, and set the rules Tharros should follow.",
+  },
+  {
+    icon: MessagesSquare,
+    title: "Run the daily work",
+    body: "Ask grounded questions, build schedules, capture enquiries, and keep customer follow-up organized.",
+  },
+  {
+    icon: Workflow,
+    title: "Automate repeatable steps",
+    body: "Use native event-driven workflows where automation is safe, while keeping managers in control of consequential actions.",
   },
 ];
 
@@ -56,8 +90,8 @@ export default function MarketingHome() {
           )}
           style={entranceDelay(80)}
         >
-          Tharros combines a grounded business assistant with workforce scheduling in one focused
-          workspace for small teams.
+          Tharros brings business knowledge, workforce scheduling, lead capture and native
+          automation into one operating workspace for small teams.
         </p>
         <div
           className={cn("mt-10 flex flex-wrap items-center justify-center gap-3", ENTRANCE_CLASS)}
@@ -77,7 +111,7 @@ export default function MarketingHome() {
           className={cn("text-sidebar-muted-foreground type-small mt-6", ENTRANCE_CLASS)}
           style={entranceDelay(240)}
         >
-          14-day free trial. Current plan features are listed on the pricing page.
+          14-day free trial. Features vary by plan.
         </p>
       </section>
 
@@ -90,59 +124,38 @@ export default function MarketingHome() {
             id="products-heading"
             className="text-3xl font-bold tracking-tight text-balance sm:text-4xl"
           >
-            Two products, one operating workspace.
+            Four connected products, one workspace.
           </h2>
           <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed text-pretty">
-            Built around the work Tharros can perform end to end today.
+            Each surface runs on the same organization, permissions, billing, notifications and
+            durable job infrastructure.
           </p>
         </div>
 
         <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] md:grid-cols-2">
-          <div className="border-b border-white/10 p-7 sm:p-9 md:border-r md:border-b-0">
-            <span className="bg-primary text-primary-foreground flex size-11 items-center justify-center rounded-xl shadow-raised">
-              <CalendarDays className="size-5" aria-hidden />
-            </span>
-            <h3 className="mt-8 text-2xl font-bold tracking-tight">AI Workforce Scheduling</h3>
-            <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed">
-              Collect availability, generate and review schedule candidates, publish shifts, and
-              manage sick calls, replacements, swaps and time off.
-            </p>
-            <div className="mt-8 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
-              {[
-                ["Availability", "Collected"],
-                ["Schedule", "Reviewed"],
-                ["Changes", "Managed"],
-              ].map(([label, value]) => (
-                <div key={label} className="bg-sidebar px-4 py-3.5">
-                  <span className="text-sidebar-muted-foreground type-meta block">{label}</span>
-                  <span className="mt-1 block text-sm font-semibold">{value}</span>
-                </div>
-              ))}
+          {PRODUCTS.map(({ icon: Icon, title, body, proof }, index) => (
+            <div
+              key={title}
+              className={cn(
+                "p-7 sm:p-9",
+                index % 2 === 0 && "md:border-r md:border-white/10",
+                index < 2 && "border-b border-white/10",
+              )}
+            >
+              <span className="bg-primary/15 text-primary-soft-foreground flex size-11 items-center justify-center rounded-xl">
+                <Icon className="size-5" aria-hidden />
+              </span>
+              <h3 className="mt-7 text-2xl font-bold tracking-tight">{title}</h3>
+              <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed">{body}</p>
+              <div className="mt-7 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
+                {proof.map((item) => (
+                  <div key={item} className="bg-sidebar px-3 py-3 text-center">
+                    <span className="text-sidebar-muted-foreground type-meta">{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div className="p-7 sm:p-9">
-            <span className="flex size-11 items-center justify-center rounded-xl bg-white/10 text-sidebar-foreground">
-              <BookOpen className="size-5" aria-hidden />
-            </span>
-            <h3 className="mt-8 text-2xl font-bold tracking-tight">AI Business Assistant</h3>
-            <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed">
-              Turn your own policies, guides, FAQs and operating documents into a searchable
-              knowledge workspace with grounded answers and citations.
-            </p>
-            <div className="mt-8 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
-              {[
-                ["Documents", "Indexed"],
-                ["Answers", "Grounded"],
-                ["Sources", "Cited"],
-              ].map(([label, value]) => (
-                <div key={label} className="bg-sidebar px-4 py-3.5">
-                  <span className="text-sidebar-muted-foreground type-meta block">{label}</span>
-                  <span className="mt-1 block text-sm font-semibold">{value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
