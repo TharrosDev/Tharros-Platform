@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, FileText, MessagesSquare, Sparkles, Users, Workflow } from "lucide-react";
+import { BookOpen, CalendarDays, FileText, MessagesSquare, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,44 +9,21 @@ import {
   MarketingHeader,
 } from "@/components/marketing/marketing-chrome";
 
-const PRODUCTS = [
-  {
-    icon: Sparkles,
-    name: "AI Business Assistant",
-    blurb:
-      "Answers questions from your own documents in plain language, with sources attached to grounded answers.",
-  },
-  {
-    icon: CalendarDays,
-    name: "AI Workforce Scheduling",
-    blurb:
-      "Collects availability, builds schedule candidates, supports manager review, and handles sick calls, swaps, time off and employee self-service.",
-    headline: true,
-  },
-  {
-    icon: Workflow,
-    name: "Lead Capture & Automations",
-    blurb:
-      "On the roadmap. These capabilities are not sold as current plan entitlements until the connector and workflow layers are production-ready.",
-    roadmap: true,
-  },
-];
-
 const STEPS = [
   {
     icon: FileText,
     title: "Add your business context",
-    body: "Upload business documents, add your team, and configure the rules Tharros should work from.",
+    body: "Upload the documents your team actually works from and configure how your organization operates.",
   },
   {
     icon: MessagesSquare,
-    title: "Use the live products",
-    body: "Ask grounded questions from your knowledge base and generate workforce schedules from real availability and constraints.",
+    title: "Use grounded AI",
+    body: "Ask questions against your own knowledge base and get answers with source citations instead of generic guesses.",
   },
   {
     icon: Users,
-    title: "Keep control of the exceptions",
-    body: "Managers can review schedules, handle approvals, edit decisions, and step in when an operational change needs a person.",
+    title: "Run the team",
+    body: "Collect availability, generate schedules, publish shifts, and handle changes without losing manager control.",
   },
 ];
 
@@ -70,7 +47,7 @@ export default function MarketingHome() {
           )}
           style={entranceDelay(0)}
         >
-          Practical AI for running the work behind your business.
+          Practical AI for the work behind your business.
         </h1>
         <p
           className={cn(
@@ -79,7 +56,7 @@ export default function MarketingHome() {
           )}
           style={entranceDelay(80)}
         >
-          Tharros combines a grounded business assistant with workforce scheduling in one operating
+          Tharros combines a grounded business assistant with workforce scheduling in one focused
           workspace for small teams.
         </p>
         <div
@@ -113,27 +90,24 @@ export default function MarketingHome() {
             id="products-heading"
             className="text-3xl font-bold tracking-tight text-balance sm:text-4xl"
           >
-            Two production products, one workspace.
+            Two products, one operating workspace.
           </h2>
           <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed text-pretty">
-            Tharros focuses on the parts that are implemented end to end today, while keeping future
-            capabilities clearly marked as roadmap work.
+            Built around the work Tharros can perform end to end today.
           </p>
         </div>
 
-        <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] md:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] md:grid-cols-2">
           <div className="border-b border-white/10 p-7 sm:p-9 md:border-r md:border-b-0">
             <span className="bg-primary text-primary-foreground flex size-11 items-center justify-center rounded-xl shadow-raised">
               <CalendarDays className="size-5" aria-hidden />
             </span>
-            <h3 className="mt-8 max-w-md text-3xl font-bold tracking-tight text-balance">
-              AI Workforce Scheduling
-            </h3>
-            <p className="text-sidebar-muted-foreground mt-3 max-w-xl text-base leading-relaxed">
+            <h3 className="mt-8 text-2xl font-bold tracking-tight">AI Workforce Scheduling</h3>
+            <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed">
               Collect availability, generate and review schedule candidates, publish shifts, and
               manage sick calls, replacements, swaps and time off.
             </p>
-            <div className="mt-9 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
+            <div className="mt-8 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
               {[
                 ["Availability", "Collected"],
                 ["Schedule", "Reviewed"],
@@ -147,27 +121,27 @@ export default function MarketingHome() {
             </div>
           </div>
 
-          <div className="divide-y divide-white/10">
-            {PRODUCTS.filter((product) => !product.headline).map(
-              ({ icon: Icon, name, blurb, roadmap }) => (
-                <div key={name} className="flex min-h-52 flex-col justify-center p-7 sm:p-9">
-                  <span className="flex size-10 items-center justify-center rounded-lg bg-white/10 text-sidebar-foreground">
-                    <Icon className="size-5" aria-hidden />
-                  </span>
-                  <div className="mt-5 flex items-center gap-2">
-                    <h3 className="text-lg font-bold tracking-tight">{name}</h3>
-                    {roadmap ? (
-                      <span className="rounded-full border border-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-sidebar-muted-foreground">
-                        Roadmap
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="text-sidebar-muted-foreground mt-2 text-sm leading-relaxed">
-                    {blurb}
-                  </p>
+          <div className="p-7 sm:p-9">
+            <span className="flex size-11 items-center justify-center rounded-xl bg-white/10 text-sidebar-foreground">
+              <BookOpen className="size-5" aria-hidden />
+            </span>
+            <h3 className="mt-8 text-2xl font-bold tracking-tight">AI Business Assistant</h3>
+            <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed">
+              Turn your own policies, guides, FAQs and operating documents into a searchable
+              knowledge workspace with grounded answers and citations.
+            </p>
+            <div className="mt-8 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
+              {[
+                ["Documents", "Indexed"],
+                ["Answers", "Grounded"],
+                ["Sources", "Cited"],
+              ].map(([label, value]) => (
+                <div key={label} className="bg-sidebar px-4 py-3.5">
+                  <span className="text-sidebar-muted-foreground type-meta block">{label}</span>
+                  <span className="mt-1 block text-sm font-semibold">{value}</span>
                 </div>
-              ),
-            )}
+              ))}
+            </div>
           </div>
         </div>
       </section>
