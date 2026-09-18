@@ -14,7 +14,6 @@ import {
   Sparkles,
   User,
   Users,
-  Workflow,
 } from "lucide-react";
 
 export type NavIcon = ComponentType<{ className?: string }>;
@@ -23,8 +22,6 @@ export type NavItem = {
   label: string;
   href: string;
   icon: NavIcon;
-  /** Phase 4-6 product stubs get a quiet "Soon" tag, never a fake count. */
-  soon?: boolean;
 };
 
 export type NavSection = {
@@ -32,11 +29,6 @@ export type NavSection = {
   items: NavItem[];
 };
 
-/**
- * The app's information architecture: what you sell, what you work with, and
- * who you are. One source of truth for the sidebar, the mobile drawer, and
- * the command palette.
- */
 export const navSections: NavSection[] = [
   {
     label: "Products",
@@ -44,8 +36,6 @@ export const navSections: NavSection[] = [
       { label: "Dashboard", href: "/dashboard", icon: LayoutGrid },
       { label: "AI Assistant", href: "/assistant", icon: Sparkles },
       { label: "Scheduling", href: "/scheduling", icon: CalendarDays },
-      { label: "Lead Capture", href: "/leads", icon: Users, soon: true },
-      { label: "Automations", href: "/automations", icon: Workflow, soon: true },
     ],
   },
   {
@@ -65,10 +55,6 @@ export const navSections: NavSection[] = [
   },
 ];
 
-/**
- * Scheduling section pages, shown as an indented sub-list under the
- * Scheduling nav item while you are inside the section.
- */
 export const schedulingNav: NavItem[] = [
   { label: "Overview", href: "/scheduling", icon: CalendarDays },
   { label: "Schedule", href: "/scheduling/calendar", icon: CalendarRange },
@@ -79,7 +65,6 @@ export const schedulingNav: NavItem[] = [
   { label: "Activity", href: "/scheduling/activity", icon: Activity },
 ];
 
-/** Flat list of every reachable page, for the command palette. */
 export const allNav: NavItem[] = [
   ...navSections.flatMap((section) => section.items),
   ...schedulingNav.filter((item) => item.href !== "/scheduling"),
