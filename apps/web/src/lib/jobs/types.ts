@@ -1,12 +1,5 @@
-/**
- * Day 38 — durable job runtime types. Pure (no `server-only`) so the runner +
- * handlers stay importable by the Vitest harness, which injects its own
- * service-role client (mirrors lib/billing/webhook).
- */
-
 export type JobStatus = "pending" | "running" | "succeeded" | "failed" | "dead";
 
-/** Known job types. New handlers add their type here as their feature lands. */
 export type JobType =
   | "noop"
   | "notification-send"
@@ -16,12 +9,12 @@ export type JobType =
   | "replacement-offer-notify"
   | "replacement-offer-timeout"
   | "swap-proposal-notify"
-  | "swap-result-notify";
+  | "swap-result-notify"
+  | "automation-dispatch";
 
-/** A claimed job, mapped from the DB row to camelCase for handlers. */
 export type Job = {
   id: string;
-  type: string; // DB column is free text; dispatch narrows to a known JobType
+  type: string;
   payload: Record<string, unknown>;
   status: JobStatus;
   runAt: string;
@@ -34,10 +27,8 @@ export type Job = {
   updatedAt: string;
 };
 
-/** A job handler runs the side effect for one job. Throw to fail (→ retry/dead). */
 export type JobHandler = (job: Job) => Promise<void>;
 
-/** The raw PostgREST row shape (snake_case) returned by claim_due_jobs. */
 export type JobRow = {
   id: string;
   type: string;

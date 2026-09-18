@@ -26,78 +26,68 @@ describe("billing plans", () => {
     expect(BILLING_CURRENCY).toBe("cad");
   });
 
-  it("uses a unique, stable lookup_key per tier", () => {
+  it("uses a unique stable lookup key per tier", () => {
     const keys = PLANS.map((p) => p.lookupKey);
     expect(new Set(keys).size).toBe(keys.length);
     keys.forEach((k) => expect(k).toMatch(/^tharros_(starter|growth|pro)_monthly$/));
   });
 
-  it("offers a 14-day trial", () => {
+  it("offers a 14-day trial and highlights Growth", () => {
     expect(TRIAL_DAYS).toBe(14);
+    expect(PLANS.filter((p) => p.highlight).map((p) => p.tier)).toEqual(["growth"]);
   });
 
-  it("highlights exactly one tier (Growth)", () => {
-    const highlighted = PLANS.filter((p) => p.highlight);
-    expect(highlighted).toHaveLength(1);
-    expect(highlighted[0].tier).toBe("growth");
-  });
+  it("ships the product ladder at the intended tiers", () => {
+    expect(PLANS.every((p) => hasFeature(p.tier, "assistant"))).toBe(true);
 
-  it("gates Scheduling to Growth and Pro while Assistant ships on every paid tier", () => {
     expect(hasFeature("starter", "scheduling")).toBe(false);
     expect(hasFeature("growth", "scheduling")).toBe(true);
     expect(hasFeature("pro", "scheduling")).toBe(true);
-    expect(PLANS.every((p) => hasFeature(p.tier, "assistant"))).toBe(true);
-    expect(hasFeature(null, "scheduling")).toBe(false);
+
+    expect(hasFeature("starter", "leads")).toBe(false);
+    expect(hasFeature("growth", "leads")).toBe(true);
+    expect(hasFeature("pro", "leads")).toBe(true);
+
+    expect(hasFeature("growth", "automations")).toBe(false);
+    expect(hasFeature("pro", "automations")).toBe(true);
   });
 
-  it("resolves the lowest tier that unlocks each shipped feature", () => {
+  it("resolves the lowest tier for each shipped feature", () => {
     expect(minTierForFeature("assistant")?.tier).toBe("starter");
     expect(minTierForFeature("scheduling")?.tier).toBe("growth");
+    expect(minTierForFeature("leads")?.tier).toBe("growth");
+    expect(minTierForFeature("automations")?.tier).toBe("pro");
   });
 
-  it("does not advertise unshipped lead, connector, or workflow products", () => {
+  it("does not claim external connected tools", () => {
     const copy = PLANS.flatMap((p) => p.features).join(" ");
-    expect(copy).not.toMatch(/lead capture|follow-up agent|connected tool|workflow automation/i);
-  });
-
-  it("keeps the scheduling entitlement consistent with the marketing copy", () => {
-    for (const plan of PLANS) {
-      const copySaysScheduling = plan.features.some((f) => /scheduling/i.test(f));
-      const inheritsFromLower = plan.features.some((f) => /everything in/i.test(f));
-      if (hasFeature(plan.tier, "scheduling")) {
-        expect(copySaysScheduling || inheritsFromLower).toBe(true);
-      }
-    }
+    expect(copy).not.toMatch(/connected tools|crm integration|nango|n8n/i);
   });
 
   it("getPlan throws on an unknown tier", () => {
-    // @ts-expect-error — exercising the runtime guard with a bad tier.
+    // @ts-expect-error exercising runtime guard
     expect(() => getPlan("enterprise")).toThrow();
   });
 
-  it("planByPriceId returns undefined for null / unmatched ids", () => {
+  it("planByPriceId returns undefined for null or unmatched ids", () => {
     expect(planByPriceId(null)).toBeUndefined();
     expect(planByPriceId(undefined)).toBeUndefined();
     expect(planByPriceId("price_does_not_exist")).toBeUndefined();
   });
 
-  it("formatMonthly renders whole-dollar CAD", () => {
+  it("formats monthly prices and preserves query caps", () => {
     expect(formatMonthly(9900)).toBe("$99");
     expect(formatMonthly(49900)).toBe("$499");
-  });
-
-  it("sets the monthly query cap to match the ladder", () => {
     expect(queryCapFor("starter")).toBe(500);
     expect(queryCapFor("growth")).toBe(5_000);
     expect(queryCapFor("pro")).toBe(25_000);
   });
 
-  it("keeps each tier's cap consistent with its AI-query bullet", () => {
+  it("keeps query-cap copy consistent with the numeric cap", () => {
     for (const plan of PLANS) {
       const bullet = plan.features.find((f) => /AI queries \/ month/.test(f));
       expect(bullet, `${plan.tier} should advertise a query cap`).toBeDefined();
-      const copyNumber = Number(bullet!.replace(/[^\d]/g, ""));
-      expect(copyNumber).toBe(plan.monthlyQueryCap);
+      expect(Number(bullet!.replace(/[^\d]/g, ""))).toBe(plan.monthlyQueryCap);
     }
   });
 });

@@ -2,18 +2,10 @@ import { env } from "@/env";
 
 import type { Tier } from "./schemas";
 
-/**
- * The subscription catalog is the single source of truth for pricing,
- * Checkout, webhook persistence, plan gating, and public pricing copy.
- *
- * Only capabilities that are shipped in production belong in `products` or
- * the customer-facing feature bullets below. Future products may be described
- * elsewhere as roadmap items, but must never be sold as current entitlements.
- */
 export const TRIAL_DAYS = 14;
 export const BILLING_CURRENCY = "cad" as const;
 
-export type ProductFeature = "assistant" | "scheduling";
+export type ProductFeature = "assistant" | "scheduling" | "leads" | "automations";
 
 export type Plan = {
   tier: Tier;
@@ -50,15 +42,16 @@ export const PLANS: readonly Plan[] = [
     tier: "growth",
     name: "Growth",
     priceMonthly: 29900,
-    products: ["assistant", "scheduling"],
+    products: ["assistant", "scheduling", "leads"],
     lookupKey: "tharros_growth_monthly",
     priceId: env.STRIPE_PRICE_GROWTH,
-    blurb: "For growing teams that need scheduling and shared business knowledge.",
+    blurb: "For growing teams that need scheduling, lead capture, and shared business knowledge.",
     highlight: true,
     features: [
       "Everything in Starter",
       "AI Workforce Scheduling",
       "Employee portal, availability, swaps and time off",
+      "Lead Capture forms and lead pipeline",
       "Up to 5,000 AI queries / month",
       "Priority email support",
     ],
@@ -68,16 +61,17 @@ export const PLANS: readonly Plan[] = [
     tier: "pro",
     name: "Pro",
     priceMonthly: 49900,
-    products: ["assistant", "scheduling"],
+    products: ["assistant", "scheduling", "leads", "automations"],
     lookupKey: "tharros_pro_monthly",
     priceId: env.STRIPE_PRICE_PRO,
-    blurb: "For larger teams that need higher AI capacity and onboarding help.",
+    blurb: "For teams that want native event-driven automation on top of the full workspace.",
     highlight: false,
     features: [
       "Everything in Growth",
+      "Native Automation Hub",
+      "Lead-triggered notifications and pipeline actions",
       "Up to 25,000 AI queries / month",
-      "Priority support",
-      "Onboarding help",
+      "Priority support and onboarding help",
     ],
     monthlyQueryCap: 25_000,
   },

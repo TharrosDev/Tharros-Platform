@@ -14,6 +14,7 @@ import {
   Sparkles,
   User,
   Users,
+  Workflow,
 } from "lucide-react";
 
 export type NavIcon = ComponentType<{ className?: string }>;
@@ -36,6 +37,8 @@ export const navSections: NavSection[] = [
       { label: "Dashboard", href: "/dashboard", icon: LayoutGrid },
       { label: "AI Assistant", href: "/assistant", icon: Sparkles },
       { label: "Scheduling", href: "/scheduling", icon: CalendarDays },
+      { label: "Lead Capture", href: "/leads", icon: Users },
+      { label: "Automations", href: "/automations", icon: Workflow },
     ],
   },
   {

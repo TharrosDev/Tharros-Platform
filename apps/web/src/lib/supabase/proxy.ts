@@ -3,10 +3,6 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { env } from "@/env";
 
-/**
- * Public path prefixes that never require an authenticated session. Everything
- * else is protected by default and bounced to /login when signed out.
- */
 const PUBLIC_PATHS = [
   "/login",
   "/signup",
@@ -14,6 +10,7 @@ const PUBLIC_PATHS = [
   "/privacy",
   "/terms",
   "/security",
+  "/forms",
   "/forgot-password",
   "/reset-password",
   "/verify-email",
@@ -23,13 +20,12 @@ const PUBLIC_PATHS = [
   "/monitoring",
   "/api/webhooks",
   "/api/cron",
+  "/api/leads/capture",
 ];
 
 function isPublicPath(pathname: string): boolean {
   if (pathname === "/") return true;
-  return PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
-  );
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 export async function updateSession(request: NextRequest) {
@@ -44,9 +40,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
