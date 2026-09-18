@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { BellRing, PlayCircle, Sparkles, Trash2, Workflow } from "lucide-react";
 
+import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getOrgContext } from "@/lib/org/queries";
 import { listAutomations, listAutomationRuns } from "@/lib/automations/queries";
 import { createAutomation, deleteAutomation, toggleAutomation } from "@/lib/automations/actions";
@@ -38,8 +39,13 @@ export default async function AutomationsPage({
 }: {
   searchParams: Promise<{ error?: string; created?: string }>;
 }) {
-  const [{ activeOrg }, params] = await Promise.all([getOrgContext(), searchParams]);
+  const [{ activeOrg }, params, access] = await Promise.all([
+    getOrgContext(),
+    searchParams,
+    getFeatureAccess("automations"),
+  ]);
   if (!activeOrg) redirect("/dashboard");
+  if (!access.entitled) redirect("/billing");
 
   const [automations, runs] = await Promise.all([
     listAutomations(activeOrg.id),
