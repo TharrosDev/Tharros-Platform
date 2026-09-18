@@ -4,19 +4,21 @@ Repository guidance for AI coding agents working on Tharros.
 
 ## Product scope
 
-Tharros is a multi-tenant SaaS for small businesses. The production product has
-two primary capabilities:
+Tharros is a multi-tenant SaaS for small businesses with four shipped product
+surfaces:
 
-1. **AI Business Assistant** — document ingestion, embeddings, retrieval,
-   grounded streaming answers, citations, generation templates and knowledge
-   management.
-2. **AI Workforce Scheduling** — setup, availability, schedule generation and
-   review, publishing/versioning, employee portal, sick calls/replacements,
-   swaps, time off, delivery/reminders, analytics and activity history.
+1. **AI Business Assistant** — grounded document knowledge and generation.
+2. **AI Workforce Scheduling** — manager + employee scheduling operations.
+3. **Lead Capture** — manual/public lead capture, pipeline, timeline/notes and
+   human-reviewed AI follow-up drafts.
+4. **Native Automations** — durable lead-event workflows and execution history.
 
-Do not reintroduce Lead Capture, generic connector, Nango, n8n, or workflow
-automation product claims unless an end-to-end implementation is intentionally
-being added. Pricing, navigation and public copy must describe shipped behavior.
+Lead Capture is Growth+ and Automations is Pro. Route actions and public capture
+must enforce those entitlements, not only hide navigation.
+
+Generic external SaaS connectors, Nango/n8n integration, and automatic customer
+email sending are not shipped. Do not claim them without an end-to-end
+implementation.
 
 ## Read before app work
 
@@ -63,8 +65,8 @@ normal CI suite.
 - `(auth)` — login/signup/reset/verification.
 - `(onboarding)` — organization onboarding.
 - `(app)` — authenticated shell.
-- `(app)/(subscribed)` — paid product surfaces: assistant, knowledge and
-  scheduling.
+- `(app)/(subscribed)` — paid product surfaces: assistant, knowledge, scheduling,
+  leads and automations. Product pages add tier-specific feature gates.
 - `portal` — account-less employee portal using a token-scoped server session.
 - `api` — route handlers including assistant streaming, document processing,
   Stripe webhooks, health and durable-job ticks.
@@ -135,6 +137,25 @@ Key areas:
 
 Consequential changes remain manager-reviewable. Race-sensitive operations
 belong in atomic database functions, not read-then-write client logic.
+
+## Leads and native automations
+
+Lead code lives under `lib/leads`:
+
+- `capture.ts` — server-only anonymous capture seam using opaque form tokens;
+- `queries.ts` / `actions.ts` — RLS-backed CRM reads and mutations;
+- `events.ts` — immutable lead event creation + automation job dispatch;
+- `follow-up.ts` — human-reviewable AI email draft generation.
+
+Automation code lives under `lib/automations`. Supported triggers currently are
+lead-created and lead-status-changed. Supported actions are manager notification,
+lead status updates and AI follow-up draft preparation. Execution runs are
+recorded in `automation_runs`; the handler is invoked by the durable
+`automation-dispatch` job. Manual runs are targeted to exactly one automation.
+
+Never make public capture a raw anonymous database insert. It must pass through
+the server-only capture seam, rate limiting, form state and Growth/Pro
+subscription check.
 
 ## Providers and configuration
 
