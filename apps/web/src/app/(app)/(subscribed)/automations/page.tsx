@@ -1,13 +1,9 @@
 import { redirect } from "next/navigation";
-import { BellRing, PlayCircle, Trash2, Workflow } from "lucide-react";
+import { BellRing, PlayCircle, Sparkles, Trash2, Workflow } from "lucide-react";
 
 import { getOrgContext } from "@/lib/org/queries";
 import { listAutomations, listAutomationRuns } from "@/lib/automations/queries";
-import {
-  createAutomation,
-  deleteAutomation,
-  toggleAutomation,
-} from "@/lib/automations/actions";
+import { createAutomation, deleteAutomation, toggleAutomation } from "@/lib/automations/actions";
 import { LEAD_STATUSES } from "@/lib/leads/types";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +22,7 @@ function triggerLabel(type: string, config: Record<string, unknown>) {
 
 function actionLabel(type: string, config: Record<string, unknown>) {
   if (type === "notify_team") return config.email === true ? "Notify managers + email" : "Notify managers";
+  if (type === "draft_follow_up") return "Prepare an AI follow-up draft";
   return typeof config.status === "string" ? `Set lead status to ${config.status}` : "Set lead status";
 }
 
@@ -55,7 +52,7 @@ export default async function AutomationsPage({
     <>
       <PageHeader
         title="Automations"
-        description="Run native Tharros actions from lead events. Workflows execute on the existing durable job queue and keep an execution history."
+        description="React to lead events with durable native workflows: notify managers, move pipeline status, or prepare AI follow-up drafts for human review."
       />
 
       {params.error ? (
@@ -69,7 +66,7 @@ export default async function AutomationsPage({
           <CardHeader>
             <CardTitle>Create automation</CardTitle>
             <CardDescription>
-              Start with lead events and native actions. External tool connectors can layer onto the same event/runtime model later.
+              Workflows execute on the same durable queue as scheduling jobs and record every run.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -80,7 +77,7 @@ export default async function AutomationsPage({
                   <Input
                     id="automation-name"
                     name="name"
-                    placeholder="Alert us about every new lead"
+                    placeholder="Draft a follow-up for every new lead"
                     maxLength={120}
                     required
                   />
@@ -126,6 +123,7 @@ export default async function AutomationsPage({
                   >
                     <option value="notify_team">Notify owners/admins</option>
                     <option value="set_lead_status">Set lead status</option>
+                    <option value="draft_follow_up">Prepare AI follow-up draft</option>
                   </select>
                 </div>
 
@@ -151,6 +149,11 @@ export default async function AutomationsPage({
                   Also email managers when using the notification action
                 </label>
 
+                <div className="bg-primary-soft/30 text-muted-foreground flex gap-2 rounded-lg p-3 text-xs">
+                  <Sparkles className="text-primary mt-0.5 size-4 shrink-0" />
+                  AI follow-up automations prepare a draft only. They never send customer email automatically.
+                </div>
+
                 <Button type="submit" className="w-full">
                   <Workflow />
                   Create automation
@@ -158,7 +161,7 @@ export default async function AutomationsPage({
               </form>
             ) : (
               <p className="text-muted-foreground text-sm">
-                Owners and admins can create or change automations. You can review the current workflows and run history.
+                Owners and admins can create or change automations. You can review workflows and run history.
               </p>
             )}
           </CardContent>

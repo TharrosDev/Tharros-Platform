@@ -96,6 +96,7 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
 
     try {
       let result: Record<string, unknown> = {};
+      let terminalStatus: "succeeded" | "skipped" = "succeeded";
       const action = automation.action_config ?? {};
 
       if (automation.action_type === "notify_team") {
@@ -149,6 +150,25 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
           });
         }
         result = { from: previousStatus, to: action.status };
+      } else if (automation.action_type === "draft_follow_up") {
+        if (!lead.email) {
+          terminalStatus = "skipped";
+          result = { reason: "lead_has_no_email" };
+        } else {
+          const [{ checkOrgQueryCap }, { generateLeadFollowUpDraft }] = await Promise.all([
+            import("@/lib/billing/usage"),
+            import("@/lib/leads/follow-up"),
+          ]);
+          const cap = await checkOrgQueryCap(event.org_id);
+          if (!cap.allowed) throw new Error("AI usage cap reached");
+
+          await generateLeadFollowUpDraft({
+            orgId: event.org_id,
+            leadId: lead.id,
+            userId: null,
+          });
+          result = { drafted: true };
+        }
       } else {
         throw new Error(`Unsupported automation action "${automation.action_type}"`);
       }
@@ -156,7 +176,7 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
       await admin
         .from("automation_runs")
         .update({
-          status: "succeeded",
+          status: terminalStatus,
           result,
           error: null,
           finished_at: new Date().toISOString(),

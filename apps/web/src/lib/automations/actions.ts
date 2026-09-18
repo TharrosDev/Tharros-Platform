@@ -9,10 +9,7 @@ import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 import { LEAD_STATUSES } from "@/lib/leads/types";
-import {
-  AUTOMATION_ACTIONS,
-  AUTOMATION_TRIGGERS,
-} from "@/lib/automations/types";
+import { AUTOMATION_ACTIONS, AUTOMATION_TRIGGERS } from "@/lib/automations/types";
 import { logger } from "@/lib/observability/logger";
 
 async function requireAutomationManager() {
@@ -56,10 +53,12 @@ export async function createAutomation(formData: FormData): Promise<void> {
     parsed.data.triggerType === "lead.status_changed" && parsed.data.triggerStatus
       ? { toStatus: parsed.data.triggerStatus }
       : {};
-  const actionConfig =
-    parsed.data.actionType === "notify_team"
-      ? { email: parsed.data.email }
-      : { status: parsed.data.actionStatus };
+
+  let actionConfig: Record<string, unknown> = {};
+  if (parsed.data.actionType === "notify_team") actionConfig = { email: parsed.data.email };
+  if (parsed.data.actionType === "set_lead_status") {
+    actionConfig = { status: parsed.data.actionStatus };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.from("automations").insert({
