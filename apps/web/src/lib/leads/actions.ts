@@ -14,6 +14,7 @@ import { recordLeadEvent } from "@/lib/leads/events";
 import { generateLeadFollowUpDraft } from "@/lib/leads/follow-up";
 import { LEAD_STATUSES } from "@/lib/leads/types";
 import { logger } from "@/lib/observability/logger";
+import { EMAIL_FROM, resend } from "@/lib/email/client";
 
 const optionalText = (max: number) =>
   z.preprocess(
@@ -241,4 +242,110 @@ export async function addLeadNote(formData: FormData): Promise<void> {
   }
 
   revalidatePath(`/leads/${leadId}`);
+}
+
+
+export async function updateLeadDetails(formData: FormData): Promise<void> {
+  const { activeOrg } = await requireLeadAccess();
+  const leadId = String(formData.get("leadId") ?? "");
+  if (!leadId) redirect("/leads?error=missing");
+
+  const parsed = leadSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    company: formData.get("company"),
+    message: formData.get("message"),
+  });
+  if (!parsed.success) redirect(`/leads/${encodeURIComponent(leadId)}?error=invalid-lead`);
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("leads")
+    .update({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      company: parsed.data.company,
+      message: parsed.data.message,
+    })
+    .eq("id", leadId)
+    .eq("org_id", activeOrg.id);
+
+  if (error) {
+    logger.error("leads.details_update_failed", { err: error, leadId, orgId: activeOrg.id });
+    redirect(`/leads/${encodeURIComponent(leadId)}?error=update`);
+  }
+
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
+}
+
+export async function sendLeadFollowUp(formData: FormData): Promise<void> {
+  const { user, activeOrg } = await requireLeadAccess();
+  const leadId = String(formData.get("leadId") ?? "");
+  if (!leadId) redirect("/leads?error=missing");
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select("email, status, follow_up_subject, follow_up_draft")
+    .eq("id", leadId)
+    .eq("org_id", activeOrg.id)
+    .maybeSingle();
+
+  if (error || !data?.email || !data.follow_up_draft) {
+    redirect(`/leads/${encodeURIComponent(leadId)}?error=missing-draft`);
+  }
+
+  const subject = data.follow_up_subject || "Following up";
+  const sent = await resend.emails.send({
+    from: EMAIL_FROM,
+    to: data.email,
+    subject,
+    text: data.follow_up_draft,
+  });
+
+  if (sent.error) {
+    logger.error("leads.followup_send_failed", {
+      leadId,
+      orgId: activeOrg.id,
+      error: sent.error.message,
+    });
+    redirect(`/leads/${encodeURIComponent(leadId)}?error=send`);
+  }
+
+  const now = new Date().toISOString();
+  const patch: Record<string, unknown> = { last_contacted_at: now };
+  if (data.status === "new") patch.status = "contacted";
+
+  const { error: updateError } = await supabase
+    .from("leads")
+    .update(patch)
+    .eq("id", leadId)
+    .eq("org_id", activeOrg.id);
+  if (updateError) {
+    logger.error("leads.followup_post_send_update_failed", {
+      err: updateError,
+      leadId,
+      orgId: activeOrg.id,
+    });
+  }
+
+  await recordLeadEvent(createAdminClient(), {
+    orgId: activeOrg.id,
+    leadId,
+    type: "lead.followup_sent",
+    data: {
+      subject,
+      providerMessageId: sent.data?.id ?? null,
+    },
+    actorUserId: user.id,
+    dispatch: false,
+  });
+
+  revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
+  revalidatePath("/dashboard");
+  redirect(`/leads/${encodeURIComponent(leadId)}?sent=1`);
 }
