@@ -7,12 +7,16 @@ import {
   CalendarDays,
   MessageSquareText,
   Users,
+  Workflow,
 } from "lucide-react";
 
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getDisplayUser } from "@/lib/auth/user";
+import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getOrgContext } from "@/lib/org/queries";
 import { countDocuments } from "@/lib/documents/queries";
+import { countNewLeads } from "@/lib/leads/queries";
+import { listAutomationRuns } from "@/lib/automations/queries";
 import { listConversationsPage } from "@/lib/assistant/conversations";
 import { getUnreadCount } from "@/lib/notifications/queries";
 import { getLatestSchedule, getSchedulingSummary } from "@/lib/scheduling/queries";
@@ -33,17 +37,33 @@ function formatUpdatedAt(value: string) {
 }
 
 export default async function DashboardPage() {
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
+  const [user, { activeOrg }, leadsAccess, automationsAccess] = await Promise.all([
+    getAuthUser(),
+    getOrgContext(),
+    getFeatureAccess("leads"),
+    getFeatureAccess("automations"),
+  ]);
   if (!activeOrg) redirect("/onboarding");
 
-  const [documentCount, unreadCount, scheduling, latestSchedule, conversationPage] =
-    await Promise.all([
-      countDocuments(activeOrg.id),
-      getUnreadCount(),
-      getSchedulingSummary(activeOrg.id),
-      getLatestSchedule(activeOrg.id),
-      listConversationsPage(activeOrg.id, { limit: 4 }),
-    ]);
+  const [
+    documentCount,
+    unreadCount,
+    scheduling,
+    latestSchedule,
+    conversationPage,
+    newLeadCount,
+    recentAutomationRuns,
+  ] = await Promise.all([
+    countDocuments(activeOrg.id),
+    getUnreadCount(),
+    getSchedulingSummary(activeOrg.id),
+    getLatestSchedule(activeOrg.id),
+    listConversationsPage(activeOrg.id, { limit: 4 }),
+    leadsAccess.entitled ? countNewLeads(activeOrg.id) : Promise.resolve(null),
+    automationsAccess.entitled
+      ? listAutomationRuns(activeOrg.id, 10)
+      : Promise.resolve([]),
+  ]);
 
   const firstName = user ? getDisplayUser(user).name.split(/\s+/)[0] : null;
   const scheduleState = !scheduling.onboardedAt
@@ -53,6 +73,7 @@ export default async function DashboardPage() {
       : latestSchedule?.status === "draft"
         ? "Draft"
         : "None";
+  const failedAutomationRuns = recentAutomationRuns.filter((run) => run.status === "failed").length;
 
   return (
     <>
@@ -61,7 +82,7 @@ export default async function DashboardPage() {
         description={activeOrg.name}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
         <Link href="/knowledge" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
           <StatCard
             label="Knowledge"
@@ -104,6 +125,28 @@ export default async function DashboardPage() {
             className="h-full transition-shadow hover:shadow-card-hover"
           />
         </Link>
+        {leadsAccess.entitled ? (
+          <Link href="/leads" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+            <StatCard
+              label="New leads"
+              value={newLeadCount ?? 0}
+              hint={(newLeadCount ?? 0) === 1 ? "new enquiry" : "new enquiries"}
+              icon={<Users />}
+              className="h-full transition-shadow hover:shadow-card-hover"
+            />
+          </Link>
+        ) : null}
+        {automationsAccess.entitled ? (
+          <Link href="/automations" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+            <StatCard
+              label="Automation issues"
+              value={failedAutomationRuns}
+              hint={failedAutomationRuns ? "failed recent runs" : "recent runs healthy"}
+              icon={<Workflow />}
+              className="h-full transition-shadow hover:shadow-card-hover"
+            />
+          </Link>
+        ) : null}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
@@ -147,10 +190,7 @@ export default async function DashboardPage() {
                 <p className="text-muted-foreground type-small mt-1">
                   Upload business documents, then ask your first grounded question.
                 </p>
-                <Link
-                  href="/assistant"
-                  className={cn(buttonVariants({ size: "sm" }), "mt-4")}
-                >
+                <Link href="/assistant" className={cn(buttonVariants({ size: "sm" }), "mt-4")}>
                   Start a conversation
                 </Link>
               </div>
@@ -173,10 +213,7 @@ export default async function DashboardPage() {
                     a schedule.
                   </p>
                 </div>
-                <Link
-                  href="/scheduling/setup"
-                  className={cn(buttonVariants(), "w-full")}
-                >
+                <Link href="/scheduling/setup" className={cn(buttonVariants(), "w-full")}>
                   Complete scheduling setup
                 </Link>
               </>
@@ -202,10 +239,7 @@ export default async function DashboardPage() {
                     </p>
                   )}
                 </div>
-                <Link
-                  href="/scheduling/calendar"
-                  className={cn(buttonVariants(), "w-full")}
-                >
+                <Link href="/scheduling/calendar" className={cn(buttonVariants(), "w-full")}>
                   Open schedule
                 </Link>
               </>
@@ -217,10 +251,7 @@ export default async function DashboardPage() {
                     Setup is complete. Generate the first schedule when you are ready.
                   </p>
                 </div>
-                <Link
-                  href="/scheduling/calendar"
-                  className={cn(buttonVariants(), "w-full")}
-                >
+                <Link href="/scheduling/calendar" className={cn(buttonVariants(), "w-full")}>
                   Create schedule
                 </Link>
               </>
