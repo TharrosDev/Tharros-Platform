@@ -9,58 +9,47 @@ import {
   MarketingHeader,
 } from "@/components/marketing/marketing-chrome";
 
-/**
- * The interim marketing landing, in the dark Workshop world (graphite + dot
- * grid + cobalt glow, matching /pricing and the auth brand panel). One page:
- * hero, the product trio, how it works, footer. The full marketing site is a
- * Phase 9 launch gate; this carries the brand until then.
- */
-
 const PRODUCTS = [
   {
     icon: Sparkles,
     name: "AI Business Assistant",
     blurb:
-      "Answers questions from your own documents, in plain language, with the source cited every time.",
+      "Answers questions from your own documents in plain language, with sources attached to grounded answers.",
   },
   {
     icon: CalendarDays,
     name: "AI Workforce Scheduling",
     blurb:
-      "Collects availability, builds a labor-valid schedule, and handles sick calls, swaps, and time off. Only exceptions reach you.",
+      "Collects availability, builds schedule candidates, supports manager review, and handles sick calls, swaps, time off and employee self-service.",
     headline: true,
   },
   {
     icon: Workflow,
     name: "Lead Capture & Automations",
     blurb:
-      "Catches every enquiry, follows up for you, and runs the busywork between the tools you already use.",
+      "On the roadmap. These capabilities are not sold as current plan entitlements until the connector and workflow layers are production-ready.",
+    roadmap: true,
   },
 ];
 
 const STEPS = [
   {
     icon: FileText,
-    title: "Show it your business",
-    body: "Upload your documents, add your team, and answer a few plain questions about how you run things.",
+    title: "Add your business context",
+    body: "Upload business documents, add your team, and configure the rules Tharros should work from.",
   },
   {
     icon: MessagesSquare,
-    title: "Let it run",
-    body: "Tharros answers questions, drafts the schedule, and chases the follow-ups while you work.",
+    title: "Use the live products",
+    body: "Ask grounded questions from your knowledge base and generate workforce schedules from real availability and constraints.",
   },
   {
     icon: Users,
-    title: "Approve the exceptions",
-    body: "The few decisions that genuinely need a human land in one inbox. Everything else is handled.",
+    title: "Keep control of the exceptions",
+    body: "Managers can review schedules, handle approvals, edit decisions, and step in when an operational change needs a person.",
   },
 ];
 
-/**
- * Staggered, motion-safe entrance for the hero only (≤ 600ms total). The
- * classes are static so Tailwind emits them; the per-element delay rides an
- * inline style (with backwards fill so delayed elements start hidden).
- */
 const ENTRANCE_CLASS =
   "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500";
 function entranceDelay(delayMs: number): React.CSSProperties {
@@ -81,7 +70,7 @@ export default function MarketingHome() {
           )}
           style={entranceDelay(0)}
         >
-          Your business, running itself.
+          Practical AI for running the work behind your business.
         </h1>
         <p
           className={cn(
@@ -90,8 +79,8 @@ export default function MarketingHome() {
           )}
           style={entranceDelay(80)}
         >
-          The AI operating layer for small businesses. Tharros does the busywork between the tools
-          you already use, so you can get back to the work that matters.
+          Tharros combines a grounded business assistant with workforce scheduling in one operating
+          workspace for small teams.
         </p>
         <div
           className={cn("mt-10 flex flex-wrap items-center justify-center gap-3", ENTRANCE_CLASS)}
@@ -111,11 +100,10 @@ export default function MarketingHome() {
           className={cn("text-sidebar-muted-foreground type-small mt-6", ENTRANCE_CLASS)}
           style={entranceDelay(240)}
         >
-          14-day free trial. No credit card to look around.
+          14-day free trial. Current plan features are listed on the pricing page.
         </p>
       </section>
 
-      {/* The products */}
       <section
         aria-labelledby="products-heading"
         className="relative mx-auto w-full max-w-6xl px-6 pb-24"
@@ -125,11 +113,11 @@ export default function MarketingHome() {
             id="products-heading"
             className="text-3xl font-bold tracking-tight text-balance sm:text-4xl"
           >
-            One place to keep the day moving.
+            Two production products, one workspace.
           </h2>
           <p className="text-sidebar-muted-foreground mt-3 text-base leading-relaxed text-pretty">
-            Tharros brings the work that usually disappears between inboxes, spreadsheets, and
-            conversations into one calm operating view.
+            Tharros focuses on the parts that are implemented end to end today, while keeping future
+            capabilities clearly marked as roadmap work.
           </p>
         </div>
 
@@ -142,14 +130,14 @@ export default function MarketingHome() {
               AI Workforce Scheduling
             </h3>
             <p className="text-sidebar-muted-foreground mt-3 max-w-xl text-base leading-relaxed">
-              Collects availability, builds a labor-valid schedule, and handles sick calls, swaps,
-              and time off. Only exceptions reach you.
+              Collect availability, generate and review schedule candidates, publish shifts, and
+              manage sick calls, replacements, swaps and time off.
             </p>
             <div className="mt-9 grid gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 sm:grid-cols-3">
               {[
                 ["Availability", "Collected"],
-                ["Schedule", "Built"],
-                ["Exceptions", "Ready"],
+                ["Schedule", "Reviewed"],
+                ["Changes", "Managed"],
               ].map(([label, value]) => (
                 <div key={label} className="bg-sidebar px-4 py-3.5">
                   <span className="text-sidebar-muted-foreground type-meta block">{label}</span>
@@ -160,22 +148,30 @@ export default function MarketingHome() {
           </div>
 
           <div className="divide-y divide-white/10">
-            {PRODUCTS.filter((product) => !product.headline).map(({ icon: Icon, name, blurb }) => (
-              <div key={name} className="flex min-h-52 flex-col justify-center p-7 sm:p-9">
-                <span className="flex size-10 items-center justify-center rounded-lg bg-white/10 text-sidebar-foreground">
-                  <Icon className="size-5" aria-hidden />
-                </span>
-                <h3 className="mt-5 text-lg font-bold tracking-tight">{name}</h3>
-                <p className="text-sidebar-muted-foreground mt-2 text-sm leading-relaxed">
-                  {blurb}
-                </p>
-              </div>
-            ))}
+            {PRODUCTS.filter((product) => !product.headline).map(
+              ({ icon: Icon, name, blurb, roadmap }) => (
+                <div key={name} className="flex min-h-52 flex-col justify-center p-7 sm:p-9">
+                  <span className="flex size-10 items-center justify-center rounded-lg bg-white/10 text-sidebar-foreground">
+                    <Icon className="size-5" aria-hidden />
+                  </span>
+                  <div className="mt-5 flex items-center gap-2">
+                    <h3 className="text-lg font-bold tracking-tight">{name}</h3>
+                    {roadmap ? (
+                      <span className="rounded-full border border-white/15 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-sidebar-muted-foreground">
+                        Roadmap
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-sidebar-muted-foreground mt-2 text-sm leading-relaxed">
+                    {blurb}
+                  </p>
+                </div>
+              ),
+            )}
           </div>
         </div>
       </section>
 
-      {/* How it works */}
       <section
         aria-labelledby="how-heading"
         className="relative border-t border-white/10 bg-black/20"
@@ -185,7 +181,8 @@ export default function MarketingHome() {
             How it works
           </h2>
           <p className="text-sidebar-muted-foreground mt-2 max-w-xl text-sm leading-relaxed">
-            Built for owners, not operators of software. Three steps, then it quietly runs.
+            Configure the context once, use the live products, and keep a person in control of
+            consequential decisions.
           </p>
           <ol className="mt-8 grid gap-6 md:grid-cols-3">
             {STEPS.map(({ icon: Icon, title, body }, index) => (
