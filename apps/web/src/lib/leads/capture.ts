@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ACTIVE_STATUSES, type SubscriptionStatus, type Tier } from "@/lib/billing/schemas";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createNotification } from "@/lib/notifications/notify";
 import { recordLeadEvent } from "@/lib/leads/events";
@@ -17,6 +18,20 @@ export type PublicLeadInput = {
   message: string | null;
 };
 
+async function orgCanCaptureLeads(orgId: string): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("subscriptions")
+    .select("status, tier")
+    .eq("org_id", orgId)
+    .maybeSingle();
+
+  if (error || !data) return false;
+  const status = data.status as SubscriptionStatus;
+  const tier = data.tier as Tier | null;
+  return ACTIVE_STATUSES.includes(status) && (tier === "growth" || tier === "pro");
+}
+
 export async function getPublicCaptureForm(token: string): Promise<CaptureForm | null> {
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -30,13 +45,19 @@ export async function getPublicCaptureForm(token: string): Promise<CaptureForm |
     logger.warn("leads.public_form_lookup_failed", { error: error.message });
     return null;
   }
-  return data ? mapCaptureForm(data as Parameters<typeof mapCaptureForm>[0]) : null;
+  if (!data) return null;
+
+  const form = mapCaptureForm(data as Parameters<typeof mapCaptureForm>[0]);
+  return (await orgCanCaptureLeads(form.orgId)) ? form : null;
 }
 
 export async function capturePublicLead(
   token: string,
   input: PublicLeadInput,
-): Promise<{ ok: true; leadId: string } | { ok: false; reason: "invalid_form" | "rate_limited" }> {
+): Promise<
+  { ok: true; leadId: string } |
+  { ok: false; reason: "invalid_form" | "rate_limited" | "inactive_plan" }
+> {
   const admin = createAdminClient();
   const { data: formData, error: formError } = await admin
     .from("lead_capture_forms")
@@ -48,6 +69,10 @@ export async function capturePublicLead(
   if (formError || !formData) return { ok: false, reason: "invalid_form" };
 
   const form = formData as { id: string; org_id: string; name: string; active: boolean };
+  if (!(await orgCanCaptureLeads(form.org_id))) {
+    return { ok: false, reason: "inactive_plan" };
+  }
+
   const since = new Date(Date.now() - 60_000).toISOString();
   const { count } = await admin
     .from("leads")
@@ -97,7 +122,7 @@ export async function capturePublicLead(
         type: "new_lead",
         title: "New lead captured",
         body: `${input.name} submitted ${form.name}.`,
-        data: { url: "/leads", label: "Open leads", leadId },
+        data: { url: `/leads/${leadId}`, label: "Open lead", leadId },
         email: true,
       }),
     ),
