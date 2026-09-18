@@ -7,6 +7,9 @@ function isLeadStatus(value: unknown): value is LeadStatus {
 
 export const automationDispatchHandler: JobHandler = async (job: Job) => {
   const eventId = typeof job.payload.eventId === "string" ? job.payload.eventId : null;
+  const targetAutomationId =
+    typeof job.payload.automationId === "string" ? job.payload.automationId : null;
+  const manual = job.payload.manual === true;
   if (!eventId) throw new Error("automation-dispatch missing eventId");
 
   const [{ createAdminClient }, { createNotification }] = await Promise.all([
@@ -48,12 +51,17 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
     status: LeadStatus;
   };
 
-  const { data: automationRows, error: automationError } = await admin
+  let automationQuery = admin
     .from("automations")
     .select("id, name, trigger_type, trigger_config, action_type, action_config")
     .eq("org_id", event.org_id)
-    .eq("enabled", true)
-    .eq("trigger_type", event.type);
+    .eq("enabled", true);
+
+  automationQuery = targetAutomationId
+    ? automationQuery.eq("id", targetAutomationId)
+    : automationQuery.eq("trigger_type", event.type);
+
+  const { data: automationRows, error: automationError } = await automationQuery;
   if (automationError) throw automationError;
 
   for (const row of automationRows ?? []) {
@@ -68,6 +76,7 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
 
     const trigger = automation.trigger_config ?? {};
     if (
+      !manual &&
       event.type === "lead.status_changed" &&
       typeof trigger.toStatus === "string" &&
       trigger.toStatus !== event.data?.to
@@ -116,7 +125,7 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
               type: "system",
               title: `Automation: ${automation.name}`,
               body: `${lead.name} matched ${automation.name}.`,
-              data: { url: "/leads", label: "Open leads", leadId: lead.id },
+              data: { url: `/leads/${lead.id}`, label: "Open lead", leadId: lead.id },
               email,
             }),
           ),
