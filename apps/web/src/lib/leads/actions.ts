@@ -138,6 +138,7 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
   revalidatePath("/dashboard");
 }
 
@@ -161,8 +162,9 @@ export async function generateLeadFollowUp(formData: FormData): Promise<void> {
   }
 
   revalidatePath("/leads");
+  revalidatePath(`/leads/${leadId}`);
   revalidatePath("/settings/usage");
-  redirect("/leads?drafted=1");
+  redirect(`/leads/${encodeURIComponent(leadId)}?drafted=1`);
 }
 
 export async function createCaptureForm(formData: FormData): Promise<void> {
