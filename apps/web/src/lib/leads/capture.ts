@@ -1,0 +1,107 @@
+import "server-only";
+
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createNotification } from "@/lib/notifications/notify";
+import { recordLeadEvent } from "@/lib/leads/events";
+import { mapCaptureForm, type CaptureForm } from "@/lib/leads/types";
+import { logger } from "@/lib/observability/logger";
+
+const FORM_COLUMNS =
+  "id, org_id, name, public_token, headline, success_message, active, created_at, updated_at";
+
+export type PublicLeadInput = {
+  name: string;
+  email: string | null;
+  phone: string | null;
+  company: string | null;
+  message: string | null;
+};
+
+export async function getPublicCaptureForm(token: string): Promise<CaptureForm | null> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("lead_capture_forms")
+    .select(FORM_COLUMNS)
+    .eq("public_token", token)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (error) {
+    logger.warn("leads.public_form_lookup_failed", { error: error.message });
+    return null;
+  }
+  return data ? mapCaptureForm(data as Parameters<typeof mapCaptureForm>[0]) : null;
+}
+
+export async function capturePublicLead(
+  token: string,
+  input: PublicLeadInput,
+): Promise<{ ok: true; leadId: string } | { ok: false; reason: "invalid_form" | "rate_limited" }> {
+  const admin = createAdminClient();
+  const { data: formData, error: formError } = await admin
+    .from("lead_capture_forms")
+    .select("id, org_id, name, active")
+    .eq("public_token", token)
+    .eq("active", true)
+    .maybeSingle();
+
+  if (formError || !formData) return { ok: false, reason: "invalid_form" };
+
+  const form = formData as { id: string; org_id: string; name: string; active: boolean };
+  const since = new Date(Date.now() - 60_000).toISOString();
+  const { count } = await admin
+    .from("leads")
+    .select("id", { head: true, count: "exact" })
+    .eq("capture_form_id", form.id)
+    .gte("created_at", since);
+
+  if ((count ?? 0) >= 30) return { ok: false, reason: "rate_limited" };
+
+  const { data: leadData, error: leadError } = await admin
+    .from("leads")
+    .insert({
+      org_id: form.org_id,
+      capture_form_id: form.id,
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      company: input.company,
+      message: input.message,
+      source: "public_form",
+      status: "new",
+    })
+    .select("id")
+    .single();
+
+  if (leadError) throw leadError;
+  const leadId = (leadData as { id: string }).id;
+
+  await recordLeadEvent(admin, {
+    orgId: form.org_id,
+    leadId,
+    type: "lead.created",
+    data: { source: "public_form", captureFormId: form.id },
+  });
+
+  const { data: managers } = await admin
+    .from("memberships")
+    .select("user_id, role")
+    .eq("org_id", form.org_id)
+    .in("role", ["owner", "admin"]);
+
+  await Promise.all(
+    (managers ?? []).map((manager) =>
+      createNotification(admin, {
+        orgId: form.org_id,
+        userId: String(manager.user_id),
+        type: "new_lead",
+        title: "New lead captured",
+        body: `${input.name} submitted ${form.name}.`,
+        data: { url: "/leads", label: "Open leads", leadId },
+        email: true,
+      }),
+    ),
+  );
+
+  return { ok: true, leadId };
+}
