@@ -1,5 +1,6 @@
 import type { Job, JobHandler } from "@/lib/jobs/types";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads/types";
+import { matchesAutomationEvent } from "@/lib/automations/match";
 
 function isLeadStatus(value: unknown): value is LeadStatus {
   return typeof value === "string" && (LEAD_STATUSES as readonly string[]).includes(value);
@@ -74,12 +75,14 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
       action_config: Record<string, unknown> | null;
     };
 
-    const trigger = automation.trigger_config ?? {};
     if (
-      !manual &&
-      event.type === "lead.status_changed" &&
-      typeof trigger.toStatus === "string" &&
-      trigger.toStatus !== event.data?.to
+      !matchesAutomationEvent({
+        manual,
+        eventType: event.type,
+        eventData: event.data,
+        triggerType: automation.trigger_type as "lead.created" | "lead.status_changed",
+        triggerConfig: automation.trigger_config,
+      })
     ) {
       continue;
     }
