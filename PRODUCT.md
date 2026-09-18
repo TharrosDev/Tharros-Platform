@@ -1,60 +1,55 @@
 # Product
 
-## Register
-
-product
-
 ## Users
 
-Non-technical small-business owners in Ottawa and across Canada (trades, clinics,
-shops, local services). They are busy operators, not software people, and many
-have been burned by over-promised SaaS before. They open Tharros between jobs and
-customers to see what was handled for them and to deal with the few things that
-need a human. Trust and clarity matter more than density or power-user depth.
+Tharros is built for non-technical small-business owners and managers in Canada.
+They need dependable operational software, not an AI demo. Trust, clarity, and
+accurate representation of what the product can do take priority over feature
+count or novelty.
 
-## Product Purpose
+## Product purpose
 
-Tharros is the AI operating layer for a small business: a single dashboard that
-orchestrates the tools an owner already uses and runs three AI products on top
-(an AI Business Assistant, Lead Capture + Follow-Up, and a Workflow Automation
-Hub), plus Settings and Billing. Success is an owner trusting it to quietly do
-the busywork and only surfacing what actually needs them.
+Tharros is an operating workspace for a small business. The production product
+currently has two primary capabilities:
 
-## Brand Personality
+1. **AI Business Assistant** — grounded answers and generation over a business's
+   own knowledge base.
+2. **AI Workforce Scheduling** — team setup, availability collection, schedule
+   generation and review, publishing, employee self-service, sick-call coverage,
+   swaps, time off, analytics, and activity history.
 
-Warm Canadian, with backbone. Warm, plain, human, and local, but confident: it
-speaks to the person ("Welcome back, {first name}"), names outcomes rather than plumbing,
-and never hides behind jargon. Three words: warm, confident, capable. The interface
-should feel inviting but assured: a grounded, well-kept workspace a busy owner
-trusts on sight, not a cozy cottage and not a cold control panel.
+Lead capture, external-tool connectors, and workflow automation remain future
+product work until their end-to-end implementations are production-ready. They
+must not appear in paid-plan entitlements or public copy as shipped features.
 
-## Anti-references
+## Product principles
 
-- **Generic SaaS-cream:** warm-beige / parchment near-white canvases, identical
-  icon-card grids, the big-number hero-metric template. The default AI dashboard
-  look.
-- **Cold enterprise:** dense grey corporate admin panels (old Jira / Salesforce).
-  Too sterile and intimidating for an owner.
-- **Techy / developer:** terminal-dark, monospace-heavy, dashboards built for
-  engineers. The user is non-technical.
-- The Tharros marketing site's bold red "Redline" aesthetic. The app is its own
-  calmer thing.
+- **Truth before breadth.** Public copy, pricing, plan gates, navigation, and the
+  actual product must agree. A roadmap item is never presented as a current
+  entitlement.
+- **Earned trust over flash.** Familiar, legible and predictable. AI output must
+  be bounded, attributable, and honest about uncertainty.
+- **Speak human.** Use plain language and concrete outcomes instead of model,
+  infrastructure, or automation jargon.
+- **Quiet by default, clear under pressure.** Routine work stays calm. Errors,
+  approvals, exceptions, and irreversible actions are unmistakable.
+- **Human control for consequential actions.** Managers can review, edit,
+  approve, reject, retry, or take over important operational decisions.
+- **Tenant isolation by default.** Organization boundaries are enforced in the
+  database, not left to UI convention.
 
-## Design Principles
+## Design direction
 
-- **Earned trust over flash.** Familiar, legible, predictable. The tool should
-  disappear into the task; surprise is saved for small moments, not the whole UI.
-- **Warmth comes from the brand, not from beige.** Carry warmth through the maple
-  accent, copy, and a brand-tinted neutral ramp, never a default cream body.
-- **Speak human.** Plain warm-Canadian copy. Name the outcome. No buzzwords, no
-  em-dashes.
-- **One accent, used with restraint.** Maple marks the primary action, the current
-  selection, and state. It is never decoration.
-- **Quiet by default, clear under pressure.** Calm at rest; obvious when something
-  needs the owner (state, errors, things waiting).
+The current design system is **Workshop**. It uses warm graphite chrome, a clean
+light working canvas, and a restrained cobalt accent. The product should feel
+like dependable operating software for a busy owner: confident and practical,
+not decorative, developer-centric, or generic beige SaaS.
 
-## Accessibility & Inclusion
+The canonical implementation guidance lives in
+`apps/web/docs/DESIGN.md`.
 
-WCAG AA. All text meets AA contrast (verified on the token ramp), interactive
-elements have visible focus rings, every animation has a reduced-motion
-alternative, and the surface is keyboard-navigable.
+## Accessibility
+
+WCAG AA is the baseline. Text contrast, visible focus states, keyboard
+navigation, reduced-motion behavior, semantic structure, and non-colour-only
+state communication are product requirements rather than optional polish.
