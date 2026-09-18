@@ -6,6 +6,7 @@ export type LeadEventType =
   | "lead.created"
   | "lead.status_changed"
   | "lead.note_added"
+  | "lead.followup_drafted"
   | "automation.action";
 
 export async function recordLeadEvent(

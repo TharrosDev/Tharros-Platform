@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ExternalLink, Inbox, Link2, Plus, Users } from "lucide-react";
+import { ExternalLink, Inbox, Link2, Plus, Sparkles, Users } from "lucide-react";
 
 import { getOrgContext } from "@/lib/org/queries";
 import { getURL } from "@/lib/site-url";
@@ -9,6 +9,7 @@ import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads/types";
 import {
   createCaptureForm,
   createManualLead,
+  generateLeadFollowUp,
   toggleCaptureForm,
   updateLeadStatus,
 } from "@/lib/leads/actions";
@@ -39,7 +40,13 @@ function sourceLabel(source: string) {
 export default async function LeadsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; error?: string; created?: string; "form-created"?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    error?: string;
+    created?: string;
+    drafted?: string;
+    "form-created"?: string;
+  }>;
 }) {
   const [{ activeOrg }, params] = await Promise.all([getOrgContext(), searchParams]);
   if (!activeOrg) redirect("/dashboard");
@@ -63,12 +70,14 @@ export default async function LeadsPage({
     <>
       <PageHeader
         title="Lead Capture"
-        description="Collect enquiries, keep every contact in one pipeline, and trigger automations from real lead events."
+        description="Collect enquiries, manage the pipeline, draft follow-ups with AI, and trigger automations from real lead events."
       />
 
       {params.error ? (
         <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-lg border px-4 py-3 text-sm">
-          That action could not be completed. Check the submitted fields or your permissions.
+          {params.error === "usage-limit"
+            ? "Your organization has reached its monthly AI usage limit."
+            : "That action could not be completed. Check the submitted fields or your permissions."}
         </div>
       ) : null}
 
@@ -229,6 +238,7 @@ export default async function LeadsPage({
                   <TableHead>Contact</TableHead>
                   <TableHead>Source</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Follow-up</TableHead>
                   <TableHead>Received</TableHead>
                 </TableRow>
               </TableHeader>
@@ -270,6 +280,34 @@ export default async function LeadsPage({
                       <Badge className="mt-1" variant={statusVariant(lead.status)}>
                         {lead.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="min-w-52">
+                      {lead.email ? (
+                        <div className="space-y-2">
+                          <form action={generateLeadFollowUp}>
+                            <input type="hidden" name="leadId" value={lead.id} />
+                            <Button type="submit" variant="outline" size="sm">
+                              <Sparkles />
+                              {lead.followUpDraft ? "Redraft" : "Draft"}
+                            </Button>
+                          </form>
+                          {lead.followUpDraft ? (
+                            <details className="text-xs">
+                              <summary className="text-primary cursor-pointer font-medium">
+                                View latest draft
+                              </summary>
+                              <div className="bg-surface-2 mt-2 max-w-sm rounded-lg border p-3">
+                                <p className="font-semibold">{lead.followUpSubject ?? "Following up"}</p>
+                                <p className="text-muted-foreground mt-2 whitespace-pre-wrap">
+                                  {lead.followUpDraft}
+                                </p>
+                              </div>
+                            </details>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">Email required</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {new Intl.DateTimeFormat("en-CA", {

@@ -6,10 +6,12 @@ import { z } from "zod";
 
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getFeatureAccess } from "@/lib/billing/entitlements";
+import { checkQueryCap } from "@/lib/billing/usage";
 import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordLeadEvent } from "@/lib/leads/events";
+import { generateLeadFollowUpDraft } from "@/lib/leads/follow-up";
 import { LEAD_STATUSES } from "@/lib/leads/types";
 import { logger } from "@/lib/observability/logger";
 
@@ -137,6 +139,30 @@ export async function updateLeadStatus(formData: FormData): Promise<void> {
 
   revalidatePath("/leads");
   revalidatePath("/dashboard");
+}
+
+export async function generateLeadFollowUp(formData: FormData): Promise<void> {
+  const { user, activeOrg } = await requireLeadAccess();
+  const leadId = String(formData.get("leadId") ?? "");
+  if (!leadId) redirect("/leads?error=missing");
+
+  const cap = await checkQueryCap(activeOrg.id);
+  if (!cap.allowed) redirect("/leads?error=usage-limit");
+
+  try {
+    await generateLeadFollowUpDraft({
+      orgId: activeOrg.id,
+      leadId,
+      userId: user.id,
+    });
+  } catch (err) {
+    logger.error("leads.followup_draft_failed", { err, leadId, orgId: activeOrg.id });
+    redirect("/leads?error=followup");
+  }
+
+  revalidatePath("/leads");
+  revalidatePath("/settings/usage");
+  redirect("/leads?drafted=1");
 }
 
 export async function createCaptureForm(formData: FormData): Promise<void> {

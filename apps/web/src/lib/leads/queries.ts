@@ -11,7 +11,7 @@ import {
 } from "@/lib/leads/types";
 
 const LEAD_COLUMNS =
-  "id, org_id, capture_form_id, name, email, phone, company, message, source, status, created_by, last_contacted_at, created_at, updated_at";
+  "id, org_id, capture_form_id, name, email, phone, company, message, source, status, created_by, last_contacted_at, follow_up_subject, follow_up_draft, follow_up_drafted_at, created_at, updated_at";
 const FORM_COLUMNS =
   "id, org_id, name, public_token, headline, success_message, active, created_at, updated_at";
 

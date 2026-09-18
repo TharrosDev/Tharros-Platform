@@ -16,6 +16,9 @@ export type Lead = {
   status: LeadStatus;
   createdBy: string | null;
   lastContactedAt: string | null;
+  followUpSubject: string | null;
+  followUpDraft: string | null;
+  followUpDraftedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -45,6 +48,9 @@ type LeadRow = {
   status: LeadStatus;
   created_by: string | null;
   last_contacted_at: string | null;
+  follow_up_subject: string | null;
+  follow_up_draft: string | null;
+  follow_up_drafted_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -75,6 +81,9 @@ export function mapLead(row: LeadRow): Lead {
     status: row.status,
     createdBy: row.created_by,
     lastContactedAt: row.last_contacted_at,
+    followUpSubject: row.follow_up_subject,
+    followUpDraft: row.follow_up_draft,
+    followUpDraftedAt: row.follow_up_drafted_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
