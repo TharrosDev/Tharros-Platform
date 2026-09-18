@@ -7,6 +7,7 @@ import {
   mapLead,
   type CaptureForm,
   type Lead,
+  type LeadEvent,
   type LeadStatus,
 } from "@/lib/leads/types";
 
@@ -35,6 +36,52 @@ export async function listLeads(
     return [];
   }
   return ((data ?? []) as Parameters<typeof mapLead>[0][]).map(mapLead);
+}
+
+export async function getLead(orgId: string, leadId: string): Promise<Lead | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select(LEAD_COLUMNS)
+    .eq("org_id", orgId)
+    .eq("id", leadId)
+    .maybeSingle();
+
+  if (error) {
+    logger.error("leads.get_failed", { err: error, orgId, leadId });
+    return null;
+  }
+  return data ? mapLead(data as Parameters<typeof mapLead>[0]) : null;
+}
+
+export async function listLeadEvents(
+  orgId: string,
+  leadId: string,
+  limit = 100,
+): Promise<LeadEvent[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("lead_events")
+    .select("id, org_id, lead_id, type, data, actor_user_id, created_at")
+    .eq("org_id", orgId)
+    .eq("lead_id", leadId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    logger.error("leads.events_list_failed", { err: error, orgId, leadId });
+    return [];
+  }
+
+  return (data ?? []).map((row) => ({
+    id: String(row.id),
+    orgId: String(row.org_id),
+    leadId: String(row.lead_id),
+    type: row.type as LeadEvent["type"],
+    data: (row.data ?? {}) as Record<string, unknown>,
+    actorUserId: row.actor_user_id ? String(row.actor_user_id) : null,
+    createdAt: String(row.created_at),
+  }));
 }
 
 export async function countNewLeads(orgId: string): Promise<number> {
