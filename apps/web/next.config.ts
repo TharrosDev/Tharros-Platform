@@ -9,6 +9,21 @@ import "./src/env";
 
 const isDev = process.env.NODE_ENV === "development";
 
+function configuredOrigin(value: string | undefined, fallback: string): string {
+  if (!value) return fallback;
+  try {
+    return new URL(value).origin;
+  } catch {
+    return fallback;
+  }
+}
+
+const supabaseHttpOrigin = configuredOrigin(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  "https://*.supabase.co",
+);
+const supabaseWsOrigin = supabaseHttpOrigin.replace(/^https:/, "wss:").replace(/^http:/, "ws:");
+
 // Content Security Policy. We deliberately use the static, header-based
 // ("Without Nonces") path from the Next.js CSP guide rather than a nonce so
 // our public/shell routes can keep prerendering statically — nonces force
@@ -29,10 +44,14 @@ const isDev = process.env.NODE_ENV === "development";
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://js.stripe.com;
+  script-src-attr 'none';
   style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data:;
   font-src 'self';
-  connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://checkout.stripe.com;
+  media-src 'self' blob:;
+  worker-src 'self' blob:;
+  manifest-src 'self';
+  connect-src 'self' ${supabaseHttpOrigin} ${supabaseWsOrigin} https://api.stripe.com https://checkout.stripe.com;
   frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://hooks.stripe.com;
   object-src 'none';
   base-uri 'self';
@@ -56,7 +75,9 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "X-DNS-Prefetch-Control", value: "on" },
+  { key: "X-DNS-Prefetch-Control", value: "off" },
+  { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+  { key: "Origin-Agent-Cluster", value: "?1" },
   {
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
