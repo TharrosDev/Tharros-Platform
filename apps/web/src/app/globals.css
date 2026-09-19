@@ -24,7 +24,8 @@
   All text pairs are verified to WCAG AA (run scripts/contrast-check.mjs).
 */
 
-:root {
+:root,
+.marketing-light {
   --radius: 0.75rem;
 
   /* Surfaces — clean cool-neutral content ramp (canvas < card) */
@@ -363,7 +364,8 @@
    Sep 18 visual overhaul — "Command Surface"
    A higher-contrast, layered operating-system treatment shared by every product.
    -------------------------------------------------------------------------- */
-:root {
+:root,
+.marketing-light {
   --radius: 1rem;
   --background: oklch(0.976 0.007 265);
   --foreground: oklch(0.205 0.025 265);
@@ -542,5 +544,52 @@
 @media (max-width: 1023px) {
   .app-shell-canvas::before {
     left: 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Marketing — always light. The class re-declares the light tokens (see the
+   `:root, .marketing-light` selectors above) so they win over the `.dark`
+   values inherited from <html> when the visitor's OS is in dark mode.
+   -------------------------------------------------------------------------- */
+.marketing-light {
+  color-scheme: light;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+@layer utilities {
+  /* Signal travelling along an SVG connector. Pair with stroke-dasharray. */
+  .flow-dash {
+    animation: flow-dash 2.4s linear infinite;
+  }
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+/* Hero entrance runs in CSS so the headline paints before hydration (LCP). */
+@layer utilities {
+  .animate-mask-up {
+    animation: mask-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-fade-up {
+    animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@keyframes mask-up {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
 }

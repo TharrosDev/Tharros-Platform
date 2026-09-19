@@ -3,26 +3,34 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { TharrosWordmark } from "@/components/brand/logo";
 import { buttonVariants } from "@/components/ui/button";
+import { HeaderShell } from "./header-shell";
+
+/** Shared marketing measure: wide editorial grid with a 16px phone gutter. */
+const marketingContainer = "mx-auto w-full max-w-[84rem] px-4 sm:px-8";
 
 const quietLinkClass =
-  "text-sidebar-muted-foreground hover:text-sidebar-foreground focus-visible:ring-sidebar-ring/40 inline-flex min-h-10 items-center rounded-xl px-3 py-2 text-sm font-medium outline-none transition-[color,background-color] hover:bg-white/[0.06] focus-visible:ring-[4px]";
+  "text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-sm font-medium outline-none transition-[color,background-color] hover:bg-accent focus-visible:ring-[4px]";
 
 function MarketingBackdrop() {
   return (
     <>
       <div
         aria-hidden
-        className="text-sidebar-foreground pointer-events-none absolute inset-0 opacity-[0.055]"
+        className="text-foreground pointer-events-none absolute inset-x-0 top-0 h-[60rem] opacity-[0.045]"
         style={{
           backgroundImage:
             "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-          maskImage: "linear-gradient(to bottom, black, transparent 78%)",
+          backgroundSize: "56px 56px",
+          maskImage: "radial-gradient(ellipse 80% 70% at 70% 0%, black, transparent 75%)",
         }}
       />
       <div
         aria-hidden
-        className="bg-primary pointer-events-none absolute -top-56 left-[58%] size-[48rem] -translate-x-1/2 rounded-full opacity-20 blur-[120px]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[56rem]"
+        style={{
+          background:
+            "radial-gradient(ellipse 55% 60% at 88% 8%, color-mix(in oklch, var(--primary) 11%, transparent), transparent 70%)",
+        }}
       />
     </>
   );
@@ -30,52 +38,58 @@ function MarketingBackdrop() {
 
 function MarketingHeader({ showPricing = false }: { showPricing?: boolean }) {
   return (
-    <header className="relative mx-auto mt-3 flex w-[calc(100%-1.5rem)] max-w-6xl items-center justify-between rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 shadow-[0_20px_60px_-38px_rgba(0,0,0,0.75)] backdrop-blur-xl sm:w-[calc(100%-3rem)] sm:px-5">
-      <Link
-        href="/"
-        aria-label="Tharros home"
-        className="focus-visible:ring-sidebar-ring/40 inline-flex min-h-10 items-center rounded-xl outline-none focus-visible:ring-[4px]"
-      >
-        <TharrosWordmark markClassName="size-7" />
-      </Link>
-      <nav aria-label="Main navigation" className="flex items-center gap-1 sm:gap-2">
-        {showPricing ? (
-          <Link href="/pricing" className={cn(quietLinkClass, "hidden sm:inline-flex")}>
-            Pricing
+    <HeaderShell>
+      <div className={cn(marketingContainer, "flex h-16 items-center justify-between sm:h-18")}>
+        <Link
+          href="/"
+          aria-label="Tharros home"
+          className="focus-visible:ring-ring/40 -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 outline-none focus-visible:ring-[4px]"
+        >
+          <TharrosWordmark markClassName="size-7" />
+        </Link>
+        <nav aria-label="Main navigation" className="flex items-center gap-0.5 sm:gap-1.5">
+          <Link href="/#product" className={cn(quietLinkClass, "hidden lg:inline-flex")}>
+            Product
           </Link>
-        ) : null}
-        <Link href="/security" className={cn(quietLinkClass, "hidden md:inline-flex")}>
-          Security
-        </Link>
-        <Link href="/login" className={quietLinkClass}>
-          Sign in
-        </Link>
-        <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "h-11 sm:h-9")}>
-          Get started
-        </Link>
-      </nav>
-    </header>
+          {showPricing ? (
+            <Link href="/pricing" className={cn(quietLinkClass, "hidden sm:inline-flex")}>
+              Pricing
+            </Link>
+          ) : null}
+          <Link href="/security" className={cn(quietLinkClass, "hidden md:inline-flex")}>
+            Security
+          </Link>
+          <Link href="/login" className={quietLinkClass}>
+            Sign in
+          </Link>
+          <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "ml-1 h-11 px-4 sm:h-10")}>
+            Get started
+          </Link>
+        </nav>
+      </div>
+    </HeaderShell>
   );
 }
 
 function MarketingFooter() {
   return (
-    <footer className="relative border-t border-white/10 bg-black/10 backdrop-blur-sm">
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-5 px-6 py-10 text-center sm:flex-row sm:justify-between sm:text-left">
-        <div className="space-y-1.5">
+    <footer className="bg-background relative border-t">
+      <div className={cn(marketingContainer, "grid gap-10 py-14 sm:grid-cols-[1fr_auto] sm:items-end")}>
+        <div className="space-y-3">
           <Link
             href="/"
             aria-label="Tharros home"
-            className="focus-visible:ring-sidebar-ring/40 inline-flex min-h-10 items-center rounded-xl outline-none focus-visible:ring-[4px]"
+            className="focus-visible:ring-ring/40 -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 outline-none focus-visible:ring-[4px]"
           >
-            <TharrosWordmark markClassName="size-6" />
+            <TharrosWordmark markClassName="size-7" />
           </Link>
-          <p className="text-sidebar-muted-foreground type-meta">
-            Keep it Local, Keep it Canadian.
+          <p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
+            One operating workspace for knowledge, scheduling, lead capture and automations.
           </p>
+          <p className="text-muted-foreground type-meta">Keep it Local, Keep it Canadian.</p>
         </div>
         <nav
-          className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1"
+          className="-ml-3 flex flex-wrap items-center gap-x-1 gap-y-1 sm:ml-0 sm:justify-end"
           aria-label="Footer"
         >
           <Link href="/pricing" className={quietLinkClass}>
@@ -99,4 +113,4 @@ function MarketingFooter() {
   );
 }
 
-export { MarketingBackdrop, MarketingFooter, MarketingHeader };
+export { MarketingBackdrop, MarketingFooter, MarketingHeader, marketingContainer };

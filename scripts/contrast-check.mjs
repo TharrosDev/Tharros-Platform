@@ -35,20 +35,20 @@ function contrast(fg, bg) {
 
 const T = {
   // light
-  background: [0.975, 0.004, 264],
-  card: [0.995, 0.0015, 264],
-  foreground: [0.24, 0.014, 264],
-  mutedFg: [0.46, 0.015, 264],
-  primary: [0.52, 0.16, 264],
-  primaryFg: [0.99, 0.005, 264],
-  primarySoftFg: [0.45, 0.14, 264],
-  primarySoft: [0.94, 0.035, 264],
+  background: [0.976, 0.007, 265],
+  card: [0.998, 0.002, 265],
+  foreground: [0.205, 0.025, 265],
+  mutedFg: [0.47, 0.025, 265],
+  primary: [0.565, 0.205, 267],
+  primaryFg: [0.99, 0.004, 265],
+  primarySoftFg: [0.43, 0.17, 267],
+  primarySoft: [0.935, 0.055, 267],
   success: [0.51, 0.13, 150],
   warning: [0.5, 0.1, 75],
   info: [0.52, 0.15, 255],
   destructive: [0.53, 0.2, 27],
-  surface2: [0.962, 0.005, 264],
-  surface2Fg: [0.24, 0.014, 264],
+  surface2: [0.958, 0.012, 265],
+  surface2Fg: [0.205, 0.025, 265],
   // light — grounded warm-graphite chrome + cobalt active pill
   sidebar: [0.235, 0.008, 70],
   sidebarFg: [0.96, 0.004, 70],
@@ -89,6 +89,12 @@ console.log(need(contrast(T.info, T.card), 4.5, "info text on card"));
 console.log(need(contrast(T.destructive, T.card), 4.5, "destructive text on card"));
 console.log(need(contrast(T.surface2Fg, T.surface2), 4.5, "ink on surface-2"));
 console.log(need(contrast(T.mutedFg, T.surface2), 4.5, "muted on surface-2"));
+
+console.log(need(contrast(T.primary, T.background), 3, "cobalt on canvas (LARGE text only: hero line, numerals)"));
+console.log(need(contrast(T.primarySoftFg, T.background), 4.5, "soft-cobalt small labels on canvas"));
+console.log(need(contrast(T.primary, T.card), 4.5, "cobalt text on card (finale CTA, indices)"));
+console.log(need(contrast(T.primarySoftFg, T.card), 4.5, "soft-cobalt text on card"));
+console.log(need(contrast(T.success, T.background), 4.5, "success text on canvas"));
 
 console.log("\nLIGHT — warm-graphite chrome");
 console.log(need(contrast(T.sidebarFg, T.sidebar), 4.5, "sidebar text on sidebar"));
