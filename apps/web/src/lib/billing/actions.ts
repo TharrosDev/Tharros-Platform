@@ -52,11 +52,18 @@ async function ensureCustomerForOwner() {
   }
 
   // First checkout for this org — create the Customer and persist its id.
-  const customer = await getStripe().customers.create({
-    email: user.email ?? undefined,
-    name: org.name as string,
-    metadata: { org_id: org.id as string },
-  });
+  const customer = await getStripe().customers.create(
+    {
+      email: user.email ?? undefined,
+      name: org.name as string,
+      metadata: { org_id: org.id as string },
+    },
+    {
+      // If Stripe succeeds but our subsequent DB write fails, an immediate
+      // retry reuses the same provider object instead of orphaning duplicates.
+      idempotencyKey: `org-customer/${org.id as string}`,
+    },
+  );
 
   const { error: updateError } = await supabase
     .from("organizations")
@@ -153,7 +160,7 @@ export async function getCheckoutStatus(
   if (!sessionId) return null;
   // Guard: only the active org's owner may inspect their own session.
   const { activeOrg } = await getOrgContext();
-  if (!activeOrg) return null;
+  if (!activeOrg || activeOrg.role !== "owner") return null;
 
   const session = await getStripe().checkout.sessions.retrieve(sessionId, {
     expand: ["subscription"],
