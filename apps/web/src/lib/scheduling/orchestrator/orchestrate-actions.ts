@@ -1,8 +1,8 @@
 "use server";
 
-import { getOrgContext } from "@/lib/org/queries";
-import { getAuthUser } from "@/lib/auth/current-user";
+import { checkQueryCap } from "@/lib/billing/usage";
 import { logger } from "@/lib/observability/logger";
+import { requireSchedulingAccess } from "@/lib/scheduling/access";
 
 import { optimizeSchedule } from "./orchestrate-handler";
 import type { AgentInputs, OptimizeResult } from "./types";
@@ -27,8 +27,9 @@ export async function runScheduleOptimization(args: {
   periodEnd: string;
   agentInputs?: AgentInputs;
 }): Promise<OptimizeState> {
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
-  if (!user || !activeOrg) return { ok: false, message: "Not authenticated." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { ok: false, message: access.message };
+  const { user, activeOrg } = access;
   if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
     return { ok: false, message: "Only an owner or admin can build a schedule." };
   }
@@ -38,6 +39,11 @@ export async function runScheduleOptimization(args: {
   }
   if (args.periodEnd < args.periodStart) {
     return { ok: false, message: "The end date must be on or after the start date." };
+  }
+
+  const cap = await checkQueryCap(activeOrg.id);
+  if (!cap.allowed) {
+    return { ok: false, message: "You've reached your plan's monthly AI limit." };
   }
 
   try {
