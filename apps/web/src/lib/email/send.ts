@@ -22,6 +22,8 @@ export type SendEmailParams = {
   react: ReactElement;
   /** Optional reply-to (e.g. a human inbox for invites). Defaults to none. */
   replyTo?: string | string[];
+  /** Stable provider idempotency key for retryable/durable sends. */
+  idempotencyKey?: string;
 };
 
 export type SendEmailResult =
@@ -33,15 +35,19 @@ export async function sendEmail({
   subject,
   react,
   replyTo,
+  idempotencyKey,
 }: SendEmailParams): Promise<SendEmailResult> {
   try {
-    const { data, error } = await resend.emails.send({
-      from: EMAIL_FROM,
-      to,
-      subject,
-      react,
-      ...(replyTo ? { replyTo } : {}),
-    });
+    const { data, error } = await resend.emails.send(
+      {
+        from: EMAIL_FROM,
+        to,
+        subject,
+        react,
+        ...(replyTo ? { replyTo } : {}),
+      },
+      idempotencyKey ? { idempotencyKey } : undefined,
+    );
 
     if (error) {
       logger.error("email send failed", { err: error, subject });
