@@ -19,7 +19,7 @@ function ToastList() {
       key={toast.id}
       toast={toast}
       className={cn(
-        "bg-popover text-popover-foreground shadow-modal relative flex flex-col gap-1 rounded-xl border border-border/60 p-4 pr-11 outline-none",
+        "bg-popover/94 text-popover-foreground shadow-modal relative flex flex-col gap-1 overflow-hidden rounded-2xl border border-border/70 p-4 pr-11 backdrop-blur-2xl outline-none before:pointer-events-none before:absolute before:inset-y-3 before:left-0 before:w-0.5 before:rounded-full before:bg-primary",
         "transition-all duration-300 ease-out",
         "data-[starting-style]:translate-x-full data-[starting-style]:opacity-0",
         "data-[ending-style]:translate-x-full data-[ending-style]:opacity-0",
@@ -28,7 +28,7 @@ function ToastList() {
       <ToastPrimitive.Title className="text-sm font-medium" />
       <ToastPrimitive.Description className="text-muted-foreground text-sm" />
       <ToastPrimitive.Close
-        className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-[3px]"
+        className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/30 absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-xl transition-colors outline-none focus-visible:ring-[4px]"
         aria-label="Close"
       >
         <X className="size-3.5" />
