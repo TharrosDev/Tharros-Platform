@@ -8,6 +8,7 @@ import { tierSchema, type Tier } from "@/lib/billing/schemas";
 import { getOrgContext } from "@/lib/org/queries";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getURL } from "@/lib/site-url";
 import { logger } from "@/lib/observability/logger";
 
@@ -48,10 +49,29 @@ async function ensureCustomerForOwner() {
   if (error || !org) throw new CheckoutError("Could not load your organization.");
 
   if (org.stripe_customer_id) {
-    return { orgId: org.id as string, customerId: org.stripe_customer_id as string };
+    try {
+      const existing = await getStripe().customers.retrieve(org.stripe_customer_id as string);
+      if (
+        !("deleted" in existing && existing.deleted) &&
+        existing.metadata?.org_id === (org.id as string)
+      ) {
+        return { orgId: org.id as string, customerId: existing.id };
+      }
+      logger.warn("billing.customer_binding_invalid", {
+        org_id: org.id,
+        customer_id: org.stripe_customer_id,
+      });
+    } catch (err) {
+      logger.warn("billing.customer_lookup_failed", {
+        org_id: org.id,
+        customer_id: org.stripe_customer_id,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
-  // First checkout for this org — create the Customer and persist its id.
+  // First checkout, or recovery from a stale/mismatched stored id: create the
+  // deterministic app-owned Customer and persist it through the service role.
   const customer = await getStripe().customers.create(
     {
       email: user.email ?? undefined,
@@ -65,7 +85,7 @@ async function ensureCustomerForOwner() {
     },
   );
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await createAdminClient()
     .from("organizations")
     .update({ stripe_customer_id: customer.id })
     .eq("id", org.id);
