@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { extractText, looksLikeScanned } from "@/lib/documents/extract";
+import {
+  extractText,
+  looksLikeScanned,
+  MAX_EXTRACTED_CHARS,
+} from "@/lib/documents/extract";
 
 const enc = (s: string) => new TextEncoder().encode(s).buffer;
 
@@ -34,6 +38,24 @@ describe("extractText — plain text", () => {
     await expect(extractText({ bytes: enc("x"), filename: "image.png" })).rejects.toThrow(
       /Unsupported file type/,
     );
+  });
+
+  it("rejects extension/content mismatches before parser work", async () => {
+    await expect(extractText({ bytes: enc("not a pdf"), filename: "fake.pdf" })).rejects.toThrow(
+      /do not match the PDF extension/,
+    );
+    await expect(extractText({ bytes: enc("not a zip"), filename: "fake.docx" })).rejects.toThrow(
+      /do not match the DOCX extension/,
+    );
+  });
+
+  it("caps extracted text before embedding amplification", async () => {
+    await expect(
+      extractText({
+        bytes: enc("x".repeat(MAX_EXTRACTED_CHARS + 1)),
+        filename: "huge.txt",
+      }),
+    ).rejects.toThrow(/too large/);
   });
 
   it("an empty text file does not flag OCR (only PDFs can)", async () => {
