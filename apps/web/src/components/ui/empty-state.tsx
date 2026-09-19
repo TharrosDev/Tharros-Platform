@@ -25,13 +25,13 @@ function EmptyState({
     <div
       data-slot="empty-state"
       className={cn(
-        "bg-surface-2/75 flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-border px-6 py-12 text-center",
+        "relative flex min-h-72 flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border/80 bg-gradient-to-b from-card/80 to-surface-2/75 px-6 py-12 text-center shadow-inner before:pointer-events-none before:absolute before:-top-24 before:size-48 before:rounded-full before:bg-primary/10 before:blur-3xl",
         className,
       )}
     >
       <span
         className={cn(
-          "mb-5 flex size-12 items-center justify-center rounded-xl shadow-xs [&>svg]:size-5",
+          "relative mb-5 flex size-14 items-center justify-center rounded-2xl border shadow-card [&>svg]:size-5",
           tone === "danger"
             ? "bg-destructive/10 text-destructive"
             : "bg-primary-soft text-primary-soft-foreground",
