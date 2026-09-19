@@ -20,11 +20,12 @@ export type EnqueueJobInput = {
   orgId?: string | null;
 };
 
-/** Insert a pending job. Returns the new job id. */
-export async function enqueueJob(
-  admin: SupabaseClient,
-  input: EnqueueJobInput,
-): Promise<string> {
+/**
+ * Build the `jobs` row for one enqueue input. Optional columns are omitted
+ * rather than sent as null so the table defaults (`run_at`, `max_attempts`)
+ * still apply.
+ */
+export function buildJobRow(input: EnqueueJobInput): Record<string, unknown> {
   const row: Record<string, unknown> = {
     type: input.type,
     payload: input.payload ?? {},
@@ -34,8 +35,30 @@ export async function enqueueJob(
   }
   if (input.maxAttempts !== undefined) row.max_attempts = input.maxAttempts;
   if (input.orgId !== undefined) row.org_id = input.orgId;
+  return row;
+}
 
-  const { data, error } = await admin.from("jobs").insert(row).select("id").single();
+/** Insert a pending job. Returns the new job id. */
+export async function enqueueJob(
+  admin: SupabaseClient,
+  input: EnqueueJobInput,
+): Promise<string> {
+  const { data, error } = await admin.from("jobs").insert(buildJobRow(input)).select("id").single();
   if (error) throw error;
   return (data as { id: string }).id;
+}
+
+/**
+ * Insert many pending jobs in a single round-trip. Fan-out paths (schedule
+ * delivery, shift reminders) previously awaited one insert per row, putting a
+ * round-trip per employee on a user-facing action. Returns the new job ids.
+ */
+export async function enqueueJobs(
+  admin: SupabaseClient,
+  inputs: EnqueueJobInput[],
+): Promise<string[]> {
+  if (inputs.length === 0) return [];
+  const { data, error } = await admin.from("jobs").insert(inputs.map(buildJobRow)).select("id");
+  if (error) throw error;
+  return ((data ?? []) as Array<{ id: string }>).map((r) => r.id);
 }

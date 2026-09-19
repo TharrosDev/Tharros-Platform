@@ -441,21 +441,26 @@ async function notifyManagers(
     (input.normalizedReason ? ` Reason: ${input.normalizedReason}.` : "") +
     " The shift is now open — review it to arrange cover.";
 
-  for (const userId of managerIds) {
-    try {
-      await createNotification(admin, {
-        orgId: input.orgId,
-        userId,
-        type: "sick_call",
-        title: `${input.employeeName} called out`,
-        body,
-        data: { url: "/scheduling", label: "Open scheduling" },
-        email: true, // transactional (no pref gate) — managers should know immediately.
-      });
-    } catch (err) {
-      logger.warn("sick_call.notify_failed", { err, userId, orgId: input.orgId });
-    }
-  }
+  // Fan out in parallel: each manager's notification is independent, and the
+  // employee reporting the call-out was previously waiting on one insert +
+  // email round-trip per manager, in sequence.
+  await Promise.all(
+    managerIds.map(async (userId) => {
+      try {
+        await createNotification(admin, {
+          orgId: input.orgId,
+          userId,
+          type: "sick_call",
+          title: `${input.employeeName} called out`,
+          body,
+          data: { url: "/scheduling", label: "Open scheduling" },
+          email: true, // transactional (no pref gate) — managers should know immediately.
+        });
+      } catch (err) {
+        logger.warn("sick_call.notify_failed", { err, userId, orgId: input.orgId });
+      }
+    }),
+  );
 }
 
 /** Append-only scheduling audit entry for the call-out. Best-effort. */

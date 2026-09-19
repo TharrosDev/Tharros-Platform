@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { capturePublicLead } from "@/lib/leads/capture";
 import { leadCaptureRequesterKey } from "@/lib/leads/request";
+import { logger } from "@/lib/observability/logger";
 import { readJsonBody } from "@/lib/security/request";
 
 export const runtime = "nodejs";
@@ -58,17 +59,30 @@ export async function POST(
     );
   }
 
-  const result = await capturePublicLead(
-    token,
-    {
-      name: parsed.data.name,
-      email: parsed.data.email?.trim() || null,
-      phone: parsed.data.phone?.trim() || null,
-      company: parsed.data.company?.trim() || null,
-      message: parsed.data.message?.trim() || null,
-    },
-    leadCaptureRequesterKey(request.headers),
-  );
+  // capturePublicLead throws if the insert itself fails. This endpoint is
+  // called cross-origin from embedded forms, so an uncaught throw would return
+  // a framework 500 carrying none of PUBLIC_HEADERS, and the browser would
+  // surface an opaque CORS failure instead of the real status.
+  let result: Awaited<ReturnType<typeof capturePublicLead>>;
+  try {
+    result = await capturePublicLead(
+      token,
+      {
+        name: parsed.data.name,
+        email: parsed.data.email?.trim() || null,
+        phone: parsed.data.phone?.trim() || null,
+        company: parsed.data.company?.trim() || null,
+        message: parsed.data.message?.trim() || null,
+      },
+      leadCaptureRequesterKey(request.headers),
+    );
+  } catch (err) {
+    logger.error("leads.capture_api_failed", { err });
+    return Response.json(
+      { error: "Could not record the lead" },
+      { status: 500, headers: PUBLIC_HEADERS },
+    );
+  }
 
   if (!result.ok) {
     if (result.reason === "rate_limited") {

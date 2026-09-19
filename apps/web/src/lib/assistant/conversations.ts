@@ -243,7 +243,17 @@ export async function appendMessage(
   // content/citations/provider usage are system-generated and use the service
   // seam; DB column grants + RLS enforce the same boundary for direct API calls.
   const writer = input.role === "assistant" ? createAdminClient() : supabase;
-  const payload =
+  // The two branches omit different columns on purpose, so the payload is
+  // annotated with the widened shape; a bare union of the two object literals
+  // does not satisfy the client's insert parameter type.
+  const payload: {
+    conversation_id: string;
+    org_id: string;
+    role: string;
+    content: string;
+    citations?: Citation[];
+    usage?: unknown;
+  } =
     input.role === "assistant"
       ? {
           conversation_id: input.conversationId,

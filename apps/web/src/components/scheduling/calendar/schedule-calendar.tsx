@@ -161,6 +161,7 @@ export function ScheduleCalendar({
   const pendingTimeOffCount = timeOffRequests.filter((r) => r.status === "pending").length;
 
   const roleName = React.useMemo(() => new Map(roles.map((r) => [r.id, r.name])), [roles]);
+  const employeeName = React.useMemo(() => new Map(employees.map((e) => [e.id, e.name])), [employees]);
 
   // Esc backs out of move mode.
   React.useEffect(() => {
@@ -530,7 +531,7 @@ export function ScheduleCalendar({
                 timeLabel: `${timeOf(s.startsAt)}–${timeOf(s.endsAt)}`,
                 title: open
                   ? "Open shift"
-                  : (employees.find((e) => e.id === s.employeeId)?.name ?? "Assigned"),
+                  : (employeeName.get(s.employeeId!) ?? "Assigned"),
                 subtitle: s.roleId ? (roleName.get(s.roleId) ?? null) : null,
                 tone: violations.some((v) => v.severity === "hard")
                   ? "violation"

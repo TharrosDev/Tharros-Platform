@@ -682,21 +682,24 @@ async function notifyManagers(
     return;
   }
   const managerIds = ((data ?? []) as Array<{ user_id: string }>).map((r) => r.user_id);
-  for (const userId of managerIds) {
-    try {
-      await createNotification(admin, {
-        orgId: input.orgId,
-        userId,
-        type: "replacement_escalated",
-        title: input.title,
-        body: input.body,
-        data: { url: "/scheduling", label: "Open scheduling" },
-        email: true, // transactional (no pref gate) — managers should know immediately.
-      });
-    } catch (err) {
-      logger.warn("replacement.notify_failed", { err, userId, orgId: input.orgId });
-    }
-  }
+  // Fan out in parallel; each manager's notification is independent.
+  await Promise.all(
+    managerIds.map(async (userId) => {
+      try {
+        await createNotification(admin, {
+          orgId: input.orgId,
+          userId,
+          type: "replacement_escalated",
+          title: input.title,
+          body: input.body,
+          data: { url: "/scheduling", label: "Open scheduling" },
+          email: true, // transactional (no pref gate) — managers should know immediately.
+        });
+      } catch (err) {
+        logger.warn("replacement.notify_failed", { err, userId, orgId: input.orgId });
+      }
+    }),
+  );
 }
 
 /** Re-arm the Day-53 shift-reminder (24h pre-shift) for a freshly-assigned shift. */
