@@ -15,16 +15,18 @@ This job always runs:
 1. dependency installation with the locked pnpm version,
 2. strict TypeScript checking,
 3. ESLint,
-4. a production Next.js build.
+4. deterministic Vitest unit suites via `test:unit`,
+5. a production Next.js build.
 
-Before the live Vitest suite, CI resolves the hostname in
+Before the live Supabase-backed Vitest suite, CI resolves the hostname in
 `TEST_SUPABASE_URL`.
 
-- If the dedicated project is reachable, `pnpm test` is a hard gate. A failing
-  RLS/integration assertion fails CI.
+- If the dedicated project is reachable, `test:integration` is a hard gate. A
+  failing RLS/integration assertion fails CI.
 - If the project is unavailable or the secret is missing, CI emits a warning and
-  records the skipped live suite in the GitHub step summary. Typecheck, lint and
-  build still run so an external outage does not hide source regressions.
+  records the skipped live suite in the GitHub step summary. Typecheck, lint,
+  deterministic unit tests and build still run, so an external outage does not
+  hide ordinary source regressions.
 
 A skipped live suite is **not release approval**. The test dependency must be
 restored and the live suite must pass before production release.
