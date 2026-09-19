@@ -357,3 +357,190 @@
     background-image: none;
   }
 }
+
+
+/* --------------------------------------------------------------------------
+   Sep 18 visual overhaul — "Command Surface"
+   A higher-contrast, layered operating-system treatment shared by every product.
+   -------------------------------------------------------------------------- */
+:root {
+  --radius: 1rem;
+  --background: oklch(0.976 0.007 265);
+  --foreground: oklch(0.205 0.025 265);
+  --card: oklch(0.998 0.002 265);
+  --card-foreground: oklch(0.205 0.025 265);
+  --popover: oklch(0.998 0.002 265);
+  --popover-foreground: oklch(0.205 0.025 265);
+  --primary: oklch(0.565 0.205 267);
+  --primary-foreground: oklch(0.99 0.004 265);
+  --primary-soft: oklch(0.935 0.055 267);
+  --primary-soft-foreground: oklch(0.43 0.17 267);
+  --secondary: oklch(0.948 0.01 265);
+  --secondary-foreground: oklch(0.285 0.025 265);
+  --muted: oklch(0.948 0.008 265);
+  --muted-foreground: oklch(0.47 0.025 265);
+  --accent: oklch(0.93 0.018 265);
+  --accent-foreground: oklch(0.27 0.03 265);
+  --surface-2: oklch(0.958 0.012 265);
+  --surface-2-foreground: oklch(0.205 0.025 265);
+  --surface-3: oklch(0.92 0.02 265);
+  --surface-3-foreground: oklch(0.27 0.03 265);
+  --border: oklch(0.885 0.014 265);
+  --input: oklch(0.875 0.016 265);
+  --ring: oklch(0.58 0.2 267);
+
+  --sidebar: oklch(0.17 0.022 265);
+  --sidebar-foreground: oklch(0.97 0.008 265);
+  --sidebar-muted-foreground: oklch(0.71 0.018 265);
+  --sidebar-accent: oklch(0.59 0.205 267);
+  --sidebar-accent-foreground: oklch(0.99 0.004 265);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.68 0.16 267);
+
+  --shadow-xs: 0 1px 2px oklch(0.2 0.04 265 / 0.06), 0 0 0 1px oklch(0.2 0.04 265 / 0.015);
+  --shadow-card:
+    0 1px 2px oklch(0.2 0.04 265 / 0.045),
+    0 8px 24px -16px oklch(0.2 0.06 265 / 0.18);
+  --shadow-card-hover:
+    0 2px 5px oklch(0.2 0.04 265 / 0.07),
+    0 18px 42px -22px oklch(0.45 0.18 267 / 0.28);
+  --shadow-raised:
+    0 6px 18px -8px oklch(0.2 0.05 265 / 0.15),
+    0 28px 64px -32px oklch(0.35 0.14 267 / 0.28);
+  --shadow-popover:
+    0 10px 30px -10px oklch(0.18 0.04 265 / 0.18),
+    0 30px 70px -32px oklch(0.18 0.08 265 / 0.28);
+  --shadow-modal:
+    0 20px 50px -16px oklch(0.15 0.04 265 / 0.28),
+    0 45px 100px -40px oklch(0.2 0.1 267 / 0.38);
+}
+
+.dark {
+  --background: oklch(0.145 0.018 265);
+  --foreground: oklch(0.965 0.008 265);
+  --card: oklch(0.188 0.021 265);
+  --card-foreground: oklch(0.965 0.008 265);
+  --popover: oklch(0.195 0.022 265);
+  --popover-foreground: oklch(0.965 0.008 265);
+  --primary: oklch(0.69 0.17 267);
+  --primary-foreground: oklch(0.13 0.025 265);
+  --primary-soft: oklch(0.275 0.075 267);
+  --primary-soft-foreground: oklch(0.86 0.1 267);
+  --secondary: oklch(0.225 0.02 265);
+  --secondary-foreground: oklch(0.96 0.008 265);
+  --muted: oklch(0.22 0.018 265);
+  --muted-foreground: oklch(0.7 0.022 265);
+  --accent: oklch(0.245 0.026 265);
+  --accent-foreground: oklch(0.97 0.008 265);
+  --surface-2: oklch(0.205 0.022 265);
+  --surface-2-foreground: oklch(0.965 0.008 265);
+  --surface-3: oklch(0.255 0.03 265);
+  --surface-3-foreground: oklch(0.965 0.008 265);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.69 0.17 267);
+  --sidebar: oklch(0.115 0.018 265);
+  --sidebar-foreground: oklch(0.97 0.008 265);
+  --sidebar-muted-foreground: oklch(0.69 0.02 265);
+  --sidebar-accent: oklch(0.62 0.19 267);
+  --sidebar-accent-foreground: oklch(0.99 0.004 265);
+}
+
+@layer base {
+  body {
+    background-image:
+      radial-gradient(circle at 8% -10%, color-mix(in oklch, var(--primary) 9%, transparent), transparent 30rem),
+      radial-gradient(circle at 94% 4%, color-mix(in oklch, var(--info) 7%, transparent), transparent 28rem);
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 24%, transparent);
+    color: var(--foreground);
+  }
+}
+
+@layer components {
+  .type-display {
+    font-size: clamp(2.75rem, 5vw, 5.25rem);
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+    font-weight: 760;
+  }
+
+  .type-h1 {
+    font-size: clamp(2rem, 3vw, 2.65rem);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    font-weight: 740;
+  }
+
+  .type-h2 {
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    font-weight: 680;
+  }
+
+  .type-meta {
+    letter-spacing: 0.095em;
+    font-weight: 650;
+  }
+}
+
+@layer utilities {
+  .app-shell-canvas {
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(circle at 78% -12%, color-mix(in oklch, var(--primary) 11%, transparent), transparent 34rem),
+      radial-gradient(circle at 15% 18%, color-mix(in oklch, var(--info) 5%, transparent), transparent 28rem),
+      linear-gradient(180deg, color-mix(in oklch, var(--card) 56%, var(--background)) 0, var(--background) 22rem);
+  }
+
+  .app-shell-canvas::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 0 18rem;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.36;
+    background-image:
+      linear-gradient(color-mix(in oklch, var(--foreground) 4%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklch, var(--foreground) 4%, transparent) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: linear-gradient(to bottom, black, transparent 45rem);
+  }
+
+  .visual-panel {
+    border: 1px solid color-mix(in oklch, var(--border) 84%, transparent);
+    background:
+      linear-gradient(145deg, color-mix(in oklch, var(--card) 96%, transparent), color-mix(in oklch, var(--surface-2) 76%, transparent));
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(18px);
+  }
+
+  .visual-panel-strong {
+    border: 1px solid color-mix(in oklch, var(--primary) 16%, var(--border));
+    background:
+      radial-gradient(circle at 100% 0, color-mix(in oklch, var(--primary) 11%, transparent), transparent 17rem),
+      var(--card);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .accent-rule {
+    background: linear-gradient(90deg, var(--primary), color-mix(in oklch, var(--info) 72%, var(--primary)), transparent);
+  }
+
+  .text-gradient {
+    background: linear-gradient(100deg, var(--foreground) 18%, color-mix(in oklch, var(--primary) 82%, var(--foreground)));
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+@media (max-width: 1023px) {
+  .app-shell-canvas::before {
+    inset-left: 0;
+  }
+}
