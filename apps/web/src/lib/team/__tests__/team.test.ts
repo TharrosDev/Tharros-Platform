@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -279,7 +280,7 @@ describe("revoke_invite + resend_invite", () => {
   it("owner resends an invite: new token + future expiry", async () => {
     const { data: liveRow } = await admin
       .from("invites")
-      .select("id, token")
+      .select("id, token_hash")
       .eq("org_id", orgA)
       .eq("email", emailFor("e"))
       .is("accepted_at", null)
@@ -289,8 +290,18 @@ describe("revoke_invite + resend_invite", () => {
     const { data, error } = await clientA.rpc("resend_invite", { p_invite: liveRow!.id });
     expect(error).toBeNull();
     const row = (data as Array<{ token: string; email: string }>)[0];
-    expect(row.token).not.toBe(liveRow!.token);
+    expect(createHash("sha256").update(row.token).digest("hex")).not.toBe(liveRow!.token_hash);
     expect(row.email).toBe(emailFor("e"));
+  });
+});
+
+describe("invite token secrecy", () => {
+  it("managers cannot read invite token hashes through PostgREST", async () => {
+    const { error } = await clientA
+      .from("invites")
+      .select("id, token_hash")
+      .eq("org_id", orgA);
+    expect(error).not.toBeNull();
   });
 });
 
