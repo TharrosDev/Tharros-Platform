@@ -78,8 +78,8 @@ export async function capturePublicLead(
   // Two atomic buckets: protect one visitor from hammering the endpoint while
   // keeping a separate form-wide circuit breaker for distributed abuse.
   const [requesterLimit, formLimit] = await Promise.all([
-    checkRateLimit(`lead-capture:${form.id}:requester:${requesterKey}`, 10, 600),
-    checkRateLimit(`lead-capture:${form.id}:form`, 120, 60),
+    checkRateLimit(`lead-capture:${form.id}:requester:${requesterKey}`, 10, 600, { failOpen: false }),
+    checkRateLimit(`lead-capture:${form.id}:form`, 120, 60, { failOpen: false }),
   ]);
   if (!requesterLimit.allowed || !formLimit.allowed) {
     return { ok: false, reason: "rate_limited" };
