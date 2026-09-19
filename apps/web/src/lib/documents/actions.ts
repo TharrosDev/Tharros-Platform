@@ -96,7 +96,8 @@ export async function setDocumentTags(
   const { error } = await supabase
     .from("documents")
     .update({ tags: normalized })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("org_id", activeOrg.id);
 
   if (error) {
     logger.error("documents.set_tags_failed", { document_id: id, error: error.message });
@@ -121,6 +122,7 @@ export async function deleteDocument(id: string): Promise<{ error?: string }> {
     .from("documents")
     .select("storage_path")
     .eq("id", id)
+    .eq("org_id", activeOrg.id)
     .maybeSingle();
 
   if (readErr) {
@@ -140,7 +142,11 @@ export async function deleteDocument(id: string): Promise<{ error?: string }> {
     logger.warn("documents.delete_storage_failed", { document_id: id, error: storageErr.message });
   }
 
-  const { error: rowErr } = await supabase.from("documents").delete().eq("id", id);
+  const { error: rowErr } = await supabase
+    .from("documents")
+    .delete()
+    .eq("id", id)
+    .eq("org_id", activeOrg.id);
   if (rowErr) {
     logger.error("documents.delete_row_failed", { document_id: id, error: rowErr.message });
     return { error: "Could not delete the document. Please try again." };
@@ -195,6 +201,7 @@ export async function addTagsToDocuments(
   const { data: rows, error: readErr } = await supabase
     .from("documents")
     .select("id, tags")
+    .eq("org_id", activeOrg.id)
     .in("id", ids);
   if (readErr) {
     logger.error("documents.bulk_tag_read_failed", { error: readErr.message });
@@ -204,7 +211,11 @@ export async function addTagsToDocuments(
   const updated: { id: string; tags: string[] }[] = [];
   for (const row of (rows ?? []) as { id: string; tags: string[] | null }[]) {
     const merged = normalizeTags([...(row.tags ?? []), ...additions]);
-    const { error } = await supabase.from("documents").update({ tags: merged }).eq("id", row.id);
+    const { error } = await supabase
+      .from("documents")
+      .update({ tags: merged })
+      .eq("id", row.id)
+      .eq("org_id", activeOrg.id);
     if (error) {
       logger.error("documents.bulk_tag_failed", { document_id: row.id, error: error.message });
       continue;
