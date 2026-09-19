@@ -2,6 +2,14 @@ import { createHash } from "node:crypto";
 
 export type HeaderReader = Pick<Headers, "get">;
 
+export function opaqueRateLimitKey(namespace: string, ...parts: string[]): string {
+  const digest = createHash("sha256")
+    .update(parts.join("\n"))
+    .digest("hex")
+    .slice(0, 32);
+  return `${namespace}:${digest}`;
+}
+
 /**
  * Privacy-preserving requester key for abuse controls. Raw network metadata is
  * never persisted in the rate-limit table.
