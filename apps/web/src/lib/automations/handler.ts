@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { canExecuteAutomations } from "@/lib/automations/eligibility";
+import { canExecuteAutomations, canReclaimAutomationRun } from "@/lib/automations/eligibility";
 import { matchesAutomationEvent } from "@/lib/automations/match";
 import type { Job, JobHandler } from "@/lib/jobs/types";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads/types";
@@ -38,13 +38,14 @@ async function acquireRun(
 
   const { data: existing, error: existingError } = await admin
     .from("automation_runs")
-    .select("id, status")
+    .select("id, status, started_at")
     .eq("automation_id", input.automationId)
     .eq("event_id", input.eventId)
     .maybeSingle();
   if (existingError) throw existingError;
   if (!existing) throw new Error("Automation run conflict could not be resolved");
   if (existing.status === "succeeded" || existing.status === "skipped") return null;
+  if (!canReclaimAutomationRun(existing)) return null;
 
   const { error: reclaimError } = await admin
     .from("automation_runs")
