@@ -29,6 +29,10 @@ export type ExtractResult = {
  * sparse-but-real pages (e.g. a title page). */
 const MIN_CHARS_PER_PAGE = 10;
 
+/** Bound parser/embedding amplification from compressed or pathologically large files. */
+export const MAX_EXTRACTED_CHARS = 500_000;
+export const MAX_PDF_PAGES = 300;
+
 /** Pure heuristic: does this PDF extraction look like a scanned/image-only doc? */
 export function looksLikeScanned(text: string, pageCount: number | null): boolean {
   if (!pageCount || pageCount <= 0) {
@@ -42,10 +46,32 @@ function toBuffer(bytes: ArrayBuffer | Buffer): Buffer {
   return Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
 }
 
+function assertExpectedSignature(ext: string, bytes: ArrayBuffer | Buffer): void {
+  const buffer = toBuffer(bytes);
+  if (ext === ".pdf" && buffer.subarray(0, 5).toString("ascii") !== "%PDF-") {
+    throw new Error("File contents do not match the PDF extension.");
+  }
+  if (ext === ".docx") {
+    const zipSignature =
+      buffer.length >= 4 &&
+      buffer[0] === 0x50 &&
+      buffer[1] === 0x4b &&
+      ((buffer[2] === 0x03 && buffer[3] === 0x04) ||
+        (buffer[2] === 0x05 && buffer[3] === 0x06) ||
+        (buffer[2] === 0x07 && buffer[3] === 0x08));
+    if (!zipSignature) {
+      throw new Error("File contents do not match the DOCX extension.");
+    }
+  }
+}
+
 async function extractPdf(bytes: ArrayBuffer | Buffer): Promise<{ text: string; pageCount: number }> {
   // unpdf wants a Uint8Array; getDocumentProxy + extractText gives merged text + total pages.
   const data = new Uint8Array(toBuffer(bytes));
   const pdf = await getDocumentProxy(data);
+  if (pdf.numPages > MAX_PDF_PAGES) {
+    throw new Error(`PDF has too many pages (max ${MAX_PDF_PAGES}).`);
+  }
   // mergePages: true → `text` is a single merged string.
   const { totalPages, text } = await unpdfExtractText(pdf, { mergePages: true });
   return { text, pageCount: totalPages };
@@ -71,6 +97,7 @@ export async function extractText(input: {
   mimeType?: string | null;
 }): Promise<ExtractResult> {
   const ext = extensionOf(input.filename);
+  assertExpectedSignature(ext, input.bytes);
 
   let text = "";
   let pageCount: number | null = null;
@@ -88,6 +115,11 @@ export async function extractText(input: {
   }
 
   const normalized = text.replace(/\r\n/g, "\n").trim();
+  if (normalized.length > MAX_EXTRACTED_CHARS) {
+    throw new Error(
+      `Extracted document is too large (max ${MAX_EXTRACTED_CHARS.toLocaleString()} characters).`,
+    );
+  }
   const needsOcr = ext === ".pdf" && looksLikeScanned(normalized, pageCount);
 
   return {
