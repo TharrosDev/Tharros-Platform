@@ -6,6 +6,7 @@ import { createNotification } from "@/lib/notifications/notify";
 import { recordLeadEvent } from "@/lib/leads/events";
 import { mapCaptureForm, type CaptureForm } from "@/lib/leads/types";
 import { logger } from "@/lib/observability/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 const FORM_COLUMNS =
   "id, org_id, name, public_token, headline, success_message, active, created_at, updated_at";
@@ -54,6 +55,7 @@ export async function getPublicCaptureForm(token: string): Promise<CaptureForm |
 export async function capturePublicLead(
   token: string,
   input: PublicLeadInput,
+  requesterKey: string,
 ): Promise<
   { ok: true; leadId: string } |
   { ok: false; reason: "invalid_form" | "rate_limited" | "inactive_plan" }
@@ -73,14 +75,15 @@ export async function capturePublicLead(
     return { ok: false, reason: "inactive_plan" };
   }
 
-  const since = new Date(Date.now() - 60_000).toISOString();
-  const { count } = await admin
-    .from("leads")
-    .select("id", { head: true, count: "exact" })
-    .eq("capture_form_id", form.id)
-    .gte("created_at", since);
-
-  if ((count ?? 0) >= 30) return { ok: false, reason: "rate_limited" };
+  // Two atomic buckets: protect one visitor from hammering the endpoint while
+  // keeping a separate form-wide circuit breaker for distributed abuse.
+  const [requesterLimit, formLimit] = await Promise.all([
+    checkRateLimit(`lead-capture:${form.id}:requester:${requesterKey}`, 10, 600),
+    checkRateLimit(`lead-capture:${form.id}:form`, 120, 60),
+  ]);
+  if (!requesterLimit.allowed || !formLimit.allowed) {
+    return { ok: false, reason: "rate_limited" };
+  }
 
   const { data: leadData, error: leadError } = await admin
     .from("leads")
