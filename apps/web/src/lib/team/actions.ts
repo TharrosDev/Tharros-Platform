@@ -50,7 +50,7 @@ export async function sendInvite(
   }
 
   // Throttle invite sends per inviter to cap Resend-quota abuse.
-  const { allowed } = await checkRateLimit(`invite:${user.id}`, 20, 3600);
+  const { allowed } = await checkRateLimit(`invite:${user.id}`, 20, 3600, { failOpen: false });
   if (!allowed) {
     return { message: "You're sending invites too quickly. Please try again later.", values: raw };
   }
@@ -102,7 +102,7 @@ export async function resendInvite(inviteId: string): Promise<{ error?: string }
   const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
   if (!user || !activeOrg) return { error: "Not authenticated." };
 
-  const { allowed } = await checkRateLimit(`invite:${user.id}`, 20, 3600);
+  const { allowed } = await checkRateLimit(`invite:${user.id}`, 20, 3600, { failOpen: false });
   if (!allowed) return { error: "You're sending invites too quickly. Please try again later." };
 
   const supabase = await createClient();
