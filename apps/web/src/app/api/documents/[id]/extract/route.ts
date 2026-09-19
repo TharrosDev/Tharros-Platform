@@ -49,8 +49,8 @@ export async function POST(
   }
 
   const [userLimit, orgLimit] = await Promise.all([
-    checkRateLimit(opaqueRateLimitKey("document-extract-user", activeOrg.id, user.id), 20, 3600),
-    checkRateLimit(opaqueRateLimitKey("document-extract-org", activeOrg.id), 120, 3600),
+    checkRateLimit(opaqueRateLimitKey("document-extract-user", activeOrg.id, user.id), 20, 3600, { failOpen: false }),
+    checkRateLimit(opaqueRateLimitKey("document-extract-org", activeOrg.id), 120, 3600, { failOpen: false }),
   ]);
   if (!userLimit.allowed || !orgLimit.allowed) {
     return Response.json(
