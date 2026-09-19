@@ -34,7 +34,7 @@ describe("subscriptionToRow", () => {
       stripe_subscription_id: "sub_123",
       stripe_customer_id: "cus_123",
       status: "trialing",
-      tier: "growth", // from metadata (price_x not a known env price)
+      tier: null, // unknown price ids never inherit entitlement from metadata
       price_id: "price_x",
       cancel_at_period_end: false,
     });

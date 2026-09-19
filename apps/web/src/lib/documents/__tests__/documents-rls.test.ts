@@ -5,8 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
  * Day 23 — Document storage RLS isolation harness.
  *
  * Proves the documents / document_chunks / ingestion_jobs policies enforce
- * cross-org isolation, that org members (incl. plain members) may create their
- * own org's documents, and that no one can write a document into a foreign org.
+ * cross-org isolation and that document rows are server-reserved: authenticated
+ * clients can read/delete their org rows but cannot forge new document records.
  *
  * Strategy mirrors the Day-11 harness (src/lib/supabase/__tests__/rls.test.ts):
  * the service-role client (bypasses RLS) seeds real auth users + ground-truth
@@ -160,30 +160,22 @@ describe("documents — cross-tenant isolation", () => {
 });
 
 describe("documents — write access", () => {
-  it("owner A can create a document in org A", async () => {
-    const { data, error } = await clientA
-      .from("documents")
-      .insert({
-        org_id: orgA,
-        storage_path: `${orgA}/new/owner.pdf`,
-        filename: "owner.pdf",
-      })
-      .select("id");
-    expect(error).toBeNull();
-    expect(data).toHaveLength(1);
+  it("owner A cannot bypass the server reservation seam", async () => {
+    const { error } = await clientA.from("documents").insert({
+      org_id: orgA,
+      storage_path: `${orgA}/new/owner.pdf`,
+      filename: "owner.pdf",
+    });
+    expect(error).not.toBeNull();
   });
 
-  it("plain member C can create a document in org A", async () => {
-    const { data, error } = await clientC
-      .from("documents")
-      .insert({
-        org_id: orgA,
-        storage_path: `${orgA}/new/member.pdf`,
-        filename: "member.pdf",
-      })
-      .select("id");
-    expect(error).toBeNull();
-    expect(data).toHaveLength(1);
+  it("plain member C cannot bypass the server reservation seam", async () => {
+    const { error } = await clientC.from("documents").insert({
+      org_id: orgA,
+      storage_path: `${orgA}/new/member.pdf`,
+      filename: "member.pdf",
+    });
+    expect(error).not.toBeNull();
   });
 
   it("A cannot create a document in org B (foreign org)", async () => {

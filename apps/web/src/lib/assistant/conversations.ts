@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/observability/logger";
 import { PAGE_SIZE, decodeCursor, nextCursorFrom } from "@/lib/pagination";
 import type { Citation } from "@/lib/documents/rag-prompt";
@@ -238,16 +239,30 @@ export async function appendMessage(
     usage?: unknown;
   },
 ): Promise<string | null> {
-  const { data, error } = await supabase
+  // Authenticated clients may insert only plain user turns. Assistant-role
+  // content/citations/provider usage are system-generated and use the service
+  // seam; DB column grants + RLS enforce the same boundary for direct API calls.
+  const writer = input.role === "assistant" ? createAdminClient() : supabase;
+  const payload =
+    input.role === "assistant"
+      ? {
+          conversation_id: input.conversationId,
+          org_id: input.orgId,
+          role: "assistant",
+          content: input.content,
+          citations: input.citations ?? [],
+          usage: input.usage ?? null,
+        }
+      : {
+          conversation_id: input.conversationId,
+          org_id: input.orgId,
+          role: "user",
+          content: input.content,
+        };
+
+  const { data, error } = await writer
     .from("messages")
-    .insert({
-      conversation_id: input.conversationId,
-      org_id: input.orgId,
-      role: input.role,
-      content: input.content,
-      citations: input.citations ?? [],
-      usage: input.usage ?? null,
-    })
+    .insert(payload)
     .select("id")
     .single();
 

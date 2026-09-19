@@ -8,5 +8,15 @@
  * can't drift.
  */
 export function sanitizeNext(value: string): string | undefined {
-  return value.startsWith("/") && !value.startsWith("//") ? value : undefined;
+  if (!value.startsWith("/") || value.startsWith("//")) return undefined;
+  if (value.includes("\\") || /%5c/i.test(value)) return undefined;
+  if (/[\u0000-\u001f\u007f]/u.test(value)) return undefined;
+
+  try {
+    const base = new URL("https://tharros.invalid");
+    const resolved = new URL(value, base);
+    return resolved.origin === base.origin ? value : undefined;
+  } catch {
+    return undefined;
+  }
 }

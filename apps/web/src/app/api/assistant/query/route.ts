@@ -22,12 +22,19 @@ import {
   type TemplateId,
 } from "@/lib/assistant/templates";
 import { logger } from "@/lib/observability/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  isSameOriginMutation,
+  opaqueRateLimitKey,
+  readJsonBody,
+} from "@/lib/security/request";
 
 // Node runtime: the RAG pipeline transitively uses the embeddings seam + the
 // Anthropic SDK, and we hold a streaming response open — Node, not Edge.
 export const runtime = "nodejs";
 
 const MAX_QUESTION_LENGTH = 2000;
+const MAX_BODY_BYTES = 16 * 1024;
 const REFUSAL_ANSWER = "I can't help with that request.";
 
 /**
@@ -39,6 +46,10 @@ const REFUSAL_ANSWER = "I can't help with that request.";
  * deliverable-shaped one (draft email / write SOP / summarize policy).
  */
 export async function POST(req: Request): Promise<Response> {
+  if (!isSameOriginMutation(req)) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const user = await getAuthUser();
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,6 +58,17 @@ export async function POST(req: Request): Promise<Response> {
   const { activeOrg } = await getOrgContext();
   if (!activeOrg) {
     return Response.json({ error: "No active organization" }, { status: 403 });
+  }
+
+  const [userBurst, orgBurst] = await Promise.all([
+    checkRateLimit(opaqueRateLimitKey("assistant-user", activeOrg.id, user.id), 30, 60, { failOpen: false }),
+    checkRateLimit(opaqueRateLimitKey("assistant-org", activeOrg.id), 180, 60, { failOpen: false }),
+  ]);
+  if (!userBurst.allowed || !orgBurst.allowed) {
+    return Response.json(
+      { error: "Too many assistant requests. Please try again shortly.", code: "rate_limit" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
   }
 
   // Day 33 — plan cap. Hard-block once the org hits its tier's monthly query
@@ -65,12 +87,15 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  let body: { question?: unknown; conversationId?: unknown; template?: unknown };
-  try {
-    body = (await req.json()) as typeof body;
-  } catch {
-    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+  type QueryBody = { question?: unknown; conversationId?: unknown; template?: unknown };
+  const bodyResult = await readJsonBody<QueryBody>(req, MAX_BODY_BYTES);
+  if (!bodyResult.ok) {
+    return Response.json(
+      { error: bodyResult.reason === "too_large" ? "Request body is too large" : "Invalid JSON body" },
+      { status: bodyResult.reason === "too_large" ? 413 : 400 },
+    );
   }
+  const body = bodyResult.value;
 
   const question = body.question;
   if (typeof question !== "string" || question.trim().length === 0) {

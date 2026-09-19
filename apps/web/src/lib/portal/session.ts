@@ -27,9 +27,9 @@ export function portalCookieOptions() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
     path: "/portal",
-    // The DB token validity is authoritative; the cookie just needs to outlive a
-    // typical session. 90 days keeps employees signed in between shifts.
-    maxAge: 60 * 60 * 24 * 90,
+    // Match the DB's maximum portal-token lifetime. Rotation/revocation remains
+    // authoritative and is checked on every request.
+    maxAge: 60 * 60 * 24 * 60,
   };
 }
 
