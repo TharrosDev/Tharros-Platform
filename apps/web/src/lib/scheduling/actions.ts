@@ -5,8 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getOrgContext } from "@/lib/org/queries";
-import { getAuthUser } from "@/lib/auth/current-user";
+import { requireSchedulingAccess } from "@/lib/scheduling/access";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { enqueueJob } from "@/lib/jobs/enqueue";
 import { logger } from "@/lib/observability/logger";
@@ -58,10 +57,9 @@ export async function completeSchedulingSetup(
   _prev: SchedulingSetupState,
   formData: FormData,
 ): Promise<SchedulingSetupState> {
-  const { activeOrg } = await getOrgContext();
-  if (!activeOrg) {
-    return { message: "No active organization. Try refreshing the page." };
-  }
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { message: access.message };
+  const { activeOrg } = access;
   if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
     return { message: "Only an owner or admin can configure scheduling." };
   }
@@ -110,8 +108,9 @@ export async function savePermanentAvailability(
   _prev: AvailabilityState,
   formData: FormData,
 ): Promise<AvailabilityState> {
-  const { activeOrg } = await getOrgContext();
-  if (!activeOrg) return { message: "No active organization. Try refreshing the page." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { message: access.message };
+  const { activeOrg } = access;
 
   const employeeId = String(formData.get("employeeId") ?? "");
   if (!employeeId) return { message: "Missing employee." };
@@ -176,8 +175,9 @@ export async function addTemporaryOverride(
   _prev: AvailabilityState,
   formData: FormData,
 ): Promise<AvailabilityState> {
-  const { activeOrg } = await getOrgContext();
-  if (!activeOrg) return { message: "No active organization. Try refreshing the page." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { message: access.message };
+  const { activeOrg } = access;
 
   const employeeId = String(formData.get("employeeId") ?? "");
   if (!employeeId) return { message: "Missing employee." };
@@ -230,8 +230,12 @@ export async function addTemporaryOverride(
 export async function requestAvailabilityNudge(employeeId: string): Promise<{ error?: string }> {
   if (!employeeId) return { error: "Missing employee." };
 
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
-  if (!user || !activeOrg) return { error: "Not authenticated." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { error: access.message };
+  const { user, activeOrg } = access;
+  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+    return { error: "Only an owner or admin can request availability." };
+  }
 
   // Throttle per manager to cap Resend-quota abuse (reuses the Day-15 limiter).
   const { allowed } = await checkRateLimit(`availability-nudge:${user.id}`, 30, 3600);
@@ -263,6 +267,11 @@ export async function requestAvailabilityNudge(employeeId: string): Promise<{ er
 /** Delete one availability row (permanent or temporary) by id. RLS-scoped. */
 export async function removeAvailabilityRow(id: string): Promise<{ error?: string }> {
   if (!id) return { error: "Missing row." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { error: access.message };
+  if (access.activeOrg.role !== "owner" && access.activeOrg.role !== "admin") {
+    return { error: "Only an owner or admin can change availability." };
+  }
   const supabase = await createClient();
   const { error } = await supabase.from("availability").delete().eq("id", id);
   if (error) {
