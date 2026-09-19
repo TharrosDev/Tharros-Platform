@@ -152,6 +152,8 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
   const { data: automationRows, error: automationError } = await automationQuery;
   if (automationError) throw automationError;
 
+  const failures: unknown[] = [];
+
   for (const row of automationRows ?? []) {
     const automation = row as {
       id: string;
@@ -273,15 +275,22 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
       const message = err instanceof Error ? err.message : "Unknown automation error";
       try {
         await finishRun(admin, runId, "failed", {}, message);
+        failures.push(err instanceof Error ? err : new Error(message));
       } catch (persistErr) {
-        throw new AggregateError(
-          [err, persistErr],
-          `Automation failed and its run state could not be persisted: ${message}`,
+        failures.push(
+          new AggregateError(
+            [err, persistErr],
+            `Automation failed and its run state could not be persisted: ${message}`,
+          ),
         );
       }
-
-      if (err instanceof Error) throw err;
-      throw new Error(message);
     }
+  }
+
+  if (failures.length) {
+    throw new AggregateError(
+      failures,
+      `${failures.length} automation run(s) failed and require retry`,
+    );
   }
 };
