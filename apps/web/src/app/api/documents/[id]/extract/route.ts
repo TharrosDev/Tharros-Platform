@@ -6,6 +6,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { extractText } from "@/lib/documents/extract";
 import { DOCUMENTS_BUCKET } from "@/lib/documents/types";
 import { logger } from "@/lib/observability/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  isSameOriginMutation,
+  opaqueRateLimitKey,
+} from "@/lib/security/request";
 
 // Node runtime: the PDF/DOCX parsers (unpdf/mammoth) need Node, not Edge.
 export const runtime = "nodejs";
@@ -19,10 +24,14 @@ export const runtime = "nodejs";
  * lifting to a real queue.
  */
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await params;
+
+  if (!isSameOriginMutation(req)) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const [user, { activeOrg }, access] = await Promise.all([
     getAuthUser(),
@@ -39,7 +48,18 @@ export async function POST(
     return Response.json({ error: "Active plan required" }, { status: 403 });
   }
 
-  // RLS scopes this read to the caller's orgs — proves membership + gets the path.
+  const [userLimit, orgLimit] = await Promise.all([
+    checkRateLimit(opaqueRateLimitKey("document-extract-user", activeOrg.id, user.id), 20, 3600),
+    checkRateLimit(opaqueRateLimitKey("document-extract-org", activeOrg.id), 120, 3600),
+  ]);
+  if (!userLimit.allowed || !orgLimit.allowed) {
+    return Response.json(
+      { error: "Too many document processing requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
+  }
+
+  // RLS scopes this read to the caller's active org — proves membership + gets the path.
   const supabase = await createClient();
   const { data: doc } = await supabase
     .from("documents")
@@ -51,15 +71,34 @@ export async function POST(
   if (!doc) {
     return Response.json({ error: "Document not found" }, { status: 404 });
   }
-  // Idempotency: already processed → no-op (re-index will be a Day-26 affordance).
+  // Already extracted → let the caller advance to embedding. OCR is terminal
+  // until an OCR pipeline exists. An in-flight stage must never be reclaimed by
+  // an overlapping browser retry.
   if (doc.status === "extracted" || doc.status === "needs_ocr") {
     return Response.json({ status: doc.status, skipped: true });
+  }
+  if (doc.status === "extracting" || doc.status === "chunking" || doc.status === "embedding") {
+    return Response.json({ error: "Document processing is already in progress" }, { status: 409 });
   }
 
   const admin = createAdminClient();
   const now = () => new Date().toISOString();
 
-  await admin.from("documents").update({ status: "extracting" }).eq("id", id);
+  const { data: claimed, error: claimError } = await admin
+    .from("documents")
+    .update({ status: "extracting" })
+    .eq("id", id)
+    .eq("org_id", activeOrg.id)
+    .eq("status", doc.status)
+    .select("id")
+    .maybeSingle();
+  if (claimError) {
+    logger.error("documents.extract_claim_failed", { document_id: id, err: claimError });
+    return Response.json({ error: "Could not start document processing" }, { status: 500 });
+  }
+  if (!claimed) {
+    return Response.json({ error: "Document processing is already in progress" }, { status: 409 });
+  }
   const { data: job } = await admin
     .from("ingestion_jobs")
     .insert({ document_id: id, org_id: doc.org_id, stage: "extract", status: "running", attempts: 1 })
@@ -99,7 +138,8 @@ export async function POST(
           extracted_at: now(),
           error: "This looks like a scanned PDF — text couldn't be extracted. OCR support is coming.",
         })
-        .eq("id", id);
+        .eq("id", id)
+        .eq("org_id", activeOrg.id);
       await finishJob("succeeded");
       return Response.json({ status: "needs_ocr" });
     }
@@ -114,7 +154,8 @@ export async function POST(
         extracted_at: now(),
         error: null,
       })
-      .eq("id", id);
+      .eq("id", id)
+        .eq("org_id", activeOrg.id);
     await finishJob("succeeded");
     return Response.json({
       status: "extracted",
@@ -127,8 +168,12 @@ export async function POST(
     await admin
       .from("documents")
       .update({ status: "failed", error: "Couldn't read this file. Try re-uploading or a different format." })
-      .eq("id", id);
+      .eq("id", id)
+        .eq("org_id", activeOrg.id);
     await finishJob("failed", message);
-    return Response.json({ status: "failed", error: message }, { status: 200 });
+    return Response.json(
+      { status: "failed", error: "Couldn't read this file. Try re-uploading or a different format." },
+      { status: 200 },
+    );
   }
 }
