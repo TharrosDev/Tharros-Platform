@@ -18,8 +18,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getOrgContext } from "@/lib/org/queries";
-import { getAuthUser } from "@/lib/auth/current-user";
+import { requireSchedulingAccess } from "@/lib/scheduling/access";
 import { logger } from "@/lib/observability/logger";
 
 import {
@@ -42,12 +41,12 @@ const CALENDAR_PATH = "/scheduling/calendar";
 async function requireManager(): Promise<
   { ok: true; orgId: string; userId: string } | { ok: false; message: string }
 > {
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
-  if (!user || !activeOrg) return { ok: false, message: "Not authenticated." };
-  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return access;
+  if (access.activeOrg.role !== "owner" && access.activeOrg.role !== "admin") {
     return { ok: false, message: "Only an owner or admin can edit a schedule." };
   }
-  return { ok: true, orgId: activeOrg.id, userId: user.id };
+  return { ok: true, orgId: access.activeOrg.id, userId: access.user.id };
 }
 
 /** A CalendarShift as the validator sees it. */
