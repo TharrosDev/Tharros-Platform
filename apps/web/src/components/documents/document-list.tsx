@@ -249,8 +249,8 @@ export function DocumentList({
   const showInitialEmpty = docs.length === 0 && query.trim() === "" && !searching;
   if (showInitialEmpty) {
     return (
-      <div className="border-border flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed py-16 text-center">
-        <span className="bg-muted text-muted-foreground flex size-12 items-center justify-center rounded-xl [&>svg]:size-6">
+      <div className="relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-dashed border-border/80 bg-gradient-to-b from-card/70 to-surface-2/60 py-16 text-center shadow-inner before:pointer-events-none before:absolute before:-top-20 before:size-48 before:rounded-full before:bg-primary/10 before:blur-3xl">
+        <span className="bg-primary-soft text-primary-soft-foreground relative flex size-14 items-center justify-center rounded-2xl border border-primary/15 shadow-card [&>svg]:size-6">
           <FileText />
         </span>
         <p className="text-foreground font-medium">No documents yet</p>
@@ -313,7 +313,7 @@ export function DocumentList({
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.15, ease: "easeOut" }}
                     data-selected={selected.has(doc.id) || undefined}
-                    className="border-b border-border/60 transition-colors hover:bg-muted/40 data-[selected]:bg-primary-soft/30"
+                    className="border-b border-border/55 transition-colors hover:bg-primary-soft/25 data-[selected]:bg-primary-soft/40"
                   >
                     <TableCell>
                       <Checkbox
@@ -336,7 +336,7 @@ export function DocumentList({
                                   key={t}
                                   type="button"
                                   onClick={() => setQuery(t)}
-                                  className="bg-muted text-muted-foreground hover:bg-accent hover:text-foreground rounded px-1.5 py-0.5 text-xs transition-colors"
+                                  className="bg-surface-2 text-muted-foreground hover:bg-primary-soft hover:text-primary-soft-foreground rounded-md border border-border/50 px-1.5 py-0.5 text-xs transition-colors"
                                 >
                                   {t}
                                 </button>
@@ -428,7 +428,7 @@ export function DocumentList({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="bg-card shadow-raised z-subnav fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-xl border border-border px-3 py-2"
+            className="bg-popover/92 shadow-popover z-subnav fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-2xl border border-border/75 px-3 py-2 backdrop-blur-2xl"
           >
             <span className="text-foreground px-1 text-sm font-medium whitespace-nowrap">
               {selected.size} selected
@@ -590,7 +590,7 @@ function BulkTagBody({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="border-input bg-card flex flex-wrap items-center gap-1.5 rounded-lg border p-2">
+      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 rounded-xl border p-2.5 shadow-xs">
         {tags.map((t) => (
           <span
             key={t}
@@ -704,7 +704,7 @@ function TagEditorBody({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="border-input bg-card flex flex-wrap items-center gap-1.5 rounded-lg border p-2">
+      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 rounded-xl border p-2.5 shadow-xs">
         {tags.map((t) => (
           <span
             key={t}
