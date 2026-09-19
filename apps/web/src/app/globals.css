@@ -541,6 +541,6 @@
 
 @media (max-width: 1023px) {
   .app-shell-canvas::before {
-    inset-left: 0;
+    left: 0;
   }
 }
