@@ -1,10 +1,12 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { capturePublicLead } from "@/lib/leads/capture";
 import { logger } from "@/lib/observability/logger";
+import { leadCaptureRequesterKey } from "@/lib/leads/request";
 
 const optional = (max: number) =>
   z.preprocess(
@@ -45,7 +47,12 @@ export async function submitPublicLead(token: string, formData: FormData): Promi
 
   let result: Awaited<ReturnType<typeof capturePublicLead>>;
   try {
-    result = await capturePublicLead(token, parsed.data);
+    const requestHeaders = await headers();
+    result = await capturePublicLead(
+      token,
+      parsed.data,
+      leadCaptureRequesterKey(requestHeaders),
+    );
   } catch (err) {
     logger.error("leads.public_submit_failed", { err });
     redirect(`/forms/${safeToken}?error=submit`);
