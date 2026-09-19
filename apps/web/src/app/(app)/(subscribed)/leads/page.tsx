@@ -98,8 +98,8 @@ export default async function LeadsPage({
             key={status}
             href={selectedStatus === status ? (search ? `/leads?q=${encodeURIComponent(search)}` : "/leads") : `/leads?status=${status}${search ? `&q=${encodeURIComponent(search)}` : ""}`}
             className={cn(
-              "bg-card rounded-xl border p-4 shadow-xs transition-shadow hover:shadow-card-hover",
-              selectedStatus === status && "border-primary/40 ring-primary/15 ring-2",
+              "visual-panel group rounded-2xl p-4 transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-card-hover",
+              selectedStatus === status && "border-primary/35 bg-primary-soft/35 ring-primary/12 ring-4",
             )}
           >
             <span className="type-meta text-muted-foreground">{status}</span>
@@ -109,7 +109,7 @@ export default async function LeadsPage({
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <Card>
+        <Card className="visual-panel-strong">
           <CardHeader>
             <CardTitle>Add a lead</CardTitle>
             <CardDescription>Record a phone, walk-in, referral, or other offline enquiry.</CardDescription>
@@ -146,7 +146,7 @@ export default async function LeadsPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-hidden bg-gradient-to-b from-card to-primary-soft/10">
           <CardHeader>
             <CardTitle>Capture forms</CardTitle>
             <CardDescription>
@@ -169,7 +169,7 @@ export default async function LeadsPage({
                 {forms.map((form) => {
                   const publicUrl = `${baseUrl}/forms/${form.publicToken}`;
                   return (
-                    <div key={form.id} className="bg-surface-2 rounded-lg border border-border/70 p-3">
+                    <div key={form.id} className="bg-surface-2/80 rounded-xl border border-border/70 p-3.5 shadow-xs transition-colors hover:border-primary/15">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
@@ -268,7 +268,7 @@ export default async function LeadsPage({
                 })}
               </div>
             ) : (
-              <div className="bg-surface-2 rounded-lg border border-dashed p-5 text-center">
+              <div className="bg-surface-2/70 rounded-xl border border-dashed border-border/80 p-6 text-center shadow-inner">
                 <Link2 className="text-muted-foreground mx-auto size-5" />
                 <p className="mt-2 text-sm font-medium">No capture forms yet</p>
                 <p className="text-muted-foreground type-small mt-1">
@@ -368,7 +368,7 @@ export default async function LeadsPage({
                           name="status"
                           defaultValue={lead.status}
                           aria-label={`Status for ${lead.name}`}
-                          className="border-input bg-card h-9 rounded-md border px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                          className="border-input bg-card/80 h-9 rounded-lg border px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                         >
                           {LEAD_STATUSES.map((status) => (
                             <option key={status} value={status}>
@@ -399,7 +399,7 @@ export default async function LeadsPage({
                               <summary className="text-primary cursor-pointer font-medium">
                                 View latest draft
                               </summary>
-                              <div className="bg-surface-2 mt-2 max-w-sm rounded-lg border p-3">
+                              <div className="bg-surface-2/80 mt-2 max-w-sm rounded-xl border border-border/70 p-3.5 shadow-inner">
                                 <p className="font-semibold">{lead.followUpSubject ?? "Following up"}</p>
                                 <p className="text-muted-foreground mt-2 whitespace-pre-wrap">
                                   {lead.followUpDraft}
@@ -423,7 +423,7 @@ export default async function LeadsPage({
               </TableBody>
             </Table>
           ) : (
-            <div className="bg-surface-2 rounded-lg border border-dashed p-8 text-center">
+            <div className="bg-surface-2/70 rounded-xl border border-dashed border-border/80 p-8 text-center shadow-inner">
               <Users className="text-muted-foreground mx-auto size-5" />
               <p className="mt-2 text-sm font-medium">No leads in this view</p>
               <p className="text-muted-foreground type-small mt-1">
