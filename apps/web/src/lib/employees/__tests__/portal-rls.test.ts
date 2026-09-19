@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -171,10 +172,11 @@ describe("validate_portal_token — the portal door (anon)", () => {
 
   it("returns nothing for an expired token", async () => {
     const token = await issueToken(ownerClient);
+    const tokenHash = createHash("sha256").update(token).digest("hex");
     await admin
       .from("employee_portal_tokens")
       .update({ expires_at: new Date(Date.now() - 1000).toISOString() })
-      .eq("token", token);
+      .eq("token_hash", tokenHash);
     expect(await validate(token)).toHaveLength(0);
   });
 
@@ -183,6 +185,16 @@ describe("validate_portal_token — the portal door (anon)", () => {
     await admin.from("employees").update({ active: false }).eq("id", employeeId);
     expect(await validate(token)).toHaveLength(0);
     await admin.from("employees").update({ active: true }).eq("id", employeeId); // restore
+  });
+});
+
+describe("portal token secrecy", () => {
+  it("managers cannot read the bearer-token hash through PostgREST", async () => {
+    const { error } = await ownerClient
+      .from("employee_portal_tokens")
+      .select("id, token_hash")
+      .eq("org_id", orgA);
+    expect(error).not.toBeNull();
   });
 });
 
