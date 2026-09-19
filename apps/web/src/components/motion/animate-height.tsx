@@ -1,6 +1,7 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
+import { m } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 import { spring } from "./springs";
 
 /**
@@ -17,7 +18,7 @@ export function AnimateHeight({
   children: React.ReactNode;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   return (
     <m.div
       className={className}

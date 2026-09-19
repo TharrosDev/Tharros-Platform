@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function MarketingHome() {
   return (
-    <div className="marketing-light relative flex min-h-screen flex-col overflow-x-clip">
+    <div className="bg-background text-foreground relative flex min-h-screen flex-col overflow-x-clip">
       <MarketingBackdrop />
       <MarketingHeader showPricing />
       <main className="relative">

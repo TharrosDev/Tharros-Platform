@@ -56,8 +56,9 @@ with this ladder.
 
 ## Design direction
 
-The production design system is **Workshop**: warm graphite chrome, a clean
-working canvas and restrained cobalt state/action colour. The canonical
+The production design system is one light system shared by marketing and the
+app: cool off-white canvas, white working surfaces, graphite ink and restrained
+cobalt state/action colour. The canonical
 implementation guidance lives in `apps/web/docs/DESIGN.md`.
 
 ## Accessibility

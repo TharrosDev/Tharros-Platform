@@ -3,7 +3,8 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { m, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { m, useScroll, useTransform } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 import { cn } from "@/lib/utils";
 import { marketingContainer } from "@/components/marketing/marketing-chrome";
@@ -12,7 +13,7 @@ import { Reveal } from "./reveal";
 /** The one inverted cobalt moment: the proposition returns at full scale. */
 function Finale() {
   const ref = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "start 25%"] });
   const scale = useTransform(scrollYProgress, [0, 1], [0.86, 1]);
   const x = useTransform(scrollYProgress, [0, 1], ["-4%", "0%"]);

@@ -20,7 +20,7 @@ function PublicDocument({
   children: ReactNode;
 }) {
   return (
-    <div className="marketing-light relative min-h-screen overflow-x-clip">
+    <div className="bg-background text-foreground relative min-h-screen overflow-x-clip">
       <MarketingBackdrop />
       <MarketingHeader showPricing />
       <main className="relative">

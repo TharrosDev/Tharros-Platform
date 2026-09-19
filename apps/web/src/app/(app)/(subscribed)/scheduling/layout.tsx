@@ -3,14 +3,8 @@ import { redirect } from "next/navigation";
 import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { minTierForFeature } from "@/lib/billing/plans";
 import { getOrgContext } from "@/lib/org/queries";
-import { getRoster } from "@/lib/employees/queries";
-import {
-  getEscalatedReplacements,
-  getEscalatedSwaps,
-  getSchedulingStatus,
-} from "@/lib/scheduling/queries";
-import { getPendingTimeOff } from "@/lib/scheduling/time-off";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getSchedulingStatus } from "@/lib/scheduling/queries";
+import { countPendingApprovals } from "@/lib/scheduling/pending-approvals";
 import { UpgradeGate } from "@/components/billing/upgrade-gate";
 import { SchedulingSubnav } from "@/components/scheduling/subnav";
 
@@ -51,20 +45,9 @@ export default async function SchedulingLayout({
 
   if (!activeOrg || !onboardedAt) return <>{children}</>;
 
-  // Pending-approvals badge (managers only): escalated swaps + pending time
-  // off + escalated replacements. Members see the rail without a count.
-  const roster = await getRoster();
-  const canManage = roster.viewerRole === "owner" || roster.viewerRole === "admin";
-  let pendingApprovals = 0;
-  if (canManage) {
-    const [swaps, timeOff, replacements] = await Promise.all([
-      getEscalatedSwaps(activeOrg.id),
-      getPendingTimeOff(createAdminClient(), activeOrg.id),
-      getEscalatedReplacements(activeOrg.id),
-    ]);
-    pendingApprovals =
-      swaps.length + timeOff.filter((t) => t.status === "pending").length + replacements.length;
-  }
+  // Pending-approvals badge (managers only). Members see the rail without a count.
+  const canManage = activeOrg.role === "owner" || activeOrg.role === "admin";
+  const pendingApprovals = canManage ? await countPendingApprovals(activeOrg.id) : 0;
 
   return (
     <div className="space-y-6">

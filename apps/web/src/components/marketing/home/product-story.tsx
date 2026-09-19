@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, m, useInView, useReducedMotion, useScroll } from "motion/react";
+import { AnimatePresence, m, useInView, useScroll } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 import { cn } from "@/lib/utils";
 import { marketingContainer } from "@/components/marketing/marketing-chrome";
@@ -18,7 +19,7 @@ import { WorkspaceFrame } from "./workspace-frame";
 function ProductStory() {
   const [active, setActive] = useState<ProductKey>("knowledge");
   const listRef = useRef<HTMLOListElement>(null);
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   const { scrollYProgress } = useScroll({
     target: listRef,
     offset: ["start 60%", "end 60%"],

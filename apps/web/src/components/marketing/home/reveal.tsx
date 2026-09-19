@@ -1,6 +1,7 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
+import { m } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
@@ -16,7 +17,7 @@ function Reveal({
   delay?: number;
   rise?: number;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   return (
     <m.div
       className={className}
@@ -46,7 +47,7 @@ function MaskedLines({
   delay?: number;
   onMount?: boolean;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
 
   return (
     <>

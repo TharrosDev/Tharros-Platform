@@ -36,7 +36,7 @@ export function NotificationMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "relative")}
+        className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "relative size-9")}
         aria-label={
           unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
         }

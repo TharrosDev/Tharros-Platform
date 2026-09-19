@@ -37,7 +37,7 @@ function SheetContent({
       <DialogBackdrop />
       <DialogPrimitive.Popup
         className={cn(
-          "bg-sidebar/98 text-sidebar-foreground shadow-modal fixed z-overlay flex w-[20rem] max-w-[90vw] flex-col border-sidebar-border backdrop-blur-2xl outline-none",
+          "bg-sidebar text-sidebar-foreground shadow-modal fixed z-overlay flex w-[18rem] max-w-[88vw] flex-col border-sidebar-border outline-none",
           "transition-transform duration-300 ease-out",
           sideClasses[side],
           className,
@@ -47,7 +47,7 @@ function SheetContent({
         {children}
         {showClose ? (
           <SheetClose
-            className="text-sidebar-muted-foreground hover:bg-white/10 hover:text-sidebar-foreground focus-visible:ring-sidebar-ring/40 absolute right-3 top-3 inline-flex size-10 items-center justify-center rounded-xl border border-transparent transition-colors outline-none hover:border-sidebar-border focus-visible:ring-[4px]"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 absolute right-3 top-3 inline-flex size-9 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-[3px]"
             aria-label="Close menu"
           >
             <X className="size-4" />

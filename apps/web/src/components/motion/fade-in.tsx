@@ -1,6 +1,7 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
+import { m } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 import { ease } from "./springs";
 
 /**
@@ -18,7 +19,7 @@ export function FadeIn({
   /** Pixels to rise from. Set 0 for a pure crossfade. */
   rise?: number;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   return (
     <m.div
       className={className}

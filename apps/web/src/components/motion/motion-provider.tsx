@@ -1,6 +1,6 @@
 "use client";
 
-import { LazyMotion, domAnimation, MotionConfig } from "motion/react";
+import { LazyMotion, domMax, MotionConfig } from "motion/react";
 
 /**
  * App-wide motion runtime. Mounted once in the root layout so every route
@@ -16,7 +16,7 @@ import { LazyMotion, domAnimation, MotionConfig } from "motion/react";
  */
 export function MotionProvider({ children }: { children: React.ReactNode }) {
   return (
-    <LazyMotion features={domAnimation} strict>
+    <LazyMotion features={domMax} strict>
       <MotionConfig reducedMotion="user">{children}</MotionConfig>
     </LazyMotion>
   );

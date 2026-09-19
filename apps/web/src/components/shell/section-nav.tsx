@@ -7,7 +7,6 @@ import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
-import { Badge } from "@/components/ui/badge";
 
 export type SectionNavItem = {
   href: string;
@@ -22,9 +21,9 @@ export type SectionNavItem = {
 };
 
 /**
- * Shared section sub-nav: a horizontal, scrollable tab rail by default;
- * `orientation="responsive"` stacks it into a vertical rail on lg+ (settings).
- * The active item carries a soft-cobalt pill that slides between items.
+ * Shared section sub-nav. Horizontal: a scrollable underline tab rail whose
+ * cobalt indicator slides between items. `orientation="responsive"` becomes a
+ * vertical list on lg+ (settings), with a soft pill for the current page.
  */
 export function SectionNav({
   items,
@@ -34,19 +33,19 @@ export function SectionNav({
 }: {
   items: SectionNavItem[];
   ariaLabel: string;
-  /** Namespaces the sliding pill so multiple rails can coexist. */
+  /** Namespaces the sliding indicator so multiple rails can coexist. */
   ns: string;
   orientation?: "horizontal" | "responsive";
 }) {
   const pathname = usePathname();
+  const vertical = orientation === "responsive";
 
   return (
     <nav
       aria-label={ariaLabel}
       className={cn(
-        "visual-panel -mx-1 flex gap-1 overflow-x-auto rounded-2xl p-1.5",
-        orientation === "responsive" &&
-          "lg:mx-0 lg:flex-col lg:overflow-visible lg:bg-transparent lg:p-1",
+        "-mx-4 flex gap-1 overflow-x-auto border-b px-4 sm:mx-0 sm:px-0",
+        vertical && "lg:flex-col lg:gap-px lg:overflow-visible lg:border-b-0",
       )}
     >
       {items.map(({ href, label, icon: Icon, danger, badge, exact }) => {
@@ -59,34 +58,39 @@ export function SectionNav({
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "focus-visible:ring-ring/35 relative flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold outline-none transition-[color,background-color,transform] hover:-translate-y-px focus-visible:ring-[4px]",
+              "focus-visible:ring-ring/40 relative flex min-h-10 shrink-0 items-center gap-2 px-2.5 text-sm outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-inset",
+              vertical && "lg:min-h-9 lg:rounded-md",
               active
-                ? danger
-                  ? "text-destructive"
-                  : "text-primary-soft-foreground"
+                ? cn("font-semibold", danger ? "text-destructive" : "text-foreground")
                 : cn(
-                    "text-muted-foreground hover:bg-accent hover:text-foreground",
-                    danger && "text-destructive/80 hover:text-destructive",
+                    "text-muted-foreground hover:text-foreground font-medium",
+                    vertical && "lg:hover:bg-accent",
+                    danger && "text-destructive/85 hover:text-destructive",
                   ),
             )}
           >
             {active ? (
               <m.span
-                layoutId={`section-pill-${ns}`}
+                layoutId={`section-indicator-${ns}`}
                 transition={spring.snappy}
-                className={cn(
-                  "absolute inset-0 rounded-xl border shadow-xs",
-                  danger ? "border-destructive/15 bg-destructive/10" : "border-primary/10 bg-primary-soft",
-                )}
                 aria-hidden
+                className={cn(
+                  "absolute inset-x-2 -bottom-px h-0.5 rounded-full",
+                  danger ? "bg-destructive" : "bg-primary",
+                  vertical &&
+                    cn(
+                      "lg:inset-0 lg:h-auto lg:rounded-md",
+                      danger ? "lg:bg-destructive/10" : "lg:bg-accent",
+                    ),
+                )}
               />
             ) : null}
             {Icon ? <Icon className="relative size-4 shrink-0" aria-hidden /> : null}
             <span className="relative whitespace-nowrap">{label}</span>
             {badge ? (
-              <Badge variant="solid" className="relative px-1.5 py-0 text-[0.625rem]">
+              <span className="bg-primary text-primary-foreground num relative inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-[0.625rem] font-semibold">
                 {badge > 9 ? "9+" : badge}
-              </Badge>
+              </span>
             ) : null}
           </Link>
         );

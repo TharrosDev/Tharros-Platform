@@ -1,6 +1,7 @@
 "use client";
 
-import { m, useReducedMotion } from "motion/react";
+import { m } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 /**
  * Staggered appearance for a list that just changed state (search results,
@@ -36,7 +37,7 @@ export function StaggerItem({
   children: React.ReactNode;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   return (
     <m.div
       className={className}

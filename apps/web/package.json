@@ -36,7 +36,6 @@
     "mammoth": "^1.12.3",
     "motion": "^12.40.0",
     "next": "16.3.5",
-    "next-themes": "^0.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0",

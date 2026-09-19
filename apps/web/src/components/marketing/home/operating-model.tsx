@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import { BookOpen, CalendarDays, Check, FileText, Users, Workflow } from "lucide-react";
-import { m, useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
+import { m, useMotionValueEvent, useScroll } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 import { cn } from "@/lib/utils";
 import { marketingContainer } from "@/components/marketing/marketing-chrome";
@@ -30,7 +31,7 @@ const STAGES = [
  */
 function OperatingModel() {
   const ref = useRef<HTMLOListElement>(null);
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 80%", "end 55%"] });
   const [reached, setReached] = useState(reduced ? 3 : 0);
   useMotionValueEvent(scrollYProgress, "change", (v) => {

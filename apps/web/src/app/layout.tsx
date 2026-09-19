@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
-import { ThemeProvider } from "@/components/theme-provider";
 import { MotionProvider } from "@/components/motion";
 
 const geistSans = Geist({
@@ -44,20 +43,9 @@ export default function RootLayout({
     process.env.NODE_ENV === "production" && process.env.VERCEL === "1";
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <MotionProvider>{children}</MotionProvider>
-        </ThemeProvider>
+        <MotionProvider>{children}</MotionProvider>
         {enableVercelTelemetry ? (
           <>
             <Analytics />

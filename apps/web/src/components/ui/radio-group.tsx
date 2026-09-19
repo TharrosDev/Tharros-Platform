@@ -27,7 +27,7 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
     <RadioPrimitive.Root
       data-slot="radio-group-item"
       className={cn(
-        "border-input bg-card flex size-[1.375rem] shrink-0 cursor-pointer items-center justify-center rounded-full border shadow-xs outline-none transition-[color,box-shadow]",
+        "border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center rounded-full border shadow-xs outline-none transition-[color,box-shadow]",
         "focus-visible:border-ring focus-visible:ring-ring/40 focus-visible:ring-[3px]",
         "data-[checked]:border-primary",
         "disabled:cursor-not-allowed disabled:opacity-50",
@@ -35,7 +35,7 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
       )}
       {...props}
     >
-      <RadioPrimitive.Indicator className="bg-primary size-2.5 rounded-full" />
+      <RadioPrimitive.Indicator className="bg-primary size-2 rounded-full" />
     </RadioPrimitive.Root>
   );
 }

@@ -25,26 +25,26 @@ function EmptyState({
     <div
       data-slot="empty-state"
       className={cn(
-        "relative flex min-h-72 flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border/80 bg-gradient-to-b from-card/80 to-surface-2/75 px-6 py-12 text-center shadow-inner before:pointer-events-none before:absolute before:-top-24 before:size-48 before:rounded-full before:bg-primary/10 before:blur-3xl",
+        "relative flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed bg-card/60 px-6 py-12 text-center",
         className,
       )}
     >
       <span
         className={cn(
-          "relative mb-5 flex size-14 items-center justify-center rounded-2xl border shadow-card [&>svg]:size-5",
+          "relative mb-4 flex size-11 items-center justify-center rounded-xl border bg-card shadow-xs [&>svg]:size-5",
           tone === "danger"
-            ? "bg-destructive/10 text-destructive"
-            : "bg-primary-soft text-primary-soft-foreground",
+            ? "text-destructive"
+            : "text-primary-soft-foreground",
         )}
         aria-hidden
       >
         {icon}
       </span>
       <Heading className="type-h2 text-balance">{title}</Heading>
-      <p className="text-muted-foreground mt-2 max-w-md text-pretty text-sm leading-relaxed">
+      <p className="text-muted-foreground mt-1.5 max-w-sm text-pretty text-sm leading-relaxed">
         {description}
       </p>
-      {action ? <div className="mt-6 flex flex-wrap justify-center gap-2">{action}</div> : null}
+      {action ? <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div> : null}
     </div>
   );
 }

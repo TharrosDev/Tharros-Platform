@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { animate, useReducedMotion } from "motion/react";
+import { animate } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 /**
  * Counts a stat up to its value when it first appears. The real value is in
@@ -20,7 +21,7 @@ export function CountUp({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   const fmt = useRef(format);
 
   // Keep the latest formatter without making it an animation dependency

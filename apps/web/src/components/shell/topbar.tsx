@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Kbd } from "@/components/ui/kbd";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -53,7 +52,7 @@ function Topbar({
   }, []);
 
   return (
-    <header className="sticky top-0 z-topbar flex h-20 items-center gap-3 border-b border-border/60 bg-background/72 px-3 shadow-[0_10px_35px_-30px_color-mix(in_oklch,var(--foreground)_45%,transparent)] backdrop-blur-2xl sm:px-6">
+    <header className="bg-background/95 sticky top-0 z-topbar flex h-14 items-center gap-2 border-b px-3 sm:px-6">
       <MobileNav user={user} orgs={orgs} activeOrg={activeOrg} />
 
       <Breadcrumbs className="hidden min-w-0 flex-1 md:block" />
@@ -62,26 +61,25 @@ function Topbar({
         <button
           type="button"
           onClick={() => setCmdOpen(true)}
-          className="text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/35 flex h-11 items-center gap-2.5 rounded-xl border border-border/70 bg-card/75 px-3 text-sm shadow-card backdrop-blur-xl outline-none transition-[color,background-color,border-color,box-shadow,transform] hover:-translate-y-px hover:border-primary/20 hover:bg-card focus-visible:ring-[4px] lg:w-80"
+          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 bg-card flex h-9 items-center gap-2 rounded-lg border px-2.5 text-sm shadow-xs outline-none transition-[color,border-color] hover:border-input focus-visible:ring-[3px] lg:w-72"
           aria-label="Search or jump to"
         >
-          <Search className="size-4 shrink-0" />
+          <Search className="size-4 shrink-0" aria-hidden />
           <span className="hidden truncate lg:inline">Search or jump to…</span>
           <Kbd className="ml-auto hidden lg:inline-flex">⌘K</Kbd>
         </button>
         <NotificationMenu notifications={notifications} unreadCount={unreadCount} />
-        <ThemeToggle />
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            className={cn(buttonVariants({ variant: "ghost" }), "h-11 gap-2 rounded-xl border border-transparent px-1.5 hover:border-border/70 hover:bg-card/80")}
+            className={cn(buttonVariants({ variant: "ghost" }), "h-9 gap-2 px-1.5")}
             aria-label="Open account menu"
           >
-            <Avatar className="size-7">
+            <Avatar className="size-6">
               <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
-              <AvatarFallback className="text-xs">{user.initials}</AvatarFallback>
+              <AvatarFallback className="text-[0.625rem]">{user.initials}</AvatarFallback>
             </Avatar>
-            <span className="hidden max-w-36 truncate text-sm font-semibold xl:block">
+            <span className="hidden max-w-36 truncate text-sm font-medium xl:block">
               {activeOrg?.name ?? user.name}
             </span>
             <ChevronDown className="text-muted-foreground hidden size-4 sm:block" />

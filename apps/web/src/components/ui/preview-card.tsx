@@ -28,7 +28,7 @@ function PreviewCardContent({
       <PreviewCardPrimitive.Positioner sideOffset={sideOffset} side={side} className="z-overlay">
         <PreviewCardPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover origin-[var(--transform-origin)] w-72 rounded-xl border border-border/60 p-4 outline-none",
+            "bg-popover text-popover-foreground shadow-popover origin-[var(--transform-origin)] w-72 rounded-xl border p-4 outline-none",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",

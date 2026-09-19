@@ -6,11 +6,11 @@ import { ArrowRight } from "lucide-react";
 import {
   m,
   useMotionValue,
-  useReducedMotion,
   useSpring,
   useTransform,
   type MotionValue,
 } from "motion/react";
+import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 import { cn } from "@/lib/utils";
 import { TharrosMark } from "@/components/brand/logo";
@@ -92,7 +92,7 @@ const NODES = [
  * single layer. Tilts toward a fine pointer; static under reduced motion.
  */
 function OperatingLayer() {
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotionSafe();
   const [focus, setFocus] = useState(0);
   const px = useMotionValue(0);
   const py = useMotionValue(0);

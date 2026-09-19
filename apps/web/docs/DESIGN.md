@@ -1,17 +1,20 @@
-# Tharros Design System — Workshop
+# Tharros Design System
 
-Workshop is the production visual system for Tharros: warm graphite chrome,
-clean working surfaces and one restrained cobalt accent. The product should feel
-like dependable operating software for a busy small-business owner.
+One light system from the marketing site to the daily product: a cool off-white
+canvas, white working surfaces, graphite ink and one restrained cobalt accent.
+The product should feel like dependable operating software for a busy
+small-business owner: dense enough for daily work, calm enough to trust.
 
 ## Principles
 
-- **Grounded, not decorative.** Dark graphite chrome gives the app weight; the
-  work happens on a clean light canvas.
+- **Hierarchy before boxes.** Type, spacing and 1px hairlines carry structure.
+  Cards are for genuinely separate things; never nest a card in a card.
+- **Operate, don't perform.** App screens lead with current state and the next
+  action. No marketing heroes, eyebrow labels or decorative metrics in the app.
 - **One decisive accent.** Cobalt marks the primary action, active navigation and
   important state. Do not create competing accent colours.
-- **Crisp surfaces.** Cards use defined borders, measured radii and restrained
-  elevation. Avoid glassmorphism and generic floating SaaS cards.
+- **Crisp surfaces.** White surfaces, 1px borders, a 0.625rem base radius and
+  quiet shadows. No glass, blur, gradient text or glow.
 - **Real data only.** Never use fabricated customers, metrics, activity or
   operational state in production product surfaces.
 - **Clear under pressure.** Errors, warnings, approvals and irreversible actions
@@ -25,7 +28,7 @@ Global OKLCH variables live in `src/app/globals.css`.
 
 Primary families:
 
-- `--sidebar*` — warm graphite application/marketing chrome;
+- `--sidebar*` — the white app rail (cobalt-soft current page);
 - `--background` / `--foreground` — working canvas and ink;
 - `--card`, `--popover`, `--surface-2` — surface hierarchy;
 - `--primary*` — cobalt action/state;
@@ -50,8 +53,12 @@ Shared classes:
 - `.type-meta`
 - `.num` for tabular numeric output
 
-Product headings are compact and authoritative rather than oversized marketing
-display type.
+Product headings are compact and authoritative (page title 28px, section 17px)
+rather than oversized marketing display type. Marketing display type lives in
+`components/marketing/home`.
+
+Dates: use `formatDateRange` from `lib/utils` for schedule periods rather than
+raw ISO strings.
 
 ## Components
 
@@ -109,8 +116,12 @@ Motion communicates state; it is not decoration.
 - Position changes use `layout` / `layoutId`.
 - Expand/collapse uses the shared `AnimateHeight`.
 - Import `m.*`, not `motion.*`, because the shared MotionProvider uses strict
-  LazyMotion.
+  LazyMotion (`domMax`, so `layout`/`layoutId` animate).
 - Respect both CSS reduced-motion rules and `MotionConfig reducedMotion="user"`.
+- When render output depends on reduced motion, use `useReducedMotionSafe`
+  (motion's `useReducedMotion` causes hydration mismatches).
+- Buttons and operational controls respond immediately: colour feedback, no
+  hover lift.
 
 Typical interaction motion belongs around 150–300ms and should ease out.
 
@@ -130,8 +141,7 @@ Write for a busy owner.
 Manager-facing consequential actions should state what will happen before the
 action and make destructive/irreversible outcomes explicit.
 
-## Dark mode
+## Theme
 
-Light/dark theming uses `next-themes` and the same semantic token system.
-Components must remain legible and coherent in both modes; do not patch dark
-mode with isolated hard-coded colours.
+Tharros is light only, from marketing to product. There is no dark theme;
+`dark:` utilities are inert. Do not reintroduce hard-coded dark surfaces.

@@ -1,153 +1,91 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Light only. `.dark` is never applied, so any stray `dark:` utility stays inert. */
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Tharros Platform — "Workshop" design system.
+  Tharros design system.
 
-  A dependable, sharp, tool-like workspace for small-business owners. It reads
-  like a well-kept workshop: warm graphite chrome with weight, a clean light
-  canvas to work on, and one decisive cobalt accent. Three rules hold it together:
-    1. Two deliberate neutral families. The CHROME (sidebar, dark surfaces) is a
-       warm graphite (hue ~70, very low chroma) — near-black with a faint warm
-       undertone, never cold-grey. The CONTENT canvas is a clean, whisper-cool
-       off-white tinted a hair toward cobalt (hue ~264), deliberately NOT warm so
-       it never drifts into the cream/parchment SaaS default.
-    2. One accent: cobalt, used decisively. Primary actions, current selection,
-       and state only — never a soft decorative wash. The active nav is a solid
-       cobalt pill on the graphite chrome.
-    3. Sharp, seated surfaces. Crisp hairline borders, low cool shadows, and a
-       measured 0.75rem radius. Confident and precise, not pillowy. No glass.
+  One light system from the marketing site to the daily product: a cool
+  off-white canvas, white working surfaces, graphite ink and a single cobalt
+  accent. Rules:
+    1. Cobalt means action or current state. It is not decoration.
+    2. Hierarchy comes from type, spacing and hairlines before boxes. Cards are
+       for things that are genuinely separate; never nest card in card.
+    3. Surfaces are crisp: 1px borders, quiet shadows, measured radius, no glass.
 
-  Tokens are OKLCH and reuse shadcn variable names so every component inherits.
-  All text pairs are verified to WCAG AA (run scripts/contrast-check.mjs).
+  Tokens are OKLCH and reuse shadcn names so every component inherits.
+  All text pairs are verified to WCAG AA: run `node scripts/contrast-check.mjs`.
 */
 
-:root,
-.marketing-light {
-  --radius: 0.75rem;
+:root {
+  color-scheme: light;
+  --radius: 0.625rem;
 
-  /* Surfaces — clean cool-neutral content ramp (canvas < card) */
-  --background: oklch(0.975 0.004 264); /* whisper-cool off-white, the work canvas */
-  --foreground: oklch(0.24 0.014 264); /* near-black ink */
-  --card: oklch(0.995 0.0015 264); /* near-pure white, lifts above the canvas */
-  --card-foreground: oklch(0.24 0.014 264);
-  --popover: oklch(0.995 0.0015 264);
-  --popover-foreground: oklch(0.24 0.014 264);
+  /* Surfaces: canvas < surface-2 < card */
+  --background: oklch(0.976 0.007 265); /* cool off-white canvas */
+  --foreground: oklch(0.205 0.025 265); /* graphite ink */
+  --card: oklch(0.998 0.002 265); /* white working surface */
+  --card-foreground: oklch(0.205 0.025 265);
+  --popover: oklch(0.998 0.002 265);
+  --popover-foreground: oklch(0.205 0.025 265);
 
-  /* Cobalt accent — decisive */
-  --primary: oklch(0.52 0.16 264); /* AA with white text */
-  --primary-foreground: oklch(0.99 0.005 264);
-  --primary-soft: oklch(0.94 0.035 264); /* soft cobalt wash */
-  --primary-soft-foreground: oklch(0.45 0.14 264);
+  /* Cobalt */
+  --primary: oklch(0.565 0.205 267); /* AA with white text; large text only on canvas */
+  --primary-foreground: oklch(0.99 0.004 265);
+  --primary-soft: oklch(0.935 0.055 267); /* selection / active wash */
+  --primary-soft-foreground: oklch(0.43 0.17 267); /* cobalt text at any size */
 
   /* Quiet neutrals */
-  --secondary: oklch(0.955 0.004 264);
-  --secondary-foreground: oklch(0.3 0.014 264);
-  --muted: oklch(0.955 0.004 264);
-  --muted-foreground: oklch(0.46 0.015 264); /* AA on canvas + card */
-  --accent: oklch(0.94 0.008 264); /* hover surface */
-  --accent-foreground: oklch(0.3 0.014 264);
+  --secondary: oklch(0.948 0.01 265);
+  --secondary-foreground: oklch(0.285 0.025 265);
+  --muted: oklch(0.948 0.008 265);
+  --muted-foreground: oklch(0.47 0.025 265);
+  --accent: oklch(0.945 0.012 265); /* hover surface */
+  --accent-foreground: oklch(0.24 0.03 265);
 
-  /* Inset layer — panels seated INTO a card (below canvas, above muted) */
-  --surface-2: oklch(0.962 0.005 264);
-  --surface-2-foreground: oklch(0.24 0.014 264);
-  --surface-3: oklch(0.935 0.008 264);
-  --surface-3-foreground: oklch(0.3 0.014 264);
+  /* Inset layers seated into a card */
+  --surface-2: oklch(0.962 0.009 265);
+  --surface-2-foreground: oklch(0.205 0.025 265);
+  --surface-3: oklch(0.925 0.016 265);
+  --surface-3-foreground: oklch(0.27 0.03 265);
 
-  /* Semantics — tuned to read AA as text on light surfaces */
+  /* Semantic state, tuned to read AA as text on light surfaces */
   --destructive: oklch(0.53 0.2 27);
   --success: oklch(0.51 0.13 150);
   --warning: oklch(0.5 0.1 75);
   --info: oklch(0.52 0.15 255);
 
-  /* Lines & focus — crisp hairlines */
-  --border: oklch(0.9 0.005 264);
-  --input: oklch(0.9 0.005 264);
-  --ring: oklch(0.52 0.16 264);
+  /* Lines and focus */
+  --border: oklch(0.905 0.01 265);
+  --input: oklch(0.88 0.014 265);
+  --ring: oklch(0.565 0.205 267);
 
-  /* Grounded chrome: a warm graphite sidebar anchors the app (hue ~70) */
-  --sidebar: oklch(0.235 0.008 70);
-  --sidebar-foreground: oklch(0.96 0.004 70);
-  --sidebar-muted-foreground: oklch(0.72 0.01 70);
-  --sidebar-accent: oklch(0.52 0.16 264); /* cobalt active pill */
-  --sidebar-accent-foreground: oklch(0.99 0.005 264);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.62 0.16 264);
+  /* App chrome: a white rail on the canvas, cobalt-soft current page */
+  --sidebar: oklch(0.992 0.003 265);
+  --sidebar-foreground: oklch(0.205 0.025 265);
+  --sidebar-muted-foreground: oklch(0.47 0.025 265);
+  --sidebar-accent: oklch(0.935 0.055 267);
+  --sidebar-accent-foreground: oklch(0.43 0.17 267);
+  --sidebar-border: oklch(0.915 0.009 265);
+  --sidebar-ring: oklch(0.565 0.205 267);
 
-  /* Seated cool-tinted elevation (crisp, not floating) */
-  --shadow-xs: 0 1px 2px oklch(0.24 0.02 264 / 0.06);
-  --shadow-card: 0 1px 1px oklch(0.24 0.02 264 / 0.05), 0 2px 4px oklch(0.24 0.02 264 / 0.06);
-  --shadow-card-hover: 0 2px 4px oklch(0.24 0.02 264 / 0.07), 0 6px 14px oklch(0.24 0.02 264 / 0.1);
-  --shadow-raised: 0 3px 6px oklch(0.24 0.02 264 / 0.08), 0 8px 20px oklch(0.24 0.02 264 / 0.11);
-  --shadow-popover: 0 6px 16px oklch(0.24 0.02 264 / 0.12), 0 12px 28px oklch(0.24 0.02 264 / 0.12);
-  --shadow-modal: 0 8px 20px oklch(0.24 0.02 264 / 0.14), 0 20px 48px oklch(0.24 0.02 264 / 0.18);
-}
-
-.dark {
-  /* Surfaces — warm graphite near-black ramp (chrome hue ~70 throughout) */
-  --background: oklch(0.2 0.007 70);
-  --foreground: oklch(0.96 0.004 70);
-  --card: oklch(0.238 0.007 70);
-  --card-foreground: oklch(0.96 0.004 70);
-  --popover: oklch(0.238 0.007 70);
-  --popover-foreground: oklch(0.96 0.004 70);
-
-  /* Cobalt accent — brightened for dark */
-  --primary: oklch(0.66 0.15 264);
-  --primary-foreground: oklch(0.18 0.02 264);
-  --primary-soft: oklch(0.32 0.06 264);
-  --primary-soft-foreground: oklch(0.84 0.1 264);
-
-  /* Quiet neutrals */
-  --secondary: oklch(0.275 0.007 70);
-  --secondary-foreground: oklch(0.96 0.004 70);
-  --muted: oklch(0.275 0.007 70);
-  --muted-foreground: oklch(0.72 0.012 70);
-  --accent: oklch(0.3 0.008 70);
-  --accent-foreground: oklch(0.96 0.004 70);
-
-  /* Inset layer — between canvas and card */
-  --surface-2: oklch(0.26 0.007 70);
-  --surface-2-foreground: oklch(0.96 0.004 70);
-  --surface-3: oklch(0.3 0.008 70);
-  --surface-3-foreground: oklch(0.96 0.004 70);
-
-  /* Semantics — brightened for dark surfaces */
-  --destructive: oklch(0.7 0.19 25);
-  --success: oklch(0.72 0.14 150);
-  --warning: oklch(0.82 0.13 85);
-  --info: oklch(0.72 0.14 255);
-
-  /* Lines & focus */
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 13%);
-  --ring: oklch(0.66 0.15 264);
-
-  /* Sidebar layer — a touch deeper than the card */
-  --sidebar: oklch(0.215 0.007 70);
-  --sidebar-foreground: oklch(0.96 0.004 70);
-  --sidebar-muted-foreground: oklch(0.72 0.012 70);
-  --sidebar-accent: oklch(0.55 0.16 264); /* cobalt active pill */
-  --sidebar-accent-foreground: oklch(0.99 0.005 264);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.66 0.15 264);
-
-  /* Depth */
-  --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.3);
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 12px oklch(0 0 0 / 0.36);
-  --shadow-card-hover: 0 2px 4px oklch(0 0 0 / 0.36), 0 12px 28px oklch(0 0 0 / 0.46);
-  --shadow-raised: 0 3px 6px oklch(0 0 0 / 0.38), 0 8px 20px oklch(0 0 0 / 0.42);
-  --shadow-popover: 0 4px 8px oklch(0 0 0 / 0.4), 0 16px 36px oklch(0 0 0 / 0.55);
-  --shadow-modal: 0 8px 20px oklch(0 0 0 / 0.44), 0 24px 56px oklch(0 0 0 / 0.6);
+  /* Elevation: quiet and cool. Raised/popover/modal carry a faint cobalt cast. */
+  --shadow-xs: 0 1px 2px oklch(0.2 0.03 265 / 0.05);
+  --shadow-card: 0 1px 2px oklch(0.2 0.03 265 / 0.04), 0 1px 3px -1px oklch(0.2 0.03 265 / 0.05);
+  --shadow-card-hover: 0 2px 4px oklch(0.2 0.03 265 / 0.05), 0 10px 24px -12px oklch(0.3 0.08 267 / 0.18);
+  --shadow-raised: 0 4px 12px -4px oklch(0.2 0.04 265 / 0.1), 0 18px 44px -22px oklch(0.35 0.12 267 / 0.24);
+  --shadow-popover: 0 2px 6px oklch(0.2 0.03 265 / 0.06), 0 12px 32px -10px oklch(0.2 0.05 265 / 0.2);
+  --shadow-modal: 0 4px 12px oklch(0.2 0.03 265 / 0.08), 0 28px 72px -20px oklch(0.2 0.08 267 / 0.32);
 }
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 6px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -217,7 +155,7 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     caret-color: var(--primary);
-    scrollbar-color: var(--muted-foreground) var(--background);
+    scrollbar-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent) transparent;
     scrollbar-width: thin;
   }
   button,
@@ -233,49 +171,34 @@
   :focus-visible {
     scroll-margin-block: 5rem;
   }
-  ::-webkit-scrollbar {
-    width: 0.7rem;
-    height: 0.7rem;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--background);
-  }
-  ::-webkit-scrollbar-thumb {
-    background: color-mix(in oklch, var(--muted-foreground) 55%, transparent);
-    border: 3px solid var(--background);
-    border-radius: 999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklch, var(--foreground) 55%, transparent);
-  }
   ::selection {
-    background: var(--primary-soft);
-    color: var(--primary-soft-foreground);
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
+    color: var(--foreground);
   }
 }
 
 @layer components {
   /*
-    Fixed-rem type scale (product UI views at consistent DPI; fluid headings
-    don't serve it). ~1.25+ ratio between steps for clear hierarchy.
+    Product type scale. Fixed rem sizes: operating UI reads at a consistent
+    density. Marketing display type lives in the marketing components.
   */
   .type-display {
-    font-size: 2.5rem; /* 40px */
+    font-size: 2.25rem; /* 36px: onboarding/auth hero moments only */
     line-height: 1.05;
-    letter-spacing: -0.025em;
-    font-weight: 700;
+    letter-spacing: -0.04em;
+    font-weight: 720;
   }
   .type-h1 {
-    font-size: 1.875rem; /* 30px */
+    font-size: 1.75rem; /* 28px: page titles */
     line-height: 1.12;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.035em;
     font-weight: 700;
   }
   .type-h2 {
-    font-size: 1.1875rem; /* 19px */
+    font-size: 1.0625rem; /* 17px: section and card titles */
     line-height: 1.3;
-    letter-spacing: -0.01em;
-    font-weight: 700;
+    letter-spacing: -0.018em;
+    font-weight: 650;
   }
   .type-body {
     font-size: 0.9375rem; /* 15px */
@@ -289,7 +212,8 @@
     font-family: var(--font-geist-mono);
     font-size: 0.6875rem; /* 11px */
     line-height: 1.4;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
+    font-weight: 600;
     text-transform: uppercase;
   }
 }
@@ -302,19 +226,23 @@
     font-feature-settings: "tnum";
   }
 
+  /* Plain canvas for full-page shells (auth, onboarding, portal, app). */
   .app-shell-canvas {
     background-color: var(--background);
-    background-image:
-      radial-gradient(
-        circle at 85% -10%,
-        color-mix(in oklch, var(--primary) 8%, transparent) 0,
-        transparent 34rem
-      ),
-      linear-gradient(
-        to bottom,
-        color-mix(in oklch, var(--card) 48%, transparent),
-        transparent 16rem
-      );
+  }
+
+  /* A standalone working surface: white, hairline, quiet shadow. */
+  .visual-panel {
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* The one emphasised surface on a view (primary panel, auth card). */
+  .visual-panel-strong {
+    border: 1px solid color-mix(in oklch, var(--primary) 14%, var(--border));
+    background-color: var(--card);
+    box-shadow: var(--shadow-raised);
   }
 
   .skeleton-shimmer {
@@ -327,6 +255,19 @@
     background-size: 220% 100%;
     animation: skeleton-shimmer 1.8s ease-in-out infinite;
   }
+
+  /* Marketing: signal travelling along an SVG connector (pair with stroke-dasharray). */
+  .flow-dash {
+    animation: flow-dash 2.4s linear infinite;
+  }
+
+  /* Marketing hero entrance runs in CSS so the headline paints before hydration (LCP). */
+  .animate-mask-up {
+    animation: mask-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-fade-up {
+    animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 }
 
 @keyframes skeleton-shimmer {
@@ -335,6 +276,25 @@
   }
   to {
     background-position: -120% 0;
+  }
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes mask-up {
+  from {
+    transform: translateY(105%);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
 }
 
@@ -356,240 +316,5 @@
   }
   .skeleton-shimmer {
     background-image: none;
-  }
-}
-
-
-/* --------------------------------------------------------------------------
-   Sep 18 visual overhaul — "Command Surface"
-   A higher-contrast, layered operating-system treatment shared by every product.
-   -------------------------------------------------------------------------- */
-:root,
-.marketing-light {
-  --radius: 1rem;
-  --background: oklch(0.976 0.007 265);
-  --foreground: oklch(0.205 0.025 265);
-  --card: oklch(0.998 0.002 265);
-  --card-foreground: oklch(0.205 0.025 265);
-  --popover: oklch(0.998 0.002 265);
-  --popover-foreground: oklch(0.205 0.025 265);
-  --primary: oklch(0.565 0.205 267);
-  --primary-foreground: oklch(0.99 0.004 265);
-  --primary-soft: oklch(0.935 0.055 267);
-  --primary-soft-foreground: oklch(0.43 0.17 267);
-  --secondary: oklch(0.948 0.01 265);
-  --secondary-foreground: oklch(0.285 0.025 265);
-  --muted: oklch(0.948 0.008 265);
-  --muted-foreground: oklch(0.47 0.025 265);
-  --accent: oklch(0.93 0.018 265);
-  --accent-foreground: oklch(0.27 0.03 265);
-  --surface-2: oklch(0.958 0.012 265);
-  --surface-2-foreground: oklch(0.205 0.025 265);
-  --surface-3: oklch(0.92 0.02 265);
-  --surface-3-foreground: oklch(0.27 0.03 265);
-  --border: oklch(0.885 0.014 265);
-  --input: oklch(0.875 0.016 265);
-  --ring: oklch(0.58 0.2 267);
-
-  --sidebar: oklch(0.17 0.022 265);
-  --sidebar-foreground: oklch(0.97 0.008 265);
-  --sidebar-muted-foreground: oklch(0.71 0.018 265);
-  --sidebar-accent: oklch(0.59 0.205 267);
-  --sidebar-accent-foreground: oklch(0.99 0.004 265);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.68 0.16 267);
-
-  --shadow-xs: 0 1px 2px oklch(0.2 0.04 265 / 0.06), 0 0 0 1px oklch(0.2 0.04 265 / 0.015);
-  --shadow-card:
-    0 1px 2px oklch(0.2 0.04 265 / 0.045),
-    0 8px 24px -16px oklch(0.2 0.06 265 / 0.18);
-  --shadow-card-hover:
-    0 2px 5px oklch(0.2 0.04 265 / 0.07),
-    0 18px 42px -22px oklch(0.45 0.18 267 / 0.28);
-  --shadow-raised:
-    0 6px 18px -8px oklch(0.2 0.05 265 / 0.15),
-    0 28px 64px -32px oklch(0.35 0.14 267 / 0.28);
-  --shadow-popover:
-    0 10px 30px -10px oklch(0.18 0.04 265 / 0.18),
-    0 30px 70px -32px oklch(0.18 0.08 265 / 0.28);
-  --shadow-modal:
-    0 20px 50px -16px oklch(0.15 0.04 265 / 0.28),
-    0 45px 100px -40px oklch(0.2 0.1 267 / 0.38);
-}
-
-.dark {
-  --background: oklch(0.145 0.018 265);
-  --foreground: oklch(0.965 0.008 265);
-  --card: oklch(0.188 0.021 265);
-  --card-foreground: oklch(0.965 0.008 265);
-  --popover: oklch(0.195 0.022 265);
-  --popover-foreground: oklch(0.965 0.008 265);
-  --primary: oklch(0.69 0.17 267);
-  --primary-foreground: oklch(0.13 0.025 265);
-  --primary-soft: oklch(0.275 0.075 267);
-  --primary-soft-foreground: oklch(0.86 0.1 267);
-  --secondary: oklch(0.225 0.02 265);
-  --secondary-foreground: oklch(0.96 0.008 265);
-  --muted: oklch(0.22 0.018 265);
-  --muted-foreground: oklch(0.7 0.022 265);
-  --accent: oklch(0.245 0.026 265);
-  --accent-foreground: oklch(0.97 0.008 265);
-  --surface-2: oklch(0.205 0.022 265);
-  --surface-2-foreground: oklch(0.965 0.008 265);
-  --surface-3: oklch(0.255 0.03 265);
-  --surface-3-foreground: oklch(0.965 0.008 265);
-  --border: oklch(1 0 0 / 11%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.69 0.17 267);
-  --sidebar: oklch(0.115 0.018 265);
-  --sidebar-foreground: oklch(0.97 0.008 265);
-  --sidebar-muted-foreground: oklch(0.69 0.02 265);
-  --sidebar-accent: oklch(0.62 0.19 267);
-  --sidebar-accent-foreground: oklch(0.99 0.004 265);
-}
-
-@layer base {
-  body {
-    background-image:
-      radial-gradient(circle at 8% -10%, color-mix(in oklch, var(--primary) 9%, transparent), transparent 30rem),
-      radial-gradient(circle at 94% 4%, color-mix(in oklch, var(--info) 7%, transparent), transparent 28rem);
-  }
-
-  ::selection {
-    background: color-mix(in oklch, var(--primary) 24%, transparent);
-    color: var(--foreground);
-  }
-}
-
-@layer components {
-  .type-display {
-    font-size: clamp(2.75rem, 5vw, 5.25rem);
-    line-height: 0.98;
-    letter-spacing: -0.055em;
-    font-weight: 760;
-  }
-
-  .type-h1 {
-    font-size: clamp(2rem, 3vw, 2.65rem);
-    line-height: 1.02;
-    letter-spacing: -0.045em;
-    font-weight: 740;
-  }
-
-  .type-h2 {
-    font-size: 1.25rem;
-    line-height: 1.2;
-    letter-spacing: -0.025em;
-    font-weight: 680;
-  }
-
-  .type-meta {
-    letter-spacing: 0.095em;
-    font-weight: 650;
-  }
-}
-
-@layer utilities {
-  .app-shell-canvas {
-    position: relative;
-    isolation: isolate;
-    background:
-      radial-gradient(circle at 78% -12%, color-mix(in oklch, var(--primary) 11%, transparent), transparent 34rem),
-      radial-gradient(circle at 15% 18%, color-mix(in oklch, var(--info) 5%, transparent), transparent 28rem),
-      linear-gradient(180deg, color-mix(in oklch, var(--card) 56%, var(--background)) 0, var(--background) 22rem);
-  }
-
-  .app-shell-canvas::before {
-    content: "";
-    position: fixed;
-    inset: 0 0 0 18rem;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.36;
-    background-image:
-      linear-gradient(color-mix(in oklch, var(--foreground) 4%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in oklch, var(--foreground) 4%, transparent) 1px, transparent 1px);
-    background-size: 32px 32px;
-    mask-image: linear-gradient(to bottom, black, transparent 45rem);
-  }
-
-  .visual-panel {
-    border: 1px solid color-mix(in oklch, var(--border) 84%, transparent);
-    background:
-      linear-gradient(145deg, color-mix(in oklch, var(--card) 96%, transparent), color-mix(in oklch, var(--surface-2) 76%, transparent));
-    box-shadow: var(--shadow-card);
-    backdrop-filter: blur(18px);
-  }
-
-  .visual-panel-strong {
-    border: 1px solid color-mix(in oklch, var(--primary) 16%, var(--border));
-    background:
-      radial-gradient(circle at 100% 0, color-mix(in oklch, var(--primary) 11%, transparent), transparent 17rem),
-      var(--card);
-    box-shadow: var(--shadow-raised);
-  }
-
-  .accent-rule {
-    background: linear-gradient(90deg, var(--primary), color-mix(in oklch, var(--info) 72%, var(--primary)), transparent);
-  }
-
-  .text-gradient {
-    background: linear-gradient(100deg, var(--foreground) 18%, color-mix(in oklch, var(--primary) 82%, var(--foreground)));
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-  }
-}
-
-@media (max-width: 1023px) {
-  .app-shell-canvas::before {
-    left: 0;
-  }
-}
-
-/* --------------------------------------------------------------------------
-   Marketing — always light. The class re-declares the light tokens (see the
-   `:root, .marketing-light` selectors above) so they win over the `.dark`
-   values inherited from <html> when the visitor's OS is in dark mode.
-   -------------------------------------------------------------------------- */
-.marketing-light {
-  color-scheme: light;
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-@layer utilities {
-  /* Signal travelling along an SVG connector. Pair with stroke-dasharray. */
-  .flow-dash {
-    animation: flow-dash 2.4s linear infinite;
-  }
-}
-
-@keyframes flow-dash {
-  to {
-    stroke-dashoffset: -48;
-  }
-}
-
-/* Hero entrance runs in CSS so the headline paints before hydration (LCP). */
-@layer utilities {
-  .animate-mask-up {
-    animation: mask-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-  .animate-fade-up {
-    animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-}
-
-@keyframes mask-up {
-  from {
-    transform: translateY(105%);
-  }
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
   }
 }

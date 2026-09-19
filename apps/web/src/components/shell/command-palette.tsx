@@ -2,13 +2,11 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
 import {
   CalendarRange,
   FileText,
   Loader2,
   MessagesSquare,
-  Moon,
   Search,
   Sparkles,
   Upload,
@@ -58,7 +56,6 @@ function CommandPalette({
   onOpenChange: (open: boolean) => void;
 }) {
   const router = useRouter();
-  const { resolvedTheme, setTheme } = useTheme();
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState(0);
   const [remote, setRemote] = React.useState<WorkspaceSearchResults>(EMPTY_RESULTS);
@@ -96,15 +93,8 @@ function CommandPalette({
         icon: UserPlus,
         href: "/settings/team",
       },
-      {
-        key: "action-theme",
-        label: "Switch theme",
-        hint: resolvedTheme === "dark" ? "To light" : "To dark",
-        icon: Moon,
-        perform: () => setTheme(resolvedTheme === "dark" ? "light" : "dark"),
-      },
     ],
-    [resolvedTheme, setTheme],
+    [],
   );
 
   function reset() {
