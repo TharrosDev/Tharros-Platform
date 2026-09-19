@@ -74,6 +74,7 @@ export const notificationSendHandler: JobHandler = async (job: Job) => {
       actionUrl: link?.url,
       actionLabel: link?.label,
     }),
+    idempotencyKey: `notification/${n.id}`,
   });
 
   if (!result.ok) {
