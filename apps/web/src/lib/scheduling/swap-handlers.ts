@@ -120,6 +120,7 @@ export const swapProposalNotifyHandler: JobHandler = async (job: Job) => {
       shiftLabel: shiftLabel(xRow.starts_at, xRow.ends_at),
       tradeForLabel: tradeFor ? shiftLabel(tradeFor.starts_at, tradeFor.ends_at) : null,
     }),
+    idempotencyKey: `swap-proposal/${job.id}`,
   });
   if (!sent.ok) throw new Error(`swap-proposal-notify: email failed (${sent.error})`);
 };
@@ -165,6 +166,7 @@ export const swapResultNotifyHandler: JobHandler = async (job: Job) => {
       result,
       shiftLabel: shiftLabel(xRow.starts_at, xRow.ends_at),
     }),
+    idempotencyKey: `swap-result/${job.id}`,
   });
   if (!sent.ok) throw new Error(`swap-result-notify: email failed (${sent.error})`);
 };
