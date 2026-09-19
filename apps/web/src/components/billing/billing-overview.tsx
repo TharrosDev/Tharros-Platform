@@ -66,7 +66,7 @@ export function BillingOverview({
 
   return (
     <div className="space-y-8">
-      <Card>
+      <Card className="visual-panel-strong overflow-hidden">
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-1">
@@ -101,9 +101,9 @@ export function BillingOverview({
         </CardHeader>
         {plan ? (
           <CardContent>
-            <ul className="grid gap-x-6 gap-y-1.5 sm:grid-cols-2">
+            <ul className="grid gap-2 sm:grid-cols-2">
               {plan.features.map((feature) => (
-                <li key={feature} className="text-muted-foreground type-small flex items-start gap-2">
+                <li key={feature} className="text-muted-foreground type-small flex items-start gap-2 rounded-lg border border-border/50 bg-surface-2/45 px-3 py-2">
                   <span className="bg-primary/60 mt-2 size-1 shrink-0 rounded-full" aria-hidden />
                   {feature}
                 </li>
