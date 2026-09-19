@@ -116,7 +116,7 @@ function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNaviga
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-sidebar-ring/50 relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium outline-none transition-[color,transform] hover:translate-x-0.5 focus-visible:ring-[3px]",
+        "group focus-visible:ring-sidebar-ring/50 relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium outline-none transition-[color,transform] hover:translate-x-0.5 focus-visible:ring-[3px]",
         active
           ? "text-sidebar-accent-foreground"
           : "text-sidebar-muted-foreground hover:bg-white/5 hover:text-sidebar-foreground",
