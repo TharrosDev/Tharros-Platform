@@ -125,6 +125,7 @@ export const scheduleDeliveryHandler: JobHandler = async (job: Job) => {
       shiftCount: shifts.length,
       periodLabel,
     }),
+    idempotencyKey: `schedule-delivery/${job.id}`,
   });
   if (!sent.ok) throw new Error(`schedule-delivery: email failed (${sent.error})`);
 };
@@ -190,6 +191,7 @@ export const shiftReminderHandler: JobHandler = async (job: Job) => {
       portalUrl,
       shiftLabel: shiftLabel(shift.starts_at, shift.ends_at),
     }),
+    idempotencyKey: `shift-reminder/${job.id}`,
   });
   if (!sent.ok) throw new Error(`shift-reminder: email failed (${sent.error})`);
 };
