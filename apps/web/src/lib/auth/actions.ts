@@ -59,8 +59,8 @@ export async function signUp(
   const next = sanitizeNext(String(formData.get("next") ?? "")) ?? "/dashboard";
 
   const [requesterLimit, identityLimit] = await Promise.all([
-    checkRateLimit(await authRequesterKey("signup-requester"), 8, 3600),
-    checkRateLimit(await authIdentityKey("signup-email", parsed.data.email), 5, 3600),
+    checkRateLimit(await authRequesterKey("signup-requester"), 8, 3600, { failOpen: false }),
+    checkRateLimit(await authIdentityKey("signup-email", parsed.data.email), 5, 3600, { failOpen: false }),
   ]);
   if (!requesterLimit.allowed || !identityLimit.allowed) {
     return {
@@ -105,8 +105,8 @@ export async function logIn(
   const next = sanitizeNext(String(formData.get("next") ?? ""));
 
   const [requesterLimit, identityLimit] = await Promise.all([
-    checkRateLimit(await authRequesterKey("login-requester"), 60, 900),
-    checkRateLimit(await authIdentityKey("login-email", parsed.data.email), 12, 900),
+    checkRateLimit(await authRequesterKey("login-requester"), 60, 900, { failOpen: false }),
+    checkRateLimit(await authIdentityKey("login-email", parsed.data.email), 12, 900, { failOpen: false }),
   ]);
   if (!requesterLimit.allowed || !identityLimit.allowed) {
     return {
@@ -145,8 +145,8 @@ export async function requestPasswordReset(
   // Throttle by opaque email + requester buckets. On limit, return the same
   // neutral "sent" response: no account-enumeration signal and no email bombing.
   const [identityLimit, requesterLimit] = await Promise.all([
-    checkRateLimit(await authIdentityKey("pwreset-email", parsed.data.email), 3, 900),
-    checkRateLimit(await authRequesterKey("pwreset-requester"), 12, 900),
+    checkRateLimit(await authIdentityKey("pwreset-email", parsed.data.email), 3, 900, { failOpen: false }),
+    checkRateLimit(await authRequesterKey("pwreset-requester"), 12, 900, { failOpen: false }),
   ]);
   if (!identityLimit.allowed || !requesterLimit.allowed) return { message: "sent" };
 
@@ -192,8 +192,8 @@ export async function resendVerification(
 
   // Throttle by opaque identity + requester buckets; keep the response neutral.
   const [identityLimit, requesterLimit] = await Promise.all([
-    checkRateLimit(await authIdentityKey("verify-email", email), 3, 900),
-    checkRateLimit(await authRequesterKey("verify-requester"), 12, 900),
+    checkRateLimit(await authIdentityKey("verify-email", email), 3, 900, { failOpen: false }),
+    checkRateLimit(await authRequesterKey("verify-requester"), 12, 900, { failOpen: false }),
   ]);
   if (!identityLimit.allowed || !requesterLimit.allowed) return { message: "resent" };
 
