@@ -16,6 +16,7 @@ export async function checkRateLimit(
   key: string,
   max: number,
   windowSeconds: number,
+  options: { failOpen?: boolean } = {},
 ): Promise<{ allowed: boolean }> {
   const supabase = createAdminClient();
   const { data, error } = await supabase.rpc("check_rate_limit", {
@@ -25,8 +26,9 @@ export async function checkRateLimit(
   });
 
   if (error) {
-    logger.warn("rate-limit check failed; allowing", { err: error, key });
-    return { allowed: true };
+    const failOpen = options.failOpen ?? true;
+    logger.warn("rate-limit check failed", { err: error, key, failOpen });
+    return { allowed: failOpen };
   }
 
   return { allowed: data === true };
