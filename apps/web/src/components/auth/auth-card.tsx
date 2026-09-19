@@ -20,14 +20,15 @@ export function AuthCard({
 }) {
   return (
     <div className="w-full max-w-md space-y-5">
-      <Card className="shadow-raised">
-        <CardHeader className="px-6 text-center sm:px-8">
-          <h1 data-slot="card-title" className="type-h2">
+      <Card className="visual-panel-strong overflow-hidden rounded-3xl shadow-raised">
+        <CardHeader className="px-6 pb-2 pt-8 text-center sm:px-8">
+          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-gradient-to-r from-primary to-info" aria-hidden />
+          <h1 data-slot="card-title" className="text-2xl font-bold tracking-[-0.035em]">
             {title}
           </h1>
           {description ? <CardDescription>{description}</CardDescription> : null}
         </CardHeader>
-        <CardContent className="px-6 sm:px-8">{children}</CardContent>
+        <CardContent className="px-6 pb-8 sm:px-8">{children}</CardContent>
       </Card>
       {footer ? <p className="text-muted-foreground text-center text-sm">{footer}</p> : null}
     </div>
