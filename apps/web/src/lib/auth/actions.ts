@@ -1,12 +1,17 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 import { getURL } from "@/lib/site-url";
 import { sanitizeNext } from "@/lib/auth/safe-redirect";
 import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  opaqueRateLimitKey,
+  requestFingerprint,
+} from "@/lib/security/request";
 import {
   logInSchema,
   requestResetSchema,
@@ -28,6 +33,15 @@ function fieldErrors(error: z.ZodError) {
   return z.flattenError(error).fieldErrors as Record<string, string[] | undefined>;
 }
 
+async function authRequesterKey(namespace: string): Promise<string> {
+  const h = await headers();
+  return opaqueRateLimitKey(namespace, requestFingerprint(h));
+}
+
+async function authIdentityKey(namespace: string, value: string): Promise<string> {
+  return opaqueRateLimitKey(namespace, value.trim().toLowerCase());
+}
+
 export async function signUp(
   _prev: AuthFormState,
   formData: FormData,
@@ -43,6 +57,17 @@ export async function signUp(
   }
 
   const next = sanitizeNext(String(formData.get("next") ?? "")) ?? "/dashboard";
+
+  const [requesterLimit, identityLimit] = await Promise.all([
+    checkRateLimit(await authRequesterKey("signup-requester"), 8, 3600),
+    checkRateLimit(await authIdentityKey("signup-email", parsed.data.email), 5, 3600),
+  ]);
+  if (!requesterLimit.allowed || !identityLimit.allowed) {
+    return {
+      message: "Too many signup attempts. Please try again later.",
+      values: { fullName: raw.fullName, email: raw.email },
+    };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
@@ -79,6 +104,17 @@ export async function logIn(
 
   const next = sanitizeNext(String(formData.get("next") ?? ""));
 
+  const [requesterLimit, identityLimit] = await Promise.all([
+    checkRateLimit(await authRequesterKey("login-requester"), 60, 900),
+    checkRateLimit(await authIdentityKey("login-email", parsed.data.email), 12, 900),
+  ]);
+  if (!requesterLimit.allowed || !identityLimit.allowed) {
+    return {
+      message: "Too many sign-in attempts. Please try again later.",
+      values: { email: raw.email },
+    };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
@@ -106,10 +142,13 @@ export async function requestPasswordReset(
     return { errors: fieldErrors(parsed.error), values: raw };
   }
 
-  // Throttle by email. On limit, return the same neutral "sent" response and
-  // skip the send — no enumeration signal, and no email bombing of an address.
-  const { allowed } = await checkRateLimit(`pwreset:${parsed.data.email.toLowerCase()}`, 3, 900);
-  if (!allowed) return { message: "sent" };
+  // Throttle by opaque email + requester buckets. On limit, return the same
+  // neutral "sent" response: no account-enumeration signal and no email bombing.
+  const [identityLimit, requesterLimit] = await Promise.all([
+    checkRateLimit(await authIdentityKey("pwreset-email", parsed.data.email), 3, 900),
+    checkRateLimit(await authRequesterKey("pwreset-requester"), 12, 900),
+  ]);
+  if (!identityLimit.allowed || !requesterLimit.allowed) return { message: "sent" };
 
   const supabase = await createClient();
   // Ignore the result on purpose — never reveal whether an email is registered.
@@ -151,9 +190,12 @@ export async function resendVerification(
 
   const next = sanitizeNext(String(formData.get("next") ?? "")) ?? "/dashboard";
 
-  // Throttle by email; on limit return the same neutral "resent" response.
-  const { allowed } = await checkRateLimit(`verify:${email.toLowerCase()}`, 3, 900);
-  if (!allowed) return { message: "resent" };
+  // Throttle by opaque identity + requester buckets; keep the response neutral.
+  const [identityLimit, requesterLimit] = await Promise.all([
+    checkRateLimit(await authIdentityKey("verify-email", email), 3, 900),
+    checkRateLimit(await authRequesterKey("verify-requester"), 12, 900),
+  ]);
+  if (!identityLimit.allowed || !requesterLimit.allowed) return { message: "resent" };
 
   const supabase = await createClient();
   await supabase.auth.resend({
