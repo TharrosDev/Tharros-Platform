@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/observability/logger";
 
 /**
@@ -17,7 +17,7 @@ export async function checkRateLimit(
   max: number,
   windowSeconds: number,
 ): Promise<{ allowed: boolean }> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase.rpc("check_rate_limit", {
     p_key: key,
     p_max: max,
