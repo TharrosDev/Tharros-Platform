@@ -104,6 +104,7 @@ export const replacementOfferNotifyHandler: JobHandler = async (job: Job) => {
         portalUrl,
         shiftLabel: label,
       }),
+      idempotencyKey: `replacement-offer/${job.id}/${employee.id}`,
     });
     if (!sent.ok) {
       // One bad address shouldn't fail the whole fan-out; log and continue.
