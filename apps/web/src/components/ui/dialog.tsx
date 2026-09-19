@@ -18,7 +18,7 @@ function DialogBackdrop({
   return (
     <DialogPrimitive.Backdrop
       className={cn(
-        "bg-sidebar/60 fixed inset-0 z-overlay backdrop-blur-[3px] transition-opacity duration-200 ease-out",
+        "bg-sidebar/72 fixed inset-0 z-overlay backdrop-blur-md transition-opacity duration-200 ease-out",
         "data-[starting-style]:opacity-0 data-[ending-style]:opacity-0",
         className,
       )}
@@ -41,7 +41,7 @@ function DialogContent({
       <DialogPrimitive.Viewport className="fixed inset-0 z-overlay flex min-h-full items-center justify-center overflow-y-auto p-4 sm:p-6">
         <DialogPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-modal relative w-full max-w-lg rounded-xl border border-border/70 p-5 outline-none sm:p-6",
+            "bg-popover/96 text-popover-foreground shadow-modal relative w-full max-w-lg overflow-hidden rounded-2xl border border-border/75 p-5 backdrop-blur-2xl outline-none before:pointer-events-none before:absolute before:inset-x-8 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary/45 before:to-transparent sm:p-6",
             "transition-all duration-200 ease-out",
             "data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             "data-[ending-style]:scale-95 data-[ending-style]:opacity-0",
@@ -52,7 +52,7 @@ function DialogContent({
           {children}
           {showClose ? (
             <DialogClose
-              className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 absolute right-3 top-3 inline-flex size-10 items-center justify-center rounded-lg transition-colors outline-none focus-visible:ring-[3px] sm:right-4 sm:top-4"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/35 absolute right-3 top-3 inline-flex size-10 items-center justify-center rounded-xl border border-transparent transition-colors outline-none hover:border-border focus-visible:ring-[4px] sm:right-4 sm:top-4"
               aria-label="Close"
             >
               <X className="size-4" />

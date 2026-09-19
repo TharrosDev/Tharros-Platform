@@ -195,12 +195,12 @@ export function AssistantChat({
   const showEmpty = messages.length === 0 && !streaming;
 
   return (
-    <div className="flex min-h-[calc(100vh-16rem)] flex-col">
+    <div className="relative flex min-h-[calc(100vh-16rem)] flex-col overflow-hidden rounded-3xl border border-border/55 bg-card/25 px-3 pt-2 shadow-[inset_0_1px_0_color-mix(in_oklch,var(--card)_80%,transparent)] backdrop-blur-sm sm:px-5">
       <div className="flex-1">
         {showEmpty ? (
           <EmptyState hasDocuments={hasDocuments} onPick={send} readOnly={readOnly} />
         ) : (
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-7 py-5">
             {olderTruncated ? (
               <p className="text-muted-foreground border-border rounded-md border border-dashed py-2 text-center text-xs">
                 Showing the most recent messages in this conversation.
@@ -287,11 +287,12 @@ function EmptyState({
   readOnly: boolean;
 }) {
   return (
-    <div className="mx-auto flex max-w-xl flex-col items-center px-4 pt-10 pb-6 text-center sm:pt-16">
-      <span className="text-primary bg-primary-soft flex size-12 items-center justify-center rounded-xl">
+    <div className="mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 pt-14 text-center sm:pt-20">
+      <span className="text-primary bg-primary-soft flex size-16 items-center justify-center rounded-2xl border border-primary/15 shadow-[0_16px_36px_-20px_color-mix(in_oklch,var(--primary)_70%,transparent)]">
         <Sparkles className="size-6" />
       </span>
-      <h2 className="type-h1 mt-4">Ask about your business</h2>
+      <p className="type-meta text-primary mt-6">Grounded intelligence</p>
+      <h2 className="type-h1 mt-2">Ask about your business</h2>
       <p className="text-muted-foreground type-body mt-2 max-w-md">
         The assistant answers only from the documents in your Knowledge base, and cites the
         source for every answer.
@@ -305,7 +306,7 @@ function EmptyState({
                 key={p}
                 type="button"
                 onClick={() => onPick(p)}
-                className="group border-border bg-card hover:border-ring hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-colors"
+                className="group border-border/75 bg-card/75 hover:border-primary/25 hover:bg-primary-soft/30 flex items-center justify-between gap-3 rounded-xl border px-4 py-3.5 text-left text-sm shadow-xs backdrop-blur-sm transition-[background-color,border-color,transform,box-shadow] hover:-translate-y-px hover:shadow-card"
               >
                 <span className="text-foreground">{p}</span>
                 <ArrowUp className="text-muted-foreground size-4 shrink-0 rotate-45 transition-transform group-hover:rotate-90" />
@@ -314,7 +315,7 @@ function EmptyState({
           </div>
         </div>
       ) : (
-        <div className="border-border bg-card shadow-card mt-7 flex w-full flex-col gap-4 rounded-xl border p-5 text-left">
+        <div className="visual-panel-strong mt-8 flex w-full flex-col gap-4 rounded-2xl p-6 text-left">
           <p className="text-foreground font-medium">Add your documents to get started</p>
           <p className="text-muted-foreground text-sm">
             The assistant answers from what you upload, so it needs a few documents first.
@@ -366,7 +367,7 @@ function TemplateChips({
             aria-pressed={active === t.id}
             title={t.description}
             className={cn(
-              "border-border bg-card hover:border-ring hover:bg-accent/50 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+              "border-border/75 bg-card/75 hover:border-primary/30 hover:bg-primary-soft/40 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium shadow-xs backdrop-blur-sm transition-[background-color,border-color,transform] hover:-translate-y-px",
               active === t.id && "border-ring bg-accent",
             )}
           >
@@ -391,7 +392,7 @@ function UsageNotice({
     <div
       role="status"
       className={cn(
-        "mb-2 rounded-lg border px-3 py-2 text-sm",
+        "mb-2 rounded-xl border px-3.5 py-2.5 text-sm shadow-xs backdrop-blur-sm",
         tone === "error"
           ? "border-destructive/40 bg-destructive/10 text-destructive"
           : "border-border bg-accent/40 text-foreground",

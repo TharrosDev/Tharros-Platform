@@ -6,6 +6,7 @@ import {
   BookOpen,
   CalendarDays,
   MessageSquareText,
+  Sparkles,
   Users,
   Workflow,
 } from "lucide-react";
@@ -82,8 +83,46 @@ export default async function DashboardPage() {
         description={activeOrg.name}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
-        <Link href="/knowledge" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+      <section className="visual-panel-strong relative overflow-hidden rounded-3xl p-6 sm:p-8">
+        <div className="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-primary/12 blur-3xl" aria-hidden />
+        <div className="relative grid gap-8 xl:grid-cols-[1.15fr_0.85fr] xl:items-end">
+          <div>
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary-soft/70 px-3 py-1.5 text-primary-soft-foreground shadow-xs">
+              <Sparkles className="size-3.5" aria-hidden />
+              <span className="type-meta">Live operations</span>
+            </div>
+            <h2 className="max-w-2xl text-2xl font-bold tracking-[-0.035em] text-balance sm:text-3xl">
+              Your business command center is up to date.
+            </h2>
+            <p className="text-muted-foreground mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
+              Knowledge, scheduling, lead activity and automation health are connected across
+              {activeOrg.name}. Review the signals below, then jump directly into the work.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+            <div className="rounded-2xl border border-border/70 bg-background/55 p-3.5 backdrop-blur-md">
+              <p className="type-meta text-muted-foreground">Knowledge</p>
+              <p className="num mt-2 text-xl font-bold tracking-tight">{documentCount}</p>
+              <p className="text-muted-foreground mt-1 text-xs">indexed documents</p>
+            </div>
+            <div className="rounded-2xl border border-border/70 bg-background/55 p-3.5 backdrop-blur-md">
+              <p className="type-meta text-muted-foreground">Schedule</p>
+              <p className="mt-2 text-xl font-bold tracking-tight">{scheduleState}</p>
+              <p className="text-muted-foreground mt-1 text-xs">current state</p>
+            </div>
+            <div className="rounded-2xl border border-border/70 bg-background/55 p-3.5 backdrop-blur-md">
+              <p className="type-meta text-muted-foreground">Attention</p>
+              <p className="num mt-2 text-xl font-bold tracking-tight">
+                {unreadCount + failedAutomationRuns + (newLeadCount ?? 0)}
+              </p>
+              <p className="text-muted-foreground mt-1 text-xs">open signals</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+        <Link href="/knowledge" className="rounded-2xl outline-none focus-visible:ring-[4px] focus-visible:ring-ring/30">
           <StatCard
             label="Knowledge"
             value={documentCount}
@@ -92,7 +131,7 @@ export default async function DashboardPage() {
             className="h-full transition-shadow hover:shadow-card-hover"
           />
         </Link>
-        <Link href="/scheduling/employees" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+        <Link href="/scheduling/employees" className="rounded-2xl outline-none focus-visible:ring-[4px] focus-visible:ring-ring/30">
           <StatCard
             label="Active team"
             value={scheduling.employeeCount}
@@ -101,7 +140,7 @@ export default async function DashboardPage() {
             className="h-full transition-shadow hover:shadow-card-hover"
           />
         </Link>
-        <Link href="/notifications" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+        <Link href="/notifications" className="rounded-2xl outline-none focus-visible:ring-[4px] focus-visible:ring-ring/30">
           <StatCard
             label="Unread"
             value={unreadCount}
@@ -110,7 +149,7 @@ export default async function DashboardPage() {
             className="h-full transition-shadow hover:shadow-card-hover"
           />
         </Link>
-        <Link href="/scheduling/calendar" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+        <Link href="/scheduling/calendar" className="rounded-2xl outline-none focus-visible:ring-[4px] focus-visible:ring-ring/30">
           <StatCard
             label="Schedule"
             value={scheduleState}
@@ -126,7 +165,7 @@ export default async function DashboardPage() {
           />
         </Link>
         {leadsAccess.entitled ? (
-          <Link href="/leads" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+          <Link href="/leads" className="rounded-2xl outline-none focus-visible:ring-[4px] focus-visible:ring-ring/30">
             <StatCard
               label="New leads"
               value={newLeadCount ?? 0}
@@ -137,7 +176,7 @@ export default async function DashboardPage() {
           </Link>
         ) : null}
         {automationsAccess.entitled ? (
-          <Link href="/automations" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40">
+          <Link href="/automations" className="rounded-2xl outline-none focus-visible:ring-[4px] focus-visible:ring-ring/30">
             <StatCard
               label="Automation issues"
               value={failedAutomationRuns}
@@ -149,8 +188,8 @@ export default async function DashboardPage() {
         ) : null}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
-        <Card>
+      <div className="grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+        <Card className="visual-panel-strong">
           <CardHeader className="flex-row items-start justify-between gap-4">
             <div>
               <CardTitle>Recent assistant conversations</CardTitle>
@@ -169,9 +208,9 @@ export default async function DashboardPage() {
                   <Link
                     key={conversation.id}
                     href={`/assistant?c=${conversation.id}`}
-                    className="group flex items-center gap-3 py-3.5 outline-none first:pt-0 last:pb-0 focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                    className="group -mx-2 flex items-center gap-3 rounded-xl px-2 py-3.5 outline-none transition-colors hover:bg-primary-soft/35 first:pt-0 last:pb-0 focus-visible:ring-[4px] focus-visible:ring-ring/30"
                   >
-                    <span className="bg-surface-2 text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+                    <span className="bg-primary-soft text-primary-soft-foreground flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/10 shadow-xs transition-transform group-hover:scale-105">
                       <MessageSquareText className="size-4" aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1">
@@ -198,7 +237,7 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-hidden bg-gradient-to-b from-card to-primary-soft/15">
           <CardHeader>
             <CardTitle>Scheduling</CardTitle>
             <CardDescription>Current organization scheduling state.</CardDescription>

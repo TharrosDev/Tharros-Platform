@@ -106,13 +106,13 @@ export function FeedbackWidget() {
             key="panel"
             layoutId="feedback-widget"
             transition={spring.gentle}
-            className="bg-card shadow-modal flex h-[32rem] w-[25rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border/70 max-h-[calc(100dvh-6rem)]"
+            className="bg-popover/95 shadow-modal flex h-[32rem] w-[25rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-border/75 backdrop-blur-2xl max-h-[calc(100dvh-6rem)]"
             role="dialog"
             aria-label="Help and feedback"
           >
             {/* Header */}
             <div className="border-border/60 flex items-center gap-2.5 border-b px-4 py-3">
-              <span className="text-primary bg-primary-soft flex size-7 items-center justify-center rounded-md">
+              <span className="text-primary bg-primary-soft flex size-8 items-center justify-center rounded-xl border border-primary/15 shadow-xs">
                 <TharrosMark className="size-3.5" />
               </span>
               <div className="min-w-0 flex-1">
@@ -191,7 +191,7 @@ export function FeedbackWidget() {
               {state.messages.map((msg, i) =>
                 msg.role === "user" ? (
                   <div key={i} className="flex justify-end">
-                    <div className="bg-primary-soft text-primary-soft-foreground max-w-[85%] rounded-lg rounded-br-sm px-3 py-2 text-sm whitespace-pre-wrap">
+                    <div className="bg-primary-soft text-primary-soft-foreground max-w-[85%] rounded-2xl rounded-br-md border border-primary/10 px-3.5 py-2.5 text-sm shadow-xs whitespace-pre-wrap">
                       {msg.content}
                     </div>
                   </div>
@@ -241,7 +241,7 @@ export function FeedbackWidget() {
 
             {/* Composer */}
             <div className="border-border/60 border-t p-3">
-              <div className="border-input bg-background focus-within:border-ring focus-within:ring-ring/40 flex items-end gap-2 rounded-lg border p-1.5 transition-[box-shadow,border-color] focus-within:ring-[3px]">
+              <div className="border-input bg-background/80 focus-within:border-ring focus-within:ring-ring/30 flex items-end gap-2 rounded-2xl border p-2 shadow-xs transition-[box-shadow,border-color] focus-within:ring-[4px]">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -265,7 +265,7 @@ export function FeedbackWidget() {
                   onClick={send}
                   disabled={!canSend}
                   aria-label="Send"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring/40 inline-flex size-10 shrink-0 items-center justify-center rounded-lg outline-none transition-all duration-150 focus-visible:ring-[3px] disabled:opacity-40"
+                  className="bg-gradient-to-b from-primary to-primary/88 text-primary-foreground focus-visible:ring-ring/30 inline-flex size-10 shrink-0 items-center justify-center rounded-xl shadow-xs outline-none transition-all duration-150 hover:-translate-y-px focus-visible:ring-[4px] disabled:opacity-40"
                 >
                   <Send className="size-3.5" />
                 </button>
@@ -279,7 +279,7 @@ export function FeedbackWidget() {
             transition={spring.gentle}
             type="button"
             onClick={() => setOpen(true)}
-            className="bg-primary text-primary-foreground shadow-raised hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:ring-ring/40 flex min-h-11 items-center gap-2 rounded-full py-2.5 pr-4 pl-3 text-sm font-semibold outline-none transition-[color,background-color,transform] focus-visible:ring-[3px]"
+            className="bg-gradient-to-b from-primary to-primary/88 text-primary-foreground shadow-raised focus-visible:ring-ring/30 flex min-h-12 items-center gap-2 rounded-full border border-white/10 py-2.5 pr-5 pl-3.5 text-sm font-semibold outline-none transition-[color,background-color,transform,box-shadow] hover:-translate-y-1 hover:shadow-modal focus-visible:ring-[4px]"
             aria-label="Open help and feedback"
           >
             <Sparkles className="size-4" aria-hidden />
@@ -296,11 +296,11 @@ function AgentBubble({ children }: { children: React.ReactNode }) {
     <div className="flex gap-2">
       <span
         aria-hidden
-        className="text-primary bg-primary-soft mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md"
+        className="text-primary bg-primary-soft mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-primary/10"
       >
         <TharrosMark className="size-3" />
       </span>
-      <div className="bg-surface-2 text-foreground/90 max-w-[85%] rounded-lg rounded-tl-sm px-3 py-2 text-sm whitespace-pre-wrap">
+      <div className="bg-surface-2 text-foreground/90 max-w-[85%] rounded-2xl rounded-tl-md border border-border/50 px-3.5 py-2.5 text-sm shadow-xs whitespace-pre-wrap">
         {children}
       </div>
     </div>

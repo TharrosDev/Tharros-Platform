@@ -44,9 +44,9 @@ export function SectionNav({
     <nav
       aria-label={ariaLabel}
       className={cn(
-        "bg-surface-2/70 -mx-1 flex gap-1 overflow-x-auto rounded-xl p-1",
+        "visual-panel -mx-1 flex gap-1 overflow-x-auto rounded-2xl p-1.5",
         orientation === "responsive" &&
-          "lg:mx-0 lg:flex-col lg:overflow-visible lg:bg-transparent lg:p-0",
+          "lg:mx-0 lg:flex-col lg:overflow-visible lg:bg-transparent lg:p-1",
       )}
     >
       {items.map(({ href, label, icon: Icon, danger, badge, exact }) => {
@@ -59,7 +59,7 @@ export function SectionNav({
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "focus-visible:ring-ring/40 relative flex min-h-10 shrink-0 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold outline-none transition-colors focus-visible:ring-[3px]",
+              "focus-visible:ring-ring/35 relative flex min-h-10 shrink-0 items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold outline-none transition-[color,background-color,transform] hover:-translate-y-px focus-visible:ring-[4px]",
               active
                 ? danger
                   ? "text-destructive"
@@ -75,8 +75,8 @@ export function SectionNav({
                 layoutId={`section-pill-${ns}`}
                 transition={spring.snappy}
                 className={cn(
-                  "absolute inset-0 rounded-lg shadow-xs",
-                  danger ? "bg-destructive/10" : "bg-primary-soft",
+                  "absolute inset-0 rounded-xl border shadow-xs",
+                  danger ? "border-destructive/15 bg-destructive/10" : "border-primary/10 bg-primary-soft",
                 )}
                 aria-hidden
               />

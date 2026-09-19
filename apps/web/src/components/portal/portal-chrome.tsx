@@ -10,7 +10,7 @@ function PortalShell({ className, children }: React.ComponentProps<"main">) {
   return (
     <main
       className={cn(
-        "app-shell-canvas mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10",
+        "app-shell-canvas mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-9",
         className,
       )}
     >
@@ -21,11 +21,11 @@ function PortalShell({ className, children }: React.ComponentProps<"main">) {
 
 function PortalHeader({ children }: { children?: React.ReactNode }) {
   return (
-    <header className="border-border/70 mb-8 flex min-h-14 items-center justify-between gap-4 border-b pb-4">
+    <header className="visual-panel mb-8 flex min-h-14 items-center justify-between gap-4 rounded-2xl px-4 py-3">
       <Link
         href="/portal"
         aria-label="Employee portal home"
-        className="focus-visible:ring-ring/40 rounded-lg outline-none focus-visible:ring-[3px]"
+        className="focus-visible:ring-ring/30 rounded-xl outline-none focus-visible:ring-[4px]"
       >
         <TharrosWordmark />
       </Link>

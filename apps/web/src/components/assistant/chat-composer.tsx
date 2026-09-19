@@ -46,11 +46,11 @@ export function ChatComposer({
   }
 
   return (
-    <div className="bg-background/85 sticky bottom-0 pt-2 pb-4 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+    <div className="sticky bottom-0 rounded-t-2xl bg-background/78 pt-3 pb-4 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/68">
       {header ? <div className="mb-2">{header}</div> : null}
       <div
         className={cn(
-          "border-input bg-card shadow-card focus-within:border-ring focus-within:ring-ring/40 relative flex items-end gap-2 rounded-xl border p-2 transition-[box-shadow,border-color] focus-within:ring-[3px]",
+          "border-input bg-card/90 shadow-raised focus-within:border-ring focus-within:ring-ring/30 relative flex items-end gap-2 overflow-hidden rounded-2xl border p-2.5 backdrop-blur-xl transition-[box-shadow,border-color,transform] focus-within:-translate-y-px focus-within:ring-[4px] before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary/45 before:to-transparent",
           disabled && "opacity-60",
         )}
       >
@@ -74,7 +74,7 @@ export function ChatComposer({
           disabled={!streaming && !canSend}
           aria-label={streaming ? "Stop generating" : "Send message"}
           className={cn(
-            "relative mb-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-all duration-150 outline-none focus-visible:ring-ring/40 focus-visible:ring-[3px] active:scale-95",
+            "relative mb-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl shadow-xs transition-all duration-200 outline-none focus-visible:ring-ring/35 focus-visible:ring-[4px] active:scale-95",
             streaming
               ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40",

@@ -97,16 +97,16 @@ export default async function SchedulingPage() {
       />
 
       {canManage ? (
-        <Card className="overflow-hidden p-0">
+        <Card className="visual-panel-strong overflow-hidden p-0">
           <Link
             href="/scheduling/approvals"
-            className="hover:bg-accent focus-visible:ring-ring/40 group flex items-center gap-4 p-5 outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-inset"
+            className="group flex items-center gap-4 p-5 outline-none transition-[background-color,transform] hover:bg-primary-soft/25 focus-visible:ring-ring/30 focus-visible:ring-[4px] focus-visible:ring-inset"
           >
             <span
               className={
                 pendingApprovals > 0
-                  ? "bg-warning/15 text-warning flex size-10 shrink-0 items-center justify-center rounded-lg [&>svg]:size-5"
-                  : "bg-success/15 text-success flex size-10 shrink-0 items-center justify-center rounded-lg [&>svg]:size-5"
+                  ? "bg-warning/15 text-warning flex size-11 shrink-0 items-center justify-center rounded-xl border border-warning/15 shadow-xs [&>svg]:size-5"
+                  : "bg-success/15 text-success flex size-11 shrink-0 items-center justify-center rounded-xl border border-success/15 shadow-xs [&>svg]:size-5"
               }
             >
               <CheckSquare />
@@ -128,7 +128,7 @@ export default async function SchedulingPage() {
         </Card>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={<Users />} label="Team members" value={String(summary.employeeCount)} />
         <StatCard icon={<Clock />} label="Open days / week" value={String(summary.openDays)} />
         <StatCard
@@ -143,8 +143,8 @@ export default async function SchedulingPage() {
         />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <Card className="visual-panel-strong">
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-2">
               Latest schedule
@@ -166,7 +166,7 @@ export default async function SchedulingPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-b from-card to-surface-2/35">
           <CardHeader>
             <CardTitle>Recent activity</CardTitle>
             <CardDescription>The last few schedule changes and agent decisions.</CardDescription>
@@ -178,7 +178,7 @@ export default async function SchedulingPage() {
               <>
                 <ul className="space-y-2">
                   {recentActivity.map((entry) => (
-                    <li key={entry.id} className="flex items-baseline gap-2 text-sm">
+                    <li key={entry.id} className="flex items-baseline gap-3 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-primary-soft/25">
                       <span className="bg-primary/60 mt-1.5 size-1.5 shrink-0 self-start rounded-full" />
                       <span className="min-w-0 flex-1 truncate">
                         {entry.title}
@@ -200,7 +200,7 @@ export default async function SchedulingPage() {
       </div>
 
       {summary.persona.notes ? (
-        <section className="bg-card max-w-prose rounded-lg border p-5 shadow-xs">
+        <section className="visual-panel-strong max-w-3xl rounded-2xl p-6">
           <h2 className="type-meta text-muted-foreground">Assistant guidance</h2>
           <p className="text-foreground/90 type-body mt-2">{summary.persona.notes}</p>
         </section>

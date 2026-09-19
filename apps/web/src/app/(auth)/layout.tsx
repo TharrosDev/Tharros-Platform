@@ -16,20 +16,22 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   if (user) redirect("/dashboard");
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[1.05fr_1fr]">
+    <div className="min-h-screen lg:grid lg:grid-cols-[1.12fr_0.88fr]">
       {/* Brand panel — desktop only */}
-      <aside className="bg-sidebar text-sidebar-foreground relative hidden flex-col justify-between overflow-hidden p-12 xl:p-16 lg:flex">
+      <aside className="bg-sidebar text-sidebar-foreground relative hidden flex-col justify-between overflow-hidden border-r border-sidebar-border p-12 shadow-[28px_0_80px_-55px_rgba(0,0,0,0.9)] xl:p-16 lg:flex">
         <div
           aria-hidden
           className="text-sidebar-foreground pointer-events-none absolute inset-0 opacity-[0.05]"
           style={{
-            backgroundImage: "radial-gradient(currentColor 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
+            backgroundImage:
+              "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
+            backgroundSize: "44px 44px",
+            maskImage: "linear-gradient(to bottom, black, transparent 82%)",
           }}
         />
         <div
           aria-hidden
-          className="bg-primary pointer-events-none absolute -top-24 -right-24 size-80 rounded-full opacity-20 blur-3xl"
+          className="bg-primary pointer-events-none absolute -top-40 -right-32 size-[34rem] rounded-full opacity-25 blur-[110px]"
         />
 
         <Link
@@ -40,22 +42,23 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
           <TharrosWordmark markClassName="size-7" />
         </Link>
 
-        <div className="relative max-w-md">
-          <h2 className="text-3xl font-bold leading-tight tracking-tight text-balance">
+        <div className="relative max-w-xl">
+          <span className="type-meta text-primary">Tharros operating system</span>
+          <h2 className="mt-4 text-4xl font-bold leading-[1.02] tracking-[-0.045em] text-balance xl:text-5xl">
             The operating layer your business runs on.
           </h2>
           <p className="text-sidebar-muted-foreground mt-4 text-base leading-relaxed text-pretty">
             Tharros quietly handles the busywork between your tools and surfaces only what actually
             needs you. Sign in to see what was handled.
           </p>
-          <ul className="mt-8 space-y-3">
+          <ul className="mt-10 grid gap-3 sm:grid-cols-1">
             {[
               "Answers grounded in your business",
               "Schedules built around real constraints",
               "Exceptions gathered in one place",
             ].map((item) => (
               <li key={item} className="flex items-center gap-3 text-sm font-medium">
-                <span className="bg-primary/20 text-primary-soft-foreground flex size-6 items-center justify-center rounded-md">
+                <span className="bg-primary/20 text-primary-soft-foreground flex size-7 items-center justify-center rounded-lg border border-primary/20 shadow-[0_0_22px_-8px_rgba(90,110,255,0.9)]">
                   <Check className="size-3.5" strokeWidth={2.5} aria-hidden />
                 </span>
                 {item}
@@ -68,7 +71,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       </aside>
 
       {/* Form side */}
-      <main className="app-shell-canvas flex min-h-screen flex-col items-center justify-center gap-8 px-4 py-12 sm:px-8">
+      <main className="app-shell-canvas relative flex min-h-screen flex-col items-center justify-center gap-8 px-4 py-12 sm:px-8 lg:px-12">
         <Link
           href="/"
           aria-label="Tharros home"

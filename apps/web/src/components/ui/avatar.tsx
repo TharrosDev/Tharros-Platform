@@ -9,7 +9,7 @@ function Avatar({ className, ...props }: React.ComponentProps<"span">) {
     <span
       data-slot="avatar"
       className={cn(
-        "relative flex size-9 shrink-0 overflow-hidden rounded-full bg-muted",
+        "relative flex size-9 shrink-0 overflow-hidden rounded-xl border border-border/70 bg-muted shadow-xs",
         className,
       )}
       {...props}
@@ -41,7 +41,7 @@ function AvatarFallback({ className, ...props }: React.ComponentProps<"span">) {
     <span
       data-slot="avatar-fallback"
       className={cn(
-        "bg-secondary text-secondary-foreground flex size-full items-center justify-center rounded-full text-sm font-medium",
+        "bg-gradient-to-br from-secondary to-primary-soft text-secondary-foreground flex size-full items-center justify-center rounded-xl text-sm font-semibold",
         className,
       )}
       {...props}

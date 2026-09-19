@@ -154,8 +154,8 @@ export function DocumentUploader() {
           if (e.dataTransfer.files?.length) void handleFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-12 text-center transition-all duration-150 ease-out motion-reduce:transition-none",
-          "hover:border-primary/60 hover:bg-primary-soft/40 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-2",
+          "group relative flex cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-dashed px-6 py-14 text-center shadow-inner transition-all duration-200 ease-out before:pointer-events-none before:absolute before:-top-20 before:size-52 before:rounded-full before:bg-primary/8 before:blur-3xl motion-reduce:transition-none",
+          "hover:-translate-y-px hover:border-primary/50 hover:bg-primary-soft/35 hover:shadow-card focus-visible:ring-ring/35 focus-visible:outline-none focus-visible:ring-4",
           dragging
             ? "border-primary bg-primary-soft/60 scale-[1.01] motion-reduce:scale-100"
             : "border-border",
@@ -163,7 +163,7 @@ export function DocumentUploader() {
       >
         <span
           className={cn(
-            "bg-primary-soft text-primary-soft-foreground flex size-12 items-center justify-center rounded-xl transition-transform duration-150 ease-out motion-reduce:transition-none [&>svg]:size-6",
+            "bg-primary-soft text-primary-soft-foreground relative flex size-14 items-center justify-center rounded-2xl border border-primary/15 shadow-card transition-transform duration-200 ease-out group-hover:scale-105 motion-reduce:transition-none [&>svg]:size-6",
             dragging && "scale-110 motion-reduce:scale-100",
           )}
         >
@@ -200,7 +200,7 @@ export function DocumentUploader() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
-              className="bg-card flex items-center gap-3 rounded-lg border px-3 py-2 text-sm"
+              className="bg-card/80 flex items-center gap-3 rounded-xl border border-border/70 px-3.5 py-2.5 text-sm shadow-xs backdrop-blur-sm"
             >
               <StatusIcon status={it.status} />
               <span className="text-foreground min-w-0 flex-1 truncate" title={it.name}>

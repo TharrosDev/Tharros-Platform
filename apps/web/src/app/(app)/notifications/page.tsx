@@ -40,7 +40,7 @@ export default async function NotificationsPage() {
           You have no notifications yet. Updates from your workspace will show up here.
         </p>
       ) : (
-        <ul className="divide-border/60 bg-card shadow-card overflow-hidden rounded-lg border border-border/60 divide-y">
+        <ul className="visual-panel divide-border/55 overflow-hidden rounded-2xl divide-y">
           {notifications.map((n) => {
             const link = notificationLink(n.data);
             return (

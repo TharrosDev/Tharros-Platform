@@ -11,7 +11,7 @@ function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimi
   return (
     <TabsPrimitive.List
       className={cn(
-        "bg-surface-3 text-muted-foreground relative inline-flex h-11 items-center justify-center rounded-xl p-1",
+        "visual-panel text-muted-foreground relative inline-flex h-12 items-center justify-center rounded-2xl p-1.5",
         className,
       )}
       {...props}
@@ -23,7 +23,7 @@ function TabsTab({ className, ...props }: React.ComponentProps<typeof TabsPrimit
   return (
     <TabsPrimitive.Tab
       className={cn(
-        "text-muted-foreground data-[selected]:text-foreground focus-visible:ring-ring/40 relative z-10 inline-flex h-9 select-none items-center justify-center rounded-lg px-3.5 text-sm font-semibold transition-colors outline-none focus-visible:ring-[3px]",
+        "text-muted-foreground data-[selected]:text-primary-soft-foreground focus-visible:ring-ring/35 relative z-10 inline-flex h-9 select-none items-center justify-center rounded-xl px-3.5 text-sm font-semibold transition-colors outline-none focus-visible:ring-[4px]",
         className,
       )}
       {...props}
@@ -38,7 +38,7 @@ function TabsIndicator({
   return (
     <TabsPrimitive.Indicator
       className={cn(
-        "bg-card shadow-xs absolute left-0 top-1 z-0 h-9 rounded-lg transition-all duration-200 ease-out",
+        "bg-primary-soft border border-primary/10 shadow-xs absolute left-0 top-1.5 z-0 h-9 rounded-xl transition-all duration-200 ease-out",
         className,
       )}
       style={{

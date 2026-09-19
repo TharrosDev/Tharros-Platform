@@ -81,8 +81,8 @@ export default async function AutomationsPage({
         </div>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
-        <Card>
+      <div className="grid gap-5 xl:grid-cols-[0.85fr_1.15fr]">
+        <Card className="visual-panel-strong">
           <CardHeader>
             <CardTitle>Create automation</CardTitle>
             <CardDescription>
@@ -108,7 +108,7 @@ export default async function AutomationsPage({
                   <select
                     id="automation-trigger"
                     name="triggerType"
-                    className="border-input bg-card h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                    className="border-input bg-card/80 h-11 w-full rounded-xl border px-3.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                     defaultValue="lead.created"
                   >
                     <option value="lead.created">Lead created</option>
@@ -121,7 +121,7 @@ export default async function AutomationsPage({
                   <select
                     id="automation-trigger-status"
                     name="triggerStatus"
-                    className="border-input bg-card h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                    className="border-input bg-card/80 h-11 w-full rounded-xl border px-3.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                     defaultValue=""
                   >
                     <option value="">Any status</option>
@@ -138,7 +138,7 @@ export default async function AutomationsPage({
                   <select
                     id="automation-action"
                     name="actionType"
-                    className="border-input bg-card h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                    className="border-input bg-card/80 h-11 w-full rounded-xl border px-3.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                     defaultValue="notify_team"
                   >
                     <option value="notify_team">Notify owners/admins</option>
@@ -152,7 +152,7 @@ export default async function AutomationsPage({
                   <select
                     id="automation-action-status"
                     name="actionStatus"
-                    className="border-input bg-card h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                    className="border-input bg-card/80 h-11 w-full rounded-xl border px-3.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                     defaultValue=""
                   >
                     <option value="">Choose a status</option>
@@ -187,7 +187,7 @@ export default async function AutomationsPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-hidden bg-gradient-to-b from-card to-primary-soft/10">
           <CardHeader>
             <CardTitle>Workflows</CardTitle>
             <CardDescription>{automations.length} configured automations.</CardDescription>
@@ -195,7 +195,7 @@ export default async function AutomationsPage({
           <CardContent className="space-y-3">
             {automations.length ? (
               automations.map((automation) => (
-                <div key={automation.id} className="bg-surface-2 rounded-xl border border-border/70 p-4">
+                <div key={automation.id} className="bg-surface-2/75 rounded-2xl border border-border/70 p-4 shadow-xs transition-[border-color,transform] hover:-translate-y-px hover:border-primary/15">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2">
@@ -257,7 +257,7 @@ export default async function AutomationsPage({
                             id={`edit-trigger-${automation.id}`}
                             name="triggerType"
                             defaultValue={automation.triggerType}
-                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                            className="border-input bg-card/80 h-10 w-full rounded-lg border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                           >
                             <option value="lead.created">Lead created</option>
                             <option value="lead.status_changed">Lead status changed</option>
@@ -273,7 +273,7 @@ export default async function AutomationsPage({
                                 ? automation.triggerConfig.toStatus
                                 : ""
                             }
-                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                            className="border-input bg-card/80 h-10 w-full rounded-lg border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                           >
                             <option value="">Any status</option>
                             {LEAD_STATUSES.map((status) => (
@@ -287,7 +287,7 @@ export default async function AutomationsPage({
                             id={`edit-action-${automation.id}`}
                             name="actionType"
                             defaultValue={automation.actionType}
-                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                            className="border-input bg-card/80 h-10 w-full rounded-lg border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                           >
                             <option value="notify_team">Notify owners/admins</option>
                             <option value="set_lead_status">Set lead status</option>
@@ -304,7 +304,7 @@ export default async function AutomationsPage({
                                 ? automation.actionConfig.status
                                 : ""
                             }
-                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                            className="border-input bg-card/80 h-10 w-full rounded-lg border px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                           >
                             <option value="">Choose a status</option>
                             {LEAD_STATUSES.map((status) => (
@@ -338,7 +338,7 @@ export default async function AutomationsPage({
                         <select
                           id={`run-lead-${automation.id}`}
                           name="leadId"
-                          className="border-input bg-card h-9 w-full rounded-md border px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                          className="border-input bg-card/80 h-9 w-full rounded-lg border px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
                           defaultValue=""
                           required
                           disabled={!automation.enabled || leads.length === 0}
@@ -367,7 +367,7 @@ export default async function AutomationsPage({
                 </div>
               ))
             ) : (
-              <div className="bg-surface-2 rounded-xl border border-dashed p-8 text-center">
+              <div className="bg-surface-2/70 rounded-2xl border border-dashed border-border/80 p-8 text-center shadow-inner">
                 <Workflow className="text-muted-foreground mx-auto size-5" />
                 <p className="mt-2 text-sm font-medium">No automations yet</p>
                 <p className="text-muted-foreground type-small mt-1">
@@ -428,7 +428,7 @@ export default async function AutomationsPage({
               </TableBody>
             </Table>
           ) : (
-            <div className="bg-surface-2 rounded-lg border border-dashed p-7 text-center">
+            <div className="bg-surface-2/70 rounded-2xl border border-dashed border-border/80 p-7 text-center shadow-inner">
               <BellRing className="text-muted-foreground mx-auto size-5" />
               <p className="mt-2 text-sm font-medium">No runs yet</p>
               <p className="text-muted-foreground type-small mt-1">

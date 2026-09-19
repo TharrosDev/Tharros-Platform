@@ -26,13 +26,13 @@ function MobileNav({
       <SheetTrigger
         className={cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "lg:hidden",
+          "border border-border/70 bg-card/70 shadow-xs lg:hidden",
         )}
         aria-label="Open menu"
       >
         <Menu className="size-5" />
       </SheetTrigger>
-      <SheetContent side="left" className="p-0">
+      <SheetContent side="left" className="border-sidebar-border bg-sidebar p-0 text-sidebar-foreground">
         <Sidebar
           user={user}
           orgs={orgs}

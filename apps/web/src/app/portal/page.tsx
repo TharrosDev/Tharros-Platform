@@ -70,7 +70,7 @@ export default async function PortalPage() {
           {/* The one thing most visits are about: when do I work next. */}
           <Link
             href="/portal/schedule"
-            className="group bg-primary text-primary-foreground shadow-raised hover:-translate-y-0.5 hover:bg-primary/90 focus-visible:ring-ring/40 mt-8 block rounded-xl p-6 outline-none transition-[color,background-color,transform] focus-visible:ring-[3px]"
+            className="group mt-8 block rounded-3xl border border-primary/25 bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground shadow-modal outline-none transition-[color,background-color,transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_26px_60px_-30px_color-mix(in_oklch,var(--primary)_80%,transparent)] focus-visible:ring-ring/30 focus-visible:ring-[4px]"
           >
             <p className="type-meta text-primary-foreground/80">Your next shift</p>
             {nextShift ? (
@@ -94,7 +94,7 @@ export default async function PortalPage() {
           <div className="mt-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
             <Link
               href="/portal/schedule"
-              className="group border-primary/30 bg-primary-soft/40 hover:bg-primary-soft/70 focus-visible:ring-ring/40 flex min-h-32 items-center gap-3 rounded-xl border p-4 outline-none transition-colors focus-visible:ring-[3px] lg:items-start lg:p-5"
+              className="group border-primary/20 bg-primary-soft/35 hover:bg-primary-soft/60 focus-visible:ring-ring/30 flex min-h-32 items-center gap-3 rounded-2xl border p-4 shadow-card outline-none transition-[background-color,transform,box-shadow] hover:-translate-y-px hover:shadow-card-hover focus-visible:ring-[4px] lg:items-start lg:p-5"
             >
               <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <CalendarDays className="size-4.5" aria-hidden />
@@ -113,7 +113,7 @@ export default async function PortalPage() {
 
             <Link
               href="/portal/availability"
-              className="group border-border bg-card hover:bg-accent/40 focus-visible:ring-ring/40 flex min-h-32 items-center gap-3 rounded-xl border p-4 outline-none transition-colors focus-visible:ring-[3px] lg:items-start lg:p-5"
+              className="group visual-panel hover:bg-accent/35 focus-visible:ring-ring/30 flex min-h-32 items-center gap-3 rounded-2xl p-4 outline-none transition-[background-color,transform,box-shadow] hover:-translate-y-px hover:shadow-card-hover focus-visible:ring-[4px] lg:items-start lg:p-5"
             >
               <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Clock className="size-4.5" aria-hidden />

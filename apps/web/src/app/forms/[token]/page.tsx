@@ -37,15 +37,16 @@ export default async function PublicLeadFormPage({
       <MarketingBackdrop />
       <MarketingHeader />
 
-      <section className="relative mx-auto flex w-full max-w-xl flex-1 items-center px-5 py-12">
-        <Card className="w-full bg-card text-card-foreground shadow-raised">
+      <section className="relative mx-auto flex w-full max-w-xl flex-1 items-center px-5 py-14">
+        <Card className="w-full overflow-hidden rounded-3xl border-primary/15 bg-card text-card-foreground shadow-modal">
           <CardHeader>
-            <CardTitle className="text-2xl">{form.headline}</CardTitle>
+            <div className="mb-2 h-1 w-10 rounded-full bg-gradient-to-r from-primary to-info" aria-hidden />
+            <CardTitle className="text-3xl font-bold tracking-[-0.04em]">{form.headline}</CardTitle>
             <CardDescription>{form.name}</CardDescription>
           </CardHeader>
           <CardContent>
             {query.submitted ? (
-              <div className="bg-success/10 text-success rounded-lg border border-success/20 p-5">
+              <div className="bg-success/10 text-success rounded-xl border border-success/20 p-5 shadow-inner">
                 <p className="font-medium">Message received</p>
                 <p className="mt-1 text-sm">{form.successMessage}</p>
               </div>

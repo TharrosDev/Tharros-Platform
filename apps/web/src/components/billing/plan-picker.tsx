@@ -19,10 +19,10 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
           <div
             key={plan.tier}
             className={cn(
-              "bg-card relative flex flex-col rounded-lg border p-6 transition-[box-shadow,transform] duration-200 ease-out motion-reduce:transition-none",
+              "relative flex flex-col overflow-hidden rounded-3xl border p-6 transition-[box-shadow,transform,border-color] duration-200 ease-out motion-reduce:transition-none before:pointer-events-none before:absolute before:-right-20 before:-top-20 before:size-52 before:rounded-full before:bg-primary/0 before:blur-3xl hover:before:bg-primary/8",
               plan.highlight
-                ? "border-primary ring-primary/15 shadow-card-hover ring-1 md:-my-2 md:py-8"
-                : "border-border shadow-card hover:shadow-card-hover hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
+                ? "border-primary/35 bg-gradient-to-b from-card to-primary-soft/25 ring-primary/10 shadow-modal ring-4 md:-my-3 md:py-9"
+                : "border-border/75 bg-card/85 shadow-card hover:-translate-y-1 hover:border-primary/15 hover:shadow-card-hover motion-reduce:hover:translate-y-0",
             )}
           >
             {plan.highlight && (
@@ -39,7 +39,7 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
               <p className="text-muted-foreground type-small text-pretty">{plan.blurb}</p>
             </div>
 
-            <div className="mt-5 flex items-baseline gap-1.5">
+            <div className="relative mt-6 flex items-baseline gap-1.5">
               <span className="num text-foreground text-4xl font-bold tracking-tight">
                 {formatMonthly(plan.priceMonthly)}
               </span>
@@ -49,7 +49,7 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
               {TRIAL_DAYS}-day free trial
             </p>
 
-            <ul className="mt-6 flex-1 space-y-2.5">
+            <ul className="relative mt-6 flex-1 space-y-2.5">
               {plan.features.map((feature) => (
                 <li key={feature} className="flex items-start gap-2.5">
                   <Check

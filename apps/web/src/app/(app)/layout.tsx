@@ -56,7 +56,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           Skip to content
         </a>
         <div className="bg-background flex min-h-screen">
-          <aside className="bg-sidebar text-sidebar-foreground sticky top-0 hidden h-screen w-72 shrink-0 border-r border-sidebar-border lg:block">
+          <aside className="bg-sidebar text-sidebar-foreground sticky top-0 hidden h-screen w-[18.5rem] shrink-0 border-r border-sidebar-border shadow-[18px_0_50px_-38px_rgba(0,0,0,0.55)] lg:block">
             <Sidebar
               user={displayUser}
               orgs={orgs}
@@ -77,7 +77,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <UsageBanner state={usageBanner} />
             <main
               id="main-content"
-              className="mx-auto w-full max-w-[90rem] flex-1 space-y-8 px-4 py-7 sm:px-6 sm:py-9 xl:px-10 xl:py-11"
+              className="mx-auto w-full max-w-[94rem] flex-1 space-y-9 px-4 py-7 sm:px-6 sm:py-9 xl:px-10 xl:py-10 2xl:px-12"
             >
               {children}
             </main>

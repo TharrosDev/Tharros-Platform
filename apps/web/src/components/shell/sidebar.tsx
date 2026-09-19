@@ -43,16 +43,19 @@ function Sidebar({
   const inScheduling = pathname.startsWith("/scheduling");
 
   return (
-    <div className={cn("flex h-full flex-col px-3 py-4", className)}>
-      <div className="flex min-h-11 items-center px-2">
+    <div className={cn("relative flex h-full flex-col overflow-hidden px-3.5 py-4 before:pointer-events-none before:absolute before:-left-24 before:top-16 before:size-64 before:rounded-full before:bg-primary/10 before:blur-3xl", className)}>
+      <div className="relative flex min-h-12 items-center rounded-xl border border-sidebar-border bg-white/[0.035] px-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <TharrosWordmark markClassName="size-7" />
+        <span className="ml-auto rounded-md border border-sidebar-border bg-white/[0.045] px-2 py-1 font-mono text-[0.58rem] font-semibold tracking-[0.12em] text-sidebar-muted-foreground">
+          OS
+        </span>
       </div>
 
-      <div className="mt-4">
+      <div className="relative mt-3.5">
         <OrgSwitcher orgs={orgs} activeOrg={activeOrg} />
       </div>
 
-      <nav className="mt-5 flex flex-1 flex-col overflow-y-auto pr-0.5">
+      <nav className="relative mt-5 flex flex-1 flex-col overflow-y-auto pr-0.5">
         {(showAdmin
           ? [
               ...navSections,
@@ -64,7 +67,7 @@ function Sidebar({
           : navSections
         ).map((section, index) => (
           <div key={section.label} className={cn(index > 0 && "mt-5")}>
-            <p className="type-meta text-sidebar-muted-foreground/75 px-3 pb-2">{section.label}</p>
+            <p className="type-meta text-sidebar-muted-foreground/65 px-3 pb-2.5">{section.label}</p>
             <div className="flex flex-col gap-0.5">
               {section.items.map((item) => (
                 <div key={item.href}>
@@ -86,7 +89,7 @@ function Sidebar({
       </nav>
 
       <Separator className="my-3 bg-sidebar-border" />
-      <div className="rounded-lg border border-sidebar-border bg-white/[0.035] p-2.5">
+      <div className="relative rounded-xl border border-sidebar-border bg-gradient-to-br from-white/[0.07] to-white/[0.025] p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
@@ -113,7 +116,7 @@ function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNaviga
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-sidebar-ring/50 relative flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+        "group focus-visible:ring-sidebar-ring/50 relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium outline-none transition-[color,transform] hover:translate-x-0.5 focus-visible:ring-[3px]",
         active
           ? "text-sidebar-accent-foreground"
           : "text-sidebar-muted-foreground hover:bg-white/5 hover:text-sidebar-foreground",
@@ -123,13 +126,13 @@ function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNaviga
         <m.span
           layoutId={`nav-pill-${ns}`}
           transition={spring.snappy}
-          className="bg-sidebar-accent absolute inset-0 rounded-lg"
+          className="absolute inset-0 rounded-xl border border-white/10 bg-gradient-to-r from-sidebar-accent to-sidebar-accent/78 shadow-[0_8px_24px_-14px_color-mix(in_oklch,var(--sidebar-accent)_80%,transparent)]"
           aria-hidden
         />
       ) : null}
       <span
         className={cn(
-          "relative flex size-7 shrink-0 items-center justify-center rounded-md transition-colors",
+          "relative flex size-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.04] transition-[background-color,transform] group-hover:scale-105",
           active ? "bg-white/10" : "bg-white/[0.045]",
         )}
       >
@@ -153,7 +156,7 @@ function SubNavLink({ item, onNavigate }: { item: NavItem; onNavigate?: () => vo
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-sidebar-ring/50 flex min-h-9 items-center rounded-md px-3 py-2 text-[0.8125rem] outline-none transition-colors focus-visible:ring-[3px]",
+        "focus-visible:ring-sidebar-ring/50 flex min-h-9 items-center rounded-lg px-3 py-2 text-[0.8125rem] outline-none transition-[color,background-color,transform] hover:translate-x-0.5 focus-visible:ring-[3px]",
         active
           ? "bg-white/10 font-medium text-sidebar-foreground"
           : "text-sidebar-muted-foreground hover:bg-white/5 hover:text-sidebar-foreground",

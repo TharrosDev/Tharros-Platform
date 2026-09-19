@@ -45,13 +45,13 @@ export function OrgSwitcher({ orgs, activeOrg }: { orgs: UserOrg[]; activeOrg: U
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            "flex min-h-12 w-full items-center gap-3 rounded-lg border border-sidebar-border bg-white/[0.035] px-2.5 py-1.5 text-left outline-none transition-colors",
-            "hover:bg-white/5 focus-visible:ring-ring/40 focus-visible:ring-[3px]",
+            "group flex min-h-14 w-full items-center gap-3 rounded-xl border border-sidebar-border bg-gradient-to-r from-white/[0.07] to-white/[0.025] px-2.5 py-1.5 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] outline-none transition-[background-color,border-color,transform]",
+            "hover:-translate-y-px hover:border-white/15 hover:from-white/[0.1] focus-visible:ring-ring/40 focus-visible:ring-[3px]",
             pending && "opacity-60",
           )}
           aria-label="Switch organization"
         >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white/10 text-sidebar-foreground">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-primary/20 text-sidebar-foreground shadow-inner">
             <Building2 className="size-4" />
           </span>
           <span className="min-w-0 flex-1">
@@ -64,7 +64,7 @@ export function OrgSwitcher({ orgs, activeOrg }: { orgs: UserOrg[]; activeOrg: U
               </span>
             ) : null}
           </span>
-          <ChevronsUpDown className="text-sidebar-muted-foreground size-4 shrink-0" />
+          <ChevronsUpDown className="text-sidebar-muted-foreground size-4 shrink-0 transition-transform group-hover:translate-y-px" />
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="start" className="w-[15rem]">
