@@ -14,11 +14,18 @@ export const env = createEnv({
     SUPABASE_SECRET_KEY: z.string().min(1),
     ANTHROPIC_API_KEY: z.string().min(1),
     OPENAI_API_KEY: z.string().min(1),
-    DEEPSEEK_API_KEY: z.string().min(1),
     STRIPE_SECRET_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
-    CRON_SECRET: z.string().min(1),
+    // Runtime-only secrets whose consumers already fail closed on absence:
+    // lib/deepseek/client.ts throws before any request, and the cron route
+    // answers 503 "Cron not configured". Requiring them here additionally
+    // failed `next build`, which needs neither, so a deploy could not be cut
+    // at all while they were unvaulted. /api/health still counts both as
+    // required shipped configuration and reports "incomplete" until they are
+    // set, so the operator signal is preserved.
+    DEEPSEEK_API_KEY: z.string().min(1).optional(),
+    CRON_SECRET: z.string().min(1).optional(),
     EMAIL_FROM: z.string().min(1).optional(),
     STRIPE_PRICE_STARTER: z.string().min(1).optional(),
     STRIPE_PRICE_GROWTH: z.string().min(1).optional(),

@@ -29,7 +29,7 @@ import {
 } from "./queries";
 import { validateEdits, type EditShift, type ValidationContext } from "./validation";
 import { publishGate } from "./publish";
-import { enqueueJob } from "@/lib/jobs/enqueue";
+import { enqueueJobs } from "@/lib/jobs/enqueue";
 import { assignedEmployeeIds, planReminders } from "./delivery";
 
 export type CalendarActionResult = { ok: true } | { ok: false; message: string };
@@ -690,18 +690,21 @@ export async function publishSchedule(args: {
     const admin = createAdminClient();
     const employeeIds = assignedEmployeeIds(loaded.shifts);
 
-    for (const employeeId of employeeIds) {
-      const { data: tok } = await supabase
-        .from("employee_portal_tokens")
-        .select("id")
-        .eq("employee_id", employeeId)
-        .is("revoked_at", null)
-        .limit(1)
-        .maybeSingle();
-      if (!tok) {
-        await supabase.rpc("issue_portal_token", { p_employee_id: employeeId });
-      }
-    }
+    // One query for every employee's live token rather than a round-trip each;
+    // only the employees without one go through the owner/admin-gated RPC.
+    const { data: liveTokens } = await supabase
+      .from("employee_portal_tokens")
+      .select("employee_id")
+      .in("employee_id", employeeIds)
+      .is("revoked_at", null);
+    const hasToken = new Set(
+      ((liveTokens ?? []) as Array<{ employee_id: string }>).map((r) => r.employee_id),
+    );
+    await Promise.all(
+      employeeIds
+        .filter((employeeId) => !hasToken.has(employeeId))
+        .map((employeeId) => supabase.rpc("issue_portal_token", { p_employee_id: employeeId })),
+    );
 
     await admin
       .from("jobs")
@@ -711,16 +714,20 @@ export async function publishSchedule(args: {
       .eq("org_id", auth.orgId)
       .eq("payload->>scheduleId", args.scheduleId);
 
-    for (const employeeId of employeeIds) {
-      await enqueueJob(admin, {
-        type: "schedule-delivery",
+    // Both fan-outs are independent inserts, so each goes in one round-trip
+    // instead of one per employee / per reminder.
+    await enqueueJobs(
+      admin,
+      employeeIds.map((employeeId) => ({
+        type: "schedule-delivery" as const,
         payload: { employeeId, orgId: auth.orgId, scheduleId: args.scheduleId },
         orgId: auth.orgId,
-      });
-    }
-    for (const r of planReminders(loaded.shifts, Date.now())) {
-      await enqueueJob(admin, {
-        type: "shift-reminder",
+      })),
+    );
+    await enqueueJobs(
+      admin,
+      planReminders(loaded.shifts, Date.now()).map((r) => ({
+        type: "shift-reminder" as const,
         payload: {
           shiftId: r.shiftId,
           employeeId: r.employeeId,
@@ -729,8 +736,8 @@ export async function publishSchedule(args: {
         },
         orgId: auth.orgId,
         runAt: r.runAt,
-      });
-    }
+      })),
+    );
 
     await audit(auth.orgId, auth.userId, "schedule.delivered", {
       entityType: "schedule",

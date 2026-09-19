@@ -2,11 +2,20 @@ packages:
   - "apps/*"
   - "packages/*"
 overrides:
-  # Force the patched postcss everywhere. next pulls in 8.4.31 transitively,
-  # which carries a moderate XSS-in-CSS-stringify advisory (GHSA-qx2v-qp2m-jg93).
-  # Build-time, trusted-input only here, but the patch bump is free. Remove once
-  # next ships a postcss >= 8.5.10 on its own.
-  postcss: ">=8.5.10"
+  # Transitive build-time tooling pulled in through next and @sentry/nextjs's
+  # bundler plugins. Each is pinned to the first patched release inside the
+  # major its parent expects, so no consumer sees a breaking change. Drop an
+  # entry once every parent ships a patched version on its own.
+  #
+  # postcss: XSS in CSS stringify (GHSA-qx2v-qp2m-jg93) and later advisories.
+  postcss: ">=8.5.28"
+  # nanoid: predictable IDs; held inside 3.x because postcss requires ^3.
+  nanoid: ">=3.3.19"
+  # fast-uri: host confusion via failed IDN canonicalization (GHSA-4c8g-83qw-93j6);
+  # held inside 3.x because ajv requires ^3.
+  fast-uri: ">=3.1.6"
+  # browserslist: reached via @babel/helper-compilation-targets.
+  browserslist: ">=4.29.0"
 allowBuilds:
   '@sentry/cli': true
   esbuild: true

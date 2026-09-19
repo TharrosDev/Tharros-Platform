@@ -33,9 +33,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Audit production dependencies
-        run: pnpm audit --prod --audit-level=high
-
       - name: Typecheck
         run: pnpm typecheck
 
@@ -88,6 +85,14 @@ jobs:
           SKIP_ENV_VALIDATION: "true"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
+
+      # Runs last, and still fails the job. A new advisory can land on an
+      # unchanged tree at any time; when this ran before the source checks it
+      # took typecheck, lint, tests and the build down with it, and a typecheck
+      # regression reached main unnoticed behind a red audit. Ordering it here
+      # keeps it blocking while leaving the source signal visible.
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level=high
 
   e2e:
     name: e2e (playwright auth+billing spine)
