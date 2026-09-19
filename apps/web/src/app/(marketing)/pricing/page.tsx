@@ -42,9 +42,10 @@ export default function PricingPage() {
       <MarketingBackdrop />
       <MarketingHeader />
 
-      <section className="relative mx-auto w-full max-w-6xl px-6 pt-14 pb-20 sm:pt-20">
+      <section className="relative mx-auto w-full max-w-6xl px-6 pb-24 pt-20 sm:pt-24">
         <div className="max-w-2xl">
-          <h1 className="text-4xl font-bold tracking-tight text-balance sm:text-5xl">
+          <p className="type-meta text-primary">Simple pricing</p>
+          <h1 className="mt-3 text-5xl font-bold tracking-[-0.05em] text-balance sm:text-6xl">
             One flat price. No per-seat math.
           </h1>
           <p className="text-sidebar-muted-foreground mt-5 max-w-xl text-lg leading-relaxed text-pretty">
@@ -55,11 +56,11 @@ export default function PricingPage() {
         </div>
 
         {/* The ladder: Growth is the light panel punched out of the dark page. */}
-        <div className="mt-14 grid items-stretch gap-4 lg:grid-cols-[1fr_1.25fr_1fr] lg:gap-0">
+        <div className="mt-16 grid items-stretch gap-4 lg:grid-cols-[1fr_1.22fr_1fr] lg:gap-3">
           {starter ? <QuietPlan plan={starter} side="left" /> : null}
 
           {growth ? (
-            <div className="bg-card text-card-foreground shadow-card-hover relative z-10 flex flex-col rounded-2xl p-7 sm:p-8 lg:-my-6 lg:rounded-2xl">
+            <div className="bg-card text-card-foreground shadow-modal relative z-10 flex flex-col overflow-hidden rounded-3xl border border-primary/25 p-7 before:pointer-events-none before:absolute before:-right-20 before:-top-24 before:size-64 before:rounded-full before:bg-primary/12 before:blur-3xl sm:p-8 lg:-my-7">
               <div className="flex items-baseline justify-between gap-3">
                 <h2 className="type-h2">{growth.name}</h2>
                 <span className="text-primary text-sm font-semibold">
@@ -136,8 +137,8 @@ function QuietPlan({ plan, side }: { plan: (typeof PLANS)[number]; side: "left" 
   return (
     <div
       className={cn(
-        "flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-7",
-        side === "left" ? "lg:rounded-r-none lg:border-r-0" : "lg:rounded-l-none lg:border-l-0",
+        "flex flex-col rounded-3xl border border-white/10 bg-white/[0.045] p-7 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] backdrop-blur-sm transition-[background-color,border-color,transform] hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.065]",
+        side === "left" ? "" : "",
       )}
     >
       <h2 className="type-h2">{plan.name}</h2>
@@ -163,7 +164,7 @@ function QuietPlan({ plan, side }: { plan: (typeof PLANS)[number]; side: "left" 
         href="/signup"
         className={cn(
           "border-border/40 text-sidebar-foreground hover:bg-white/10 focus-visible:ring-sidebar-ring/50",
-          "mt-8 inline-flex h-11 w-full items-center justify-center rounded-md border text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+          "mt-8 inline-flex h-11 w-full items-center justify-center rounded-xl border text-sm font-semibold outline-none transition-[background-color,border-color,transform] hover:-translate-y-px focus-visible:ring-[4px]",
         )}
       >
         Start free trial
