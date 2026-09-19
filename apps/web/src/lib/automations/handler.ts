@@ -1,9 +1,82 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { canExecuteAutomations } from "@/lib/automations/eligibility";
+import { matchesAutomationEvent } from "@/lib/automations/match";
 import type { Job, JobHandler } from "@/lib/jobs/types";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads/types";
-import { matchesAutomationEvent } from "@/lib/automations/match";
+import { logger } from "@/lib/observability/logger";
 
 function isLeadStatus(value: unknown): value is LeadStatus {
   return typeof value === "string" && (LEAD_STATUSES as readonly string[]).includes(value);
+}
+
+type RunTerminalStatus = "succeeded" | "failed" | "skipped";
+
+async function acquireRun(
+  admin: SupabaseClient,
+  input: {
+    orgId: string;
+    automationId: string;
+    eventId: string;
+    leadId: string;
+  },
+): Promise<string | null> {
+  const { data, error } = await admin
+    .from("automation_runs")
+    .insert({
+      org_id: input.orgId,
+      automation_id: input.automationId,
+      event_id: input.eventId,
+      lead_id: input.leadId,
+      status: "running",
+    })
+    .select("id")
+    .single();
+
+  if (!error) return (data as { id: string }).id;
+  if (error.code !== "23505") throw error;
+
+  const { data: existing, error: existingError } = await admin
+    .from("automation_runs")
+    .select("id, status")
+    .eq("automation_id", input.automationId)
+    .eq("event_id", input.eventId)
+    .maybeSingle();
+  if (existingError) throw existingError;
+  if (!existing) throw new Error("Automation run conflict could not be resolved");
+  if (existing.status === "succeeded" || existing.status === "skipped") return null;
+
+  const { error: reclaimError } = await admin
+    .from("automation_runs")
+    .update({
+      status: "running",
+      result: {},
+      error: null,
+      started_at: new Date().toISOString(),
+      finished_at: null,
+    })
+    .eq("id", existing.id);
+  if (reclaimError) throw reclaimError;
+  return String(existing.id);
+}
+
+async function finishRun(
+  admin: SupabaseClient,
+  runId: string,
+  status: RunTerminalStatus,
+  result: Record<string, unknown>,
+  errorMessage: string | null,
+): Promise<void> {
+  const { error } = await admin
+    .from("automation_runs")
+    .update({
+      status,
+      result,
+      error: errorMessage,
+      finished_at: new Date().toISOString(),
+    })
+    .eq("id", runId);
+  if (error) throw error;
 }
 
 export const automationDispatchHandler: JobHandler = async (job: Job) => {
@@ -34,6 +107,20 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
     type: string;
     data: Record<string, unknown> | null;
   };
+
+  const { data: subscription, error: subscriptionError } = await admin
+    .from("subscriptions")
+    .select("status, tier")
+    .eq("org_id", event.org_id)
+    .maybeSingle();
+  if (subscriptionError) throw subscriptionError;
+  if (!canExecuteAutomations(subscription)) {
+    logger.info("automations.dispatch_not_entitled", {
+      orgId: event.org_id,
+      eventId: event.id,
+    });
+    return;
+  }
 
   const { data: leadData, error: leadError } = await admin
     .from("leads")
@@ -87,24 +174,13 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
       continue;
     }
 
-    const { data: runData, error: runError } = await admin
-      .from("automation_runs")
-      .insert({
-        org_id: event.org_id,
-        automation_id: automation.id,
-        event_id: event.id,
-        lead_id: lead.id,
-        status: "running",
-      })
-      .select("id")
-      .single();
-
-    if (runError) {
-      if ((runError as { code?: string }).code === "23505") continue;
-      throw runError;
-    }
-
-    const runId = (runData as { id: string }).id;
+    const runId = await acquireRun(admin, {
+      orgId: event.org_id,
+      automationId: automation.id,
+      eventId: event.id,
+      leadId: lead.id,
+    });
+    if (!runId) continue;
 
     try {
       let result: Record<string, unknown> = {};
@@ -135,7 +211,9 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
         );
         result = { notified: (managers ?? []).length, email };
       } else if (automation.action_type === "set_lead_status") {
-        if (!isLeadStatus(action.status)) throw new Error("Automation has an invalid target status");
+        if (!isLeadStatus(action.status)) {
+          throw new Error("Automation has an invalid target status");
+        }
 
         const previousStatus = lead.status;
         if (previousStatus !== action.status) {
@@ -149,7 +227,7 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
             .eq("org_id", event.org_id);
           if (updateError) throw updateError;
 
-          await admin.from("lead_events").insert({
+          const { error: eventInsertError } = await admin.from("lead_events").insert({
             org_id: event.org_id,
             lead_id: lead.id,
             type: "automation.action",
@@ -160,6 +238,8 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
               to: action.status,
             },
           });
+          if (eventInsertError) throw eventInsertError;
+          lead.status = action.status;
         }
         result = { from: previousStatus, to: action.status };
       } else if (automation.action_type === "draft_follow_up") {
@@ -172,38 +252,36 @@ export const automationDispatchHandler: JobHandler = async (job: Job) => {
             import("@/lib/leads/follow-up"),
           ]);
           const cap = await checkOrgQueryCap(event.org_id);
-          if (!cap.allowed) throw new Error("AI usage cap reached");
-
-          await generateLeadFollowUpDraft({
-            orgId: event.org_id,
-            leadId: lead.id,
-            userId: null,
-          });
-          result = { drafted: true };
+          if (!cap.allowed) {
+            terminalStatus = "skipped";
+            result = { reason: "ai_usage_cap_reached" };
+          } else {
+            await generateLeadFollowUpDraft({
+              orgId: event.org_id,
+              leadId: lead.id,
+              userId: null,
+            });
+            result = { drafted: true };
+          }
         }
       } else {
         throw new Error(`Unsupported automation action "${automation.action_type}"`);
       }
 
-      await admin
-        .from("automation_runs")
-        .update({
-          status: terminalStatus,
-          result,
-          error: null,
-          finished_at: new Date().toISOString(),
-        })
-        .eq("id", runId);
+      await finishRun(admin, runId, terminalStatus, result, null);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown automation error";
-      await admin
-        .from("automation_runs")
-        .update({
-          status: "failed",
-          error: message,
-          finished_at: new Date().toISOString(),
-        })
-        .eq("id", runId);
+      try {
+        await finishRun(admin, runId, "failed", {}, message);
+      } catch (persistErr) {
+        throw new AggregateError(
+          [err, persistErr],
+          `Automation failed and its run state could not be persisted: ${message}`,
+        );
+      }
+
+      if (err instanceof Error) throw err;
+      throw new Error(message);
     }
   }
 };
