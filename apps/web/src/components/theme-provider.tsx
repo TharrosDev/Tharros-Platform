@@ -13,7 +13,17 @@ function ThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+  return (
+    <NextThemesProvider
+      // The anti-flash script only needs to run from the server HTML. On the
+      // client React 19 warns about rendering an executable <script>, so mark it
+      // an inert data block there (next-themes sets suppressHydrationWarning).
+      scriptProps={{ type: typeof window === "undefined" ? "text/javascript" : "text/plain" }}
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
 }
 
 export { ThemeProvider };
