@@ -33,27 +33,26 @@ export default async function PublicLeadFormPage({
   const action = submitPublicLead.bind(null, token);
 
   return (
-    <main className="bg-sidebar text-sidebar-foreground relative flex min-h-screen flex-col overflow-hidden">
+    <main className="bg-background text-foreground relative flex min-h-screen flex-col overflow-x-clip">
       <MarketingBackdrop />
       <MarketingHeader />
 
       <section className="relative mx-auto flex w-full max-w-xl flex-1 items-center px-5 py-14">
-        <Card className="w-full overflow-hidden rounded-3xl border-primary/15 bg-card text-card-foreground shadow-modal">
-          <CardHeader>
-            <div className="mb-2 h-1 w-10 rounded-full bg-gradient-to-r from-primary to-info" aria-hidden />
-            <CardTitle className="text-3xl font-bold tracking-[-0.04em]">{form.headline}</CardTitle>
+        <Card className="shadow-raised w-full rounded-2xl">
+          <CardHeader className="px-6 pt-7 sm:px-8">
+            <CardTitle className="text-[1.75rem] font-semibold tracking-[-0.03em]">{form.headline}</CardTitle>
             <CardDescription>{form.name}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-6 pb-7 sm:px-8">
             {query.submitted ? (
-              <div className="bg-success/10 text-success rounded-xl border border-success/20 p-5 shadow-inner">
-                <p className="font-medium">Message received</p>
+              <div role="status" className="bg-success/[0.07] text-success rounded-lg border border-success/25 p-5">
+                <p className="font-semibold">Message received</p>
                 <p className="mt-1 text-sm">{form.successMessage}</p>
               </div>
             ) : (
               <form action={action} className="space-y-4">
                 {query.error ? (
-                  <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-lg border px-4 py-3 text-sm">
+                  <div role="alert" className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm">
                     We could not submit that message. Check the fields and try again.
                   </div>
                 ) : null}

@@ -70,22 +70,22 @@ export default async function PortalPage() {
           {/* The one thing most visits are about: when do I work next. */}
           <Link
             href="/portal/schedule"
-            className="group mt-8 block rounded-3xl border border-primary/25 bg-gradient-to-br from-primary to-primary/80 p-6 text-primary-foreground shadow-modal outline-none transition-[color,background-color,transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_26px_60px_-30px_color-mix(in_oklch,var(--primary)_80%,transparent)] focus-visible:ring-ring/30 focus-visible:ring-[4px]"
+            className="group bg-primary text-primary-foreground shadow-raised mt-8 block rounded-xl p-5 outline-none transition-colors hover:bg-primary/94 focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-offset-2"
           >
-            <p className="type-meta text-primary-foreground/80">Your next shift</p>
+            <p className="text-sm font-medium">Your next shift</p>
             {nextShift ? (
               <>
                 <p className="mt-1.5 text-xl font-bold tracking-tight tabular-nums">
                   {nextShiftLabel(nextShift)}
                 </p>
                 {nextShift.roleName ? (
-                  <p className="text-primary-foreground/85 mt-0.5 text-sm">{nextShift.roleName}</p>
+                  <p className="mt-0.5 text-sm">{nextShift.roleName}</p>
                 ) : null}
               </>
             ) : (
               <p className="mt-1.5 text-xl font-bold tracking-tight">Nothing scheduled yet</p>
             )}
-            <span className="text-primary-foreground/90 mt-3 inline-flex items-center gap-1 text-sm font-medium">
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold underline decoration-primary-foreground/40 underline-offset-4">
               {nextShift ? "See your full schedule" : "Open your schedule"}
               <ArrowRight className="size-4 transition-transform duration-150 ease-out group-hover:translate-x-0.5" />
             </span>
@@ -94,13 +94,13 @@ export default async function PortalPage() {
           <div className="mt-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
             <Link
               href="/portal/schedule"
-              className="group border-primary/20 bg-primary-soft/35 hover:bg-primary-soft/60 focus-visible:ring-ring/30 flex min-h-32 items-center gap-3 rounded-2xl border p-4 shadow-card outline-none transition-[background-color,transform,box-shadow] hover:-translate-y-px hover:shadow-card-hover focus-visible:ring-[4px] lg:items-start lg:p-5"
+              className="group bg-card focus-visible:ring-ring/40 flex min-h-24 items-center gap-3 rounded-xl border p-4 shadow-card outline-none transition-colors hover:bg-accent/40 focus-visible:ring-[3px] lg:items-start lg:p-5"
             >
-              <span className="bg-primary text-primary-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <CalendarDays className="size-4.5" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-foreground font-medium">Your schedule</p>
+                <p className="text-foreground font-semibold">Your schedule</p>
                 <p className="text-muted-foreground text-sm">
                   See your shifts, request time off, swap shifts, and add them to your calendar.
                 </p>
@@ -113,13 +113,13 @@ export default async function PortalPage() {
 
             <Link
               href="/portal/availability"
-              className="group visual-panel hover:bg-accent/35 focus-visible:ring-ring/30 flex min-h-32 items-center gap-3 rounded-2xl p-4 outline-none transition-[background-color,transform,box-shadow] hover:-translate-y-px hover:shadow-card-hover focus-visible:ring-[4px] lg:items-start lg:p-5"
+              className="group bg-card focus-visible:ring-ring/40 flex min-h-24 items-center gap-3 rounded-xl border p-4 shadow-card outline-none transition-colors hover:bg-accent/40 focus-visible:ring-[3px] lg:items-start lg:p-5"
             >
               <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Clock className="size-4.5" aria-hidden />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-foreground font-medium">Set your availability</p>
+                <p className="text-foreground font-semibold">Set your availability</p>
                 <p className="text-muted-foreground text-sm">
                   Tell us when you can work, in plain language.
                 </p>

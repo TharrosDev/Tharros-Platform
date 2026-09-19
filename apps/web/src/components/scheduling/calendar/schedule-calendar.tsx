@@ -1545,7 +1545,7 @@ function TimeOffReviewDialog({
         <DialogHeader>
           <DialogTitle>Time-off requests</DialogTitle>
           <DialogDescription>
-            The agent assessed staffing impact. Low-impact requests are auto-approved — you can
+            The agent assessed staffing impact. Low-impact requests are auto-approved; you can
             reverse one if you need the cover.
           </DialogDescription>
         </DialogHeader>

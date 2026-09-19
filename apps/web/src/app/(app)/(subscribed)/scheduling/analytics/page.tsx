@@ -52,7 +52,7 @@ export default async function SchedulingAnalyticsPage({
     <div className="space-y-8">
       <PageHeader
         title="Scheduling analytics"
-        description={`Workforce oversight over the last ${days} days — coverage, reliability, and disruption.`}
+        description={`Workforce oversight over the last ${days} days: coverage, reliability and disruption.`}
       />
 
       <div

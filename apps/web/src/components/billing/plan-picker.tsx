@@ -19,16 +19,16 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
           <div
             key={plan.tier}
             className={cn(
-              "relative flex flex-col overflow-hidden rounded-3xl border p-6 transition-[box-shadow,transform,border-color] duration-200 ease-out motion-reduce:transition-none before:pointer-events-none before:absolute before:-right-20 before:-top-20 before:size-52 before:rounded-full before:bg-primary/0 before:blur-3xl hover:before:bg-primary/8",
+              "bg-card relative flex flex-col rounded-xl border p-6 transition-[border-color,box-shadow] duration-200",
               plan.highlight
-                ? "border-primary/35 bg-gradient-to-b from-card to-primary-soft/25 ring-primary/10 shadow-modal ring-4 md:-my-3 md:py-9"
-                : "border-border/75 bg-card/85 shadow-card hover:-translate-y-1 hover:border-primary/15 hover:shadow-card-hover motion-reduce:hover:translate-y-0",
+                ? "border-primary/40 ring-primary/15 shadow-raised ring-2"
+                : "shadow-card hover:border-input",
             )}
           >
             {plan.highlight && (
               <Badge
                 variant="solid"
-                className="absolute -top-2.5 left-6 px-2.5 py-0.5"
+                className="absolute -top-2.5 left-5"
               >
                 Most popular
               </Badge>

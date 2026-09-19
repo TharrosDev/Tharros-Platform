@@ -57,7 +57,7 @@ export default async function ProfilePage() {
         description="Your photo, details, and how your name appears across Tharros."
       />
 
-      <Card className="visual-panel-strong max-w-2xl">
+      <Card className="max-w-2xl">
         <CardHeader>
           <CardTitle>Account</CardTitle>
           <CardDescription>

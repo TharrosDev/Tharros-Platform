@@ -307,7 +307,7 @@ function TemporaryOverrides({
       <div className="space-y-1">
         <h2 className="type-h2">Date overrides</h2>
         <p className="text-muted-foreground text-sm">
-          One-off exceptions — block a vacation, or open up an extra day. These win over the weekly
+          One-off exceptions: block a vacation, or open up an extra day. These win over the weekly
           pattern.
         </p>
       </div>

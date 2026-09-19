@@ -230,7 +230,7 @@ export function DocumentList({
       if (extracted?.status === "needs_ocr") {
         toast.add({
           title: "Can't index this file",
-          description: "It looks like a scanned PDF — OCR support is coming.",
+          description: "It looks like a scanned PDF. OCR support is coming.",
         });
       } else if (extracted?.status === "extracted") {
         await fetch(`/api/documents/${doc.id}/embed`, { method: "POST" });

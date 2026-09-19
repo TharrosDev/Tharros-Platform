@@ -33,7 +33,7 @@ export default async function SchedulingLayout({
       <UpgradeGate
         feature="Scheduling"
         requiredPlanName={requiredPlan?.name ?? "Growth"}
-        blurb="Build conflict-free staff schedules with the AI workforce scheduler — availability collection, auto-generation, and disruption handling."
+        blurb="Build conflict-free staff schedules with the AI workforce scheduler: availability collection, auto-generation, and disruption handling."
       />
     );
   }
