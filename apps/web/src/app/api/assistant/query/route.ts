@@ -61,8 +61,8 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const [userBurst, orgBurst] = await Promise.all([
-    checkRateLimit(opaqueRateLimitKey("assistant-user", activeOrg.id, user.id), 30, 60),
-    checkRateLimit(opaqueRateLimitKey("assistant-org", activeOrg.id), 180, 60),
+    checkRateLimit(opaqueRateLimitKey("assistant-user", activeOrg.id, user.id), 30, 60, { failOpen: false }),
+    checkRateLimit(opaqueRateLimitKey("assistant-org", activeOrg.id), 180, 60, { failOpen: false }),
   ]);
   if (!userBurst.allowed || !orgBurst.allowed) {
     return Response.json(
