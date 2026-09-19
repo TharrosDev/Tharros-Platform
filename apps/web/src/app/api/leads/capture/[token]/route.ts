@@ -2,8 +2,11 @@ import { z } from "zod";
 
 import { capturePublicLead } from "@/lib/leads/capture";
 import { leadCaptureRequesterKey } from "@/lib/leads/request";
+import { readJsonBody } from "@/lib/security/request";
 
 export const runtime = "nodejs";
+
+const MAX_BODY_BYTES = 16 * 1024;
 
 const PUBLIC_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -36,14 +39,18 @@ export async function POST(
 ): Promise<Response> {
   const { token } = await params;
 
-  let raw: unknown;
-  try {
-    raw = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body" }, { status: 400, headers: PUBLIC_HEADERS });
+  const body = await readJsonBody<unknown>(request, MAX_BODY_BYTES);
+  if (!body.ok) {
+    return Response.json(
+      { error: body.reason === "too_large" ? "Request body is too large" : "Invalid JSON body" },
+      {
+        status: body.reason === "too_large" ? 413 : 400,
+        headers: PUBLIC_HEADERS,
+      },
+    );
   }
 
-  const parsed = schema.safeParse(raw);
+  const parsed = schema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json(
       { error: "Invalid lead payload", issues: parsed.error.flatten().fieldErrors },
