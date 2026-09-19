@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { canExecuteAutomations, canReclaimAutomationRun } from "@/lib/automations/eligibility";
+import {
+  AUTOMATION_RUN_STALE_MS,
+  canExecuteAutomations,
+  canReclaimAutomationRun,
+} from "@/lib/automations/eligibility";
 import { matchesAutomationEvent } from "@/lib/automations/match";
 import type { Job, JobHandler } from "@/lib/jobs/types";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/leads/types";
@@ -47,18 +51,35 @@ async function acquireRun(
   if (existing.status === "succeeded" || existing.status === "skipped") return null;
   if (!canReclaimAutomationRun(existing)) return null;
 
-  const { error: reclaimError } = await admin
+  const now = Date.now();
+  const patch = {
+    status: "running",
+    result: {},
+    error: null,
+    started_at: new Date(now).toISOString(),
+    finished_at: null,
+  };
+
+  let reclaimQuery = admin
     .from("automation_runs")
-    .update({
-      status: "running",
-      result: {},
-      error: null,
-      started_at: new Date().toISOString(),
-      finished_at: null,
-    })
+    .update(patch)
     .eq("id", existing.id);
+
+  // Make the lease acquisition itself conditional. The earlier read decides
+  // whether a retry is eligible; these predicates ensure two overlapping
+  // workers cannot both reclaim the same failed/stale run.
+  reclaimQuery =
+    existing.status === "failed"
+      ? reclaimQuery.eq("status", "failed")
+      : reclaimQuery
+          .eq("status", "running")
+          .lte("started_at", new Date(now - AUTOMATION_RUN_STALE_MS).toISOString());
+
+  const { data: reclaimed, error: reclaimError } = await reclaimQuery
+    .select("id")
+    .maybeSingle();
   if (reclaimError) throw reclaimError;
-  return String(existing.id);
+  return reclaimed ? String(reclaimed.id) : null;
 }
 
 async function finishRun(
