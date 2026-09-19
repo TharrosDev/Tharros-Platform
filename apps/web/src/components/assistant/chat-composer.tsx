@@ -46,11 +46,11 @@ export function ChatComposer({
   }
 
   return (
-    <div className="sticky bottom-0 rounded-t-2xl bg-background/78 pt-3 pb-4 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/68">
+    <div className="bg-background sticky bottom-0 pt-2 pb-4 before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-background before:to-transparent">
       {header ? <div className="mb-2">{header}</div> : null}
       <div
         className={cn(
-          "border-input bg-card/90 shadow-raised focus-within:border-ring focus-within:ring-ring/30 relative flex items-end gap-2 overflow-hidden rounded-2xl border p-2.5 backdrop-blur-xl transition-[box-shadow,border-color,transform] focus-within:-translate-y-px focus-within:ring-[4px] before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary/45 before:to-transparent",
+          "border-input bg-card shadow-card focus-within:border-ring focus-within:ring-ring/25 relative flex items-end gap-2 rounded-xl border p-2 transition-[box-shadow,border-color] focus-within:ring-[3px]",
           disabled && "opacity-60",
         )}
       >
@@ -66,7 +66,7 @@ export function ChatComposer({
               : (placeholder ?? "Ask about your documents…")
           }
           aria-label="Ask the assistant a question"
-          className="max-h-44 min-h-11 resize-none border-0 bg-transparent px-2 py-2.5 shadow-none focus-visible:ring-0"
+          className="max-h-44 min-h-10 resize-none border-0 bg-transparent px-2 py-2 text-[0.9375rem] shadow-none hover:border-0 focus-visible:ring-0"
         />
         <button
           type="button"
@@ -74,10 +74,10 @@ export function ChatComposer({
           disabled={!streaming && !canSend}
           aria-label={streaming ? "Stop generating" : "Send message"}
           className={cn(
-            "relative mb-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl shadow-xs transition-all duration-200 outline-none focus-visible:ring-ring/35 focus-visible:ring-[4px] active:scale-95",
+            "relative inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 outline-none focus-visible:ring-ring/40 focus-visible:ring-[3px] active:translate-y-px",
             streaming
-              ? "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              : "bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-40",
+              ? "bg-foreground text-background hover:bg-foreground/85"
+              : "bg-primary text-primary-foreground hover:bg-primary/92 disabled:bg-muted disabled:text-muted-foreground",
           )}
         >
           {/* Crossfade between send and stop so the state change reads as one control. */}
@@ -95,7 +95,7 @@ export function ChatComposer({
           />
         </button>
       </div>
-      <p className="text-muted-foreground mt-1.5 px-1 text-center text-xs">
+      <p className="text-muted-foreground mt-2 px-1 text-center text-xs">
         Answers come only from your uploaded documents. Verify anything important.
       </p>
     </div>

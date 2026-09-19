@@ -249,11 +249,11 @@ export function DocumentList({
   const showInitialEmpty = docs.length === 0 && query.trim() === "" && !searching;
   if (showInitialEmpty) {
     return (
-      <div className="relative flex flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-dashed border-border/80 bg-gradient-to-b from-card/70 to-surface-2/60 py-16 text-center shadow-inner before:pointer-events-none before:absolute before:-top-20 before:size-48 before:rounded-full before:bg-primary/10 before:blur-3xl">
-        <span className="bg-primary-soft text-primary-soft-foreground relative flex size-14 items-center justify-center rounded-2xl border border-primary/15 shadow-card [&>svg]:size-6">
+      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card/60 px-6 py-12 text-center">
+        <span className="bg-card text-primary-soft-foreground mb-2 flex size-10 items-center justify-center rounded-lg border shadow-xs [&>svg]:size-5">
           <FileText />
         </span>
-        <p className="text-foreground font-medium">No documents yet</p>
+        <p className="text-foreground font-semibold">No documents yet</p>
         <p className="text-muted-foreground max-w-sm text-sm">
           Upload your SOPs, policies, and manuals above. Your AI Assistant will answer
           from them once processing lands.
@@ -428,7 +428,7 @@ export function DocumentList({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="bg-popover/92 shadow-popover z-subnav fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-2xl border border-border/75 px-3 py-2 backdrop-blur-2xl"
+            className="bg-popover shadow-popover z-subnav fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-xl border px-3 py-2"
           >
             <span className="text-foreground px-1 text-sm font-medium whitespace-nowrap">
               {selected.size} selected

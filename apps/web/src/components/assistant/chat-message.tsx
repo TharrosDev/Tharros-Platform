@@ -28,7 +28,7 @@ export function ChatTurn({
   if (message.role === "user") {
     return (
       <div className="flex justify-end">
-        <div className="bg-gradient-to-br from-primary-soft to-primary-soft/70 text-primary-soft-foreground max-w-[85%] rounded-2xl rounded-br-md border border-primary/10 px-4 py-3 text-[0.9375rem] leading-relaxed shadow-xs whitespace-pre-wrap">
+        <div className="bg-card text-foreground max-w-[85%] rounded-2xl rounded-br-md border px-4 py-2.5 text-[0.9375rem] leading-relaxed shadow-xs whitespace-pre-wrap">
           {message.content}
         </div>
       </div>
@@ -47,9 +47,9 @@ function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming
     <div className="flex gap-3">
       <span
         aria-hidden
-        className="text-primary bg-primary-soft mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/10 shadow-xs"
+        className="text-primary bg-card mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border shadow-xs"
       >
-        <TharrosMark className="size-4" />
+        <TharrosMark className="size-3.5" />
       </span>
       <div className="min-w-0 flex-1 pt-0.5">
         {message.content ? (

@@ -8,6 +8,8 @@ import {
   CalendarClock,
   CalendarRange,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Eraser,
   History,
@@ -23,6 +25,7 @@ import {
 import { DayList, type DayListShift } from "@/components/scheduling/calendar/day-list";
 
 import { Button } from "@/components/ui/button";
+import { formatDateRange } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -294,26 +297,28 @@ export function ScheduleCalendar({
     <div className="space-y-5">
       {/* Toolbar: period nav + state on the left, actions on the right, all
           seated in one bar so nothing floats loose. */}
-      <div className="bg-card shadow-xs flex flex-wrap items-center gap-x-4 gap-y-3 rounded-lg border px-4 py-3">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+        <div className="flex items-center gap-1">
           <Button
             variant="outline"
-            size="sm"
+            size="icon-sm"
+            aria-label="Previous two weeks"
             onClick={() => setWindowStart(addDays(windowStart, -WINDOW_DAYS))}
           >
-            Previous
+            <ChevronLeft />
           </Button>
           <Button
             variant="outline"
-            size="sm"
+            size="icon-sm"
+            aria-label="Next two weeks"
             onClick={() => setWindowStart(addDays(windowStart, WINDOW_DAYS))}
           >
-            Next
+            <ChevronRight />
           </Button>
+          <span className="text-foreground ml-2 text-base font-semibold tracking-[-0.01em]">
+            {formatDateRange(windowStart, windowEnd)}
+          </span>
         </div>
-        <span className="text-foreground text-sm font-semibold tabular-nums">
-          {windowStart} – {windowEnd}
-        </span>
 
         <div className="flex items-center gap-2">
           {isPublished ? (
@@ -322,7 +327,7 @@ export function ScheduleCalendar({
               {schedule.publishedAt ? ` ${schedule.publishedAt.slice(0, 10)}` : ""}
             </Badge>
           ) : (
-            <Badge variant="secondary">Draft</Badge>
+            <Badge variant="default">Draft</Badge>
           )}
           {hardCount > 0 ? (
             <Badge variant="destructive">
@@ -372,6 +377,7 @@ export function ScheduleCalendar({
                 lockedCount={shifts.filter((s) => s.locked).length}
               />
             ) : null}
+            {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
             {canManage && isDraft ? (
               <PublishDialog
                 scheduleId={schedule.id}
@@ -380,22 +386,16 @@ export function ScheduleCalendar({
                 openShiftCount={openShiftCount}
               />
             ) : null}
-            {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
         </div>
       </div>
 
       {/* The judge's rationale: a designed AI panel, not an orphan paragraph. */}
       {schedule.optimizationSummary ? (
-        <div className="border-primary/25 bg-primary-soft/30 flex gap-3 rounded-lg border p-4">
-          <span
-            aria-hidden
-            className="bg-primary-soft text-primary mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md"
-          >
-            <Sparkles className="size-4" />
-          </span>
+        <div className="bg-card flex gap-3 rounded-xl border px-4 py-3.5 shadow-xs">
+          <Sparkles className="text-primary-soft-foreground mt-0.5 size-4 shrink-0" aria-hidden />
           <div className="min-w-0">
-            <p className="type-meta text-primary-soft-foreground">Why this schedule</p>
-            <p className="text-foreground/90 type-body mt-1.5 max-w-prose leading-relaxed">
+            <p className="text-sm font-semibold">Why this draft looks the way it does</p>
+            <p className="text-muted-foreground type-small mt-0.5 max-w-prose">
               {schedule.optimizationSummary}
             </p>
           </div>
@@ -659,15 +659,15 @@ function ShiftChip({
           ? "border-destructive/50 bg-destructive/10 text-destructive"
           : open
             ? "border-warning/50 border-dashed bg-warning/10 text-warning hover:bg-warning/15"
-            : "border-primary/30 bg-primary/10 text-primary hover:bg-primary/15",
+            : "border-primary/20 bg-primary-soft/70 text-primary-soft-foreground hover:bg-primary-soft",
       ].join(" ")}
     >
-      <span className="flex items-center gap-1 font-medium tabular-nums">
+      <span className="flex items-center gap-1 font-semibold whitespace-nowrap tabular-nums">
         {timeOf(shift.startsAt)}–{timeOf(shift.endsAt)}
         {shift.locked ? <Lock className="size-3" aria-label="Locked" /> : null}
         {hard ? <TriangleAlert className="size-3" aria-hidden /> : null}
       </span>
-      {roleName ? <span className="block truncate opacity-80">{roleName}</span> : null}
+      {roleName ? <span className="block truncate opacity-85">{roleName}</span> : null}
     </button>
     </m.div>
   );
@@ -943,12 +943,12 @@ function ClearScheduleButton({
   return (
     <>
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
-        className="text-destructive hover:text-destructive"
+        className="text-muted-foreground hover:text-destructive"
         onClick={() => setOpen(true)}
       >
-        <Eraser className="size-4" /> Clear schedule
+        <Eraser className="size-4" /> Clear
       </Button>
 
       <Dialog open={open} onOpenChange={(o) => !o && !pending && setOpen(false)}>

@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, m } from "motion/react";
-import { Bug, CheckCircle2, Lightbulb, Minus, Send, Sparkles, Star } from "lucide-react";
+import { Bug, CheckCircle2, CircleHelp, Lightbulb, Minus, Send, Star } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
@@ -38,6 +39,8 @@ type TabState = {
 
 export function FeedbackWidget() {
   const [open, setOpen] = React.useState(false);
+  // The assistant docks its composer at the bottom; on small screens the launcher would cover Send.
+  const overComposer = usePathname().startsWith("/assistant");
   const [tab, setTab] = React.useState<"ask" | "suggest">("ask");
   const [kind, setKind] = React.useState<FeedbackKind | null>(null);
   const [ask, setAsk] = React.useState<TabState>({ messages: [], logged: false });
@@ -99,20 +102,20 @@ export function FeedbackWidget() {
   }
 
   return (
-    <div className="z-widget fixed right-4 bottom-4">
+    <div className={cn("z-widget fixed right-4 bottom-4", overComposer && "max-lg:hidden")}>
       <AnimatePresence initial={false} mode="popLayout">
         {open ? (
           <m.div
             key="panel"
             layoutId="feedback-widget"
             transition={spring.gentle}
-            className="bg-popover/95 shadow-modal flex h-[32rem] w-[25rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-border/75 backdrop-blur-2xl max-h-[calc(100dvh-6rem)]"
+            className="bg-popover shadow-modal flex h-[32rem] max-h-[calc(100dvh-6rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border"
             role="dialog"
             aria-label="Help and feedback"
           >
             {/* Header */}
-            <div className="border-border/60 flex items-center gap-2.5 border-b px-4 py-3">
-              <span className="text-primary bg-primary-soft flex size-8 items-center justify-center rounded-xl border border-primary/15 shadow-xs">
+            <div className="flex items-center gap-2.5 border-b px-4 py-3">
+              <span className="text-primary-soft-foreground bg-primary-soft flex size-8 items-center justify-center rounded-lg">
                 <TharrosMark className="size-3.5" />
               </span>
               <div className="min-w-0 flex-1">
@@ -132,7 +135,7 @@ export function FeedbackWidget() {
             </div>
 
             {/* Tabs */}
-            <div className="border-border/60 flex gap-1 border-b px-3 py-2">
+            <div className="flex gap-1 border-b px-3 py-2">
               {(["ask", "suggest"] as const).map((t) => (
                 <button
                   key={t}
@@ -191,7 +194,7 @@ export function FeedbackWidget() {
               {state.messages.map((msg, i) =>
                 msg.role === "user" ? (
                   <div key={i} className="flex justify-end">
-                    <div className="bg-primary-soft text-primary-soft-foreground max-w-[85%] rounded-2xl rounded-br-md border border-primary/10 px-3.5 py-2.5 text-sm shadow-xs whitespace-pre-wrap">
+                    <div className="bg-surface-2 text-foreground max-w-[85%] rounded-2xl rounded-br-md px-3.5 py-2.5 text-sm whitespace-pre-wrap">
                       {msg.content}
                     </div>
                   </div>
@@ -240,8 +243,8 @@ export function FeedbackWidget() {
             </div>
 
             {/* Composer */}
-            <div className="border-border/60 border-t p-3">
-              <div className="border-input bg-background/80 focus-within:border-ring focus-within:ring-ring/30 flex items-end gap-2 rounded-2xl border p-2 shadow-xs transition-[box-shadow,border-color] focus-within:ring-[4px]">
+            <div className="border-t p-3">
+              <div className="border-input bg-card focus-within:border-ring focus-within:ring-ring/25 flex items-end gap-2 rounded-lg border p-1.5 transition-[box-shadow,border-color] focus-within:ring-[3px]">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -265,7 +268,7 @@ export function FeedbackWidget() {
                   onClick={send}
                   disabled={!canSend}
                   aria-label="Send"
-                  className="bg-gradient-to-b from-primary to-primary/88 text-primary-foreground focus-visible:ring-ring/30 inline-flex size-10 shrink-0 items-center justify-center rounded-xl shadow-xs outline-none transition-all duration-150 hover:-translate-y-px focus-visible:ring-[4px] disabled:opacity-40"
+                  className="bg-primary text-primary-foreground hover:bg-primary/92 focus-visible:ring-ring/40 disabled:bg-muted disabled:text-muted-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-[3px]"
                 >
                   <Send className="size-3.5" />
                 </button>
@@ -279,11 +282,11 @@ export function FeedbackWidget() {
             transition={spring.gentle}
             type="button"
             onClick={() => setOpen(true)}
-            className="bg-gradient-to-b from-primary to-primary/88 text-primary-foreground shadow-raised focus-visible:ring-ring/30 flex min-h-12 items-center gap-2 rounded-full border border-white/10 py-2.5 pr-5 pl-3.5 text-sm font-semibold outline-none transition-[color,background-color,transform,box-shadow] hover:-translate-y-1 hover:shadow-modal focus-visible:ring-[4px]"
+            className="bg-card text-foreground shadow-raised focus-visible:ring-ring/40 hover:text-primary-soft-foreground flex size-11 items-center justify-center rounded-full border outline-none transition-colors focus-visible:ring-[3px]"
             aria-label="Open help and feedback"
+            title="Help & feedback"
           >
-            <Sparkles className="size-4" aria-hidden />
-            Suggest
+            <CircleHelp className="size-5" aria-hidden />
           </m.button>
         )}
       </AnimatePresence>
@@ -296,7 +299,7 @@ function AgentBubble({ children }: { children: React.ReactNode }) {
     <div className="flex gap-2">
       <span
         aria-hidden
-        className="text-primary bg-primary-soft mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-primary/10"
+        className="text-primary-soft-foreground bg-primary-soft mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-primary/10"
       >
         <TharrosMark className="size-3" />
       </span>

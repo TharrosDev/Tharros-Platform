@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ExternalLink, Inbox, Link2, Plus, Sparkles, Users } from "lucide-react";
+import { ExternalLink, Link2, Plus, Search, Sparkles, Users } from "lucide-react";
 
 import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getOrgContext } from "@/lib/org/queries";
@@ -20,26 +20,26 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
+import { PanelSheet } from "@/components/ui/panel-sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-function statusVariant(status: LeadStatus) {
-  if (status === "won") return "success" as const;
-  if (status === "contacted") return "info" as const;
-  if (status === "qualified") return "default" as const;
-  if (status === "lost") return "outline" as const;
-  return "secondary" as const;
-}
+const statusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
 
 function sourceLabel(source: string) {
   if (source === "public_form") return "Capture form";
   if (source === "api") return "API";
   return "Manual";
 }
+
+const ERRORS: Record<string, string> = {
+  "usage-limit": "Your organization has reached its monthly AI usage limit.",
+  permission: "Only owners and admins can do that.",
+};
 
 export default async function LeadsPage({
   searchParams,
@@ -76,363 +76,359 @@ export default async function LeadsPage({
   const counts = Object.fromEntries(
     LEAD_STATUSES.map((status) => [status, leads.filter((lead) => lead.status === status).length]),
   ) as Record<LeadStatus, number>;
+  const withSearch = (status: LeadStatus | null) => {
+    const qs = new URLSearchParams();
+    if (status) qs.set("status", status);
+    if (search) qs.set("q", search);
+    const s = qs.toString();
+    return s ? `/leads?${s}` : "/leads";
+  };
+  const filters: { key: string; label: string; count: number; href: string; active: boolean }[] = [
+    { key: "all", label: "All", count: leads.length, href: withSearch(null), active: !selectedStatus },
+    ...LEAD_STATUSES.map((status) => ({
+      key: status,
+      label: statusLabel(status),
+      count: counts[status],
+      href: withSearch(status),
+      active: selectedStatus === status,
+    })),
+  ];
 
   return (
     <>
       <PageHeader
         title="Lead Capture"
-        description="Collect enquiries, manage the pipeline, draft follow-ups with AI, and trigger automations from real lead events."
+        description="Collect enquiries, work the pipeline and review AI follow-up drafts before anything goes out."
+        actions={
+          <>
+            <PanelSheet
+              label="Capture forms"
+              icon={<Link2 />}
+              title="Capture forms"
+              description="Share a public form or post JSON to its tokenized endpoint. New submissions land in the pipeline."
+              closeOnSubmit={false}
+            >
+              <CaptureForms forms={forms} baseUrl={baseUrl} canManage={canManageForms} />
+            </PanelSheet>
+            <PanelSheet
+              label="Add lead"
+              icon={<Plus />}
+              variant="default"
+              title="Add a lead"
+              description="Record a phone call, walk-in, referral or other offline enquiry."
+            >
+              <form action={createManualLead} className="grid gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-name">Name</Label>
+                  <Input id="lead-name" name="name" required maxLength={160} />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lead-email">Email</Label>
+                    <Input id="lead-email" name="email" type="email" maxLength={320} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="lead-phone">Phone</Label>
+                    <Input id="lead-phone" name="phone" type="tel" maxLength={80} />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-company">Company</Label>
+                  <Input id="lead-company" name="company" maxLength={160} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="lead-message">Notes or enquiry</Label>
+                  <Textarea id="lead-message" name="message" maxLength={4000} />
+                </div>
+                <Button type="submit">Add lead</Button>
+              </form>
+            </PanelSheet>
+          </>
+        }
       />
 
       {params.error ? (
-        <div className="border-destructive/30 bg-destructive/10 text-destructive rounded-lg border px-4 py-3 text-sm">
-          {params.error === "usage-limit"
-            ? "Your organization has reached its monthly AI usage limit."
-            : "That action could not be completed. Check the submitted fields or your permissions."}
+        <div role="alert" className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm">
+          {ERRORS[params.error] ?? "That action could not be completed. Check the fields or your permissions."}
+        </div>
+      ) : params.created || params["form-created"] ? (
+        <div role="status" className="border-success/25 bg-success/[0.07] text-success rounded-lg border px-4 py-3 text-sm">
+          {params.created ? "Lead added to the pipeline." : "Capture form created."}
         </div>
       ) : null}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        {LEAD_STATUSES.map((status) => (
-          <Link
-            key={status}
-            href={selectedStatus === status ? (search ? `/leads?q=${encodeURIComponent(search)}` : "/leads") : `/leads?status=${status}${search ? `&q=${encodeURIComponent(search)}` : ""}`}
-            className={cn(
-              "visual-panel group rounded-2xl p-4 transition-[border-color,box-shadow,transform] hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-card-hover",
-              selectedStatus === status && "border-primary/35 bg-primary-soft/35 ring-primary/12 ring-4",
-            )}
-          >
-            <span className="type-meta text-muted-foreground">{status}</span>
-            <span className="num mt-2 block text-2xl font-bold">{counts[status]}</span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <Card className="visual-panel-strong">
-          <CardHeader>
-            <CardTitle>Add a lead</CardTitle>
-            <CardDescription>Record a phone, walk-in, referral, or other offline enquiry.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form action={createManualLead} className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="lead-name">Name</Label>
-                <Input id="lead-name" name="name" required maxLength={160} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="lead-email">Email</Label>
-                <Input id="lead-email" name="email" type="email" maxLength={320} />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="lead-phone">Phone</Label>
-                <Input id="lead-phone" name="phone" type="tel" maxLength={80} />
-              </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="lead-company">Company</Label>
-                <Input id="lead-company" name="company" maxLength={160} />
-              </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label htmlFor="lead-message">Notes / enquiry</Label>
-                <Textarea id="lead-message" name="message" maxLength={4000} />
-              </div>
-              <div className="sm:col-span-2">
-                <Button type="submit">
-                  <Plus />
-                  Add lead
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden bg-gradient-to-b from-card to-primary-soft/10">
-          <CardHeader>
-            <CardTitle>Capture forms</CardTitle>
-            <CardDescription>
-              Share a public Tharros form or post JSON to the tokenized capture endpoint.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {canManageForms ? (
-              <form action={createCaptureForm} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-                <Input name="name" placeholder="Website enquiries" aria-label="Form name" required />
-                <Input name="headline" placeholder="Get in touch" aria-label="Public headline" />
-                <Button type="submit" variant="outline">
-                  Create
-                </Button>
-              </form>
-            ) : null}
-
-            {forms.length ? (
-              <div className="space-y-3">
-                {forms.map((form) => {
-                  const publicUrl = `${baseUrl}/forms/${form.publicToken}`;
-                  return (
-                    <div key={form.id} className="bg-surface-2/80 rounded-xl border border-border/70 p-3.5 shadow-xs transition-colors hover:border-primary/15">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-medium">{form.name}</p>
-                            <Badge variant={form.active ? "success" : "secondary"}>
-                              {form.active ? "Live" : "Paused"}
-                            </Badge>
-                          </div>
-                          <p className="text-muted-foreground mt-1 truncate text-xs">{publicUrl}</p>
-                          <p className="text-muted-foreground mt-1 text-xs">
-                            API: POST /api/leads/capture/{form.publicToken}
-                          </p>
-                        </div>
-                        <Link
-                          href={publicUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={buttonVariants({ variant: "ghost", size: "sm" })}
-                        >
-                          <ExternalLink />
-                          Open
-                        </Link>
-                      </div>
-                      {canManageForms ? (
-                        <div className="mt-3 space-y-3 border-t border-border/70 pt-3">
-                          <details>
-                            <summary className="text-primary cursor-pointer text-xs font-medium">
-                              Edit form settings
-                            </summary>
-                            <form action={updateCaptureForm} className="mt-3 grid gap-3">
-                              <input type="hidden" name="formId" value={form.id} />
-                              <div className="grid gap-3 sm:grid-cols-2">
-                                <div className="space-y-1.5">
-                                  <Label htmlFor={`form-name-${form.id}`}>Internal name</Label>
-                                  <Input
-                                    id={`form-name-${form.id}`}
-                                    name="name"
-                                    defaultValue={form.name}
-                                    maxLength={120}
-                                    required
-                                  />
-                                </div>
-                                <div className="space-y-1.5">
-                                  <Label htmlFor={`form-headline-${form.id}`}>Public headline</Label>
-                                  <Input
-                                    id={`form-headline-${form.id}`}
-                                    name="headline"
-                                    defaultValue={form.headline}
-                                    maxLength={240}
-                                  />
-                                </div>
-                              </div>
-                              <div className="space-y-1.5">
-                                <Label htmlFor={`form-success-${form.id}`}>Success message</Label>
-                                <Textarea
-                                  id={`form-success-${form.id}`}
-                                  name="successMessage"
-                                  defaultValue={form.successMessage}
-                                  maxLength={500}
-                                />
-                              </div>
-                              <Button type="submit" variant="outline" size="sm">
-                                Save form settings
-                              </Button>
-                            </form>
-                          </details>
-
-                          <div className="flex flex-wrap gap-2">
-                            <form action={toggleCaptureForm}>
-                              <input type="hidden" name="formId" value={form.id} />
-                              <input type="hidden" name="active" value={form.active ? "false" : "true"} />
-                              <Button type="submit" variant="outline" size="sm">
-                                {form.active ? "Pause form" : "Enable form"}
-                              </Button>
-                            </form>
-                            <form action={rotateCaptureFormToken}>
-                              <input type="hidden" name="formId" value={form.id} />
-                              <Button type="submit" variant="outline" size="sm">
-                                Rotate public link
-                              </Button>
-                            </form>
-                            <form action={deleteCaptureForm}>
-                              <input type="hidden" name="formId" value={form.id} />
-                              <Button type="submit" variant="ghost" size="sm">
-                                Delete form
-                              </Button>
-                            </form>
-                          </div>
-                          <p className="text-muted-foreground text-xs">
-                            Rotating the public link immediately invalidates the previous form and API URL.
-                          </p>
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="bg-surface-2/70 rounded-xl border border-dashed border-border/80 p-6 text-center shadow-inner">
-                <Link2 className="text-muted-foreground mx-auto size-5" />
-                <p className="mt-2 text-sm font-medium">No capture forms yet</p>
-                <p className="text-muted-foreground type-small mt-1">
-                  {canManageForms
-                    ? "Create one to get a shareable public contact form."
-                    : "An owner or admin can create public forms."}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle>Find leads</CardTitle>
-              <CardDescription>Search by name, email, phone or company.</CardDescription>
-            </div>
-            {search ? (
-              <Link href="/leads" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-                Clear search
+      <section aria-labelledby="pipeline-heading" className="space-y-3">
+        <h2 id="pipeline-heading" className="sr-only">
+          Pipeline
+        </h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <nav aria-label="Filter by status" className="-mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            {filters.map((f) => (
+              <Link
+                key={f.key}
+                href={f.href}
+                aria-current={f.active ? "page" : undefined}
+                className={cn(
+                  "focus-visible:ring-ring/40 inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                  f.active
+                    ? "bg-card text-foreground border shadow-xs"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                )}
+              >
+                {f.label}
+                <span className={cn("num text-xs", f.active ? "text-primary-soft-foreground" : "text-muted-foreground")}>
+                  {f.count}
+                </span>
               </Link>
-            ) : null}
-          </div>
-        </CardHeader>
-        <CardContent>
-          <form action="/leads" className="flex gap-2">
+            ))}
+          </nav>
+          <form action="/leads" role="search" className="flex w-full gap-2 sm:w-auto">
             {selectedStatus ? <input type="hidden" name="status" value={selectedStatus} /> : null}
-            <Input
-              name="q"
-              defaultValue={search}
-              placeholder="Search leads..."
-              aria-label="Search leads"
-              maxLength={120}
-            />
-            <Button type="submit" variant="outline">Search</Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Inbox className="size-4" />
-                Pipeline
-              </CardTitle>
-              <CardDescription>
-                {selectedStatus ? `${visibleLeads.length} ${selectedStatus} leads` : `${leads.length} recent leads`}
-              </CardDescription>
+            <div className="relative flex-1 sm:w-72">
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" aria-hidden />
+              <Input
+                name="q"
+                defaultValue={search}
+                placeholder="Name, email, phone or company"
+                aria-label="Search leads"
+                maxLength={120}
+                className="pl-9"
+              />
             </div>
-            {selectedStatus ? (
-              <Link href="/leads" className={buttonVariants({ variant: "outline", size: "sm" })}>
-                Show all
+            <Button type="submit" variant="outline">
+              Search
+            </Button>
+            {search ? (
+              <Link
+                href={selectedStatus ? `/leads?status=${selectedStatus}` : "/leads"}
+                className={buttonVariants({ variant: "ghost" })}
+              >
+                Clear
               </Link>
             ) : null}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {visibleLeads.length ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Lead</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Follow-up</TableHead>
-                  <TableHead>Received</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visibleLeads.map((lead) => (
-                  <TableRow key={lead.id}>
-                    <TableCell>
-                      <Link href={`/leads/${lead.id}`} className="font-medium hover:underline">
-                        {lead.name}
+          </form>
+        </div>
+
+        {visibleLeads.length ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lead</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Source</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Follow-up</TableHead>
+                <TableHead className="text-right">Received</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visibleLeads.map((lead) => (
+                <TableRow key={lead.id}>
+                  <TableCell className="max-w-64">
+                    <Link
+                      href={`/leads/${lead.id}`}
+                      className="focus-visible:ring-ring/40 rounded-sm font-semibold outline-none hover:underline focus-visible:ring-[3px]"
+                    >
+                      {lead.name}
+                    </Link>
+                    <div className="text-muted-foreground truncate text-xs">
+                      {lead.company ?? lead.message ?? "No details"}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="truncate">{lead.email ?? lead.phone ?? "—"}</div>
+                    {lead.email && lead.phone ? (
+                      <div className="text-muted-foreground text-xs">{lead.phone}</div>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{sourceLabel(lead.source)}</TableCell>
+                  <TableCell>
+                    <form action={updateLeadStatus} className="flex items-center gap-1.5">
+                      <input type="hidden" name="leadId" value={lead.id} />
+                      <NativeSelect
+                        name="status"
+                        defaultValue={lead.status}
+                        aria-label={`Status for ${lead.name}`}
+                        className="w-32"
+                      >
+                        {LEAD_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {statusLabel(status)}
+                          </option>
+                        ))}
+                      </NativeSelect>
+                      <Button type="submit" variant="ghost" size="sm">
+                        Save
+                      </Button>
+                    </form>
+                  </TableCell>
+                  <TableCell className="min-w-44">
+                    {lead.followUpDraft ? (
+                      <Link
+                        href={`/leads/${lead.id}`}
+                        className="focus-visible:ring-ring/40 inline-flex rounded-md outline-none focus-visible:ring-[3px]"
+                      >
+                        <Badge variant="default">Draft ready to review</Badge>
                       </Link>
-                      <div className="text-muted-foreground max-w-xs truncate text-xs">
-                        {lead.company ?? lead.message ?? "No additional details"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div>{lead.email ?? lead.phone ?? "—"}</div>
-                      {lead.email && lead.phone ? (
-                        <div className="text-muted-foreground text-xs">{lead.phone}</div>
-                      ) : null}
-                    </TableCell>
-                    <TableCell>{sourceLabel(lead.source)}</TableCell>
-                    <TableCell>
-                      <form action={updateLeadStatus} className="flex items-center gap-2">
+                    ) : lead.email ? (
+                      <form action={generateLeadFollowUp}>
                         <input type="hidden" name="leadId" value={lead.id} />
-                        <select
-                          name="status"
-                          defaultValue={lead.status}
-                          aria-label={`Status for ${lead.name}`}
-                          className="border-input bg-card/80 h-9 rounded-lg border px-2.5 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[4px] focus-visible:ring-ring/30"
-                        >
-                          {LEAD_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                              {status[0].toUpperCase() + status.slice(1)}
-                            </option>
-                          ))}
-                        </select>
-                        <Button type="submit" variant="ghost" size="sm">
-                          Save
+                        <Button type="submit" variant="outline" size="sm">
+                          <Sparkles />
+                          Draft follow-up
                         </Button>
                       </form>
-                      <Badge className="mt-1" variant={statusVariant(lead.status)}>
-                        {lead.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="min-w-52">
-                      {lead.email ? (
-                        <div className="space-y-2">
-                          <form action={generateLeadFollowUp}>
-                            <input type="hidden" name="leadId" value={lead.id} />
-                            <Button type="submit" variant="outline" size="sm">
-                              <Sparkles />
-                              {lead.followUpDraft ? "Redraft" : "Draft"}
-                            </Button>
-                          </form>
-                          {lead.followUpDraft ? (
-                            <details className="text-xs">
-                              <summary className="text-primary cursor-pointer font-medium">
-                                View latest draft
-                              </summary>
-                              <div className="bg-surface-2/80 mt-2 max-w-sm rounded-xl border border-border/70 p-3.5 shadow-inner">
-                                <p className="font-semibold">{lead.followUpSubject ?? "Following up"}</p>
-                                <p className="text-muted-foreground mt-2 whitespace-pre-wrap">
-                                  {lead.followUpDraft}
-                                </p>
-                              </div>
-                            </details>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">Email required</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {new Intl.DateTimeFormat("en-CA", {
-                        month: "short",
-                        day: "numeric",
-                      }).format(new Date(lead.createdAt))}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="bg-surface-2/70 rounded-xl border border-dashed border-border/80 p-8 text-center shadow-inner">
-              <Users className="text-muted-foreground mx-auto size-5" />
-              <p className="mt-2 text-sm font-medium">No leads in this view</p>
-              <p className="text-muted-foreground type-small mt-1">
-                Add one manually or share a capture form.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">Needs an email</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground num text-right whitespace-nowrap">
+                    {new Intl.DateTimeFormat("en-CA", { month: "short", day: "numeric" }).format(
+                      new Date(lead.createdAt),
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="bg-card/60 rounded-xl border border-dashed px-6 py-10 text-center">
+            <Users className="text-muted-foreground mx-auto size-5" aria-hidden />
+            <p className="mt-3 font-semibold">{search || selectedStatus ? "No leads match" : "No leads yet"}</p>
+            <p className="text-muted-foreground type-small mx-auto mt-1 max-w-sm">
+              {search || selectedStatus
+                ? "Try another status or search."
+                : "Add a lead by hand or share a capture form. Every new lead appears here."}
+            </p>
+          </div>
+        )}
+      </section>
     </>
+  );
+}
+
+function CaptureForms({
+  forms,
+  baseUrl,
+  canManage,
+}: {
+  forms: Awaited<ReturnType<typeof listCaptureForms>>;
+  baseUrl: string;
+  canManage: boolean;
+}) {
+  return (
+    <div className="space-y-5">
+      {canManage ? (
+        <form action={createCaptureForm} className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="new-form-name">Internal name</Label>
+              <Input id="new-form-name" name="name" placeholder="Website enquiries" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="new-form-headline">Public headline</Label>
+              <Input id="new-form-headline" name="headline" placeholder="Get in touch" />
+            </div>
+          </div>
+          <Button type="submit" variant="outline" size="sm">
+            <Plus />
+            Create form
+          </Button>
+        </form>
+      ) : null}
+
+      {forms.length ? (
+        <ul className="divide-y rounded-xl border">
+          {forms.map((form) => {
+            const publicUrl = `${baseUrl}/forms/${form.publicToken}`;
+            return (
+              <li key={form.id} className="space-y-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-semibold">{form.name}</p>
+                      <Badge variant={form.active ? "success" : "secondary"}>{form.active ? "Live" : "Paused"}</Badge>
+                    </div>
+                    <p className="text-muted-foreground mt-1 truncate text-xs">{publicUrl}</p>
+                    <p className="text-muted-foreground num mt-0.5 truncate text-xs">
+                      POST /api/leads/capture/{form.publicToken}
+                    </p>
+                  </div>
+                  <Link
+                    href={publicUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={buttonVariants({ variant: "ghost", size: "sm" })}
+                  >
+                    <ExternalLink />
+                    Open
+                  </Link>
+                </div>
+                {canManage ? (
+                  <>
+                    <details>
+                      <summary className="text-primary-soft-foreground cursor-pointer text-sm font-medium select-none">
+                        Edit form settings
+                      </summary>
+                      <form action={updateCaptureForm} className="mt-3 grid gap-3">
+                        <input type="hidden" name="formId" value={form.id} />
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`form-name-${form.id}`}>Internal name</Label>
+                          <Input id={`form-name-${form.id}`} name="name" defaultValue={form.name} maxLength={120} required />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`form-headline-${form.id}`}>Public headline</Label>
+                          <Input id={`form-headline-${form.id}`} name="headline" defaultValue={form.headline} maxLength={240} />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`form-success-${form.id}`}>Success message</Label>
+                          <Textarea
+                            id={`form-success-${form.id}`}
+                            name="successMessage"
+                            defaultValue={form.successMessage}
+                            maxLength={500}
+                          />
+                        </div>
+                        <Button type="submit" variant="outline" size="sm" className="justify-self-start">
+                          Save form settings
+                        </Button>
+                      </form>
+                    </details>
+                    <div className="flex flex-wrap gap-2">
+                      <form action={toggleCaptureForm}>
+                        <input type="hidden" name="formId" value={form.id} />
+                        <input type="hidden" name="active" value={form.active ? "false" : "true"} />
+                        <Button type="submit" variant="outline" size="sm">
+                          {form.active ? "Pause form" : "Turn on form"}
+                        </Button>
+                      </form>
+                      <form action={rotateCaptureFormToken}>
+                        <input type="hidden" name="formId" value={form.id} />
+                        <Button type="submit" variant="outline" size="sm">
+                          Rotate public link
+                        </Button>
+                      </form>
+                      <form action={deleteCaptureForm}>
+                        <input type="hidden" name="formId" value={form.id} />
+                        <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                          Delete
+                        </Button>
+                      </form>
+                    </div>
+                    <p className="text-muted-foreground text-xs">
+                      Rotating the link immediately stops the old form and API URL from working.
+                    </p>
+                  </>
+                ) : null}
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="text-muted-foreground rounded-xl border border-dashed px-4 py-6 text-center text-sm">
+          {canManage ? "No capture forms yet. Create one above to get a shareable link." : "An owner or admin can create public forms."}
+        </p>
+      )}
+    </div>
   );
 }

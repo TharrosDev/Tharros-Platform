@@ -54,7 +54,7 @@ export function CitationFooter({
               onClick={() => onOpen(c.index)}
               className="group hover:bg-accent/60 focus-visible:ring-ring/40 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none transition-colors focus-visible:ring-2"
             >
-              <span className="text-primary bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
+              <span className="text-primary-soft-foreground bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
                 {c.index}
               </span>
               <FileText className="text-muted-foreground size-3.5 shrink-0" />
@@ -110,7 +110,7 @@ export function SourcesDialog({
                   active ? "border-ring bg-primary-soft/50" : "border-border bg-card",
                 )}
               >
-                <span className="text-primary bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
+                <span className="text-primary-soft-foreground bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
                   {c.index}
                 </span>
                 <FileText className="text-muted-foreground size-4 shrink-0" />

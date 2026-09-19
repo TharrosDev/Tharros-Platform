@@ -24,7 +24,7 @@ export function UpgradeGate({
 }) {
   return (
     <div className="visual-panel-strong relative mx-auto flex max-w-lg flex-col items-center gap-4 overflow-hidden rounded-3xl px-8 py-16 text-center before:pointer-events-none before:absolute before:-top-24 before:size-56 before:rounded-full before:bg-primary/10 before:blur-3xl">
-      <span className="bg-primary-soft text-primary relative flex size-14 items-center justify-center rounded-2xl border border-primary/15 shadow-card">
+      <span className="bg-primary-soft text-primary-soft-foreground relative flex size-14 items-center justify-center rounded-2xl border border-primary/15 shadow-card">
         <Lock className="size-5" aria-hidden />
       </span>
       <div className="relative space-y-2">

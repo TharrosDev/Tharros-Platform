@@ -48,7 +48,6 @@ export default async function AssistantPage({
     <div className="flex flex-1 flex-col gap-6">
       <PageHeader
         title="AI Assistant"
-        description="Ask anything about your business. Answers come straight from your documents, with sources."
         actions={
           <ConversationHistory
             conversations={convPage.conversations}

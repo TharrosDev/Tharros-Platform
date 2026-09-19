@@ -195,14 +195,14 @@ export function AssistantChat({
   const showEmpty = messages.length === 0 && !streaming;
 
   return (
-    <div className="relative flex min-h-[calc(100vh-16rem)] flex-col overflow-hidden rounded-3xl border border-border/55 bg-card/25 px-3 pt-2 shadow-[inset_0_1px_0_color-mix(in_oklch,var(--card)_80%,transparent)] backdrop-blur-sm sm:px-5">
+    <div className="relative flex min-h-[calc(100dvh-13rem)] flex-col">
       <div className="flex-1">
         {showEmpty ? (
           <EmptyState hasDocuments={hasDocuments} onPick={send} readOnly={readOnly} />
         ) : (
-          <div className="mx-auto flex w-full max-w-4xl flex-col gap-7 py-5">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-4">
             {olderTruncated ? (
-              <p className="text-muted-foreground border-border rounded-md border border-dashed py-2 text-center text-xs">
+              <p className="text-muted-foreground rounded-md border border-dashed py-2 text-center text-xs">
                 Showing the most recent messages in this conversation.
               </p>
             ) : null}
@@ -287,36 +287,36 @@ function EmptyState({
   readOnly: boolean;
 }) {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col items-center px-4 pb-10 pt-14 text-center sm:pt-20">
-      <span className="text-primary bg-primary-soft flex size-16 items-center justify-center rounded-2xl border border-primary/15 shadow-[0_16px_36px_-20px_color-mix(in_oklch,var(--primary)_70%,transparent)]">
-        <Sparkles className="size-6" />
+    <div className="mx-auto flex w-full max-w-2xl flex-col px-1 pb-10 pt-8 sm:pt-14">
+      <span className="bg-card text-primary flex size-10 items-center justify-center rounded-xl border shadow-xs" aria-hidden>
+        <Sparkles className="size-5" />
       </span>
-      <p className="type-meta text-primary mt-6">Grounded intelligence</p>
-      <h2 className="type-h1 mt-2">Ask about your business</h2>
-      <p className="text-muted-foreground type-body mt-2 max-w-md">
+      <h2 className="mt-5 text-[1.375rem] font-semibold tracking-[-0.025em]">Ask about your business</h2>
+      <p className="text-muted-foreground type-body mt-1.5 max-w-lg">
         The assistant answers only from the documents in your Knowledge base, and cites the
         source for every answer.
       </p>
 
       {readOnly ? null : hasDocuments ? (
-        <div className="mt-7 flex w-full flex-col gap-4">
-          <div className="flex flex-col gap-2">
+        <div className="mt-7 w-full">
+          <p className="text-muted-foreground mb-2 text-sm font-medium">Try asking</p>
+          <div className="bg-card divide-y overflow-hidden rounded-xl border shadow-card">
             {EXAMPLE_PROMPTS.map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => onPick(p)}
-                className="group border-border/75 bg-card/75 hover:border-primary/25 hover:bg-primary-soft/30 flex items-center justify-between gap-3 rounded-xl border px-4 py-3.5 text-left text-sm shadow-xs backdrop-blur-sm transition-[background-color,border-color,transform,box-shadow] hover:-translate-y-px hover:shadow-card"
+                className="group focus-visible:ring-ring/40 flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm outline-none transition-colors hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-inset"
               >
                 <span className="text-foreground">{p}</span>
-                <ArrowUp className="text-muted-foreground size-4 shrink-0 rotate-45 transition-transform group-hover:rotate-90" />
+                <ArrowUp className="text-muted-foreground group-hover:text-primary-soft-foreground size-4 shrink-0 rotate-90 transition-colors" aria-hidden />
               </button>
             ))}
           </div>
         </div>
       ) : (
-        <div className="visual-panel-strong mt-8 flex w-full flex-col gap-4 rounded-2xl p-6 text-left">
-          <p className="text-foreground font-medium">Add your documents to get started</p>
+        <div className="bg-card mt-7 flex w-full flex-col gap-4 rounded-xl border p-5 text-left shadow-card">
+          <p className="text-foreground font-semibold">Add your documents to get started</p>
           <p className="text-muted-foreground text-sm">
             The assistant answers from what you upload, so it needs a few documents first.
           </p>
@@ -367,8 +367,8 @@ function TemplateChips({
             aria-pressed={active === t.id}
             title={t.description}
             className={cn(
-              "border-border/75 bg-card/75 hover:border-primary/30 hover:bg-primary-soft/40 inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium shadow-xs backdrop-blur-sm transition-[background-color,border-color,transform] hover:-translate-y-px",
-              active === t.id && "border-ring bg-accent",
+              "bg-card focus-visible:ring-ring/40 inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[0.8125rem] font-medium outline-none transition-colors hover:border-input hover:bg-accent focus-visible:ring-[3px]",
+              active === t.id && "border-primary/30 bg-primary-soft text-primary-soft-foreground",
             )}
           >
             <Icon className="text-muted-foreground size-3.5" />
@@ -392,10 +392,10 @@ function UsageNotice({
     <div
       role="status"
       className={cn(
-        "mb-2 rounded-xl border px-3.5 py-2.5 text-sm shadow-xs backdrop-blur-sm",
+        "mb-2 rounded-lg border px-3.5 py-2.5 text-sm",
         tone === "error"
-          ? "border-destructive/40 bg-destructive/10 text-destructive"
-          : "border-border bg-accent/40 text-foreground",
+          ? "border-destructive/25 bg-destructive/[0.06] text-destructive"
+          : "border-warning/25 bg-warning/[0.07] text-foreground",
       )}
     >
       {children}

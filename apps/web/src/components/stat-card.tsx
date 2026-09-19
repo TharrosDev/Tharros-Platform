@@ -31,7 +31,12 @@ function StatCard({
           </span>
         ) : null}
       </div>
-      <span className="num text-foreground text-[1.75rem] leading-none font-semibold tracking-[-0.03em]">
+      <span
+        className={cn(
+          "text-foreground text-[1.75rem] leading-none font-semibold tracking-[-0.03em]",
+          typeof value === "number" && "num",
+        )}
+      >
         {value}
       </span>
       {hint ? <p className="text-muted-foreground type-small">{hint}</p> : null}

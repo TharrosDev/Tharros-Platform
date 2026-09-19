@@ -120,7 +120,7 @@ function CitationMarker({
       type="button"
       onClick={onClick}
       aria-label={filename ? `Source ${n}: ${filename}` : `Source ${n}`}
-      className="text-primary bg-primary-soft hover:bg-primary-soft/70 focus-visible:ring-ring/40 inline-flex min-w-[1.1em] items-center justify-center rounded px-1 text-[0.7em] font-semibold tabular-nums outline-none transition-colors focus-visible:ring-2"
+      className="text-primary-soft-foreground bg-primary-soft hover:bg-primary-soft/70 focus-visible:ring-ring/40 inline-flex min-w-[1.1em] items-center justify-center rounded px-1 text-[0.7em] font-semibold tabular-nums outline-none transition-colors focus-visible:ring-2"
     >
       {n}
     </button>
@@ -134,7 +134,7 @@ function CitationMarker({
         <PreviewCardTrigger render={chip} />
         <PreviewCardContent>
           <div className="flex items-start gap-2.5">
-            <span className="text-primary bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
+            <span className="text-primary-soft-foreground bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
               {n}
             </span>
             <div className="min-w-0">

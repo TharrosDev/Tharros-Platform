@@ -26,7 +26,9 @@ export default async function KnowledgePage() {
       {total < 3 ? <FirstDocumentsProgress count={total} /> : null}
       <DocumentUploader />
       <section className="space-y-3">
-        <h2 className="type-h2">Documents</h2>
+        <h2 className="type-h2">
+          Documents <span className="text-muted-foreground num font-normal">{total}</span>
+        </h2>
         <DocumentList
           key={`${total}:${page.documents[0]?.id ?? "none"}`}
           initialDocuments={page.documents}

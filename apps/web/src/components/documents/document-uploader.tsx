@@ -154,24 +154,22 @@ export function DocumentUploader() {
           if (e.dataTransfer.files?.length) void handleFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "group relative flex cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-dashed px-6 py-14 text-center shadow-inner transition-all duration-200 ease-out before:pointer-events-none before:absolute before:-top-20 before:size-52 before:rounded-full before:bg-primary/8 before:blur-3xl motion-reduce:transition-none",
-          "hover:-translate-y-px hover:border-primary/50 hover:bg-primary-soft/35 hover:shadow-card focus-visible:ring-ring/35 focus-visible:outline-none focus-visible:ring-4",
-          dragging
-            ? "border-primary bg-primary-soft/60 scale-[1.01] motion-reduce:scale-100"
-            : "border-border",
+          "group bg-card/60 relative flex cursor-pointer items-center gap-4 rounded-xl border border-dashed px-4 py-4 text-left transition-colors duration-150 sm:px-5",
+          "hover:border-primary/40 hover:bg-primary-soft/25 focus-visible:ring-ring/40 focus-visible:outline-none focus-visible:ring-[3px]",
+          dragging ? "border-primary bg-primary-soft/50" : "border-input",
         )}
       >
         <span
           className={cn(
-            "bg-primary-soft text-primary-soft-foreground relative flex size-14 items-center justify-center rounded-2xl border border-primary/15 shadow-card transition-transform duration-200 ease-out group-hover:scale-105 motion-reduce:transition-none [&>svg]:size-6",
-            dragging && "scale-110 motion-reduce:scale-100",
+            "bg-card text-primary-soft-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border shadow-xs [&>svg]:size-5",
+            dragging && "border-primary/40",
           )}
         >
           <UploadCloud />
         </span>
-        <div className="space-y-1">
-          <p className="text-foreground font-medium">
-            Drag &amp; drop files, or <span className="text-primary">browse</span>
+        <div className="min-w-0 space-y-0.5">
+          <p className="text-foreground text-sm font-semibold">
+            Drop files to upload, or <span className="text-primary-soft-foreground underline underline-offset-2">browse</span>
           </p>
           <p className="text-muted-foreground text-sm">
             {ACCEPTED_LABEL} · up to {formatBytes(MAX_FILE_BYTES)} each
@@ -200,7 +198,7 @@ export function DocumentUploader() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
-              className="bg-card/80 flex items-center gap-3 rounded-xl border border-border/70 px-3.5 py-2.5 text-sm shadow-xs backdrop-blur-sm"
+              className="bg-card flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm shadow-xs"
             >
               <StatusIcon status={it.status} />
               <span className="text-foreground min-w-0 flex-1 truncate" title={it.name}>

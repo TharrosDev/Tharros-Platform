@@ -207,7 +207,7 @@ function OperatingLayer() {
                     <span
                       className={cn(
                         "flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-500",
-                        focus === i ? "bg-primary text-primary-foreground" : "bg-primary-soft text-primary",
+                        focus === i ? "bg-primary text-primary-foreground" : "bg-primary-soft text-primary-soft-foreground",
                       )}
                     >
                       <Icon className="size-3.5" />
