@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 
 export default function NotFound() {
   return (
-    <main className="bg-background text-foreground flex min-h-screen items-center justify-center px-6 py-16">
-      <div className="max-w-md text-center">
-        <p className="type-meta text-muted-foreground">404</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight">Page not found</h1>
+    <main className="app-shell-canvas bg-background text-foreground flex min-h-screen items-center justify-center px-6 py-16">
+      <div className="visual-panel-strong max-w-lg rounded-3xl p-10 text-center">
+        <p className="type-meta text-primary">404 · Lost route</p>
+        <h1 className="mt-3 text-4xl font-bold tracking-[-0.045em]">Page not found</h1>
         <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
           The page may have moved, the record may no longer exist, or you may not have access to it.
         </p>
