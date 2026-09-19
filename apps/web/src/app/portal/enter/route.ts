@@ -5,6 +5,7 @@ import {
   portalCookieOptions,
   validatePortalToken,
 } from "@/lib/portal/session";
+import { sanitizeNext } from "@/lib/auth/safe-redirect";
 
 /**
  * Day 37 — the employee portal magic-link landing.
@@ -27,7 +28,10 @@ export const dynamic = "force-dynamic";
 
 /** Only allow same-app portal destinations — never an off-site open redirect. */
 function safeNext(next: string | null): string {
-  if (next && next.startsWith("/portal")) return next;
+  const safe = sanitizeNext(next ?? "");
+  if (safe === "/portal" || safe?.startsWith("/portal/") || safe?.startsWith("/portal?")) {
+    return safe;
+  }
   return "/portal";
 }
 
