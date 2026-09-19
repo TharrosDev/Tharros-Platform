@@ -1,5 +1,6 @@
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getFeatureAccess } from "@/lib/billing/entitlements";
+import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { extractText } from "@/lib/documents/extract";
@@ -23,12 +24,16 @@ export async function POST(
 ): Promise<Response> {
   const { id } = await params;
 
-  const [user, access] = await Promise.all([
+  const [user, { activeOrg }, access] = await Promise.all([
     getAuthUser(),
+    getOrgContext(),
     getFeatureAccess("assistant"),
   ]);
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!activeOrg) {
+    return Response.json({ error: "No active organization" }, { status: 403 });
   }
   if (!access.entitled) {
     return Response.json({ error: "Active plan required" }, { status: 403 });
@@ -40,6 +45,7 @@ export async function POST(
     .from("documents")
     .select("id, org_id, storage_path, filename, mime_type, status")
     .eq("id", id)
+    .eq("org_id", activeOrg.id)
     .maybeSingle();
 
   if (!doc) {
