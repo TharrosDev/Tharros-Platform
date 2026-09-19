@@ -49,8 +49,9 @@ export function subscriptionToRow(sub: Stripe.Subscription): SubscriptionRow | n
 
   const item = sub.items?.data?.[0];
   const priceId = item?.price?.id ?? null;
-  const tier =
-    planByPriceId(priceId)?.tier ?? (sub.metadata?.tier as Tier | undefined) ?? null;
+  // Entitlements come only from a configured Stripe Price id. Subscription
+  // metadata is useful for routing, but is not an authorization source.
+  const tier = planByPriceId(priceId)?.tier ?? null;
 
   return {
     org_id: orgId,
@@ -101,6 +102,29 @@ export async function handleStripeEvent(
         });
         break;
       }
+      // Cross-check the provider customer against the org row written by our
+      // checkout flow. Metadata alone must not be able to move a subscription
+      // between tenants.
+      if (!row.stripe_customer_id) {
+        throw new Error("subscription is missing a Stripe customer");
+      }
+      const { data: org, error: orgError } = await admin
+        .from("organizations")
+        .select("id")
+        .eq("id", row.org_id)
+        .eq("stripe_customer_id", row.stripe_customer_id)
+        .maybeSingle();
+      if (orgError) throw new Error(`organization billing lookup failed: ${orgError.message}`);
+      if (!org) {
+        logger.warn("billing.webhook_tenant_binding_mismatch", {
+          event_id: event.id,
+          subscription_id: sub.id,
+          org_id: row.org_id,
+          customer_id: row.stripe_customer_id,
+        });
+        throw new Error("subscription tenant binding mismatch");
+      }
+
       const { error } = await admin
         .from("subscriptions")
         .upsert(row, { onConflict: "org_id" });
