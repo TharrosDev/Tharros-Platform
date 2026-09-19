@@ -684,7 +684,7 @@ set file_size_limit = 26214400,
 where id = 'documents';
 
 update storage.buckets
-set file_size_limit = 5242880,
+set file_size_limit = 2097152,
     allowed_mime_types = array[
       'image/jpeg',
       'image/png',
@@ -692,6 +692,28 @@ set file_size_limit = 5242880,
       'image/gif'
     ]::text[]
 where id = 'avatars';
+
+-- Avatar writes are one fixed object per user, so a signed-in account cannot
+-- turn the public avatar bucket into unmetered general-purpose object storage.
+drop policy if exists "avatars_owner_insert" on storage.objects;
+create policy "avatars_owner_insert"
+  on storage.objects for insert to authenticated
+  with check (
+    bucket_id = 'avatars'
+    and name = (select auth.uid())::text || '/avatar'
+  );
+
+drop policy if exists "avatars_owner_update" on storage.objects;
+create policy "avatars_owner_update"
+  on storage.objects for update to authenticated
+  using (
+    bucket_id = 'avatars'
+    and name = (select auth.uid())::text || '/avatar'
+  )
+  with check (
+    bucket_id = 'avatars'
+    and name = (select auth.uid())::text || '/avatar'
+  );
 
 drop policy if exists documents_objects_insert_member on storage.objects;
 create policy documents_objects_insert_member
