@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getOrgContext } from "@/lib/org/queries";
@@ -11,6 +12,8 @@ import { DOCUMENTS_BUCKET, storagePathFor } from "@/lib/documents/types";
 import { sanitizeStorageName, validateUploadFile } from "@/lib/documents/validation";
 import { normalizeTags } from "@/lib/documents/tags";
 import { listDocumentsPage, type DocumentPage } from "@/lib/documents/queries";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { opaqueRateLimitKey } from "@/lib/security/request";
 
 /**
  * Day 24 — document server actions. The bytes go straight from the browser to
@@ -53,13 +56,24 @@ export async function createDocumentRecord(input: {
     return { error: valid.error };
   }
 
+  const reservationLimit = await checkRateLimit(
+    opaqueRateLimitKey("document-reserve", activeOrg.id, user.id),
+    30,
+    3600,
+  );
+  if (!reservationLimit.allowed) {
+    return { error: "Too many document uploads. Please try again later." };
+  }
+
   // Reserve the id ourselves so we can build the org-scoped Storage path up
-  // front (the path's first segment MUST be the org_id for the RLS to pass).
+  // front (the path's first segment MUST be the org_id for Storage RLS to pass).
   const id = crypto.randomUUID();
   const storagePath = storagePathFor(activeOrg.id, id, sanitizeStorageName(input.filename));
 
-  const supabase = await createClient();
-  const { error } = await supabase.from("documents").insert({
+  // Row creation is server-only. Authenticated clients receive no INSERT grant
+  // on documents, so they cannot forge storage paths or pipeline/system fields.
+  const admin = createAdminClient();
+  const { error } = await admin.from("documents").insert({
     id,
     org_id: activeOrg.id,
     uploaded_by: user.id,
