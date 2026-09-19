@@ -60,6 +60,7 @@ export async function createDocumentRecord(input: {
     opaqueRateLimitKey("document-reserve", activeOrg.id, user.id),
     30,
     3600,
+    { failOpen: false },
   );
   if (!reservationLimit.allowed) {
     return { error: "Too many document uploads. Please try again later." };
