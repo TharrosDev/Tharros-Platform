@@ -51,20 +51,47 @@ export async function runDueJobs(
   const jobs = ((data ?? []) as JobRow[]).map(mapJob);
   summary.claimed = jobs.length;
 
-  // 3) Dispatch each. One failure never aborts the batch.
+  // 3) Dispatch each. Handler failures are retried; persistence failures leave
+  // the row running so the reaper can recover it rather than lying about state.
   for (const job of jobs) {
     try {
       const handler = getHandler(job.type);
       if (!handler) throw new Error(`No handler registered for job type "${job.type}"`);
       await handler(job);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "unknown error";
+      try {
+        const outcome = await markFailed(admin, job, message);
+        if (outcome === "dead") summary.dead += 1;
+        else summary.failed += 1;
+        logger.error("jobs.handler_failed", {
+          id: job.id,
+          type: job.type,
+          err: message,
+          outcome,
+        });
+      } catch (persistErr) {
+        summary.failed += 1;
+        logger.error("jobs.failure_state_persist_failed", {
+          id: job.id,
+          type: job.type,
+          err: persistErr,
+          handlerError: message,
+        });
+      }
+      continue;
+    }
+
+    try {
       await markSucceeded(admin, job.id);
       summary.succeeded += 1;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "unknown error";
-      const outcome = await markFailed(admin, job, message);
-      if (outcome === "dead") summary.dead += 1;
-      else summary.failed += 1;
-      logger.error("jobs.handler_failed", { id: job.id, type: job.type, err: message, outcome });
+      summary.failed += 1;
+      logger.error("jobs.success_state_persist_failed", {
+        id: job.id,
+        type: job.type,
+        err,
+      });
     }
   }
 
@@ -72,10 +99,11 @@ export async function runDueJobs(
 }
 
 async function markSucceeded(admin: SupabaseClient, id: string): Promise<void> {
-  await admin
+  const { error } = await admin
     .from("jobs")
     .update({ status: "succeeded", locked_at: null, last_error: null })
     .eq("id", id);
+  if (error) throw new Error(`Could not persist job success: ${error.message}`);
 }
 
 /** Retry with backoff if attempts remain, else mark dead. Returns which happened. */
@@ -87,13 +115,15 @@ async function markFailed(
   // `job.attempts` already counts the attempt just made (claim_due_jobs incremented it).
   const exhausted = job.attempts >= job.maxAttempts;
   if (exhausted) {
-    await admin
+    const { error } = await admin
       .from("jobs")
       .update({ status: "dead", locked_at: null, last_error: message })
       .eq("id", job.id);
+    if (error) throw new Error(`Could not persist dead job state: ${error.message}`);
     return "dead";
   }
-  await admin
+
+  const { error } = await admin
     .from("jobs")
     .update({
       status: "pending",
@@ -102,5 +132,6 @@ async function markFailed(
       last_error: message,
     })
     .eq("id", job.id);
+  if (error) throw new Error(`Could not persist job retry state: ${error.message}`);
   return "retry";
 }

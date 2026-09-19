@@ -18,8 +18,7 @@ import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getOrgContext } from "@/lib/org/queries";
-import { getAuthUser } from "@/lib/auth/current-user";
+import { requireSchedulingAccess } from "@/lib/scheduling/access";
 import { logger } from "@/lib/observability/logger";
 
 import {
@@ -42,12 +41,12 @@ const CALENDAR_PATH = "/scheduling/calendar";
 async function requireManager(): Promise<
   { ok: true; orgId: string; userId: string } | { ok: false; message: string }
 > {
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
-  if (!user || !activeOrg) return { ok: false, message: "Not authenticated." };
-  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return access;
+  if (access.activeOrg.role !== "owner" && access.activeOrg.role !== "admin") {
     return { ok: false, message: "Only an owner or admin can edit a schedule." };
   }
-  return { ok: true, orgId: activeOrg.id, userId: user.id };
+  return { ok: true, orgId: access.activeOrg.id, userId: access.user.id };
 }
 
 /** A CalendarShift as the validator sees it. */
@@ -77,6 +76,7 @@ async function loadSchedule(scheduleId: string, orgId: string): Promise<LoadedSc
     .from("schedules")
     .select("status, period_start, period_end")
     .eq("id", scheduleId)
+    .eq("org_id", orgId)
     .maybeSingle();
   if (!sched) return null;
   const periodStart = sched.period_start as string;
@@ -91,12 +91,13 @@ async function loadSchedule(scheduleId: string, orgId: string): Promise<LoadedSc
 const REOPEN_TO_EDIT = "Reopen the schedule before editing it.";
 
 /** A schedule's status, or null if it no longer exists. */
-async function scheduleStatusOf(scheduleId: string): Promise<string | null> {
+async function scheduleStatusOf(scheduleId: string, orgId: string): Promise<string | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("schedules")
     .select("status")
     .eq("id", scheduleId)
+    .eq("org_id", orgId)
     .maybeSingle();
   return (data?.status as string | undefined) ?? null;
 }
@@ -169,6 +170,7 @@ export async function assignShift(args: {
     .from("shifts")
     .select("id, schedule_id, locked")
     .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId)
     .maybeSingle();
   if (!shiftRow) return { ok: false, message: "That shift no longer exists." };
   if (shiftRow.locked) return { ok: false, message: "Unlock the shift before changing it." };
@@ -186,7 +188,8 @@ export async function assignShift(args: {
   const { error } = await supabase
     .from("shifts")
     .update({ employee_id: args.employeeId, status: args.employeeId ? "draft" : "open" })
-    .eq("id", args.shiftId);
+    .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId);
   if (error) {
     logger.error("assignShift: update failed", { err: error, shiftId: args.shiftId });
     return { ok: false, message: "Couldn't save the change. Please try again." };
@@ -203,6 +206,7 @@ export async function assignShift(args: {
       .from("replacement_pool_events")
       .update({ status: "expired", responded_at: new Date().toISOString() })
       .eq("shift_id", args.shiftId)
+      .eq("org_id", auth.orgId)
       .eq("status", "offered");
     if (expErr) logger.warn("assignShift: expire stale offers failed", { err: expErr, shiftId: args.shiftId });
   }
@@ -243,6 +247,7 @@ export async function updateShiftTimes(args: {
     .from("shifts")
     .select("id, schedule_id, locked")
     .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId)
     .maybeSingle();
   if (!shiftRow) return { ok: false, message: "That shift no longer exists." };
   if (shiftRow.locked) return { ok: false, message: "Unlock the shift before changing it." };
@@ -262,7 +267,8 @@ export async function updateShiftTimes(args: {
   const { error } = await supabase
     .from("shifts")
     .update({ starts_at: args.startsAt, ends_at: args.endsAt, break_minutes: breakMinutes })
-    .eq("id", args.shiftId);
+    .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId);
   if (error) {
     logger.error("updateShiftTimes: update failed", { err: error, shiftId: args.shiftId });
     return { ok: false, message: "Couldn't save the change. Please try again." };
@@ -355,14 +361,19 @@ export async function deleteShift(args: { shiftId: string }): Promise<CalendarAc
     .from("shifts")
     .select("id, schedule_id, locked")
     .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId)
     .maybeSingle();
   if (!shiftRow) return { ok: true }; // already gone
   if (shiftRow.locked) return { ok: false, message: "Unlock the shift before deleting it." };
-  if ((await scheduleStatusOf(shiftRow.schedule_id as string)) !== "draft") {
+  if ((await scheduleStatusOf(shiftRow.schedule_id as string, auth.orgId)) !== "draft") {
     return { ok: false, message: REOPEN_TO_EDIT };
   }
 
-  const { error } = await supabase.from("shifts").delete().eq("id", args.shiftId);
+  const { error } = await supabase
+    .from("shifts")
+    .delete()
+    .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId);
   if (error) {
     logger.error("deleteShift: delete failed", { err: error, shiftId: args.shiftId });
     return { ok: false, message: "Couldn't delete the shift. Please try again." };
@@ -387,7 +398,7 @@ export async function clearSchedule(args: { scheduleId: string }): Promise<Calen
   const auth = await requireManager();
   if (!auth.ok) return auth;
   if (!args.scheduleId) return { ok: false, message: "Missing schedule." };
-  if ((await scheduleStatusOf(args.scheduleId)) !== "draft") {
+  if ((await scheduleStatusOf(args.scheduleId, auth.orgId)) !== "draft") {
     return { ok: false, message: REOPEN_TO_EDIT };
   }
 
@@ -396,6 +407,7 @@ export async function clearSchedule(args: { scheduleId: string }): Promise<Calen
     .from("shifts")
     .delete()
     .eq("schedule_id", args.scheduleId)
+    .eq("org_id", auth.orgId)
     .eq("locked", false)
     .select("id");
   if (error) {
@@ -427,16 +439,18 @@ export async function toggleShiftLock(args: {
     .from("shifts")
     .select("id, schedule_id")
     .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId)
     .maybeSingle();
   if (!shiftRow) return { ok: false, message: "That shift no longer exists." };
-  if ((await scheduleStatusOf(shiftRow.schedule_id as string)) !== "draft") {
+  if ((await scheduleStatusOf(shiftRow.schedule_id as string, auth.orgId)) !== "draft") {
     return { ok: false, message: REOPEN_TO_EDIT };
   }
 
   const { error } = await supabase
     .from("shifts")
     .update({ locked: args.locked })
-    .eq("id", args.shiftId);
+    .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId);
   if (error) {
     logger.error("toggleShiftLock: update failed", { err: error, shiftId: args.shiftId });
     return { ok: false, message: "Couldn't update the lock. Please try again." };
@@ -467,6 +481,7 @@ export async function findReplacement(args: { shiftId: string }): Promise<Calend
     .from("shifts")
     .select("id, status, employee_id, schedule_id")
     .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId)
     .maybeSingle();
   if (!shiftRow) return { ok: false, message: "That shift no longer exists." };
   if (shiftRow.status !== "open" || shiftRow.employee_id !== null) {
@@ -617,7 +632,8 @@ export async function publishSchedule(args: {
   const { error: schedErr } = await supabase
     .from("schedules")
     .update({ status: "published", published_at: publishedAt, updated_at: publishedAt })
-    .eq("id", args.scheduleId);
+    .eq("id", args.scheduleId)
+    .eq("org_id", auth.orgId);
   if (schedErr) {
     logger.error("publishSchedule: schedule update failed", { err: schedErr, scheduleId: args.scheduleId });
     return { ok: false, message: "Couldn't publish the schedule. Please try again." };
@@ -628,6 +644,7 @@ export async function publishSchedule(args: {
     .from("shifts")
     .update({ status: "published" })
     .eq("schedule_id", args.scheduleId)
+    .eq("org_id", auth.orgId)
     .eq("status", "draft");
   if (shiftErr) {
     logger.error("publishSchedule: shifts update failed", { err: shiftErr, scheduleId: args.scheduleId });
@@ -691,6 +708,7 @@ export async function publishSchedule(args: {
       .delete()
       .in("type", ["schedule-delivery", "shift-reminder"])
       .eq("status", "pending")
+      .eq("org_id", auth.orgId)
       .eq("payload->>scheduleId", args.scheduleId);
 
     for (const employeeId of employeeIds) {
@@ -739,6 +757,7 @@ export async function reopenSchedule(args: { scheduleId: string }): Promise<Cale
     .from("schedules")
     .select("status")
     .eq("id", args.scheduleId)
+    .eq("org_id", auth.orgId)
     .maybeSingle();
   if (!sched) return { ok: false, message: "That schedule no longer exists." };
   if (sched.status !== "published") return { ok: false, message: "Only a published schedule can be reopened." };
@@ -746,7 +765,8 @@ export async function reopenSchedule(args: { scheduleId: string }): Promise<Cale
   const { error } = await supabase
     .from("schedules")
     .update({ status: "draft", updated_at: new Date().toISOString() })
-    .eq("id", args.scheduleId);
+    .eq("id", args.scheduleId)
+    .eq("org_id", auth.orgId);
   if (error) {
     logger.error("reopenSchedule: update failed", { err: error, scheduleId: args.scheduleId });
     return { ok: false, message: "Couldn't reopen the schedule. Please try again." };

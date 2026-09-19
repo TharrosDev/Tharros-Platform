@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { capturePublicLead } from "@/lib/leads/capture";
+import { leadCaptureRequesterKey } from "@/lib/leads/request";
 
 export const runtime = "nodejs";
 
@@ -50,13 +51,17 @@ export async function POST(
     );
   }
 
-  const result = await capturePublicLead(token, {
-    name: parsed.data.name,
-    email: parsed.data.email?.trim() || null,
-    phone: parsed.data.phone?.trim() || null,
-    company: parsed.data.company?.trim() || null,
-    message: parsed.data.message?.trim() || null,
-  });
+  const result = await capturePublicLead(
+    token,
+    {
+      name: parsed.data.name,
+      email: parsed.data.email?.trim() || null,
+      phone: parsed.data.phone?.trim() || null,
+      company: parsed.data.company?.trim() || null,
+      message: parsed.data.message?.trim() || null,
+    },
+    leadCaptureRequesterKey(request.headers),
+  );
 
   if (!result.ok) {
     if (result.reason === "rate_limited") {

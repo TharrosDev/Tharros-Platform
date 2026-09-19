@@ -4,9 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
-import { getOrgContext } from "@/lib/org/queries";
-import { getAuthUser } from "@/lib/auth/current-user";
-import { recordUsage } from "@/lib/billing/usage";
+import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
+import { requireSchedulingAccess } from "@/lib/scheduling/access";
 import { chatCompletion } from "@/lib/deepseek/client";
 import { SCHEDULING_MODEL_PRO } from "@/lib/deepseek/models";
 import { mapDeepSeekUsage } from "@/lib/deepseek/usage";
@@ -93,8 +92,16 @@ async function buildForecastContext(
 
 /** Run the forecast and return a preview (not saved). Owner/admin only via RLS. */
 export async function runStaffingForecast(): Promise<ForecastState> {
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
-  if (!user || !activeOrg) return { ok: false, message: "Not authenticated." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { ok: false, message: access.message };
+  const { user, activeOrg } = access;
+  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+    return { ok: false, message: "Only an owner or admin can run staffing forecasts." };
+  }
+  const cap = await checkQueryCap(activeOrg.id);
+  if (!cap.allowed) {
+    return { ok: false, message: "You've reached your plan's monthly AI limit." };
+  }
 
   const supabase = await createClient();
   try {
@@ -123,8 +130,12 @@ export type SaveForecastResult = { ok: boolean; message: string };
 export async function saveStaffingForecast(
   requirements: StaffingDay[],
 ): Promise<SaveForecastResult> {
-  const { activeOrg } = await getOrgContext();
-  if (!activeOrg) return { ok: false, message: "No active organization. Try refreshing the page." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { ok: false, message: access.message };
+  const { activeOrg } = access;
+  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+    return { ok: false, message: "Only an owner or admin can save staffing forecasts." };
+  }
 
   const valid = z.array(staffingDaySchema).max(60).safeParse(requirements);
   if (!valid.success) {

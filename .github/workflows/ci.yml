@@ -34,6 +34,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Test (deterministic unit suites)
+        run: pnpm --filter @tharros/web test:unit
+
       # A paused/deleted test project or transient DNS outage must not hide the
       # deterministic source checks. When Supabase is reachable, the full live
       # RLS/integration suite remains a hard gate and any test failure still fails.
@@ -57,9 +60,9 @@ jobs:
             echo "::warning::Dedicated Supabase test project is unreachable ($host); live integration tests will be skipped. Restore the test dependency before release."
           fi
 
-      - name: Test (RLS + integration)
+      - name: Test (RLS + live integration)
         if: steps.supabase.outputs.reachable == 'true'
-        run: pnpm test
+        run: pnpm --filter @tharros/web test:integration
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
@@ -69,7 +72,7 @@ jobs:
         if: steps.supabase.outputs.reachable != 'true'
         run: |
           echo "### Live integration suite skipped" >> "$GITHUB_STEP_SUMMARY"
-          echo "The dedicated Supabase test project could not be resolved/reached. Typecheck, lint, and production build still ran. This dependency must be restored before release." >> "$GITHUB_STEP_SUMMARY"
+          echo "The dedicated Supabase test project could not be resolved/reached. Typecheck, lint, deterministic unit tests, and production build still ran. This dependency must be restored before release." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build
         run: pnpm build

@@ -1,9 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getOrgContext } from "@/lib/org/queries";
-import { getAuthUser } from "@/lib/auth/current-user";
-import { recordUsage } from "@/lib/billing/usage";
+import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
+import { requireSchedulingAccess } from "@/lib/scheduling/access";
 import { chatCompletion } from "@/lib/deepseek/client";
 import { SCHEDULING_MODEL_PRO } from "@/lib/deepseek/models";
 import { mapDeepSeekUsage } from "@/lib/deepseek/usage";
@@ -27,8 +26,16 @@ export async function translateSchedulingIntent(text: string): Promise<IntentSta
   const goals = text.trim();
   if (!goals) return { ok: false, message: "Describe what you'd like the schedule to do." };
 
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
-  if (!user || !activeOrg) return { ok: false, message: "Not authenticated." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { ok: false, message: access.message };
+  const { user, activeOrg } = access;
+  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+    return { ok: false, message: "Only an owner or admin can interpret scheduling goals." };
+  }
+  const cap = await checkQueryCap(activeOrg.id);
+  if (!cap.allowed) {
+    return { ok: false, message: "You've reached your plan's monthly AI limit." };
+  }
 
   const supabase = await createClient();
   const { data: roster } = await supabase

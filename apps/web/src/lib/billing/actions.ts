@@ -52,11 +52,18 @@ async function ensureCustomerForOwner() {
   }
 
   // First checkout for this org — create the Customer and persist its id.
-  const customer = await getStripe().customers.create({
-    email: user.email ?? undefined,
-    name: org.name as string,
-    metadata: { org_id: org.id as string },
-  });
+  const customer = await getStripe().customers.create(
+    {
+      email: user.email ?? undefined,
+      name: org.name as string,
+      metadata: { org_id: org.id as string },
+    },
+    {
+      // If Stripe succeeds but our subsequent DB write fails, an immediate
+      // retry reuses the same provider object instead of orphaning duplicates.
+      idempotencyKey: `org-customer/${org.id as string}`,
+    },
+  );
 
   const { error: updateError } = await supabase
     .from("organizations")
@@ -64,7 +71,7 @@ async function ensureCustomerForOwner() {
     .eq("id", org.id);
   if (updateError) {
     // The Customer exists in Stripe but we couldn't record it. Surface rather
-    // than silently orphaning — a retry will reuse it via metadata search later.
+    // than silently orphaning — a retry reuses the same idempotent create.
     logger.error("billing.persist_customer_failed", {
       org_id: org.id,
       customer_id: customer.id,
@@ -153,13 +160,16 @@ export async function getCheckoutStatus(
   if (!sessionId) return null;
   // Guard: only the active org's owner may inspect their own session.
   const { activeOrg } = await getOrgContext();
-  if (!activeOrg) return null;
+  if (!activeOrg || activeOrg.role !== "owner") return null;
 
   const session = await getStripe().checkout.sessions.retrieve(sessionId, {
     expand: ["subscription"],
   });
 
-  if (session.client_reference_id && session.client_reference_id !== activeOrg.id) {
+  // Treat the tenant binding as mandatory, not merely advisory. A session that
+  // predates or bypasses our checkout flow must not be inspectable by whichever
+  // signed-in owner happens to know its id.
+  if (session.client_reference_id !== activeOrg.id) {
     return null;
   }
 
@@ -167,7 +177,8 @@ export async function getCheckoutStatus(
     session.subscription && typeof session.subscription !== "string"
       ? session.subscription
       : null;
-  const tier = (session.metadata?.tier as Tier | undefined) ?? null;
+  const parsedTier = tierSchema.safeParse(session.metadata?.tier);
+  const tier = parsedTier.success ? parsedTier.data : null;
 
   return {
     status: (session.status ?? "open") as CheckoutStatus["status"],

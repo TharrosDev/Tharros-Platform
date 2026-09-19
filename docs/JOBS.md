@@ -21,7 +21,10 @@ Claude / run the solver, so they can't run in SQL).
 - **Enqueue:** `enqueueJob(adminClient, { type, payload?, runAt?, maxAttempts?, orgId? })`.
 
 **Delivery is at-least-once** (the reaper can re-run a stalled job) — handlers must
-be **idempotent**. Add a real handler by registering it in `handlers.ts` and adding
+be **idempotent**. Retryable email handlers pass stable provider idempotency keys
+through the shared Resend seam, and the runner treats failure to persist a
+success/retry/dead transition as an operational failure rather than silently
+claiming success. Add a real handler by registering it in `handlers.ts` and adding
 its type to `JobType` in `types.ts`.
 
 **Registered handlers:**
