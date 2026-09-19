@@ -6,7 +6,7 @@
   "exports": {
     "./next": "./next.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "eslint-config-prettier": "^9.1.0"
   }
 }
