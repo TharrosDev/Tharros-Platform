@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getOrgContext } from "@/lib/org/queries";
 import { logger } from "@/lib/observability/logger";
@@ -34,9 +35,16 @@ export async function createDocumentRecord(input: {
   mimeType?: string | null;
   sizeBytes: number;
 }): Promise<CreateDocumentResult> {
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
+  const [user, { activeOrg }, access] = await Promise.all([
+    getAuthUser(),
+    getOrgContext(),
+    getFeatureAccess("assistant"),
+  ]);
   if (!user || !activeOrg) {
     return { error: "No active organization. Try refreshing the page." };
+  }
+  if (!access.entitled) {
+    return { error: "An active plan is required to upload knowledge documents." };
   }
 
   // Re-validate server-side — never trust the client.
