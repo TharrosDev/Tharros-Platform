@@ -111,6 +111,9 @@ export async function savePermanentAvailability(
   const access = await requireSchedulingAccess();
   if (!access.ok) return { message: access.message };
   const { activeOrg } = access;
+  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+    return { message: "Only an owner or admin can change availability." };
+  }
 
   const employeeId = String(formData.get("employeeId") ?? "");
   if (!employeeId) return { message: "Missing employee." };
@@ -127,12 +130,21 @@ export async function savePermanentAvailability(
   }
 
   const supabase = await createClient();
+  const { data: employee } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("id", employeeId)
+    .eq("org_id", activeOrg.id)
+    .maybeSingle();
+  if (!employee) return { message: "Employee not found in this workspace." };
+
   // Replace the permanent rows for this employee (delete then insert the
   // workable days). N ≤ 7, manager-gated by RLS.
   const del = await supabase
     .from("availability")
     .delete()
     .eq("employee_id", employeeId)
+    .eq("org_id", activeOrg.id)
     .eq("kind", "permanent");
   if (del.error) {
     logger.error("savePermanentAvailability: delete failed", {
@@ -178,6 +190,9 @@ export async function addTemporaryOverride(
   const access = await requireSchedulingAccess();
   if (!access.ok) return { message: access.message };
   const { activeOrg } = access;
+  if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
+    return { message: "Only an owner or admin can change availability." };
+  }
 
   const employeeId = String(formData.get("employeeId") ?? "");
   if (!employeeId) return { message: "Missing employee." };
@@ -196,6 +211,14 @@ export async function addTemporaryOverride(
   const o = parsed.data;
 
   const supabase = await createClient();
+  const { data: employee } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("id", employeeId)
+    .eq("org_id", activeOrg.id)
+    .maybeSingle();
+  if (!employee) return { message: "Employee not found in this workspace." };
+
   const { error } = await supabase.from("availability").insert({
     org_id: activeOrg.id,
     employee_id: employeeId,
@@ -242,6 +265,14 @@ export async function requestAvailabilityNudge(employeeId: string): Promise<{ er
   if (!allowed) return { error: "You're sending requests too quickly. Please try again later." };
 
   const supabase = await createClient();
+  const { data: employee } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("id", employeeId)
+    .eq("org_id", activeOrg.id)
+    .maybeSingle();
+  if (!employee) return { error: "Employee not found in this workspace." };
+
   const { error: rpcErr } = await supabase.rpc("issue_portal_token", {
     p_employee_id: employeeId,
   });
@@ -273,7 +304,11 @@ export async function removeAvailabilityRow(id: string): Promise<{ error?: strin
     return { error: "Only an owner or admin can change availability." };
   }
   const supabase = await createClient();
-  const { error } = await supabase.from("availability").delete().eq("id", id);
+  const { error } = await supabase
+    .from("availability")
+    .delete()
+    .eq("id", id)
+    .eq("org_id", access.activeOrg.id);
   if (error) {
     logger.error("removeAvailabilityRow: delete failed", { err: error, id });
     return { error: error.message };
