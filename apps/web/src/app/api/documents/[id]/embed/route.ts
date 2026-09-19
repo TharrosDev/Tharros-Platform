@@ -1,4 +1,5 @@
 import { getAuthUser } from "@/lib/auth/current-user";
+import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { chunkText } from "@/lib/documents/chunk";
@@ -24,9 +25,15 @@ export async function POST(
 ): Promise<Response> {
   const { id } = await params;
 
-  const user = await getAuthUser();
+  const [user, access] = await Promise.all([
+    getAuthUser(),
+    getFeatureAccess("assistant"),
+  ]);
   if (!user) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!access.entitled) {
+    return Response.json({ error: "Active plan required" }, { status: 403 });
   }
 
   const supabase = await createClient();
