@@ -6,6 +6,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { chunkText } from "@/lib/documents/chunk";
 import { embedTexts, toVectorLiteral } from "@/lib/documents/embeddings";
 import { logger } from "@/lib/observability/logger";
+import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  isSameOriginMutation,
+  opaqueRateLimitKey,
+} from "@/lib/security/request";
 
 // Node runtime: chunking + the embeddings fetch run server-side.
 export const runtime = "nodejs";
@@ -21,10 +26,14 @@ export const runtime = "nodejs";
  * Synchronous for now (small MVP corpora); a durable queue comes with scale.
  */
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await params;
+
+  if (!isSameOriginMutation(req)) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const [user, { activeOrg }, access] = await Promise.all([
     getAuthUser(),
@@ -39,6 +48,17 @@ export async function POST(
   }
   if (!access.entitled) {
     return Response.json({ error: "Active plan required" }, { status: 403 });
+  }
+
+  const [userLimit, orgLimit] = await Promise.all([
+    checkRateLimit(opaqueRateLimitKey("document-embed-user", activeOrg.id, user.id), 20, 3600),
+    checkRateLimit(opaqueRateLimitKey("document-embed-org", activeOrg.id), 120, 3600),
+  ]);
+  if (!userLimit.allowed || !orgLimit.allowed) {
+    return Response.json(
+      { error: "Too many document processing requests. Please try again later." },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
   }
 
   const supabase = await createClient();
@@ -58,9 +78,33 @@ export async function POST(
   if (doc.status === "ready") {
     return Response.json({ status: "ready", skipped: true });
   }
+  if (doc.status !== "extracted") {
+    return Response.json(
+      { error: "Document is not ready for embedding" },
+      { status: doc.status === "chunking" || doc.status === "embedding" ? 409 : 400 },
+    );
+  }
 
   const admin = createAdminClient();
   const now = () => new Date().toISOString();
+
+  // Atomically claim the extracted document so overlapping retries cannot
+  // duplicate chunk deletion/provider calls.
+  const { data: claimed, error: claimError } = await admin
+    .from("documents")
+    .update({ status: "chunking" })
+    .eq("id", id)
+    .eq("org_id", activeOrg.id)
+    .eq("status", "extracted")
+    .select("id")
+    .maybeSingle();
+  if (claimError) {
+    logger.error("documents.embed_claim_failed", { document_id: id, err: claimError });
+    return Response.json({ error: "Could not start document indexing" }, { status: 500 });
+  }
+  if (!claimed) {
+    return Response.json({ error: "Document indexing is already in progress" }, { status: 409 });
+  }
 
   const { data: job } = await admin
     .from("ingestion_jobs")
@@ -77,8 +121,6 @@ export async function POST(
   }
 
   try {
-    await admin.from("documents").update({ status: "chunking" }).eq("id", id);
-
     const chunks = chunkText(doc.extracted_text as string);
     if (chunks.length === 0) {
       throw new Error("Chunking produced no content.");
@@ -87,7 +129,8 @@ export async function POST(
     // Re-index safe: drop any existing chunks for this document first.
     await admin.from("document_chunks").delete().eq("document_id", id);
 
-    await admin.from("documents").update({ status: "embedding" }).eq("id", id);
+    await admin.from("documents").update({ status: "embedding" }).eq("id", id)
+        .eq("org_id", activeOrg.id);
     const vectors = await embedTexts(chunks.map((c) => c.content));
 
     const rows = chunks.map((c, i) => ({
@@ -106,7 +149,8 @@ export async function POST(
     await admin
       .from("documents")
       .update({ status: "ready", error: null })
-      .eq("id", id);
+      .eq("id", id)
+        .eq("org_id", activeOrg.id);
     await finishJob("succeeded");
 
     return Response.json({ status: "ready", chunks: chunks.length });
@@ -116,8 +160,12 @@ export async function POST(
     await admin
       .from("documents")
       .update({ status: "failed", error: "Couldn't index this document. Please try re-indexing." })
-      .eq("id", id);
+      .eq("id", id)
+        .eq("org_id", activeOrg.id);
     await finishJob("failed", message);
-    return Response.json({ status: "failed", error: message }, { status: 200 });
+    return Response.json(
+      { status: "failed", error: "Couldn't index this document. Please try re-indexing." },
+      { status: 200 },
+    );
   }
 }
