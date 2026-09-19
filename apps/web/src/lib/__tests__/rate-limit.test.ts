@@ -53,11 +53,25 @@ describe("check_rate_limit", () => {
     expect(await check(b, 1, 900)).toBe(true);
   });
 
-  it("allows again after the window prunes old hits", async () => {
+  it("allows again after expired hits are pruned", async () => {
     const key = keyFor("window");
-    // Zero-second window: every prior hit is already expired on the next call.
-    expect(await check(key, 1, 0)).toBe(true);
-    expect(await check(key, 1, 0)).toBe(true);
-    expect(await check(key, 1, 0)).toBe(true);
+    const { error } = await admin.from("rate_limit_events").insert({
+      key,
+      created_at: new Date(Date.now() - 60_000).toISOString(),
+    });
+    expect(error).toBeNull();
+
+    expect(await check(key, 1, 1)).toBe(true);
+    expect(await check(key, 1, 1)).toBe(false);
+  });
+
+  it("serializes concurrent attempts for the same bucket", async () => {
+    const key = keyFor("concurrent");
+    const results = await Promise.all(
+      Array.from({ length: 12 }, () => check(key, 3, 900)),
+    );
+
+    expect(results.filter(Boolean)).toHaveLength(3);
+    expect(results.filter((allowed) => !allowed)).toHaveLength(9);
   });
 });
