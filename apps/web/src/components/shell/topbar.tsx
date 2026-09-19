@@ -53,7 +53,7 @@ function Topbar({
   }, []);
 
   return (
-    <header className="bg-background/90 sticky top-0 z-topbar flex h-[4.5rem] items-center gap-3 border-b border-border/70 px-3 backdrop-blur-xl sm:px-6">
+    <header className="sticky top-0 z-topbar flex h-20 items-center gap-3 border-b border-border/60 bg-background/72 px-3 shadow-[0_10px_35px_-30px_color-mix(in_oklch,var(--foreground)_45%,transparent)] backdrop-blur-2xl sm:px-6">
       <MobileNav user={user} orgs={orgs} activeOrg={activeOrg} />
 
       <Breadcrumbs className="hidden min-w-0 flex-1 md:block" />
@@ -62,7 +62,7 @@ function Topbar({
         <button
           type="button"
           onClick={() => setCmdOpen(true)}
-          className="text-muted-foreground hover:bg-card hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/40 flex h-11 items-center gap-2.5 rounded-lg border border-border/70 bg-card/70 px-3 text-sm shadow-xs outline-none transition-[color,background-color,border-color,box-shadow] focus-visible:ring-[3px] lg:w-72"
+          className="text-muted-foreground hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/35 flex h-11 items-center gap-2.5 rounded-xl border border-border/70 bg-card/75 px-3 text-sm shadow-card backdrop-blur-xl outline-none transition-[color,background-color,border-color,box-shadow,transform] hover:-translate-y-px hover:border-primary/20 hover:bg-card focus-visible:ring-[4px] lg:w-80"
           aria-label="Search or jump to"
         >
           <Search className="size-4 shrink-0" />
@@ -74,7 +74,7 @@ function Topbar({
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            className={cn(buttonVariants({ variant: "ghost" }), "h-11 gap-2 px-1.5")}
+            className={cn(buttonVariants({ variant: "ghost" }), "h-11 gap-2 rounded-xl border border-transparent px-1.5 hover:border-border/70 hover:bg-card/80")}
             aria-label="Open account menu"
           >
             <Avatar className="size-7">
