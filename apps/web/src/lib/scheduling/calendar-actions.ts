@@ -369,7 +369,11 @@ export async function deleteShift(args: { shiftId: string }): Promise<CalendarAc
     return { ok: false, message: REOPEN_TO_EDIT };
   }
 
-  const { error } = await supabase.from("shifts").delete().eq("id", args.shiftId);
+  const { error } = await supabase
+    .from("shifts")
+    .delete()
+    .eq("id", args.shiftId)
+    .eq("org_id", auth.orgId);
   if (error) {
     logger.error("deleteShift: delete failed", { err: error, shiftId: args.shiftId });
     return { ok: false, message: "Couldn't delete the shift. Please try again." };
