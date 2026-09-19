@@ -1,9 +1,8 @@
 "use server";
 
-import { getOrgContext } from "@/lib/org/queries";
-import { getAuthUser } from "@/lib/auth/current-user";
 import { logger } from "@/lib/observability/logger";
 import { checkQueryCap } from "@/lib/billing/usage";
+import { requireSchedulingAccess } from "@/lib/scheduling/access";
 
 import { runSchedulePanelHandler } from "./panel-handler";
 import type { AgentInputs } from "../orchestrator/types";
@@ -28,8 +27,9 @@ export async function runSchedulePanel(args: {
   periodEnd: string;
   agentInputs?: AgentInputs;
 }): Promise<PanelState> {
-  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
-  if (!user || !activeOrg) return { ok: false, message: "Not authenticated." };
+  const access = await requireSchedulingAccess();
+  if (!access.ok) return { ok: false, message: access.message };
+  const { user, activeOrg } = access;
   if (activeOrg.role !== "owner" && activeOrg.role !== "admin") {
     return { ok: false, message: "Only an owner or admin can build a schedule." };
   }
