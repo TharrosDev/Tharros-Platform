@@ -71,7 +71,7 @@ async function ensureCustomerForOwner() {
     .eq("id", org.id);
   if (updateError) {
     // The Customer exists in Stripe but we couldn't record it. Surface rather
-    // than silently orphaning — a retry will reuse it via metadata search later.
+    // than silently orphaning — a retry reuses the same idempotent create.
     logger.error("billing.persist_customer_failed", {
       org_id: org.id,
       customer_id: customer.id,
@@ -166,7 +166,10 @@ export async function getCheckoutStatus(
     expand: ["subscription"],
   });
 
-  if (session.client_reference_id && session.client_reference_id !== activeOrg.id) {
+  // Treat the tenant binding as mandatory, not merely advisory. A session that
+  // predates or bypasses our checkout flow must not be inspectable by whichever
+  // signed-in owner happens to know its id.
+  if (session.client_reference_id !== activeOrg.id) {
     return null;
   }
 
@@ -174,7 +177,8 @@ export async function getCheckoutStatus(
     session.subscription && typeof session.subscription !== "string"
       ? session.subscription
       : null;
-  const tier = (session.metadata?.tier as Tier | undefined) ?? null;
+  const parsedTier = tierSchema.safeParse(session.metadata?.tier);
+  const tier = parsedTier.success ? parsedTier.data : null;
 
   return {
     status: (session.status ?? "open") as CheckoutStatus["status"],
