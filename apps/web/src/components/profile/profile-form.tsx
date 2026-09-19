@@ -157,7 +157,7 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
 
 /**
  * Avatar picker: uploads straight to the public `avatars` bucket (owner-gated
- * by Storage RLS, path `<user_id>/avatar-<ts>.<ext>`), then records the public
+ * by Storage RLS, fixed path `<user_id>/avatar`), then records the public
  * URL via the `setAvatarUrl` server action so the shell re-renders with it.
  */
 function AvatarUploader({ profile }: { profile: ProfileDetails }) {
@@ -184,8 +184,7 @@ function AvatarUploader({ profile }: { profile: ProfileDetails }) {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("You must be signed in.");
 
-      const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const path = `${user.id}/avatar`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
         .upload(path, file, { upsert: true, contentType: file.type });
