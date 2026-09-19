@@ -105,6 +105,7 @@ export const availabilityNudgeHandler: JobHandler = async (job: Job) => {
       orgName,
       portalUrl,
     }),
+    idempotencyKey: `availability-nudge/${job.id}`,
   });
   // Throw so the runtime retries a transient email failure (at-least-once).
   if (!sent.ok) throw new Error(`availability-nudge: email failed (${sent.error})`);
