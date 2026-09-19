@@ -288,7 +288,7 @@ export async function sendLeadFollowUp(formData: FormData): Promise<void> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("leads")
-    .select("email, status, follow_up_subject, follow_up_draft")
+    .select("email, status, follow_up_subject, follow_up_draft, follow_up_drafted_at")
     .eq("id", leadId)
     .eq("org_id", activeOrg.id)
     .maybeSingle();
@@ -299,12 +299,17 @@ export async function sendLeadFollowUp(formData: FormData): Promise<void> {
 
   const { EMAIL_FROM, resend } = await import("@/lib/email/client");
   const subject = data.follow_up_subject || "Following up";
-  const sent = await resend.emails.send({
-    from: EMAIL_FROM,
-    to: data.email,
-    subject,
-    text: data.follow_up_draft,
-  });
+  const sent = await resend.emails.send(
+    {
+      from: EMAIL_FROM,
+      to: data.email,
+      subject,
+      text: data.follow_up_draft,
+    },
+    {
+      idempotencyKey: `lead-followup/${leadId}/${data.follow_up_drafted_at ?? "undated"}`,
+    },
+  );
 
   if (sent.error) {
     logger.error("leads.followup_send_failed", {
@@ -316,7 +321,12 @@ export async function sendLeadFollowUp(formData: FormData): Promise<void> {
   }
 
   const now = new Date().toISOString();
-  const patch: Record<string, unknown> = { last_contacted_at: now };
+  const patch: Record<string, unknown> = {
+    last_contacted_at: now,
+    follow_up_subject: null,
+    follow_up_draft: null,
+    follow_up_drafted_at: null,
+  };
   if (data.status === "new") patch.status = "contacted";
 
   const { error: updateError } = await supabase
