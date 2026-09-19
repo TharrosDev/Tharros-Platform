@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  Activity,
   ArrowRight,
   Bell,
   BookOpen,
