@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { PostgrestDouble, type Script } from "@/lib/__tests__/postgrest-double";
+
 /*
   `automation-dispatch` is the durable job that runs a customer's automations
   when a lead event lands. It is the only path by which Tharros changes a
@@ -17,83 +19,9 @@ const createNotification = vi.fn(async (_admin: unknown, _input: Record<string, 
 const checkOrgQueryCap = vi.fn(async () => ({ allowed: true }) as { allowed: boolean });
 const generateLeadFollowUpDraft = vi.fn(async () => {});
 
-/** One scripted response, keyed by table and verb. */
-type Reply = { data?: unknown; error?: unknown };
-type Call = { table: string; verb: string; payload?: unknown; filters: Record<string, unknown> };
+const db = new PostgrestDouble();
 
-let calls: Call[] = [];
-let script: Record<string, Reply | ((call: Call) => Reply)> = {};
-
-function reply(call: Call): Reply {
-  const entry = script[`${call.table}.${call.verb}`] ?? script[call.table];
-  const result = typeof entry === "function" ? entry(call) : entry;
-  return result ?? { data: null, error: null };
-}
-
-/**
- * A thenable query builder. PostgREST chains are terminal in several
- * different ways (`single`, `maybeSingle`, or awaiting the builder itself),
- * so all three resolve through the same path.
- */
-class Query implements PromiseLike<Reply> {
-  private filters: Record<string, unknown> = {};
-
-  constructor(
-    private table: string,
-    private verb: string,
-    private payload?: unknown,
-  ) {}
-
-  select() {
-    return this;
-  }
-  eq(key: string, value: unknown) {
-    this.filters[key] = value;
-    return this;
-  }
-  in(key: string, value: unknown) {
-    this.filters[key] = value;
-    return this;
-  }
-  lte() {
-    return this;
-  }
-  private run(): Promise<Reply> {
-    const call: Call = {
-      table: this.table,
-      verb: this.verb,
-      payload: this.payload,
-      filters: this.filters,
-    };
-    calls.push(call);
-    const result = reply(call);
-    return result.error ? Promise.resolve(result) : Promise.resolve(result);
-  }
-  maybeSingle() {
-    return this.run();
-  }
-  single() {
-    return this.run();
-  }
-  then<A, B>(
-    onfulfilled?: ((value: Reply) => A | PromiseLike<A>) | null,
-    onrejected?: ((reason: unknown) => B | PromiseLike<B>) | null,
-  ): PromiseLike<A | B> {
-    return this.run().then(onfulfilled, onrejected);
-  }
-}
-
-const admin = {
-  from(table: string) {
-    return {
-      select: () => new Query(table, "select"),
-      insert: (payload: unknown) => new Query(table, "insert", payload),
-      update: (payload: unknown) => new Query(table, "update", payload),
-    };
-  },
-};
-
-vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => admin }));
+vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => db.client }));
 vi.mock("@/lib/notifications/notify", () => ({ createNotification }));
 vi.mock("@/lib/billing/usage", () => ({ checkOrgQueryCap }));
 vi.mock("@/lib/leads/follow-up", () => ({ generateLeadFollowUpDraft }));
@@ -134,8 +62,8 @@ function automation(overrides: Record<string, unknown> = {}) {
 }
 
 /** The happy path every test starts from; individual tests override one key. */
-function baseScript(over: Record<string, Reply | ((call: Call) => Reply)> = {}) {
-  script = {
+function baseScript(over: Script = {}) {
+  db.setScript({
     lead_events: (call) =>
       call.verb === "select" ? { data: EVENT, error: null } : { data: null, error: null },
     subscriptions: { data: ACTIVE_SUB, error: null },
@@ -148,19 +76,16 @@ function baseScript(over: Record<string, Reply | ((call: Call) => Reply)> = {}) 
     "automation_runs.update": { data: null, error: null },
     memberships: { data: [{ user_id: "user-1" }, { user_id: "user-2" }], error: null },
     ...over,
-  };
+  });
 }
 
 const job = (payload: Record<string, unknown> = { eventId: "event-1" }) =>
   ({ id: "job-1", type: "automation-dispatch", payload, attempts: 0 }) as never;
 
 const runsFinishedWith = () =>
-  calls
-    .filter((c) => c.table === "automation_runs" && c.verb === "update")
-    .map((c) => c.payload as Record<string, unknown>);
+  db.callsTo("automation_runs", "update").map((c) => c.payload as Record<string, unknown>);
 
 beforeEach(() => {
-  calls = [];
   vi.clearAllMocks();
   checkOrgQueryCap.mockResolvedValue({ allowed: true });
   baseScript();
@@ -174,13 +99,13 @@ describe("automationDispatchHandler", () => {
   it("no-ops when the event no longer exists", async () => {
     baseScript({ lead_events: { data: null, error: null } });
     await automationDispatchHandler(job());
-    expect(calls.some((c) => c.table === "automations")).toBe(false);
+    expect(db.callsTo("automations").length > 0).toBe(false);
   });
 
   it("does not run automations for an org that is not entitled", async () => {
     baseScript({ subscriptions: { data: { status: "active", tier: "starter" }, error: null } });
     await automationDispatchHandler(job());
-    expect(calls.some((c) => c.table === "automations")).toBe(false);
+    expect(db.callsTo("automations").length > 0).toBe(false);
     expect(createNotification).not.toHaveBeenCalled();
   });
 
@@ -189,7 +114,7 @@ describe("automationDispatchHandler", () => {
       leads: (call) => (call.verb === "select" ? { data: null, error: null } : {}),
     });
     await automationDispatchHandler(job());
-    expect(calls.some((c) => c.table === "automations")).toBe(false);
+    expect(db.callsTo("automations").length > 0).toBe(false);
   });
 
   it("skips an automation whose trigger does not match the event", async () => {
@@ -197,7 +122,7 @@ describe("automationDispatchHandler", () => {
       automations: { data: [automation({ trigger_type: "lead.status_changed" })], error: null },
     });
     await automationDispatchHandler(job());
-    expect(calls.some((c) => c.table === "automation_runs")).toBe(false);
+    expect(db.callsTo("automation_runs").length > 0).toBe(false);
   });
 
   it("notifies every manager and records the count", async () => {
@@ -226,11 +151,11 @@ describe("automationDispatchHandler", () => {
     });
     await automationDispatchHandler(job());
 
-    const update = calls.find((c) => c.table === "leads" && c.verb === "update");
+    const update = db.callsTo("leads", "update")[0];
     expect(update?.payload).toMatchObject({ status: "contacted" });
     expect(update?.payload).toHaveProperty("last_contacted_at");
 
-    const audit = calls.find((c) => c.table === "lead_events" && c.verb === "insert");
+    const audit = db.callsTo("lead_events", "insert")[0];
     expect(audit?.payload).toMatchObject({
       type: "automation.action",
       data: { action: "set_lead_status", from: "new", to: "contacted" },
@@ -247,7 +172,7 @@ describe("automationDispatchHandler", () => {
     });
     await automationDispatchHandler(job());
 
-    expect(calls.some((c) => c.table === "leads" && c.verb === "update")).toBe(false);
+    expect(db.callsTo("leads", "update").length > 0).toBe(false);
     expect(runsFinishedWith()[0]).toMatchObject({
       status: "succeeded",
       result: { from: "new", to: "new" },
@@ -360,7 +285,7 @@ describe("automationDispatchHandler", () => {
       job({ eventId: "event-1", automationId: "auto-1", manual: true }),
     );
 
-    const query = calls.find((c) => c.table === "automations");
+    const query = db.callsTo("automations")[0];
     expect(query?.filters).toMatchObject({ id: "auto-1" });
     expect(query?.filters).not.toHaveProperty("trigger_type");
   });
