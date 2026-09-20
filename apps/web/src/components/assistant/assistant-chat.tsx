@@ -306,7 +306,7 @@ function EmptyState({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col px-1 pb-10 pt-8 sm:pt-14">
       <span
-        className="bg-card text-primary flex size-10 items-center justify-center rounded-xl border shadow-xs"
+        className="bg-card text-primary-soft-foreground flex size-10 items-center justify-center rounded-xl border shadow-xs"
         aria-hidden
       >
         <Sparkles className="size-5" />
@@ -396,7 +396,8 @@ function TemplateChips({
             title={t.description}
             className={cn(
               "bg-card inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[0.8125rem] font-medium transition-colors hover:border-input hover:bg-accent ",
-              active === t.id && "border-primary/30 bg-primary-soft text-primary-soft-foreground",
+              active === t.id &&
+                "border-primary-edge/30 bg-primary-soft text-primary-soft-foreground",
             )}
           >
             <Icon className="text-muted-foreground size-3.5" />

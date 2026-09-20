@@ -64,7 +64,7 @@ export default function PricingPage() {
               <div className="visual-panel-strong text-card-foreground ring-primary/20 relative z-10 flex flex-col overflow-hidden rounded-3xl p-7 ring-1 sm:p-8 lg:-my-7">
                 <div className="flex items-baseline justify-between gap-3">
                   <h2 className="type-h2">{growth.name}</h2>
-                  <span className="text-primary text-sm font-semibold">
+                  <span className="text-primary-soft-foreground text-sm font-semibold">
                     Where most businesses land
                   </span>
                 </div>
@@ -80,7 +80,10 @@ export default function PricingPage() {
                 <ul className="mt-7 flex-1 space-y-3">
                   {growth.features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2.5">
-                      <Check aria-hidden className="text-primary mt-0.5 size-4 shrink-0" />
+                      <Check
+                        aria-hidden
+                        className="text-primary-soft-foreground mt-0.5 size-4 shrink-0"
+                      />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
@@ -139,7 +142,7 @@ function QuietPlan({ plan, side }: { plan: (typeof PLANS)[number]; side: "left" 
   return (
     <div
       className={cn(
-        "flex flex-col bg-card rounded-3xl border p-7 shadow-card transition-[border-color,box-shadow,transform] hover:-translate-y-1 hover:border-primary/20 hover:shadow-card-hover",
+        "flex flex-col bg-card rounded-3xl border p-7 shadow-card transition-[border-color,box-shadow,transform] hover:-translate-y-1 hover:border-primary-edge/20 hover:shadow-card-hover",
         side === "left" ? "" : "",
       )}
     >

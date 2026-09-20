@@ -187,7 +187,7 @@ export const AssistantMarkdown = React.memo(function AssistantMarkdown({
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary font-medium underline underline-offset-2 hover:no-underline"
+            className="text-primary-soft-foreground font-medium underline underline-offset-2 hover:no-underline"
           >
             {children}
           </a>

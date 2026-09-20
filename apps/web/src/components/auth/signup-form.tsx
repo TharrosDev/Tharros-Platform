@@ -20,7 +20,10 @@ export function SignupForm({ next }: { next?: string }) {
       footer={
         <>
           Already have an account?{" "}
-          <Link className="text-primary font-medium hover:underline" href={loginHref}>
+          <Link
+            className="text-primary-soft-foreground font-medium hover:underline"
+            href={loginHref}
+          >
             Sign in
           </Link>
         </>

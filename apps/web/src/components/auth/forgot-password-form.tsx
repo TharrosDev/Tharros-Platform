@@ -20,7 +20,7 @@ export function ForgotPasswordForm() {
       footer={
         <>
           Remembered it?{" "}
-          <Link className="text-primary font-medium hover:underline" href="/login">
+          <Link className="text-primary-soft-foreground font-medium hover:underline" href="/login">
             Back to sign in
           </Link>
         </>

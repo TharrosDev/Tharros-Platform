@@ -139,7 +139,7 @@ export default async function ActivityLogPage({
                   className={cn(
                     "relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full ring-2",
                     e.source === "agent"
-                      ? "bg-primary-soft/40 text-primary"
+                      ? "bg-primary-soft/40 text-primary-soft-foreground"
                       : "bg-muted text-muted-foreground",
                     e.category === "escalation"
                       ? "ring-destructive/40"

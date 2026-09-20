@@ -28,7 +28,7 @@ function WorkspaceFrame({
       className={cn("bg-card overflow-hidden rounded-[1.5rem] border shadow-raised", className)}
     >
       <div className="bg-background/60 flex h-11 items-center gap-2 border-b px-4">
-        <TharrosMark className="text-primary size-4" />
+        <TharrosMark className="text-primary-soft-foreground size-4" />
         <span className="text-sm font-semibold tracking-tight">Workspace</span>
         <span className="type-meta text-muted-foreground ml-auto hidden sm:inline">
           One organization
@@ -54,8 +54,10 @@ function WorkspaceFrame({
                   <span
                     className={cn(
                       "relative flex size-6 items-center justify-center rounded-md border transition-colors duration-300",
-                      state === "active" && "border-primary bg-primary text-primary-foreground",
-                      state === "done" && "border-primary/30 bg-card text-primary",
+                      state === "active" &&
+                        "border-primary-edge bg-primary text-primary-foreground",
+                      state === "done" &&
+                        "border-primary-edge/30 bg-card text-primary-soft-foreground",
                       state === "idle" && "bg-card",
                     )}
                   >

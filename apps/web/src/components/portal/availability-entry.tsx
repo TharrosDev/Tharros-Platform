@@ -157,7 +157,7 @@ function AvailabilityPreview({ parsed, dimmed }: { parsed: ParsedAvailability; d
       }`}
     >
       <div className="flex items-center gap-2">
-        <CalendarClock className="text-primary size-5" aria-hidden />
+        <CalendarClock className="text-primary-soft-foreground size-5" aria-hidden />
         <h2 className="type-h2">Here&apos;s what I understood</h2>
       </div>
       {parsed.summary ? (

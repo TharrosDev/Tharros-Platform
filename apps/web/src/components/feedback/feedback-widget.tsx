@@ -180,7 +180,7 @@ export function FeedbackWidget() {
                       className={cn(
                         " inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ",
                         kind === value
-                          ? "border-primary/40 bg-primary-soft text-primary-soft-foreground"
+                          ? "border-primary-edge/40 bg-primary-soft text-primary-soft-foreground"
                           : "border-border text-muted-foreground hover:bg-accent hover:text-foreground",
                       )}
                     >
@@ -226,7 +226,7 @@ export function FeedbackWidget() {
                     <button
                       type="button"
                       onClick={resetSuggest}
-                      className="text-primary font-medium hover:underline"
+                      className="text-primary-soft-foreground font-medium hover:underline"
                     >
                       Send another
                     </button>
@@ -299,7 +299,7 @@ function AgentBubble({ children }: { children: React.ReactNode }) {
     <div className="flex gap-2">
       <span
         aria-hidden
-        className="text-primary-soft-foreground bg-primary-soft mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-primary/10"
+        className="text-primary-soft-foreground bg-primary-soft mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-primary-edge/10"
       >
         <TharrosMark className="size-3" />
       </span>

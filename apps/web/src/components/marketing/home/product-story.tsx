@@ -115,7 +115,7 @@ function Step({
         aria-hidden
         className={cn(
           "bg-background absolute top-1 left-0 flex size-[1.375rem] items-center justify-center rounded-full border transition-colors duration-300 lg:top-1/2 lg:-translate-y-1/2",
-          active ? "border-primary" : "border-border",
+          active ? "border-primary-edge" : "border-border",
         )}
       >
         <span

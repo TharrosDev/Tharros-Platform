@@ -21,7 +21,7 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
             className={cn(
               "bg-card relative flex flex-col rounded-xl border p-6 transition-[border-color,box-shadow] duration-200",
               plan.highlight
-                ? "border-primary/40 ring-primary/15 shadow-raised ring-2"
+                ? "border-primary-edge/40 ring-primary/15 shadow-raised ring-2"
                 : "shadow-card hover:border-input",
             )}
           >
@@ -50,7 +50,7 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
                   <Check
                     className={cn(
                       "mt-0.5 size-4 shrink-0",
-                      plan.highlight ? "text-primary" : "text-muted-foreground",
+                      plan.highlight ? "text-primary-soft-foreground" : "text-muted-foreground",
                     )}
                     aria-hidden
                   />

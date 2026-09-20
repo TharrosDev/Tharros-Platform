@@ -128,7 +128,7 @@ export default async function LeadDetailPage({
       ) : query.drafted ? (
         <div
           role="status"
-          className="border-primary/20 bg-primary-soft/50 text-primary-soft-foreground rounded-lg border px-4 py-3 text-sm"
+          className="border-primary-edge/20 bg-primary-soft/50 text-primary-soft-foreground rounded-lg border px-4 py-3 text-sm"
         >
           A new follow-up draft is ready. Review it below before sending.
         </div>

@@ -342,7 +342,7 @@ export function LaborStep({ state, actions }: { state: WizardState; actions: Ste
               key={opt.value}
               className={cn(
                 "flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors",
-                active ? "border-primary bg-primary-soft/40" : "bg-card hover:bg-accent",
+                active ? "border-primary-edge bg-primary-soft/40" : "bg-card hover:bg-accent",
               )}
             >
               <RadioGroupItem value={opt.value} className="mt-0.5" />
@@ -398,7 +398,7 @@ export function PersonaStep({ state, actions }: { state: WizardState; actions: S
               key={t.value}
               className={cn(
                 "flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors",
-                active ? "border-primary bg-primary-soft/40" : "bg-card hover:bg-accent",
+                active ? "border-primary-edge bg-primary-soft/40" : "bg-card hover:bg-accent",
               )}
             >
               <RadioGroupItem value={t.value} className="mt-0.5" />

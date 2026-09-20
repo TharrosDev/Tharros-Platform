@@ -59,7 +59,7 @@ function Finale() {
           <div className="flex flex-wrap items-center gap-3 lg:col-span-6 lg:justify-end">
             <Link
               href="/signup"
-              className="bg-card text-primary group inline-flex h-13 items-center gap-2 rounded-xl px-7 text-base font-semibold shadow-raised transition-transform duration-200 hover:-translate-y-0.5 "
+              className="bg-card text-primary-soft-foreground group inline-flex h-13 items-center gap-2 rounded-xl px-7 text-base font-semibold shadow-raised transition-transform duration-200 hover:-translate-y-0.5 "
             >
               Start your 14-day trial
               <ArrowRight

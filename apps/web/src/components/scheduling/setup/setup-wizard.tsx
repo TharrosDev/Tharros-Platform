@@ -187,8 +187,8 @@ function StepRail({
                 <span
                   className={cn(
                     "flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-medium tabular-nums transition-colors",
-                    current && "border-primary bg-primary text-primary-foreground",
-                    done && "border-primary bg-primary text-primary-foreground",
+                    current && "border-primary-edge bg-primary text-primary-foreground",
+                    done && "border-primary-edge bg-primary text-primary-foreground",
                     !current && !done && "border-border text-muted-foreground",
                   )}
                 >

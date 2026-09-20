@@ -161,14 +161,14 @@ export function DocumentUploader() {
         }}
         className={cn(
           "group bg-card/60 relative flex cursor-pointer items-center gap-4 rounded-xl border border-dashed px-4 py-4 text-left transition-colors duration-150 sm:px-5",
-          "hover:border-primary/40 hover:bg-primary-soft/25 ",
-          dragging ? "border-primary bg-primary-soft/50" : "border-input",
+          "hover:border-primary-edge/40 hover:bg-primary-soft/25 ",
+          dragging ? "border-primary-edge bg-primary-soft/50" : "border-input",
         )}
       >
         <span
           className={cn(
             "bg-card text-primary-soft-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border shadow-xs [&>svg]:size-5",
-            dragging && "border-primary/40",
+            dragging && "border-primary-edge/40",
           )}
         >
           <UploadCloud />

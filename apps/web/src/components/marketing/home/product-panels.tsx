@@ -71,7 +71,7 @@ function Chip({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.72rem] font-medium whitespace-nowrap",
         tone === "neutral" && "bg-surface-2 text-muted-foreground",
-        tone === "cobalt" && "border-primary/15 bg-primary-soft text-primary-soft-foreground",
+        tone === "cobalt" && "border-primary-edge/15 bg-primary-soft text-primary-soft-foreground",
         tone === "ok" && "border-success/20 bg-card text-success",
       )}
     >
@@ -95,7 +95,7 @@ function PanelTitle({
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <p className="type-meta text-muted-foreground flex items-center gap-1.5">
-          <Icon className="text-primary size-3.5" aria-hidden />
+          <Icon className="text-primary-soft-foreground size-3.5" aria-hidden />
           {crumb}
         </p>
         <p className="mt-1.5 truncate text-base font-semibold tracking-tight sm:text-lg">{title}</p>
@@ -115,9 +115,9 @@ function KnowledgePanel() {
       <div className="bg-card max-w-[92%] rounded-2xl rounded-bl-md border p-4 shadow-xs">
         <p className="text-sm leading-relaxed">
           The staff member calls the manager on duty before the shift starts
-          <sup className="text-primary ml-0.5 font-semibold">1</sup>. The manager opens the shift
-          for replacement and records the absence
-          <sup className="text-primary ml-0.5 font-semibold">2</sup>.
+          <sup className="text-primary-soft-foreground ml-0.5 font-semibold">1</sup>. The manager
+          opens the shift for replacement and records the absence
+          <sup className="text-primary-soft-foreground ml-0.5 font-semibold">2</sup>.
         </p>
         <div className="mt-3.5 flex flex-wrap gap-1.5 border-t pt-3">
           <Chip tone="cobalt">
@@ -167,9 +167,9 @@ function SchedulingPanel() {
                 key={i}
                 className={cn(
                   "h-9 rounded-lg border sm:h-11",
-                  kind === 1 && "border-primary/15 bg-primary-soft",
+                  kind === 1 && "border-primary-edge/15 bg-primary-soft",
                   kind === 0 && "bg-surface-2 border-dashed",
-                  kind === 2 && "border-primary bg-primary/10 border-dashed",
+                  kind === 2 && "border-primary-edge bg-primary/10 border-dashed",
                 )}
               />
             ))}
@@ -210,7 +210,7 @@ function LeadsPanel() {
                   key={card}
                   className={cn(
                     "bg-card rounded-lg border px-2 py-2 text-[0.72rem] leading-tight font-medium break-words shadow-xs",
-                    s === 0 && c === 0 && "border-primary/40 ring-primary/15 ring-2",
+                    s === 0 && c === 0 && "border-primary-edge/40 ring-primary/15 ring-2",
                   )}
                 >
                   {card}
@@ -223,7 +223,7 @@ function LeadsPanel() {
       <div className="bg-card rounded-xl border p-3.5 shadow-xs">
         <div className="flex items-center justify-between gap-2">
           <p className="flex items-center gap-1.5 text-sm font-semibold">
-            <PenLine className="text-primary size-3.5" aria-hidden />
+            <PenLine className="text-primary-soft-foreground size-3.5" aria-hidden />
             Follow-up draft
           </p>
           <Chip tone="cobalt">Awaiting your review</Chip>
@@ -280,13 +280,15 @@ function FlowStep({
     <div
       className={cn(
         "flex items-center gap-3 rounded-xl border px-3.5 py-2.5",
-        strong ? "border-primary/25 bg-primary-soft" : "bg-card shadow-xs",
+        strong ? "border-primary-edge/25 bg-primary-soft" : "bg-card shadow-xs",
       )}
     >
       <span
         className={cn(
           "flex size-7 shrink-0 items-center justify-center rounded-lg",
-          strong ? "bg-primary text-primary-foreground" : "bg-surface-2 text-primary",
+          strong
+            ? "bg-primary text-primary-foreground"
+            : "bg-surface-2 text-primary-soft-foreground",
         )}
       >
         <Icon className="size-3.5" aria-hidden />

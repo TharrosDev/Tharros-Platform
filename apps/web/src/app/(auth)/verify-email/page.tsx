@@ -29,7 +29,7 @@ export default async function VerifyEmailPage({
         )
       }
       footer={
-        <Link className="text-primary font-medium hover:underline" href="/login">
+        <Link className="text-primary-soft-foreground font-medium hover:underline" href="/login">
           Back to sign in
         </Link>
       }
@@ -39,7 +39,7 @@ export default async function VerifyEmailPage({
       ) : (
         <p className="text-muted-foreground text-sm">
           No verification email? Check your spam folder, or{" "}
-          <Link className="text-primary hover:underline" href="/signup">
+          <Link className="text-primary-soft-foreground hover:underline" href="/signup">
             try signing up again
           </Link>
           .

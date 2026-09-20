@@ -77,7 +77,7 @@ export default async function NotificationsPage() {
                     {link ? (
                       <Link
                         href={link.url}
-                        className="text-primary text-xs font-medium hover:underline"
+                        className="text-primary-soft-foreground text-xs font-medium hover:underline"
                       >
                         {link.label}
                       </Link>

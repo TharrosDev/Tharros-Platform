@@ -43,7 +43,7 @@ function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming
     <div className="flex gap-3">
       <span
         aria-hidden
-        className="text-primary bg-card mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border shadow-xs"
+        className="text-primary-soft-foreground bg-card mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border shadow-xs"
       >
         <TharrosMark className="size-3.5" />
       </span>

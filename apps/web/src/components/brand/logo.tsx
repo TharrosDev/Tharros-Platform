@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
  * Tharros "Workshop" mark — a sharp cobalt tile (tight 5u radius) with one
  * chamfered top-right corner, and a clean "T" cut out of it as negative space
  * so it reads on any background. The chamfer is the tool-precision tell. Single
- * colour: inherits `currentColor`, so wrap it in `text-primary` for cobalt.
+ * colour: inherits `currentColor`, so wrap it in `text-primary-soft-foreground` for cobalt.
  */
 function TharrosMark({ className, ...props }: React.ComponentProps<"svg">) {
   return (
@@ -39,7 +39,7 @@ function TharrosWordmark({
       className={cn("inline-flex items-center gap-2", className)}
       {...props}
     >
-      <TharrosMark className={cn("size-6 text-primary", markClassName)} />
+      <TharrosMark className={cn("size-6 text-primary-soft-foreground", markClassName)} />
       <span className="text-[1.0625rem] font-semibold tracking-tight">Tharros</span>
     </span>
   );

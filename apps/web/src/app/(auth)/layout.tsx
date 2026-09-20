@@ -44,7 +44,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         <div className="relative max-w-lg">
           <h2 className="text-[clamp(2.5rem,4vw,3.75rem)] leading-[0.95] font-[740] tracking-[-0.05em]">
             Run the business.
-            <span className="text-primary block">Not the busywork.</span>
+            <span className="text-primary-soft-foreground block">Not the busywork.</span>
           </h2>
           <p className="text-muted-foreground mt-5 text-lg leading-relaxed text-pretty">
             Knowledge, scheduling, lead capture and automations in one workspace. AI does the

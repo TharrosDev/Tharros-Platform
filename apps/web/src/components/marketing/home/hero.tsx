@@ -44,7 +44,7 @@ function Hero() {
             delay={0.1}
             lines={[
               { text: "Run the business." },
-              { text: "Not the busywork.", className: "text-primary" },
+              { text: "Not the busywork.", className: "text-primary-soft-foreground" },
             ]}
           />
         </h1>
@@ -208,7 +208,7 @@ function OperatingLayer() {
                 <path
                   d={node.path}
                   className={cn(
-                    "stroke-primary flow-dash transition-opacity duration-500",
+                    "stroke-primary-soft-foreground flow-dash transition-opacity duration-500",
                     focus === i ? "opacity-100" : "opacity-30",
                   )}
                   strokeWidth={2}
@@ -256,7 +256,7 @@ function OperatingLayer() {
                   transition={{ duration: 0.7, ease: EASE_OUT, delay: 0.75 + i * 0.1 }}
                   className={cn(
                     "bg-card rounded-2xl border p-3 transition-[border-color,box-shadow] duration-500 sm:p-4",
-                    focus === i ? "border-primary/40 shadow-raised" : "shadow-card",
+                    focus === i ? "border-primary-edge/40 shadow-raised" : "shadow-card",
                   )}
                 >
                   <div className="flex items-center gap-2">
@@ -275,7 +275,8 @@ function OperatingLayer() {
                     </span>
                   </div>
                   <p className="type-meta text-muted-foreground mt-3 hidden truncate sm:block">
-                    <span className="text-primary">{product.index}</span> · {node.state}
+                    <span className="text-primary-soft-foreground">{product.index}</span> ·{" "}
+                    {node.state}
                   </p>
                 </m.div>
               </Layer>

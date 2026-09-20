@@ -67,7 +67,7 @@ export function SwapInbox({ incoming, open }: { incoming: PortalSwap[]; open: Po
               return (
                 <li
                   key={s.requestId}
-                  className="border-primary/30 bg-primary/5 flex flex-col gap-3 rounded-xl border p-4"
+                  className="border-primary-edge/30 bg-primary/5 flex flex-col gap-3 rounded-xl border p-4"
                 >
                   <div className="min-w-0">
                     <p className="text-foreground text-sm">

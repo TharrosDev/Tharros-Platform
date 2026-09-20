@@ -95,7 +95,7 @@ export function SwapProposalButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-muted-foreground hover:text-primary mt-0.5 inline-flex shrink-0 items-center gap-1 text-xs"
+        className="text-muted-foreground hover:text-primary-soft-foreground mt-0.5 inline-flex shrink-0 items-center gap-1 text-xs"
         aria-label="Propose a swap for this shift"
       >
         <ArrowLeftRight className="size-4" /> Swap

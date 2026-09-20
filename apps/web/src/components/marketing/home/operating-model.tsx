@@ -79,13 +79,13 @@ function OperatingModel() {
                 aria-hidden
                 className={cn(
                   "absolute -left-10 top-1 size-[0.9375rem] rounded-full border-2 transition-colors duration-500 lg:-top-14 lg:left-0",
-                  done(i) ? "border-primary bg-primary" : "border-border bg-card",
+                  done(i) ? "border-primary-edge bg-primary" : "border-border bg-card",
                 )}
               />
               <Reveal delay={i * 0.08}>
                 <p
                   aria-hidden
-                  className="text-primary font-mono text-[clamp(3.5rem,6vw,5.5rem)] leading-none font-medium tracking-[-0.06em]"
+                  className="text-primary-soft-foreground font-mono text-[clamp(3.5rem,6vw,5.5rem)] leading-none font-medium tracking-[-0.06em]"
                 >
                   0{i + 1}
                 </p>
@@ -163,7 +163,7 @@ function Row({
 }) {
   return (
     <li className="bg-card flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm">
-      <Icon className="text-primary size-4 shrink-0" />
+      <Icon className="text-primary-soft-foreground size-4 shrink-0" />
       <span className="min-w-0 flex-1 truncate font-medium">{label}</span>
       <span
         className={cn(

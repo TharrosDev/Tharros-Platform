@@ -408,7 +408,7 @@ export function ScheduleCalendar({
       {moving ? (
         <div
           role="status"
-          className="border-primary/40 bg-primary-soft/50 text-primary-soft-foreground flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+          className="border-primary-edge/40 bg-primary-soft/50 text-primary-soft-foreground flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm"
         >
           <Move className="size-4 shrink-0" aria-hidden />
           <span className="min-w-0 flex-1">
@@ -658,7 +658,7 @@ function ShiftChip({
             ? "border-destructive/50 bg-destructive/10 text-destructive"
             : open
               ? "border-warning/50 border-dashed bg-warning/10 text-warning hover:bg-warning/15"
-              : "border-primary/20 bg-primary-soft/70 text-primary-soft-foreground hover:bg-primary-soft",
+              : "border-primary-edge/20 bg-primary-soft/70 text-primary-soft-foreground hover:bg-primary-soft",
         ].join(" ")}
       >
         <span className="flex items-center gap-1 font-semibold whitespace-nowrap tabular-nums">

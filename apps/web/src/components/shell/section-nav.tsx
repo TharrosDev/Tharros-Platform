@@ -95,7 +95,7 @@ export function SectionNav({
               <span
                 className={cn(
                   "bg-destructive text-destructive-foreground num relative inline-flex h-4.5 min-w-4.5 items-center justify-center px-1 text-[0.6875rem] font-semibold",
-                  active && vertical && "lg:bg-primary-edge lg:text-primary",
+                  active && vertical && "lg:bg-primary-edge lg:text-primary-soft-foreground",
                 )}
               >
                 {badge > 9 ? "9+" : badge}
