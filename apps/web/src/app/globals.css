@@ -139,9 +139,9 @@
   --tracking-label: 0.08em;
 
   /* --- Layout ------------------------------------------------------------- */
-  --rail-w: 13rem;
-  --topbar-h: 3rem;
-  --board-max: 96rem;
+  --rail-w: 15rem;
+  --topbar-h: 3.5rem;
+  --board-max: 88rem;
   --grid-board: repeat(12, minmax(0, 1fr));
   --grid-strip: minmax(0, 1fr) 7rem 8rem 2.75rem; /* what / when / who / initials */
   --grid-log: 9rem minmax(0, 1fr) 6rem; /* time / line / source */
@@ -224,6 +224,7 @@
   --spacing-control-lg: var(--control-h-lg);
   --spacing-rail: var(--rail-w);
   --spacing-topbar: var(--topbar-h);
+  --spacing-board: var(--board-max);
 
   /* Tracking: tracking-display / -body / -data / -label. One set, no one-offs. */
   --tracking-display: var(--tracking-display);
@@ -415,14 +416,41 @@
     font-variation-settings: "wdth" var(--wdth-normal);
   }
 
-  /* The rack: dark anodized chrome. Frames the board; never holds working data. */
+  /*
+    The rack: dark anodized chrome. Frames the board; never holds working data.
+
+    It is a token context, not just a background. Redefining the stock families
+    inside it means every primitive drops into the chrome correctly without a
+    single per-component override, and portalled overlays escape it and stay on
+    stock, which is where they belong.
+  */
+  .on-rack,
+  .on-rack-deep {
+    --foreground: var(--rack-foreground);
+    --card: var(--rack-deep);
+    --card-foreground: var(--rack-foreground);
+    --muted: color-mix(in oklch, var(--rack-foreground) 8%, transparent);
+    --muted-foreground: var(--rack-muted-foreground);
+    --secondary: color-mix(in oklch, var(--rack-foreground) 10%, transparent);
+    --secondary-foreground: var(--rack-foreground);
+    --accent: color-mix(in oklch, var(--rack-foreground) 12%, transparent);
+    --accent-foreground: var(--rack-foreground);
+    --surface-2: var(--rack-deep);
+    --surface-2-foreground: var(--rack-foreground);
+    --surface-3: color-mix(in oklch, var(--rack-foreground) 14%, transparent);
+    --surface-3-foreground: var(--rack-foreground);
+    --border: var(--rack-edge);
+    --input: var(--rack-edge);
+    --primary-soft: color-mix(in oklch, var(--primary) 20%, transparent);
+    --primary-soft-foreground: var(--primary);
+    --ring: var(--sidebar-ring);
+    color: var(--rack-foreground);
+  }
   .on-rack {
     background-color: var(--rack);
-    color: var(--rack-foreground);
   }
   .on-rack-deep {
     background-color: var(--rack-deep);
-    color: var(--rack-foreground);
   }
 
   /* Machined seams. A rack is divided by edges, not by shadow. */
@@ -472,6 +500,14 @@
     animation: skeleton-shimmer 1.8s ease-in-out infinite;
   }
 
+  /*
+    A strip settling into its slot. The board's one authored moment: it runs on
+    the lead bay only, staggered, and never section by section down the page.
+  */
+  .animate-strip-seat {
+    animation: strip-seat 0.26s var(--ease-out) both;
+  }
+
   /* Marketing entrance runs in CSS so the headline paints before hydration (LCP). */
   .animate-mask-up {
     animation: mask-up 0.72s var(--ease-out) both;
@@ -487,6 +523,13 @@
   }
   to {
     background-position: -120% 0;
+  }
+}
+
+@keyframes strip-seat {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
   }
 }
 

@@ -52,7 +52,7 @@ function Topbar({
   }, []);
 
   return (
-    <header className="bg-background/95 sticky top-0 z-topbar flex h-14 items-center gap-2 border-b px-3 sm:px-6">
+    <header className="on-rack seam-b z-topbar h-topbar sticky top-0 flex items-center gap-2 px-3 sm:px-6">
       <MobileNav user={user} orgs={orgs} activeOrg={activeOrg} />
 
       <Breadcrumbs className="hidden min-w-0 flex-1 md:block" />
@@ -61,7 +61,7 @@ function Topbar({
         <button
           type="button"
           onClick={() => setCmdOpen(true)}
-          className="text-muted-foreground hover:text-foreground bg-card flex h-9 items-center gap-2 rounded-lg border px-2.5 text-sm shadow-xs transition-[color,border-color] hover:border-input lg:w-72"
+          className="text-muted-foreground hover:text-foreground bg-rack-deep border-rack-edge type-strip h-control-sm hover:border-rack-foreground/40 flex items-center gap-2 border px-2.5 transition-colors lg:w-72"
           aria-label="Search or jump to"
         >
           <Search className="size-4 shrink-0" aria-hidden />
@@ -72,14 +72,17 @@ function Topbar({
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            className={cn(buttonVariants({ variant: "ghost" }), "h-9 gap-2 px-1.5")}
+            className={cn(
+              buttonVariants({ variant: "ghost", size: "sm" }),
+              "gap-2 px-1.5 normal-case",
+            )}
             aria-label="Open account menu"
           >
-            <Avatar className="size-6">
+            <Avatar className="size-6 border-rack-edge">
               <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
-              <AvatarFallback className="text-[0.625rem]">{user.initials}</AvatarFallback>
+              <AvatarFallback>{user.initials}</AvatarFallback>
             </Avatar>
-            <span className="hidden max-w-36 truncate text-sm font-medium xl:block">
+            <span className="type-strip hidden max-w-36 truncate xl:block">
               {activeOrg?.name ?? user.name}
             </span>
             <ChevronDown className="text-muted-foreground hidden size-4 sm:block" />

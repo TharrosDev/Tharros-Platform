@@ -14,6 +14,11 @@ import { navSections, type NavItem } from "@/components/shell/nav";
 import type { DisplayUser } from "@/lib/auth/user";
 import type { UserOrg } from "@/lib/org/queries";
 
+/*
+  The rack rail. Section names are engraved into the chrome, and the current
+  page is a hi-vis strip seated in its slot: the same object that carries work
+  on the board, used here to carry place.
+*/
 function Sidebar({
   user,
   orgs,
@@ -21,9 +26,9 @@ function Sidebar({
   onNavigate,
   className,
   /**
-   * Namespaces the sliding active-pill layoutId. The desktop sidebar and the
+   * Namespaces the sliding seated-strip layoutId. The desktop rail and the
    * mobile drawer are both mounted at once; without distinct namespaces the
-   * pill would animate between the two copies.
+   * strip would animate between the two copies.
    */
   ns = "desktop",
   /** Platform admin (email allowlist): shows the cross-org admin section. */
@@ -49,26 +54,27 @@ function Sidebar({
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
-      <div className="flex h-14 shrink-0 items-center px-4">
+      {/* The nameplate, screwed to the top of the rack. */}
+      <div className="seam-b h-topbar flex shrink-0 items-center px-4">
         <Link
           href="/dashboard"
           onClick={onNavigate}
           aria-label="Tharros dashboard"
-          className=" -ml-1 inline-flex items-center rounded-md px-1 py-1 "
+          className="-ml-1 inline-flex items-center px-1 py-1"
         >
           <TharrosWordmark markClassName="size-6" />
         </Link>
       </div>
 
-      <div className="px-3">
+      <div className="px-3 pt-3">
         <OrgSwitcher orgs={orgs} activeOrg={activeOrg} />
       </div>
 
-      <nav aria-label="Main" className="mt-4 flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-4">
+      <nav aria-label="Main" className="mt-5 flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-4">
         {sections.map((section) => (
           <div key={section.label}>
-            <p className="type-meta text-muted-foreground/80 px-2.5 pb-1.5">{section.label}</p>
-            <ul className="flex flex-col gap-px">
+            <p className="type-meta text-rack-muted-foreground px-2 pb-1.5">{section.label}</p>
+            <ul className="flex flex-col">
               {section.items.map((item) => (
                 <li key={item.href}>
                   <NavLink item={item} ns={ns} onNavigate={onNavigate} />
@@ -79,14 +85,14 @@ function Sidebar({
         ))}
       </nav>
 
-      <div className="border-sidebar-border flex items-center gap-2.5 border-t px-4 py-3">
+      <div className="seam-t flex items-center gap-2.5 px-4 py-3">
         <Avatar>
           <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
           <AvatarFallback>{user.initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <p className="truncate text-sm font-medium">{user.name}</p>
-          <p className="text-muted-foreground truncate text-xs">{user.email}</p>
+          <p className="type-strip truncate">{user.name}</p>
+          <p className="text-rack-muted-foreground type-small truncate">{user.email}</p>
         </div>
       </div>
     </div>
@@ -104,22 +110,24 @@ function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNaviga
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        " relative flex min-h-9 items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors ",
+        "min-h-control-lg relative flex items-center gap-2.5 px-2 transition-colors",
         active
-          ? "text-sidebar-accent-foreground font-semibold"
-          : "text-sidebar-muted-foreground hover:bg-accent hover:text-sidebar-foreground font-medium",
+          ? "text-sidebar-accent-foreground"
+          : "text-rack-muted-foreground hover:bg-accent hover:text-rack-foreground",
       )}
     >
       {active ? (
         <m.span
-          layoutId={`nav-pill-${ns}`}
+          layoutId={`nav-strip-${ns}`}
           transition={spring.snappy}
-          className="bg-sidebar-accent absolute inset-0 rounded-md"
+          className="bg-sidebar-accent absolute inset-0"
           aria-hidden
         />
       ) : null}
       <Icon className="relative size-4 shrink-0" />
-      <span className="relative flex-1 truncate">{item.label}</span>
+      <span className={cn("type-strip relative flex-1 truncate", active && "font-semibold")}>
+        {item.label}
+      </span>
     </Link>
   );
 }

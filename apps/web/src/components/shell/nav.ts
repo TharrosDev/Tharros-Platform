@@ -6,6 +6,7 @@ import {
   BookOpen,
   CalendarDays,
   CalendarRange,
+  ClipboardCheck,
   Clock,
   CreditCard,
   LayoutGrid,
@@ -61,7 +62,8 @@ export const navSections: NavSection[] = [
 export const schedulingNav: NavItem[] = [
   { label: "Overview", href: "/scheduling", icon: CalendarDays },
   { label: "Schedule", href: "/scheduling/calendar", icon: CalendarRange },
-  { label: "Team", href: "/scheduling/employees", icon: Users },
+  { label: "Approvals", href: "/scheduling/approvals", icon: ClipboardCheck },
+  { label: "Employees", href: "/scheduling/employees", icon: Users },
   { label: "Availability", href: "/scheduling/availability", icon: Clock },
   { label: "Conversations", href: "/scheduling/conversations", icon: MessagesSquare },
   { label: "Analytics", href: "/scheduling/analytics", icon: BarChart3 },

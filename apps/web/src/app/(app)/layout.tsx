@@ -51,12 +51,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <TooltipProvider>
         <a
           href="#main-content"
-          className="bg-primary text-primary-foreground fixed left-4 top-4 z-toast -translate-y-24 rounded-lg px-4 py-2 text-sm font-semibold shadow-raised transition-transform focus:translate-y-0 "
+          className="bg-primary text-primary-foreground border-primary-edge type-control z-toast fixed top-4 left-4 -translate-y-24 border-2 px-4 py-2 transition-transform focus:translate-y-0"
         >
           Skip to content
         </a>
-        <div className="bg-background flex min-h-screen">
-          <aside className="bg-sidebar text-sidebar-foreground border-sidebar-border sticky top-0 hidden h-screen w-60 shrink-0 border-r lg:block">
+        <div className="bg-background flex min-h-dvh">
+          <aside className="on-rack-deep seam-r w-rail sticky top-0 hidden h-dvh shrink-0 lg:block">
             <Sidebar
               user={displayUser}
               orgs={orgs}
@@ -77,7 +77,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <UsageBanner state={usageBanner} />
             <main
               id="main-content"
-              className="mx-auto w-full max-w-[88rem] flex-1 space-y-8 px-4 py-6 sm:px-6 sm:py-8 xl:px-10"
+              className="max-w-board mx-auto w-full flex-1 space-y-8 px-4 py-6 sm:px-6 sm:py-8 xl:px-10"
             >
               {children}
             </main>

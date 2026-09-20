@@ -3,27 +3,28 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { m } from "motion/react";
-import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { spring } from "@/components/motion";
+import type { NavIcon } from "@/components/shell/nav";
 
 export type SectionNavItem = {
   href: string;
   label: string;
-  icon?: LucideIcon;
-  /** Destructive section (e.g. danger zone): tinted red instead of cobalt. */
+  icon?: NavIcon;
+  /** Destructive section (e.g. danger zone): signal red instead of press black. */
   danger?: boolean;
-  /** Small count badge (e.g. pending approvals). Omitted when 0. */
+  /** Small count tab (e.g. pending approvals). Omitted when 0. */
   badge?: number;
   /** Match only the exact pathname (for a section's index page). */
   exact?: boolean;
 };
 
 /**
- * Shared section sub-nav. Horizontal: a scrollable underline tab rail whose
- * cobalt indicator slides between items. `orientation="responsive"` becomes a
- * vertical list on lg+ (settings), with a soft pill for the current page.
+ * Bay selectors. Horizontal: a scrollable rail of bay labels with a heavy
+ * press-black rule struck under the open bay. `orientation="responsive"`
+ * becomes a vertical list on lg+ (settings), where the open bay is a seated
+ * strip instead.
  */
 export function SectionNav({
   items,
@@ -44,8 +45,8 @@ export function SectionNav({
     <nav
       aria-label={ariaLabel}
       className={cn(
-        "-mx-4 flex gap-1 overflow-x-auto border-b px-4 sm:mx-0 sm:px-0",
-        vertical && "lg:flex-col lg:gap-px lg:overflow-visible lg:border-b-0",
+        "-mx-4 flex gap-0 overflow-x-auto border-b px-4 sm:mx-0 sm:px-0",
+        vertical && "lg:flex-col lg:overflow-visible lg:border-b-0",
       )}
     >
       {items.map(({ href, label, icon: Icon, danger, badge, exact }) => {
@@ -58,12 +59,11 @@ export function SectionNav({
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              " relative flex min-h-10 shrink-0 items-center gap-2 px-2.5 text-sm transition-colors ",
-              vertical && "lg:min-h-9 lg:rounded-md",
+              "min-h-control-lg type-meta relative flex shrink-0 items-center gap-2 px-3 transition-colors",
               active
                 ? cn("font-semibold", danger ? "text-destructive" : "text-foreground")
                 : cn(
-                    "text-muted-foreground hover:text-foreground font-medium",
+                    "text-muted-foreground hover:text-foreground",
                     vertical && "lg:hover:bg-accent",
                     danger && "text-destructive/85 hover:text-destructive",
                   ),
@@ -75,20 +75,29 @@ export function SectionNav({
                 transition={spring.snappy}
                 aria-hidden
                 className={cn(
-                  "absolute inset-x-2 -bottom-px h-0.5 rounded-full",
-                  danger ? "bg-destructive" : "bg-primary",
+                  "absolute inset-x-0 -bottom-px h-0.5",
+                  danger ? "bg-destructive" : "bg-foreground",
                   vertical &&
-                    cn(
-                      "lg:inset-0 lg:h-auto lg:rounded-md",
-                      danger ? "lg:bg-destructive/10" : "lg:bg-accent",
-                    ),
+                    cn("lg:inset-0 lg:h-auto", danger ? "lg:bg-destructive/12" : "lg:bg-primary"),
                 )}
               />
             ) : null}
             {Icon ? <Icon className="relative size-4 shrink-0" aria-hidden /> : null}
-            <span className="relative whitespace-nowrap">{label}</span>
+            <span
+              className={cn(
+                "relative whitespace-nowrap",
+                active && vertical && "lg:text-primary-foreground",
+              )}
+            >
+              {label}
+            </span>
             {badge ? (
-              <span className="bg-primary text-primary-foreground num relative inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-[0.625rem] font-semibold">
+              <span
+                className={cn(
+                  "bg-destructive text-destructive-foreground num relative inline-flex h-4.5 min-w-4.5 items-center justify-center px-1 text-[0.6875rem] font-semibold",
+                  active && vertical && "lg:bg-primary-edge lg:text-primary",
+                )}
+              >
                 {badge > 9 ? "9+" : badge}
               </span>
             ) : null}
