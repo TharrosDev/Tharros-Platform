@@ -12,6 +12,8 @@ import { getScheduleActivityPage } from "@/lib/audit/queries";
 import { presentActivityFeed } from "@/lib/audit/present";
 import { cn, formatDateRange } from "@/lib/utils";
 
+export const metadata = { title: "Scheduling" };
+
 /**
  * Scheduling overview: what needs the manager (linking to the Approvals
  * inbox), the current schedule, the setup summary and recent activity. Routes

@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NotificationsForm } from "@/components/org/notifications-form";
 import { NOTIFICATION_DEFAULTS } from "@/lib/org/schemas";
+import { NoActiveOrg } from "@/components/access-notice";
 
 export const metadata: Metadata = { title: "Notifications" };
 
@@ -15,7 +16,7 @@ export default async function NotificationsSettingsPage() {
     return (
       <>
         <PageHeader title="Notifications" description="Workspace email preferences." />
-        <p className="text-muted-foreground type-body">Select or create an organization first.</p>
+        <NoActiveOrg what="set notification preferences" />
       </>
     );
   }

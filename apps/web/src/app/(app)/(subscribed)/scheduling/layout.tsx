@@ -1,39 +1,24 @@
-import { redirect } from "next/navigation";
-
-import { getFeatureAccess } from "@/lib/billing/entitlements";
-import { minTierForFeature } from "@/lib/billing/plans";
 import { getOrgContext } from "@/lib/org/queries";
 import { getSchedulingStatus } from "@/lib/scheduling/queries";
 import { countPendingApprovals } from "@/lib/scheduling/pending-approvals";
-import { UpgradeGate } from "@/components/billing/upgrade-gate";
+import { FeatureGate } from "@/components/billing/feature-gate";
 import { SchedulingSubnav } from "@/components/scheduling/subnav";
 
 /**
- * Day 61 — feature gate for AI Workforce Scheduling. The parent (subscribed)
- * group already requires an active subscription; this adds the per-tier check:
- * scheduling is a team feature (Growth+), so a Starter org sees an upgrade prompt
- * instead of the product (`reason='not_in_plan'`). A missing subscription
- * (shouldn't reach here) falls back to /billing.
- *
- * Once entitled and set up, every scheduling page renders under the persistent
- * section rail (with a pending-approvals badge for managers). Before setup the
- * rail is hidden so the wizard stands alone.
+ * Scheduling is Growth+, so the shared gate runs first. Once entitled and set
+ * up, every page in the section renders under the persistent bay rail, with a
+ * pending-approvals count for managers. Before setup the rail is hidden so the
+ * wizard stands alone.
  */
 export default async function SchedulingLayout({ children }: { children: React.ReactNode }) {
-  const access = await getFeatureAccess("scheduling");
+  return (
+    <FeatureGate feature="scheduling">
+      <SchedulingFrame>{children}</SchedulingFrame>
+    </FeatureGate>
+  );
+}
 
-  if (!access.entitled) {
-    if (access.reason === "no_subscription") redirect("/billing");
-    const requiredPlan = minTierForFeature("scheduling");
-    return (
-      <UpgradeGate
-        feature="Scheduling"
-        requiredPlanName={requiredPlan?.name ?? "Growth"}
-        blurb="Build conflict-free staff schedules with the AI workforce scheduler: availability collection, auto-generation, and disruption handling."
-      />
-    );
-  }
-
+async function SchedulingFrame({ children }: { children: React.ReactNode }) {
   const { activeOrg } = await getOrgContext();
   const { onboardedAt } = activeOrg
     ? await getSchedulingStatus(activeOrg.id)
@@ -41,7 +26,7 @@ export default async function SchedulingLayout({ children }: { children: React.R
 
   if (!activeOrg || !onboardedAt) return <>{children}</>;
 
-  // Pending-approvals badge (managers only). Members see the rail without a count.
+  // Members see the rail without a count; only managers can act on approvals.
   const canManage = activeOrg.role === "owner" || activeOrg.role === "admin";
   const pendingApprovals = canManage ? await countPendingApprovals(activeOrg.id) : 0;
 

@@ -5,6 +5,8 @@ import { SchedulingSetupWizard } from "@/components/scheduling/setup/setup-wizar
 import { getOrgContext } from "@/lib/org/queries";
 import { getSchedulingSetup, getSchedulingStatus } from "@/lib/scheduling/queries";
 
+export const metadata = { title: "Scheduling setup" };
+
 /**
  * Day 43 — scheduling setup wizard. Subscription-gated by the parent
  * (subscribed) layout. The wizard stays reachable after onboarding so the owner

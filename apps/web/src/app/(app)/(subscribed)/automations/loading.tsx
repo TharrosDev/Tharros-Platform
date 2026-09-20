@@ -1,18 +1,20 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  BaySkeleton,
+  HeaderSkeleton,
+  LogSkeleton,
+  PanelSkeleton,
+} from "@/components/board/board-skeleton";
 
-export default function AutomationsLoading() {
+/** Workflows, the builder and the run history. Was a stack of generic grey rectangles. */
+export default function Loading() {
   return (
-    <div role="status" aria-busy="true" className="space-y-6">
-      <span className="sr-only">Loading automations…</span>
-      <div className="space-y-2">
-        <Skeleton className="h-7 w-44" />
-        <Skeleton className="h-4 w-[34rem] max-w-full" />
+    <div role="status" aria-busy="true" aria-label="Loading" className="space-y-8">
+      <HeaderSkeleton />
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <BaySkeleton rows={4} />
+        <PanelSkeleton lines={5} />
       </div>
-      <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
-        <Skeleton className="h-[34rem] rounded-xl" />
-        <Skeleton className="h-[34rem] rounded-xl" />
-      </div>
-      <Skeleton className="h-72 rounded-xl" />
+      <LogSkeleton rows={5} />
     </div>
   );
 }

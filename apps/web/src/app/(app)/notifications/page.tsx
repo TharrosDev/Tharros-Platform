@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Bell } from "lucide-react";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import {
   dismissNotification,
 } from "@/lib/notifications/actions";
 import { formatTimestamp, notificationLink } from "@/lib/notifications/types";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const metadata: Metadata = { title: "Notifications" };
 
@@ -43,9 +45,11 @@ export default async function NotificationsPage() {
       />
 
       {notifications.length === 0 ? (
-        <p className="text-muted-foreground type-body">
-          You have no notifications yet. Updates from your workspace will show up here.
-        </p>
+        <EmptyState
+          icon={<Bell />}
+          title="Nothing in the inbox"
+          description="Updates from scheduling, lead capture and automations land here as they happen."
+        />
       ) : (
         <ul className="bg-card divide-y overflow-hidden rounded-xl border shadow-card">
           {notifications.map((n) => {

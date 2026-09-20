@@ -12,6 +12,7 @@ import {
 } from "@/lib/scheduling/queries";
 import { getPendingTimeOff } from "@/lib/scheduling/time-off";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { RoleDenied } from "@/components/access-notice";
 
 export const metadata: Metadata = { title: "Approvals" };
 
@@ -39,9 +40,7 @@ export default async function ApprovalsPage() {
           title="Approvals"
           description="Swap requests, time off, and unfilled shifts that need a manager."
         />
-        <p className="text-muted-foreground type-body">
-          Approvals are handled by your organization&apos;s owners and admins.
-        </p>
+        <RoleDenied what="approvals" who="managers" />
       </>
     );
   }

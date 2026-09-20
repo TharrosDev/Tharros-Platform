@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getOrgContext } from "@/lib/org/queries";
 import { PageHeader } from "@/components/page-header";
 import { DangerZone } from "@/components/settings/danger-zone";
+import { NoActiveOrg } from "@/components/access-notice";
 
 export const metadata: Metadata = { title: "Danger zone" };
 
@@ -13,7 +14,7 @@ export default async function DangerSettingsPage() {
     return (
       <>
         <PageHeader title="Danger zone" description="Irreversible account actions." />
-        <p className="text-muted-foreground type-body">Select or create an organization first.</p>
+        <NoActiveOrg what="delete an organization" />
       </>
     );
   }

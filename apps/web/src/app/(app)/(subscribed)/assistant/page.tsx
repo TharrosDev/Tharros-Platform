@@ -13,6 +13,8 @@ import { PageHeader } from "@/components/page-header";
 import { AssistantChat } from "@/components/assistant/assistant-chat";
 import { ConversationHistory } from "@/components/assistant/conversation-history";
 
+export const metadata = { title: "AI Assistant" };
+
 export default async function AssistantPage({
   searchParams,
 }: {

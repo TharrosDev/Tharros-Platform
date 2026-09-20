@@ -6,6 +6,8 @@ import { getOrgContext } from "@/lib/org/queries";
 import { getRoster } from "@/lib/employees/queries";
 import { getEmployeeAvailability, getSchedulingStatus } from "@/lib/scheduling/queries";
 
+export const metadata = { title: "Availability" };
+
 /**
  * Day 44 — manager availability surface. Pick a team member (via ?employee=),
  * then edit their permanent weekly availability + dated overrides. Subscription

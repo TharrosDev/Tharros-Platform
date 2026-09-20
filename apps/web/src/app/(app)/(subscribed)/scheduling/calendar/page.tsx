@@ -20,6 +20,8 @@ import type { ValidationContext } from "@/lib/scheduling/validation";
 import { getPendingTimeOff, type PendingTimeOff } from "@/lib/scheduling/time-off";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const metadata = { title: "Schedule" };
+
 /**
  * Day 50/51 — schedule calendar. Renders the latest schedule as a two-week grid
  * with manual edit tools (assign, retime, add, delete, lock) that re-validate

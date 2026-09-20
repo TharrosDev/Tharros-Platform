@@ -28,6 +28,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
+
+export const metadata = { title: "Automations" };
 
 const statusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -311,15 +314,15 @@ export default async function AutomationsPage({
               ))}
             </ul>
           ) : (
-            <div className="bg-card/60 rounded-xl border border-dashed px-6 py-10 text-center">
-              <Workflow className="text-muted-foreground mx-auto size-5" aria-hidden />
-              <p className="mt-3 font-semibold">No workflows yet</p>
-              <p className="text-muted-foreground type-small mx-auto mt-1 max-w-sm">
-                {canManage
-                  ? "Create one to react automatically when leads arrive or change status."
-                  : "Owners and admins can create workflows. They'll appear here."}
-              </p>
-            </div>
+            <EmptyState
+              icon={<Workflow />}
+              title="No workflows yet"
+              description={
+                canManage
+                  ? "A workflow reacts when a lead arrives or changes status: notify a manager, move the lead, or prepare a follow-up draft for review."
+                  : "Owners and admins can create workflows. They will appear here once one exists."
+              }
+            />
           )}
         </section>
 
@@ -468,13 +471,11 @@ export default async function AutomationsPage({
             </TableBody>
           </Table>
         ) : (
-          <div className="bg-card/60 rounded-xl border border-dashed px-6 py-8 text-center">
-            <BellRing className="text-muted-foreground mx-auto size-5" aria-hidden />
-            <p className="mt-3 font-semibold">No runs yet</p>
-            <p className="text-muted-foreground type-small mt-1">
-              Each run is recorded here with its result once a matching lead event is processed.
-            </p>
-          </div>
+          <EmptyState
+            icon={<BellRing />}
+            title="No runs yet"
+            description="Every run is recorded here with its result as soon as a matching lead event is processed."
+          />
         )}
       </section>
     </>

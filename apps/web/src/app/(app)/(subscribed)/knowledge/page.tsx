@@ -4,6 +4,8 @@ import { PageHeader } from "@/components/page-header";
 import { DocumentUploader } from "@/components/documents/document-uploader";
 import { DocumentList } from "@/components/documents/document-list";
 
+export const metadata = { title: "Knowledge" };
+
 /**
  * Day 24 — Knowledge base. Upload + manage the documents the AI Assistant
  * answers from. Day 32 added tagging, library search, citation usage stats, and

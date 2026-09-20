@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteForm } from "@/components/team/invite-form";
 import { TeamLists } from "@/components/team/team-lists";
+import { NoActiveOrg } from "@/components/access-notice";
 
 export const metadata: Metadata = { title: "Team" };
 
@@ -16,9 +17,7 @@ export default async function TeamPage() {
     return (
       <>
         <PageHeader title="Team" description="Manage who has access to your workspace." />
-        <p className="text-muted-foreground type-body">
-          Select or create an organization to manage its team.
-        </p>
+        <NoActiveOrg what="manage members" />
       </>
     );
   }

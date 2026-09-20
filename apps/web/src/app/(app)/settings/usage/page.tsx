@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormMessage } from "@/components/auth/auth-card";
 import { cn } from "@/lib/utils";
+import { NoActiveOrg } from "@/components/access-notice";
+import { RoleDenied } from "@/components/access-notice";
 
 export const metadata: Metadata = { title: "Usage" };
 
@@ -38,7 +40,7 @@ export default async function UsagePage() {
     return (
       <>
         <PageHeader title="Usage" description="Your AI usage this month." />
-        <p className="text-muted-foreground type-body">Select or create an organization first.</p>
+        <NoActiveOrg what="see AI usage" />
       </>
     );
   }
@@ -48,7 +50,7 @@ export default async function UsagePage() {
     return (
       <>
         <PageHeader title="Usage" description="Your AI usage this month." />
-        <FormMessage tone="error">Only the organization owner can view usage.</FormMessage>
+        <RoleDenied what="AI usage" who="owner" />
       </>
     );
   }

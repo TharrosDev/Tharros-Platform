@@ -1,34 +1,15 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { BaySkeleton, HeaderSkeleton, LogSkeleton } from "@/components/board/board-skeleton";
 
-/**
- * Day 35 — route skeleton for /dashboard. Mirrors the header + focal "waiting on
- * you" card + the activity / right-rail grid.
- */
-export default function DashboardLoading() {
+/** The board arriving: the lead bay, the state bay and the record. */
+export default function Loading() {
   return (
-    <div role="status" aria-busy="true" className="space-y-8">
-      <span className="sr-only">Loading your dashboard…</span>
-
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-7 w-56" />
-          <Skeleton className="h-4 w-96 max-w-full" />
-        </div>
-        <Skeleton className="h-10 w-40" />
+    <div role="status" aria-busy="true" aria-label="Loading" className="space-y-8">
+      <HeaderSkeleton />
+      <div className="grid gap-x-8 gap-y-8 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+        <BaySkeleton rows={4} lead />
+        <BaySkeleton rows={5} />
       </div>
-
-      {/* Focal card */}
-      <Skeleton className="h-44 w-full rounded-lg" />
-
-      {/* Activity + right rail */}
-      <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-        <Skeleton className="h-64 w-full rounded-lg" />
-        <div className="flex flex-col gap-4">
-          <Skeleton className="h-40 w-full rounded-lg" />
-          <Skeleton className="h-48 w-full rounded-lg" />
-        </div>
-      </div>
+      <LogSkeleton />
     </div>
   );
 }

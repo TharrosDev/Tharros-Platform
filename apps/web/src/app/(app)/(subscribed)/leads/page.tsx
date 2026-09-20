@@ -34,6 +34,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/ui/empty-state";
+
+export const metadata = { title: "Lead Capture" };
 
 const statusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
 
@@ -324,17 +327,15 @@ export default async function LeadsPage({
             </TableBody>
           </Table>
         ) : (
-          <div className="bg-card/60 rounded-xl border border-dashed px-6 py-10 text-center">
-            <Users className="text-muted-foreground mx-auto size-5" aria-hidden />
-            <p className="mt-3 font-semibold">
-              {search || selectedStatus ? "No leads match" : "No leads yet"}
-            </p>
-            <p className="text-muted-foreground type-small mx-auto mt-1 max-w-sm">
-              {search || selectedStatus
-                ? "Try another status or search."
-                : "Add a lead by hand or share a capture form. Every new lead appears here."}
-            </p>
-          </div>
+          <EmptyState
+            icon={<Users />}
+            title={search || selectedStatus ? "No leads match those filters" : "No leads yet"}
+            description={
+              search || selectedStatus
+                ? "Try another status, or clear the search."
+                : "Add a lead by hand, or publish a capture form and share the link. Every new lead lands here."
+            }
+          />
         )}
       </section>
     </>
