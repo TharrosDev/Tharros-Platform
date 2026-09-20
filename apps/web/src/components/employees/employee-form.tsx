@@ -39,9 +39,10 @@ export function EmployeeForm() {
             placeholder="Sam Rivera"
             defaultValue={state?.values?.name}
             aria-invalid={Boolean(state?.errors?.name)}
+            aria-describedby={state?.errors?.name ? "employee-name-error" : undefined}
             required
           />
-          <FieldError message={state?.errors?.name?.[0]} />
+          <FieldError id="employee-name-error" message={state?.errors?.name?.[0]} />
         </div>
 
         <div className="space-y-1.5">
@@ -54,9 +55,10 @@ export function EmployeeForm() {
             placeholder="sam@business.ca"
             defaultValue={state?.values?.email}
             aria-invalid={Boolean(state?.errors?.email)}
+            aria-describedby={state?.errors?.email ? "employee-email-error" : undefined}
             required
           />
-          <FieldError message={state?.errors?.email?.[0]} />
+          <FieldError id="employee-email-error" message={state?.errors?.email?.[0]} />
         </div>
 
         <div className="space-y-1.5">

@@ -63,9 +63,10 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
               autoComplete="name"
               defaultValue={value("fullName")}
               aria-invalid={Boolean(state?.errors?.fullName)}
+              aria-describedby={state?.errors?.fullName ? "fullName-error" : undefined}
               required
             />
-            <FieldError message={state?.errors?.fullName?.[0]} />
+            <FieldError id="fullName-error" message={state?.errors?.fullName?.[0]} />
           </div>
 
           <div className="space-y-1.5">
@@ -78,8 +79,9 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
               placeholder="e.g. Owner, Office manager"
               defaultValue={value("jobTitle")}
               aria-invalid={Boolean(state?.errors?.jobTitle)}
+              aria-describedby={state?.errors?.jobTitle ? "jobTitle-error" : undefined}
             />
-            <FieldError message={state?.errors?.jobTitle?.[0]} />
+            <FieldError id="jobTitle-error" message={state?.errors?.jobTitle?.[0]} />
           </div>
         </div>
 
@@ -93,8 +95,9 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
             placeholder="A few words about you and what you do."
             defaultValue={value("bio")}
             aria-invalid={Boolean(state?.errors?.bio)}
+            aria-describedby={state?.errors?.bio ? "bio-error" : undefined}
           />
-          <FieldError message={state?.errors?.bio?.[0]} />
+          <FieldError id="bio-error" message={state?.errors?.bio?.[0]} />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -108,8 +111,9 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
               placeholder="e.g. (613) 555-0123"
               defaultValue={value("phone")}
               aria-invalid={Boolean(state?.errors?.phone)}
+              aria-describedby={state?.errors?.phone ? "phone-error" : undefined}
             />
-            <FieldError message={state?.errors?.phone?.[0]} />
+            <FieldError id="phone-error" message={state?.errors?.phone?.[0]} />
           </div>
 
           <div className="space-y-1.5">
@@ -121,8 +125,9 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
               placeholder="e.g. Ottawa, ON"
               defaultValue={value("location")}
               aria-invalid={Boolean(state?.errors?.location)}
+              aria-describedby={state?.errors?.location ? "location-error" : undefined}
             />
-            <FieldError message={state?.errors?.location?.[0]} />
+            <FieldError id="location-error" message={state?.errors?.location?.[0]} />
           </div>
         </div>
 
@@ -136,8 +141,9 @@ export function ProfileForm({ profile }: { profile: ProfileDetails }) {
               placeholder="e.g. America/Toronto"
               defaultValue={value("timezone")}
               aria-invalid={Boolean(state?.errors?.timezone)}
+              aria-describedby={state?.errors?.timezone ? "timezone-error" : undefined}
             />
-            <FieldError message={state?.errors?.timezone?.[0]} />
+            <FieldError id="timezone-error" message={state?.errors?.timezone?.[0]} />
           </div>
 
           <div className="space-y-1.5">

@@ -49,6 +49,28 @@ export function FeedbackWidget() {
   const [error, setError] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();
   const bottomRef = React.useRef<HTMLDivElement>(null);
+  const panelRef = React.useRef<HTMLElement>(null);
+  const launcherRef = React.useRef<HTMLButtonElement>(null);
+
+  /*
+    This is a non-modal helper panel, not a modal dialog: it does not trap the
+    page and the rest of the app stays usable behind it. It previously claimed
+    role="dialog" while providing none of what that role promises. It is now an
+    ordinary disclosure, and it owes Escape and focus return, which it now has.
+  */
+  React.useEffect(() => {
+    if (!open) return;
+    panelRef.current?.focus();
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setOpen(false);
+      launcherRef.current?.focus();
+    }
+    const node = panelRef.current;
+    node?.addEventListener("keydown", onKey);
+    return () => node?.removeEventListener("keydown", onKey);
+  }, [open]);
 
   const state = tab === "ask" ? ask : suggest;
   const setState = tab === "ask" ? setAsk : setSuggest;
@@ -105,13 +127,15 @@ export function FeedbackWidget() {
     <div className={cn("z-widget fixed right-4 bottom-4", overComposer && "max-lg:hidden")}>
       <AnimatePresence initial={false} mode="popLayout">
         {open ? (
-          <m.div
+          <m.section
             key="panel"
             layoutId="feedback-widget"
             transition={spring.gentle}
-            className="bg-popover shadow-modal flex h-[32rem] max-h-[calc(100dvh-6rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border"
-            role="dialog"
+            ref={panelRef}
+            id="feedback-panel"
+            tabIndex={-1}
             aria-label="Help and feedback"
+            className="bg-popover shadow-modal flex h-[32rem] max-h-[calc(100dvh-6rem)] w-[24rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden border"
           >
             {/* Header */}
             <div className="flex items-center gap-2.5 border-b px-4 py-3">
@@ -274,15 +298,18 @@ export function FeedbackWidget() {
                 </button>
               </div>
             </div>
-          </m.div>
+          </m.section>
         ) : (
           <m.button
             key="pill"
             layoutId="feedback-widget"
             transition={spring.gentle}
+            ref={launcherRef}
             type="button"
             onClick={() => setOpen(true)}
-            className="bg-card text-foreground shadow-raised hover:text-primary-soft-foreground flex size-11 items-center justify-center border transition-colors "
+            aria-expanded={false}
+            aria-controls="feedback-panel"
+            className="bg-card text-foreground shadow-raised hover:text-primary-soft-foreground flex size-11 items-center justify-center border transition-colors"
             aria-label="Open help and feedback"
             title="Help & feedback"
           >

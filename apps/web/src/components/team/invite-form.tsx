@@ -49,9 +49,10 @@ export function InviteForm() {
             placeholder="teammate@business.ca"
             defaultValue={state?.values?.email}
             aria-invalid={Boolean(state?.errors?.email)}
+            aria-describedby={state?.errors?.email ? "invite-email-error" : undefined}
             required
           />
-          <FieldError message={state?.errors?.email?.[0]} />
+          <FieldError id="invite-email-error" message={state?.errors?.email?.[0]} />
         </div>
 
         <div className="space-y-1.5">

@@ -41,9 +41,10 @@ export function ForgotPasswordForm() {
               autoComplete="email"
               defaultValue={state?.values?.email}
               aria-invalid={Boolean(state?.errors?.email)}
+              aria-describedby={state?.errors?.email ? "email-error" : undefined}
               required
             />
-            <FieldError message={state?.errors?.email?.[0]} />
+            <FieldError id="email-error" message={state?.errors?.email?.[0]} />
           </div>
 
           <Button type="submit" className="w-full" disabled={pending}>

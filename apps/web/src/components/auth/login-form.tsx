@@ -43,9 +43,10 @@ export function LoginForm({ notice, next }: { notice?: string; next?: string }) 
             autoComplete="email"
             defaultValue={state?.values?.email}
             aria-invalid={Boolean(state?.errors?.email)}
+            aria-describedby={state?.errors?.email ? "email-error" : undefined}
             required
           />
-          <FieldError message={state?.errors?.email?.[0]} />
+          <FieldError id="email-error" message={state?.errors?.email?.[0]} />
         </div>
 
         <div className="space-y-1.5">
@@ -64,9 +65,10 @@ export function LoginForm({ notice, next }: { notice?: string; next?: string }) 
             type="password"
             autoComplete="current-password"
             aria-invalid={Boolean(state?.errors?.password)}
+            aria-describedby={state?.errors?.password ? "password-error" : undefined}
             required
           />
-          <FieldError message={state?.errors?.password?.[0]} />
+          <FieldError id="password-error" message={state?.errors?.password?.[0]} />
         </div>
 
         <Button type="submit" className="w-full" disabled={pending}>

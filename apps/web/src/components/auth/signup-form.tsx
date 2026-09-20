@@ -42,9 +42,10 @@ export function SignupForm({ next }: { next?: string }) {
             autoComplete="name"
             defaultValue={state?.values?.fullName}
             aria-invalid={Boolean(state?.errors?.fullName)}
+            aria-describedby={state?.errors?.fullName ? "fullName-error" : undefined}
             required
           />
-          <FieldError message={state?.errors?.fullName?.[0]} />
+          <FieldError id="fullName-error" message={state?.errors?.fullName?.[0]} />
         </div>
 
         <div className="space-y-1.5">
@@ -56,9 +57,10 @@ export function SignupForm({ next }: { next?: string }) {
             autoComplete="email"
             defaultValue={state?.values?.email}
             aria-invalid={Boolean(state?.errors?.email)}
+            aria-describedby={state?.errors?.email ? "email-error" : undefined}
             required
           />
-          <FieldError message={state?.errors?.email?.[0]} />
+          <FieldError id="email-error" message={state?.errors?.email?.[0]} />
         </div>
 
         <div className="space-y-1.5">

@@ -55,7 +55,7 @@ function Topbar({
     <header className="on-rack seam-b z-topbar h-topbar sticky top-0 flex items-center gap-2 px-3 sm:px-6">
       <MobileNav user={user} orgs={orgs} activeOrg={activeOrg} />
 
-      <Breadcrumbs className="hidden min-w-0 flex-1 md:block" />
+      <Breadcrumbs className="min-w-0 flex-1" />
 
       <div className="ml-auto flex items-center gap-2">
         <button

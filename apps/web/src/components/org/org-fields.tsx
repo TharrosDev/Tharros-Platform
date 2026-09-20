@@ -29,9 +29,10 @@ export function OrgFields({ state, autoFocus }: { state: OrgFormState; autoFocus
           autoFocus={autoFocus}
           defaultValue={state?.values?.name}
           aria-invalid={Boolean(state?.errors?.name)}
+          aria-describedby={state?.errors?.name ? "name-error" : undefined}
           required
         />
-        <FieldError message={state?.errors?.name?.[0]} />
+        <FieldError id="name-error" message={state?.errors?.name?.[0]} />
       </div>
 
       <div className="space-y-1.5">

@@ -223,6 +223,12 @@ function CommandPalette({
                 onKeyDown={onInputKeyDown}
                 placeholder="Search pages, actions, documents, people…"
                 aria-label="Search pages, actions, documents, people"
+                role="combobox"
+                aria-expanded
+                aria-controls="command-palette-results"
+                aria-activedescendant={
+                  flat.length ? `command-palette-option-${activeIndex}` : undefined
+                }
                 className="placeholder:text-muted-foreground h-12 w-full bg-transparent text-sm "
               />
               {isSearching ? (
@@ -235,7 +241,19 @@ function CommandPalette({
               )}
             </div>
 
-            <div className="max-h-96 overflow-y-auto p-2">
+            {/* Announced to screen readers as the result set changes. */}
+            <p aria-live="polite" className="sr-only">
+              {showEmpty
+                ? "No matches."
+                : `${flat.length} ${flat.length === 1 ? "result" : "results"}.`}
+            </p>
+
+            <div
+              id="command-palette-results"
+              role="listbox"
+              aria-label="Results"
+              className="max-h-96 overflow-y-auto p-2"
+            >
               {showEmpty ? (
                 <p className="text-muted-foreground px-3 py-6 text-center text-sm">
                   No matches for &ldquo;{query.trim()}&rdquo;.
@@ -254,6 +272,7 @@ function CommandPalette({
                         return (
                           <PaletteRow
                             key={entry.key}
+                            id={`command-palette-option-${flatIndex}`}
                             entry={entry}
                             isActive={flatIndex === activeIndex}
                             onSelect={run}
@@ -274,11 +293,13 @@ function CommandPalette({
 }
 
 function PaletteRow({
+  id,
   entry,
   isActive,
   onSelect,
   onHover,
 }: {
+  id: string;
   entry: Entry;
   isActive: boolean;
   onSelect: (entry: Entry) => void;
@@ -287,6 +308,9 @@ function PaletteRow({
   const Icon = entry.icon;
   return (
     <button
+      id={id}
+      role="option"
+      aria-selected={isActive}
       type="button"
       onClick={() => onSelect(entry)}
       onMouseMove={onHover}
