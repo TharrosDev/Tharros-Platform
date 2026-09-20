@@ -90,7 +90,7 @@ export function EmployeeRoster({
                   >
                     <span
                       aria-hidden
-                      className="bg-secondary text-secondary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                      className="bg-secondary text-secondary-foreground flex size-8 shrink-0 items-center justify-center text-xs font-semibold"
                     >
                       {e.name
                         .split(/\s+/)

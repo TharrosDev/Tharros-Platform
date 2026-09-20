@@ -100,10 +100,10 @@ export default async function UsagePage() {
               <span className="type-h1">{numberFmt.format(used)}</span>
               <span className="text-muted-foreground text-sm">of {numberFmt.format(cap)}</span>
             </div>
-            <div className="bg-accent h-2 w-full overflow-hidden rounded-full" aria-hidden>
+            <div className="bg-accent h-2 w-full overflow-hidden " aria-hidden>
               <div
                 className={cn(
-                  "h-full rounded-full transition-all",
+                  "h-full transition-all",
                   pct >= 100 ? "bg-destructive" : pct >= 80 ? "bg-amber-500" : "bg-primary",
                 )}
                 style={{ width: `${pct}%` }}

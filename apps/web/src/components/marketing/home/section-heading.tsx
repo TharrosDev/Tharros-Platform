@@ -1,49 +1,27 @@
 import { cn } from "@/lib/utils";
-import { MaskedLines, Reveal } from "./reveal";
 
-/** Mono index + eyebrow over an editorial display heading. */
+/**
+ * A section plate. The heading carries its own weight, so there is no label
+ * floated above it.
+ */
 function SectionHeading({
   id,
-  index,
-  eyebrow,
-  lines,
-  intro,
+  title,
+  lede,
   className,
 }: {
   id: string;
-  index: string;
-  eyebrow: string;
-  /** First line in ink, following lines muted. */
-  lines: string[];
-  intro?: React.ReactNode;
+  title: string;
+  lede?: string;
   className?: string;
 }) {
   return (
-    <div className={cn("max-w-5xl", className)}>
-      <Reveal>
-        <p className="type-meta text-muted-foreground flex items-center gap-3">
-          <span className="text-primary-soft-foreground">{index}</span>
-          <span aria-hidden className="bg-border h-px w-8" />
-          {eyebrow}
-        </p>
-      </Reveal>
-      <h2
-        id={id}
-        className="mt-6 text-[clamp(2.4rem,5.4vw,4.75rem)] font-[720] leading-[0.95] tracking-[-0.05em] text-balance"
-      >
-        <MaskedLines
-          lines={lines.map((text, i) => ({
-            text,
-            className: i === 0 ? undefined : "text-muted-foreground",
-          }))}
-        />
+    <div className={cn("border-rack-edge max-w-2xl border-b pb-5", className)}>
+      <h2 id={id} className="type-hero text-rack-foreground">
+        {title}
       </h2>
-      {intro ? (
-        <Reveal delay={0.15}>
-          <p className="text-muted-foreground mt-7 max-w-xl text-lg leading-relaxed text-pretty">
-            {intro}
-          </p>
-        </Reveal>
+      {lede ? (
+        <p className="text-rack-muted-foreground type-body mt-4 text-pretty sm:text-lg">{lede}</p>
       ) : null}
     </div>
   );

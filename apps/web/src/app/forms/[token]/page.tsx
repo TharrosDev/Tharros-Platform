@@ -3,11 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getPublicCaptureForm } from "@/lib/leads/capture";
 import { submitPublicLead } from "@/lib/leads/public-actions";
-import {
-  MarketingBackdrop,
-  MarketingFooter,
-  MarketingHeader,
-} from "@/components/marketing/marketing-chrome";
+import { TharrosWordmark } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,33 +29,33 @@ export default async function PublicLeadFormPage({
   const action = submitPublicLead.bind(null, token);
 
   return (
-    <main className="bg-background text-foreground relative flex min-h-screen flex-col overflow-x-clip">
-      <MarketingBackdrop />
-      <MarketingHeader />
-
+    <main className="bg-background text-foreground relative flex min-h-dvh flex-col overflow-x-clip">
+      {/* Quiet chrome: a stranger filling in a contact form is not shown an app
+          nav with "Sign in" and "Get started". */}
+      <div className="border-border flex items-center border-b px-5 py-4">
+        <TharrosWordmark markClassName="size-6" />
+      </div>
       <section className="relative mx-auto flex w-full max-w-xl flex-1 items-center px-5 py-14">
-        <Card className="shadow-raised w-full rounded-2xl">
+        <Card className="w-full">
           <CardHeader className="px-6 pt-7 sm:px-8">
-            <CardTitle className="text-[1.75rem] font-semibold tracking-[-0.03em]">
-              {form.headline}
-            </CardTitle>
+            <CardTitle className="type-h1">{form.headline}</CardTitle>
             <CardDescription>{form.name}</CardDescription>
           </CardHeader>
           <CardContent className="px-6 pb-7 sm:px-8">
             {query.submitted ? (
               <div
                 role="status"
-                className="bg-success/[0.07] text-success rounded-lg border border-success/25 p-5"
+                className="bg-stock-cleared border-success text-foreground border p-5"
               >
-                <p className="font-semibold">Message received</p>
-                <p className="mt-1 text-sm">{form.successMessage}</p>
+                <p className="type-h2">Message received</p>
+                <p className="type-body text-muted-foreground mt-1">{form.successMessage}</p>
               </div>
             ) : (
               <form action={action} className="space-y-4">
                 {query.error ? (
                   <div
                     role="alert"
-                    className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm"
+                    className="border-destructive bg-stock-signal text-foreground type-body border px-4 py-3"
                   >
                     We could not submit that message. Check the fields and try again.
                   </div>
@@ -110,8 +106,6 @@ export default async function PublicLeadFormPage({
           </CardContent>
         </Card>
       </section>
-
-      <MarketingFooter />
     </main>
   );
 }

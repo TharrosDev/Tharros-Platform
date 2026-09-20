@@ -155,6 +155,8 @@
   --radius-lg: 0rem;
   --radius-xl: 0rem;
   --radius-2xl: 0rem;
+  --radius-3xl: 0rem;
+  --radius-4xl: 0rem;
   --radius-notch: var(--notch);
 
   --color-background: var(--background);
@@ -325,6 +327,15 @@
     font-variation-settings: "wdth" 86;
     text-wrap: balance;
   }
+  /* Marketing display. Persuade volume; the app never uses this step. */
+  .type-hero {
+    font-size: clamp(3rem, 6.4vw, 5.75rem);
+    line-height: 0.93;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    font-variation-settings: "wdth" 82;
+    text-wrap: balance;
+  }
   .type-h1 {
     font-size: 1.75rem; /* 28px: page titles */
     line-height: 1.1;
@@ -451,6 +462,33 @@
   }
   .on-rack-deep {
     background-color: var(--rack-deep);
+  }
+
+  /*
+    Stock seated inside the rack. The rack context cascades to every
+    descendant, so a light strip nested in dark chrome has to put the stock
+    families back or it prints light ink on light paper.
+  */
+  .on-stock {
+    --foreground: oklch(0.205 0.013 80);
+    --card: oklch(0.985 0.006 86);
+    --card-foreground: oklch(0.205 0.013 80);
+    --muted: oklch(0.918 0.012 86);
+    --muted-foreground: oklch(0.445 0.015 80);
+    --secondary: oklch(0.918 0.012 86);
+    --secondary-foreground: oklch(0.275 0.015 80);
+    --accent: oklch(0.905 0.016 86);
+    --accent-foreground: oklch(0.225 0.015 80);
+    --surface-2: oklch(0.928 0.012 86);
+    --surface-2-foreground: oklch(0.205 0.013 80);
+    --surface-3: oklch(0.878 0.015 86);
+    --surface-3-foreground: oklch(0.245 0.015 80);
+    --border: oklch(0.845 0.015 86);
+    --input: oklch(0.6 0.02 86);
+    --primary-soft: oklch(0.935 0.07 90);
+    --primary-soft-foreground: oklch(0.415 0.095 75);
+    --ring: oklch(0.5 0.12 78);
+    color: var(--foreground);
   }
 
   /* Machined seams. A rack is divided by edges, not by shadow. */

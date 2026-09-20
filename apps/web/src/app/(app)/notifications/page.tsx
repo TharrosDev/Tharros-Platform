@@ -61,7 +61,7 @@ export default async function NotificationsPage() {
                 <span
                   aria-hidden
                   className={cn(
-                    "mt-1.5 size-2 shrink-0 rounded-full",
+                    "mt-1.5 size-2 shrink-0 ",
                     n.readAt ? "bg-transparent" : "bg-primary",
                   )}
                 />

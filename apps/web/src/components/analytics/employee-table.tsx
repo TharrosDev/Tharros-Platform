@@ -125,7 +125,7 @@ export function EmployeeAnalyticsTable({ employees }: { employees: EmployeeAnaly
                     <span className="text-muted-foreground">—</span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 tabular-nums">
-                      <span aria-hidden className={cn("size-1.5 rounded-full", BAND_DOT[band])} />
+                      <span aria-hidden className={cn("size-1.5 ", BAND_DOT[band])} />
                       {formatPercent(e.reliability)}
                     </span>
                   )}

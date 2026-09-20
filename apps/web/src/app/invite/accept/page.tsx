@@ -16,10 +16,10 @@ export const dynamic = "force-dynamic";
 /**
  * Team-invite accept landing. Lives outside the (auth)/(app) route groups so it
  * can handle both signed-out and signed-in visitors:
- *   - no token        → bounce to /login with an invite error
- *   - signed out      → send to /login?next=<this url> (signup link carries it
- *                       too); they return here after authenticating
- *   - signed in       → redeem the token via accept_invite, land on /dashboard
+ * - no token → bounce to /login with an invite error
+ * - signed out → send to /login?next=<this url> (signup link carries it
+ * too); they return here after authenticating
+ * - signed in → redeem the token via accept_invite, land on /dashboard
  *
  * `/invite` is in PUBLIC_PATHS so the proxy lets this page run instead of doing
  * its own bounce (which would drop the token).

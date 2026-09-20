@@ -252,7 +252,7 @@ export default async function LeadDetailPage({
                       <span
                         aria-hidden
                         className={cn(
-                          "absolute top-1.5 -left-6 size-[0.6875rem] rounded-full border-2 border-background",
+                          "absolute top-1.5 -left-6 size-[0.6875rem] border-2 border-background",
                           event.type === "lead.note_added" ? "bg-muted-foreground" : "bg-primary",
                         )}
                       />

@@ -352,7 +352,7 @@ function EmptyState({
               "Get an answer with the source it came from.",
             ].map((step, i) => (
               <li key={step} className="flex items-start gap-2.5">
-                <span className="bg-primary-soft text-primary-soft-foreground mt-px flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                <span className="bg-primary-soft text-primary-soft-foreground mt-px flex size-5 shrink-0 items-center justify-center text-xs font-semibold">
                   {i + 1}
                 </span>
                 <span className="text-foreground">{step}</span>
@@ -395,7 +395,7 @@ function TemplateChips({
             aria-pressed={active === t.id}
             title={t.description}
             className={cn(
-              "bg-card inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[0.8125rem] font-medium transition-colors hover:border-input hover:bg-accent ",
+              "bg-card inline-flex h-8 items-center gap-1.5 border px-3 text-[0.8125rem] font-medium transition-colors hover:border-input hover:bg-accent ",
               active === t.id &&
                 "border-primary-edge/30 bg-primary-soft text-primary-soft-foreground",
             )}
@@ -429,14 +429,14 @@ function UsageNotice({ tone, children }: { tone: "warning" | "error"; children: 
 /** The chip shown above the composer once a template is selected. */
 function ActiveTemplateChip({ label, onClear }: { label: string; onClear: () => void }) {
   return (
-    <div className="bg-primary-soft text-primary-soft-foreground inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium">
+    <div className="bg-primary-soft text-primary-soft-foreground inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium">
       <Sparkles className="size-3.5" />
       {label}
       <button
         type="button"
         onClick={onClear}
         aria-label="Clear template"
-        className="hover:bg-background/40 -mr-1 ml-0.5 inline-flex size-4 items-center justify-center rounded-full transition-colors"
+        className="hover:bg-background/40 -mr-1 ml-0.5 inline-flex size-4 items-center justify-center transition-colors"
       >
         <X className="size-3" />
       </button>

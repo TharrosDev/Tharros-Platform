@@ -61,9 +61,9 @@ function FirstDocumentsProgress({ count }: { count: number }) {
           {done}/{FIRST_DOCS_TARGET}
         </span>
       </div>
-      <div className="bg-muted mt-2.5 h-1.5 w-full overflow-hidden rounded-full" aria-hidden>
+      <div className="bg-muted mt-2.5 h-1.5 w-full overflow-hidden " aria-hidden>
         <div
-          className="bg-primary h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none"
+          className="bg-primary h-full transition-[width] duration-300 ease-out motion-reduce:transition-none"
           style={{ width: `${pct}%` }}
         />
       </div>

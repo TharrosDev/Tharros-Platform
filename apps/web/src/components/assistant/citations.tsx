@@ -18,11 +18,11 @@ import {
 /**
  * Day 30 — the trust layer under an assistant turn.
  *
- *  - `CitationFooter` — a quiet "Based on N documents" divider + a numbered
- *    source list; each `[n] filename` opens the sources dialog at that source.
- *  - `SourcesDialog` — lists every cited document, highlighting the opened one,
- *    with a link to the Knowledge library (no per-document viewer until Day 32).
- *  - `NotGroundedNote` — the honest, low-key state for an answer with no sources.
+ * - `CitationFooter` — a quiet "Based on N documents" divider + a numbered
+ * source list; each `[n] filename` opens the sources dialog at that source.
+ * - `SourcesDialog` — lists every cited document, highlighting the opened one,
+ * with a link to the Knowledge library (no per-document viewer until Day 32).
+ * - `NotGroundedNote` — the honest, low-key state for an answer with no sources.
  *
  * Inline `[n]` markers in the answer body are rendered by `AssistantMarkdown`;
  * both the markers and this footer call the same `onOpen(index)`.
@@ -72,7 +72,7 @@ export function CitationFooter({
 export function NotGroundedNote() {
   return (
     <p className="border-border bg-muted/40 text-muted-foreground mt-3 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs">
-      <span aria-hidden className="bg-muted-foreground/50 size-1.5 shrink-0 rounded-full" />
+      <span aria-hidden className="bg-muted-foreground/50 size-1.5 shrink-0 " />
       This answer isn&apos;t based on your documents. Double-check it before relying on it.
     </p>
   );

@@ -11,7 +11,6 @@ export const metadata: Metadata = {
 export default function SecurityPage() {
   return (
     <PublicDocument
-      eyebrow="Trust"
       title="Security at Tharros"
       intro="Security controls are built into the application and database boundaries rather than relying only on what the interface hides."
       updated="September 18, 2026"

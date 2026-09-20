@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useMotionValueEvent, useScroll } from "motion/react";
 
 /**
- * Sticky marketing header frame. Transparent over the hero, then settles onto a
- * card surface once the page scrolls, so the bar never competes with the
- * opening typography.
+ * The rack's top rail. Transparent over the opening, then a machined seam
+ * appears once the page moves under it. No blur and no translucency: this is
+ * anodized metal, not glass.
  */
 function HeaderShell({ children }: { children: React.ReactNode }) {
   const { scrollY } = useScroll();
@@ -16,7 +16,7 @@ function HeaderShell({ children }: { children: React.ReactNode }) {
   return (
     <header
       data-scrolled={scrolled}
-      className="sticky top-0 z-topbar border-b border-transparent transition-[background-color,border-color,box-shadow] duration-300 ease-out data-[scrolled=true]:border-border/70 data-[scrolled=true]:bg-background/85 data-[scrolled=true]:shadow-xs data-[scrolled=true]:backdrop-blur-xl"
+      className="z-topbar data-[scrolled=true]:bg-rack-deep data-[scrolled=true]:border-rack-edge sticky top-0 border-b border-transparent transition-colors"
     >
       {children}
     </header>

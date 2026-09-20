@@ -62,7 +62,7 @@ export function AvailabilityEntry({ employeeName }: { employeeName: string }) {
   if (saved?.ok) {
     return (
       <section className="bg-card flex flex-col items-center gap-3 rounded-lg border px-6 py-12 text-center shadow-xs">
-        <span className="bg-success/12 text-success flex size-11 items-center justify-center rounded-full">
+        <span className="bg-success/12 text-success flex size-11 items-center justify-center ">
           <CircleCheck className="size-6" aria-hidden />
         </span>
         <h2 className="type-h2">You&apos;re all set</h2>

@@ -58,7 +58,7 @@ function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming
           <ThinkingDots />
         ) : null}
         {streaming && message.content ? (
-          <span className="bg-primary ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse rounded-full align-middle motion-reduce:animate-none" />
+          <span className="bg-primary ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse align-middle motion-reduce:animate-none" />
         ) : null}
         {!streaming && message.content ? (
           <>
@@ -92,7 +92,7 @@ function ThinkingDots() {
       {[0, 1, 2].map((i) => (
         <span
           key={i}
-          className="bg-muted-foreground/60 size-1.5 animate-pulse rounded-full motion-reduce:animate-none"
+          className="bg-muted-foreground/60 size-1.5 animate-pulse motion-reduce:animate-none"
           style={{ animationDelay: `${i * 160}ms` }}
         />
       ))}

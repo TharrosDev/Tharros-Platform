@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <PublicDocument
-      eyebrow="Trust"
       title="Privacy notice"
       intro="This notice explains the information Tharros processes to provide the platform, why it is used, and the service providers involved."
       updated="September 18, 2026"

@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <PublicDocument
-      eyebrow="Legal"
       title="Terms of service"
       intro="These terms describe the basic conditions for accessing and using Tharros."
       updated="September 18, 2026"

@@ -137,7 +137,7 @@ export default async function ActivityLogPage({
                 ) : null}
                 <span
                   className={cn(
-                    "relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full ring-2",
+                    "relative mt-0.5 flex size-7 shrink-0 items-center justify-center ring-2",
                     e.source === "agent"
                       ? "bg-primary-soft/40 text-primary-soft-foreground"
                       : "bg-muted text-muted-foreground",

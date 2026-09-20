@@ -193,10 +193,7 @@ export default async function SchedulingPage() {
           <ul className="bg-card divide-y rounded-xl border shadow-card">
             {recentActivity.map((entry) => (
               <li key={entry.id} className="flex items-baseline gap-3 px-4 py-2.5 text-sm">
-                <span
-                  aria-hidden
-                  className="bg-primary mt-1.5 size-1.5 shrink-0 self-start rounded-full"
-                />
+                <span aria-hidden className="bg-primary mt-1.5 size-1.5 shrink-0 self-start " />
                 <span className="min-w-0 flex-1">
                   {entry.title}
                   <span className="text-muted-foreground"> · {entry.actorLabel}</span>

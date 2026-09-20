@@ -5,67 +5,37 @@ import { TharrosWordmark } from "@/components/brand/logo";
 import { buttonVariants } from "@/components/ui/button";
 import { HeaderShell } from "./header-shell";
 
-/** Shared marketing measure: wide editorial grid with a 16px phone gutter. */
-const marketingContainer = "mx-auto w-full max-w-[84rem] px-4 sm:px-8";
+/** One measure for every public page. */
+const marketingContainer = "mx-auto w-full max-w-board px-4 sm:px-8";
 
-const quietLinkClass =
-  "text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color] hover:bg-accent ";
+const railLinkClass =
+  "text-rack-muted-foreground hover:text-rack-foreground hover:bg-accent min-h-control-lg type-meta inline-flex items-center px-3 transition-colors";
 
-function MarketingBackdrop() {
-  return (
-    <>
-      <div
-        aria-hidden
-        className="text-foreground pointer-events-none absolute inset-x-0 top-0 h-[60rem] opacity-[0.045]"
-        style={{
-          backgroundImage:
-            "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-          maskImage: "radial-gradient(ellipse 80% 70% at 70% 0%, black, transparent 75%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[56rem]"
-        style={{
-          background:
-            "radial-gradient(ellipse 55% 60% at 88% 8%, color-mix(in oklch, var(--primary) 11%, transparent), transparent 70%)",
-        }}
-      />
-    </>
-  );
-}
-
-function MarketingHeader({ showPricing = false }: { showPricing?: boolean }) {
+function MarketingHeader() {
   return (
     <HeaderShell>
-      <div className={cn(marketingContainer, "flex h-16 items-center justify-between sm:h-18")}>
+      <div className={cn(marketingContainer, "h-topbar flex items-center justify-between")}>
         <Link
           href="/"
           aria-label="Tharros home"
-          className=" -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 "
+          className="min-h-control-lg -ml-1 inline-flex items-center px-1"
         >
-          <TharrosWordmark markClassName="size-7" />
+          <TharrosWordmark markClassName="size-6" />
         </Link>
-        <nav aria-label="Main navigation" className="flex items-center gap-0.5 sm:gap-1.5">
-          <Link href="/#product" className={cn(quietLinkClass, "hidden lg:inline-flex")}>
+        <nav aria-label="Main navigation" className="flex items-center gap-0.5">
+          <Link href="/#product" className={cn(railLinkClass, "hidden lg:inline-flex")}>
             Product
           </Link>
-          {showPricing ? (
-            <Link href="/pricing" className={cn(quietLinkClass, "hidden sm:inline-flex")}>
-              Pricing
-            </Link>
-          ) : null}
-          <Link href="/security" className={cn(quietLinkClass, "hidden md:inline-flex")}>
+          <Link href="/pricing" className={cn(railLinkClass, "hidden sm:inline-flex")}>
+            Pricing
+          </Link>
+          <Link href="/security" className={cn(railLinkClass, "hidden md:inline-flex")}>
             Security
           </Link>
-          <Link href="/login" className={quietLinkClass}>
+          <Link href="/login" className={railLinkClass}>
             Sign in
           </Link>
-          <Link
-            href="/signup"
-            className={cn(buttonVariants({ size: "sm" }), "ml-1 h-11 px-4 sm:h-10")}
-          >
+          <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "ml-2")}>
             Get started
           </Link>
         </nav>
@@ -76,7 +46,7 @@ function MarketingHeader({ showPricing = false }: { showPricing?: boolean }) {
 
 function MarketingFooter() {
   return (
-    <footer className="bg-background relative border-t">
+    <footer className="seam-t relative">
       <div
         className={cn(marketingContainer, "grid gap-10 py-14 sm:grid-cols-[1fr_auto] sm:items-end")}
       >
@@ -84,32 +54,32 @@ function MarketingFooter() {
           <Link
             href="/"
             aria-label="Tharros home"
-            className=" -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 "
+            className="min-h-control-lg -ml-1 inline-flex items-center px-1"
           >
-            <TharrosWordmark markClassName="size-7" />
+            <TharrosWordmark markClassName="size-6" />
           </Link>
-          <p className="text-muted-foreground max-w-xs text-sm leading-relaxed">
+          <p className="text-rack-muted-foreground type-body max-w-xs">
             One operating workspace for knowledge, scheduling, lead capture and automations.
           </p>
-          <p className="text-muted-foreground type-meta">Keep it Local, Keep it Canadian.</p>
+          <p className="text-rack-muted-foreground type-meta">Keep it Local, Keep it Canadian.</p>
         </div>
         <nav
-          className="-ml-3 flex flex-wrap items-center gap-x-1 gap-y-1 sm:ml-0 sm:justify-end"
+          className="-ml-3 flex flex-wrap items-center gap-x-1 sm:ml-0 sm:justify-end"
           aria-label="Footer"
         >
-          <Link href="/pricing" className={quietLinkClass}>
+          <Link href="/pricing" className={railLinkClass}>
             Pricing
           </Link>
-          <Link href="/security" className={quietLinkClass}>
+          <Link href="/security" className={railLinkClass}>
             Security
           </Link>
-          <Link href="/privacy" className={quietLinkClass}>
+          <Link href="/privacy" className={railLinkClass}>
             Privacy
           </Link>
-          <Link href="/terms" className={quietLinkClass}>
+          <Link href="/terms" className={railLinkClass}>
             Terms
           </Link>
-          <Link href="/login" className={quietLinkClass}>
+          <Link href="/login" className={railLinkClass}>
             Sign in
           </Link>
         </nav>
@@ -118,4 +88,4 @@ function MarketingFooter() {
   );
 }
 
-export { MarketingBackdrop, MarketingFooter, MarketingHeader, marketingContainer };
+export { MarketingFooter, MarketingHeader, marketingContainer };

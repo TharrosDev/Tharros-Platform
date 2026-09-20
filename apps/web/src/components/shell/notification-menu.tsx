@@ -45,9 +45,9 @@ export function NotificationMenu({
             {/* One soft ping when the badge appears, then steady. */}
             <span
               aria-hidden
-              className="bg-primary/40 absolute inset-0 animate-ping rounded-full [animation-iteration-count:2] motion-reduce:animate-none"
+              className="bg-primary/40 absolute inset-0 animate-ping [animation-iteration-count:2] motion-reduce:animate-none"
             />
-            <span className="bg-primary text-primary-foreground relative flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold">
+            <span className="bg-primary text-primary-foreground relative flex h-4 min-w-4 items-center justify-center px-1 text-[10px] leading-none font-semibold">
               {badge}
             </span>
           </span>
@@ -81,7 +81,7 @@ export function NotificationMenu({
                 <span
                   aria-hidden
                   className={cn(
-                    "mt-1.5 size-2 shrink-0 rounded-full",
+                    "mt-1.5 size-2 shrink-0 ",
                     n.readAt ? "bg-transparent" : "bg-primary",
                   )}
                 />

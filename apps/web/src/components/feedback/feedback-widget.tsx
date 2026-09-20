@@ -178,7 +178,7 @@ export function FeedbackWidget() {
                       onClick={() => setKind(value)}
                       data-active={kind === value || undefined}
                       className={cn(
-                        " inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ",
+                        " inline-flex items-center gap-1.5 border px-2.5 py-1 text-xs font-medium transition-colors ",
                         kind === value
                           ? "border-primary-edge/40 bg-primary-soft text-primary-soft-foreground"
                           : "border-border text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -209,7 +209,7 @@ export function FeedbackWidget() {
                     {[0, 1, 2].map((i) => (
                       <span
                         key={i}
-                        className="bg-muted-foreground/60 size-1.5 animate-pulse rounded-full motion-reduce:animate-none"
+                        className="bg-muted-foreground/60 size-1.5 animate-pulse motion-reduce:animate-none"
                         style={{ animationDelay: `${i * 160}ms` }}
                       />
                     ))}
@@ -282,7 +282,7 @@ export function FeedbackWidget() {
             transition={spring.gentle}
             type="button"
             onClick={() => setOpen(true)}
-            className="bg-card text-foreground shadow-raised hover:text-primary-soft-foreground flex size-11 items-center justify-center rounded-full border transition-colors "
+            className="bg-card text-foreground shadow-raised hover:text-primary-soft-foreground flex size-11 items-center justify-center border transition-colors "
             aria-label="Open help and feedback"
             title="Help & feedback"
           >

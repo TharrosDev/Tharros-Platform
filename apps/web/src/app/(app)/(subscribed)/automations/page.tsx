@@ -126,7 +126,7 @@ export default async function AutomationsPage({
                       <span
                         aria-hidden
                         className={cn(
-                          "size-2 shrink-0 rounded-full",
+                          "size-2 shrink-0 ",
                           automation.enabled ? "bg-success" : "bg-muted-foreground/40",
                         )}
                       />

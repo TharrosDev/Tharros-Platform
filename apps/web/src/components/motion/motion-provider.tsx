@@ -8,11 +8,11 @@ import { LazyMotion, domMax, MotionConfig } from "motion/react";
  * feature bundle.
  *
  * - `LazyMotion strict` + `m.*` components keep the core bundle small and
- *   throw if a full `motion.*` component sneaks in.
+ * throw if a full `motion.*` component sneaks in.
  * - `MotionConfig reducedMotion="user"` disables transform/layout animation
- *   for prefers-reduced-motion users at the JS level. The CSS clamp in
- *   globals.css only covers CSS transitions, not motion's springs, so both
- *   layers are required.
+ * for prefers-reduced-motion users at the JS level. The CSS clamp in
+ * globals.css only covers CSS transitions, not motion's springs, so both
+ * layers are required.
  */
 export function MotionProvider({ children }: { children: React.ReactNode }) {
   return (

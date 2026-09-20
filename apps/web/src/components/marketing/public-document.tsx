@@ -1,45 +1,33 @@
 import type { ReactNode } from "react";
 
-import {
-  MarketingBackdrop,
-  MarketingFooter,
-  MarketingHeader,
-} from "@/components/marketing/marketing-chrome";
-
+/**
+ * A public reference document: security, privacy, terms. Read mode, so the
+ * job is comprehension and wayfinding, not expression. The rack frames it and
+ * the text sits on stock at a comfortable measure.
+ */
 function PublicDocument({
-  eyebrow,
   title,
   intro,
   updated,
   children,
 }: {
-  eyebrow: string;
   title: string;
   intro: string;
   updated: string;
   children: ReactNode;
 }) {
   return (
-    <div className="bg-background text-foreground relative min-h-screen overflow-x-clip">
-      <MarketingBackdrop />
-      <MarketingHeader showPricing />
-      <main className="relative">
-        <article className="relative mx-auto w-full max-w-4xl px-6 py-16 sm:py-24">
-          <div className="bg-primary-soft inline-flex rounded-full border border-primary-edge/15 px-3 py-1.5">
-            <p className="text-primary-soft-foreground type-meta">{eyebrow}</p>
-          </div>
-          <h1 className="mt-5 text-5xl font-[720] tracking-[-0.05em] text-balance sm:text-6xl">
-            {title}
-          </h1>
-          <p className="text-muted-foreground mt-5 max-w-2xl text-lg leading-relaxed">{intro}</p>
-          <p className="text-muted-foreground type-meta mt-4">Last updated {updated}</p>
-          <div className="mt-14 space-y-10 bg-card rounded-3xl border p-6 text-base leading-7 shadow-card sm:p-9 [&_a]:text-primary-soft-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:tracking-tight [&_li]:ml-5 [&_li]:list-disc [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:space-y-1.5">
-            {children}
-          </div>
-        </article>
-      </main>
-      <MarketingFooter />
-    </div>
+    <article className="mx-auto w-full max-w-4xl px-4 py-16 sm:px-8 sm:py-24">
+      <h1 className="type-hero text-rack-foreground text-balance">{title}</h1>
+      <p className="text-rack-muted-foreground type-body mt-5 max-w-2xl text-pretty sm:text-lg">
+        {intro}
+      </p>
+      <p className="text-rack-muted-foreground type-meta mt-5">Last updated {updated}</p>
+
+      <div className="on-stock bg-card border-border text-foreground mt-12 border p-6 text-base leading-7 sm:p-10 [&_a]:text-primary-soft-foreground [&_a]:underline [&_a]:underline-offset-4 [&_h2]:type-h2 [&_h2]:mt-10 [&_h2]:first:mt-0 [&_li]:ml-5 [&_li]:list-disc [&_p]:mt-3 [&_ul]:mt-3 [&_ul]:space-y-1.5">
+        {children}
+      </div>
+    </article>
   );
 }
 
