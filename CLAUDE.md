@@ -53,7 +53,7 @@ normal CI suite.
 
 - `apps/web` — the only deployable application.
 - `apps/web/src/app` — Next.js routes.
-- `apps/web/src/components` — Workshop UI primitives and product components.
+- `apps/web/src/components` — Strip Board UI primitives and product components.
 - `apps/web/src/lib` — domain logic and provider/infrastructure seams.
 - `supabase/migrations` — database schema source of truth.
 - `docs` — operator documentation.
@@ -189,7 +189,7 @@ Follow `apps/web/docs/DESIGN.md`.
 
 - use existing Base UI/shadcn-style primitives;
 - use semantic tokens, not arbitrary colour values;
-- one primary cobalt action per view;
+- one primary hi-vis action per view;
 - retain keyboard/focus/reduced-motion behavior;
 - use `m.*` from `motion/react` under the shared MotionProvider;
 - keep Base UI overlay transitions CSS-driven;

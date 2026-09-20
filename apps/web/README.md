@@ -1,7 +1,7 @@
 # @tharros/web
 
 Production Tharros web application: Next.js 16, React 19, strict TypeScript,
-Tailwind v4, Supabase, Stripe, and the Workshop design system.
+Tailwind v4, Supabase, Stripe, and the Strip Board design system.
 
 > Read `AGENTS.md` before framework-level work. This repository uses a modified
 > Next.js 16 build; middleware is `src/proxy.ts` and `cookies()` is async.
@@ -62,7 +62,7 @@ src/
 
 - `../../README.md` — repository/architecture overview
 - `../../PRODUCT.md` — authoritative shipped product scope
-- `docs/DESIGN.md` — Workshop design system
+- `docs/DESIGN.md` — the Strip Board design system
 - `../../docs/CI.md` — CI and integration-test setup
 - `../../docs/SECRETS.md` — production configuration
 - `../../docs/JOBS.md` — durable job runner operations

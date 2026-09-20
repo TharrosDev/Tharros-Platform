@@ -40,7 +40,7 @@ Production: [tharros.ca](https://tharros.ca)
 ```
 apps/web/              Next.js application
   src/app/             route groups, APIs, public lead forms and employee portal
-  src/components/      Workshop UI system and product components
+  src/components/      Strip Board UI system and product components
   src/lib/             domain logic and infrastructure seams
   src/eval/            RAG evaluation harness
   e2e/                 Playwright browser journeys

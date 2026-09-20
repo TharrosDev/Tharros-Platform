@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Minimal table primitives (Maple Pure). Thin semantic wrappers — first used by
+ * Minimal table primitives. Thin semantic wrappers — first used by
  * the Day-15 team page (members + pending invites), reusable for Leads/Billing.
  */
 

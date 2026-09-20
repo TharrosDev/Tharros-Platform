@@ -1,8 +1,8 @@
-// Regenerates the Tharros favicon assets from the brand "Workshop" mark
+// Regenerates the Tharros favicon assets from the brand mark
 // (`apps/web/src/components/brand/logo.tsx`). Pure Node — rasterizes the mark's
 // geometry with 4x supersampled anti-aliasing and packs a multi-size PNG-in-ICO,
 // so no native image deps (sharp/imagemagick) are needed. Run after the mark or
-// the cobalt primary changes:
+// the hi-vis primary changes:
 //
 //   node scripts/generate-favicon.mjs
 //
@@ -17,18 +17,17 @@ import { dirname, join } from "node:path";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const appDir = join(root, "apps/web/src/app");
 
-// Cobalt primary: oklch(0.52 0.16 264) → sRGB. Keep in sync with --primary in globals.css.
-const COBALT = { r: 0x38, g: 0x62, b: 0xc4 };
-const WHITE = { r: 0xff, g: 0xff, b: 0xff };
+// Safety yellow: oklch(0.835 0.152 88) → sRGB. Keep in sync with --primary in
+// globals.css. The plate is press black so the mark reads on a light tab strip,
+// with the "T" punched out in hi-vis.
+const PLATE = { r: 0x1a, g: 0x17, b: 0x10 };
+const HIVIS = { r: 0xf2, g: 0xc2, b: 0x3d };
 
 // Mark geometry, in the 24×24 viewBox of the source path.
-// Outer tile: rounded rect (r=5) on TL/BL/BR corners, chamfered top-right
-// (edge from (14.5,0) to (24,4.6)). Inner "T" is negative space (a hole).
+// Outer tile: a square plate, chamfered top-right (edge from (14.5,0) to
+// (24,4.6)). Nothing in this system is rounded, including the mark.
 function insideTile(x, y) {
   if (x < 0 || x > 24 || y < 0 || y > 24) return false;
-  if (x < 5 && y < 5) return (x - 5) ** 2 + (y - 5) ** 2 <= 25; // TL
-  if (x < 5 && y > 19) return (x - 5) ** 2 + (y - 19) ** 2 <= 25; // BL
-  if (x > 19 && y > 19) return (x - 19) ** 2 + (y - 19) ** 2 <= 25; // BR
   // Top-right chamfer: exclude points on the outer side of the cut edge.
   // Edge vector (9.5, 4.6); interior is where the cross product is positive.
   if (9.5 * y - 4.6 * (x - 14.5) < 0) return false;
@@ -62,15 +61,15 @@ function render(size, bg) {
       const cov = markHits / samples;
       const i = (py * size + px) * 4;
       if (bg) {
-        // Composite cobalt mark over an opaque background.
-        buf[i] = Math.round(COBALT.r * cov + bg.r * (1 - cov));
-        buf[i + 1] = Math.round(COBALT.g * cov + bg.g * (1 - cov));
-        buf[i + 2] = Math.round(COBALT.b * cov + bg.b * (1 - cov));
+        // Composite the plate over an opaque background.
+        buf[i] = Math.round(PLATE.r * cov + bg.r * (1 - cov));
+        buf[i + 1] = Math.round(PLATE.g * cov + bg.g * (1 - cov));
+        buf[i + 2] = Math.round(PLATE.b * cov + bg.b * (1 - cov));
         buf[i + 3] = 255;
       } else {
-        buf[i] = COBALT.r;
-        buf[i + 1] = COBALT.g;
-        buf[i + 2] = COBALT.b;
+        buf[i] = PLATE.r;
+        buf[i + 1] = PLATE.g;
+        buf[i + 2] = PLATE.b;
         buf[i + 3] = Math.round(cov * 255);
       }
     }
@@ -148,6 +147,6 @@ const ico = encodeIco(
 writeFileSync(join(appDir, "favicon.ico"), ico);
 
 // Apple touch icon: opaque white canvas (iOS squares + adds its own rounding).
-writeFileSync(join(appDir, "apple-icon.png"), encodePng(180, render(180, WHITE)));
+writeFileSync(join(appDir, "apple-icon.png"), encodePng(180, render(180, HIVIS)));
 
 console.log(`favicon.ico (${icoSizes.join("/")}) + apple-icon.png written to ${appDir}`);

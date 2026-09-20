@@ -36,6 +36,17 @@ its type to `JobType` in `types.ts`.
   terminating: no-ops the moment the employee has permanent availability. Enqueued by the
   manager action `requestAvailabilityNudge`, which mints the portal token first (the system
   can't); the handler reads the live token to build the link.
+- `schedule-delivery` — sends a published schedule to the staff it covers.
+- `shift-reminder` — reminds an employee of an upcoming shift.
+- `replacement-offer-notify` — offers an uncovered shift to the replacement pool.
+- `replacement-offer-timeout` — closes an unanswered replacement offer and escalates it.
+- `swap-proposal-notify` — tells the counterparty a swap has been proposed.
+- `swap-result-notify` — tells both sides how a swap was resolved.
+- `automation-dispatch` — runs the native automation matched to a lead event and records
+  the result in `automation_runs`.
+
+This list is the whole registry in `handlers.ts`. It previously documented three of
+the ten, which made the doc look complete while hiding most of the runtime.
 
 ## Operator setup (the minutely tick)
 

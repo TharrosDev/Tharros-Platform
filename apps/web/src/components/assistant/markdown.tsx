@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { PreviewCard, PreviewCardContent, PreviewCardTrigger } from "@/components/ui/preview-card";
 
 /**
- * Day 29 — markdown for assistant turns, mapped to the Workshop type scale.
+ * Day 29 — markdown for assistant turns, mapped to the Strip Board type scale.
  * Claude returns GitHub-flavoured markdown; this renders it with the app's own
  * spacing, lists, links, and code styling rather than browser defaults. User
  * turns are plain text and never go through this.

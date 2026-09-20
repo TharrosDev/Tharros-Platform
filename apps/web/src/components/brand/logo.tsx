@@ -3,10 +3,12 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Tharros "Workshop" mark — a sharp cobalt tile (tight 5u radius) with one
- * chamfered top-right corner, and a clean "T" cut out of it as negative space
- * so it reads on any background. The chamfer is the tool-precision tell. Single
- * colour: inherits `currentColor`, so wrap it in `text-primary-soft-foreground` for cobalt.
+ * The Tharros mark: a square cut plate with one chamfered top-right corner and
+ * a "T" cut out of it as negative space, so it reads on the rack and on stock
+ * alike. The chamfer is the tool-precision tell. Nothing in this system is
+ * rounded, and neither is the mark.
+ *
+ * Single colour: it inherits `currentColor`.
  */
 function TharrosMark({ className, ...props }: React.ComponentProps<"svg">) {
   return (
@@ -21,7 +23,7 @@ function TharrosMark({ className, ...props }: React.ComponentProps<"svg">) {
         fill="currentColor"
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M5 0h9.5L24 4.6V19a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5Zm.5 6.2v3.3h5.1V18h2.8V9.5h5.1V6.2H5.5Z"
+        d="M0 0h14.5L24 4.6V24H0V0Zm5.5 6.2v3.3h5.1V18h2.8V9.5h5.1V6.2H5.5Z"
       />
     </svg>
   );
@@ -39,8 +41,8 @@ function TharrosWordmark({
       className={cn("inline-flex items-center gap-2", className)}
       {...props}
     >
-      <TharrosMark className={cn("size-6 text-primary-soft-foreground", markClassName)} />
-      <span className="text-[1.0625rem] font-semibold tracking-tight">Tharros</span>
+      <TharrosMark className={cn("size-6 text-primary", markClassName)} />
+      <span className="type-h2">Tharros</span>
     </span>
   );
 }

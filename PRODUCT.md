@@ -56,9 +56,13 @@ with this ladder.
 
 ## Design direction
 
-The production design system is one light system shared by marketing and the
-app: cool off-white canvas, white working surfaces, graphite ink and restrained
-cobalt state/action colour. The canonical
+The production design system is The Strip Board. Every unit of work is a
+printed strip in a rack, and its position in the rack is its status: the
+machine prints the strip, a person initials it, and advancing it writes the
+record. A dark anodized rack carries the chrome, warm printed stock carries
+everything you read and act on, safety yellow is the control, signal red is
+stop, and procedure cyan is what the system printed itself. Nothing is
+rounded. The canonical
 implementation guidance lives in `apps/web/docs/DESIGN.md`.
 
 ## Accessibility

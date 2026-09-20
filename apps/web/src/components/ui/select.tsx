@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 /**
  * Select primitives on Base UI (`@base-ui/react/select`). Submits its value via
  * a hidden input when given a `name`, so it works inside a plain `<form action>`.
- * Visually matches the Input primitive (Maple Pure).
+ * Visually matches the Input primitive: a ruled box cut into the stock.
  */
 
 const Select = SelectPrimitive.Root;

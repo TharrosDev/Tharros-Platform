@@ -1,7 +1,7 @@
 import type { Transition } from "motion/react";
 
 /**
- * Shared motion vocabulary for the Workshop system. Product register: motion
+ * Shared motion vocabulary for the Strip Board system. Product register: motion
  * conveys state, lands inside the 150-300ms window, and always eases out.
  * Pick from these instead of inventing per-component timings.
  */

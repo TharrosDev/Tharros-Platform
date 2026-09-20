@@ -15,7 +15,7 @@ import type { ReactNode } from "react";
 import { font, palette } from "./theme";
 
 /**
- * Shared shell for every Tharros email. Workshop-styled, light-mode only,
+ * Shared shell for every Tharros email. Strip Board styling, light only,
  * inline styles (email clients ignore external/embedded CSS). Renders both as a
  * React element (app-sent mail via lib/email/send) and to a static HTML string
  * for Supabase Auth templates (via @react-email/render).
