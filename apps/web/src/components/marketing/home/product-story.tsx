@@ -31,7 +31,9 @@ function ProductStory() {
                 </h3>
 
                 <div className="min-w-0">
-                  <p className="type-body text-rack-muted-foreground text-pretty">{product.body}</p>
+                  <p className="type-body text-rack-muted-foreground max-w-[68ch] text-pretty">
+                    {product.body}
+                  </p>
                   <dl className="border-rack-edge mt-5 grid border-t sm:grid-cols-3">
                     {product.tags.map((tag) => (
                       <div key={tag} className="border-rack-edge border-b py-2.5 sm:border-b-0">

@@ -84,8 +84,8 @@ export default function SecurityPage() {
         <h2>Responsible disclosure</h2>
         <p>
           If you believe you have found a security issue, do not access data beyond what is
-          necessary to demonstrate the problem. Send the details to
-          <a href="mailto:tharrosdev@gmail.com"> tharrosdev@gmail.com</a> so the issue can be
+          necessary to demonstrate the problem. Send the details to{" "}
+          <a href="mailto:tharrosdev@gmail.com">tharrosdev@gmail.com</a> so the issue can be
           investigated.
         </p>
       </section>
