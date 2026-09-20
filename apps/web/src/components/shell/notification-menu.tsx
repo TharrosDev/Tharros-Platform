@@ -60,7 +60,7 @@ export function NotificationMenu({
             <form action={markAllNotificationsRead}>
               <button
                 type="submit"
-                className="text-muted-foreground hover:bg-accent hover:text-foreground min-h-8 rounded-md px-2 py-1 text-xs transition-colors "
+                className="text-muted-foreground hover:bg-accent hover:text-foreground min-h-8 px-2 py-1 text-xs transition-colors "
               >
                 Mark all read
               </button>

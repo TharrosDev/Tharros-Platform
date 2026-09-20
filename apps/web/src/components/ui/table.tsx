@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div className="bg-card w-full overflow-x-auto overscroll-x-contain rounded-xl border shadow-xs">
+    <div className="bg-card w-full overflow-x-auto overscroll-x-contain border shadow-xs">
       <table
         data-slot="table"
         className={cn("w-full caption-bottom border-collapse text-sm", className)}

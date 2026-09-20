@@ -102,7 +102,7 @@ export function TimeOffSection({ requests }: { requests: MyTimeOff[] }) {
           {requests.map((r) => (
             <li
               key={r.id}
-              className="border-border bg-card flex items-center justify-between rounded-lg border px-3 py-2"
+              className="border-border bg-card flex items-center justify-between border px-3 py-2"
             >
               <div className="min-w-0">
                 <p className="type-small font-medium">{rangeText(r.startDate, r.endDate)}</p>

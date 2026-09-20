@@ -178,7 +178,7 @@ function StepRail({
                 onClick={() => onJump(i)}
                 disabled={!allowJumpAhead && i >= step}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
+                  "flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors",
                   current && "bg-primary-soft/50 text-foreground font-medium",
                   done && "text-foreground hover:bg-accent",
                   !current && !done && "text-muted-foreground",

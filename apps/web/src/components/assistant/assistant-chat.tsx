@@ -214,7 +214,7 @@ export function AssistantChat({
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-4">
             {olderTruncated ? (
-              <p className="text-muted-foreground rounded-md border border-dashed py-2 text-center text-xs">
+              <p className="text-muted-foreground border border-dashed py-2 text-center text-xs">
                 Showing the most recent messages in this conversation.
               </p>
             ) : null}
@@ -306,7 +306,7 @@ function EmptyState({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col px-1 pb-10 pt-8 sm:pt-14">
       <span
-        className="bg-card text-primary-soft-foreground flex size-10 items-center justify-center rounded-xl border shadow-xs"
+        className="bg-card text-primary-soft-foreground flex size-10 items-center justify-center border shadow-xs"
         aria-hidden
       >
         <Sparkles className="size-5" />
@@ -322,7 +322,7 @@ function EmptyState({
       {readOnly ? null : hasDocuments ? (
         <div className="mt-7 w-full">
           <p className="text-muted-foreground mb-2 text-sm font-medium">Try asking</p>
-          <div className="bg-card divide-y overflow-hidden rounded-xl border shadow-card">
+          <div className="bg-card divide-y overflow-hidden border shadow-card">
             {EXAMPLE_PROMPTS.map((p) => (
               <button
                 key={p}
@@ -340,7 +340,7 @@ function EmptyState({
           </div>
         </div>
       ) : (
-        <div className="bg-card mt-7 flex w-full flex-col gap-4 rounded-xl border p-5 text-left shadow-card">
+        <div className="bg-card mt-7 flex w-full flex-col gap-4 border p-5 text-left shadow-card">
           <p className="text-foreground font-semibold">Add your documents to get started</p>
           <p className="text-muted-foreground text-sm">
             The assistant answers from what you upload, so it needs a few documents first.
@@ -415,7 +415,7 @@ function UsageNotice({ tone, children }: { tone: "warning" | "error"; children: 
     <div
       role="status"
       className={cn(
-        "mb-2 rounded-lg border px-3.5 py-2.5 text-sm",
+        "mb-2 border px-3.5 py-2.5 text-sm",
         tone === "error"
           ? "border-destructive/25 bg-destructive/[0.06] text-destructive"
           : "border-warning/25 bg-warning/[0.07] text-foreground",

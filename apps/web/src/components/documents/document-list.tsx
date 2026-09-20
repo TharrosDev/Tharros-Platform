@@ -248,8 +248,8 @@ export function DocumentList({
   const showInitialEmpty = docs.length === 0 && query.trim() === "" && !searching;
   if (showInitialEmpty) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed bg-card/60 px-6 py-12 text-center">
-        <span className="bg-card text-primary-soft-foreground mb-2 flex size-10 items-center justify-center rounded-lg border shadow-xs [&>svg]:size-5">
+      <div className="flex flex-col items-center justify-center gap-2 border border-dashed bg-card/60 px-6 py-12 text-center">
+        <span className="bg-card text-primary-soft-foreground mb-2 flex size-10 items-center justify-center border shadow-xs [&>svg]:size-5">
           <FileText />
         </span>
         <p className="text-foreground font-semibold">No documents yet</p>
@@ -336,7 +336,7 @@ export function DocumentList({
                                     key={t}
                                     type="button"
                                     onClick={() => setQuery(t)}
-                                    className="bg-surface-2 text-muted-foreground hover:bg-primary-soft hover:text-primary-soft-foreground rounded-md border border-border/50 px-1.5 py-0.5 text-xs transition-colors"
+                                    className="bg-surface-2 text-muted-foreground hover:bg-primary-soft hover:text-primary-soft-foreground border border-border/50 px-1.5 py-0.5 text-xs transition-colors"
                                   >
                                     {t}
                                   </button>
@@ -435,7 +435,7 @@ export function DocumentList({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="bg-popover shadow-popover z-subnav fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-xl border px-3 py-2"
+            className="bg-popover shadow-popover z-subnav fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1.5 border px-3 py-2"
           >
             <span className="text-foreground px-1 text-sm font-medium whitespace-nowrap">
               {selected.size} selected
@@ -597,7 +597,7 @@ function BulkTagBody({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 rounded-xl border p-2.5 shadow-xs">
+      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 border p-2.5 shadow-xs">
         {tags.map((t) => (
           <span
             key={t}
@@ -711,7 +711,7 @@ function TagEditorBody({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 rounded-xl border p-2.5 shadow-xs">
+      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 border p-2.5 shadow-xs">
         {tags.map((t) => (
           <span
             key={t}

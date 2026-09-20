@@ -139,7 +139,7 @@ export function FeedbackWidget() {
           >
             {/* Header */}
             <div className="flex items-center gap-2.5 border-b px-4 py-3">
-              <span className="text-primary-soft-foreground bg-primary-soft flex size-8 items-center justify-center rounded-lg">
+              <span className="text-primary-soft-foreground bg-primary-soft flex size-8 items-center justify-center">
                 <TharrosMark className="size-3.5" />
               </span>
               <div className="min-w-0 flex-1">
@@ -152,7 +152,7 @@ export function FeedbackWidget() {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Minimize"
-                className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded-lg transition-colors "
+                className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center transition-colors "
               >
                 <Minus className="size-4" />
               </button>
@@ -170,7 +170,7 @@ export function FeedbackWidget() {
                   }}
                   aria-current={tab === t ? "page" : undefined}
                   className={cn(
-                    " relative rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
+                    " relative px-3 py-1.5 text-sm font-medium transition-colors ",
                     tab === t
                       ? "text-primary-soft-foreground"
                       : "text-muted-foreground hover:text-foreground",
@@ -180,7 +180,7 @@ export function FeedbackWidget() {
                     <m.span
                       layoutId="feedback-tab"
                       transition={spring.snappy}
-                      className="bg-primary-soft absolute inset-0 rounded-md"
+                      className="bg-primary-soft absolute inset-0"
                       aria-hidden
                     />
                   ) : null}
@@ -218,7 +218,7 @@ export function FeedbackWidget() {
               {state.messages.map((msg, i) =>
                 msg.role === "user" ? (
                   <div key={i} className="flex justify-end">
-                    <div className="bg-surface-2 text-foreground max-w-[85%] rounded-2xl rounded-br-md px-3.5 py-2.5 text-sm whitespace-pre-wrap">
+                    <div className="bg-surface-2 text-foreground max-w-[85%] rounded-br-md px-3.5 py-2.5 text-sm whitespace-pre-wrap">
                       {msg.content}
                     </div>
                   </div>
@@ -242,7 +242,7 @@ export function FeedbackWidget() {
               ) : null}
 
               {state.logged && tab === "suggest" ? (
-                <div className="bg-success/10 text-success flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm">
+                <div className="bg-success/10 text-success flex items-start gap-2 px-3 py-2.5 text-sm">
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden />
                   <span className="text-foreground/90">
                     Logged for the team. Valuable submissions can earn bonus AI usage, applied to
@@ -259,16 +259,14 @@ export function FeedbackWidget() {
               ) : null}
 
               {error ? (
-                <p className="bg-destructive/10 text-destructive rounded-lg px-3 py-2 text-sm">
-                  {error}
-                </p>
+                <p className="bg-destructive/10 text-destructive px-3 py-2 text-sm">{error}</p>
               ) : null}
               <div ref={bottomRef} />
             </div>
 
             {/* Composer */}
             <div className="border-t p-3">
-              <div className="border-input bg-card focus-within:border-ring focus-within:ring-ring/25 flex items-end gap-2 rounded-lg border p-1.5 transition-[box-shadow,border-color] focus-within:ring-[3px]">
+              <div className="border-input bg-card focus-within:border-ring focus-within:ring-ring/25 flex items-end gap-2 border p-1.5 transition-[box-shadow,border-color] focus-within:ring-[3px]">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -292,7 +290,7 @@ export function FeedbackWidget() {
                   onClick={send}
                   disabled={!canSend}
                   aria-label="Send"
-                  className="bg-primary text-primary-foreground hover:bg-primary/92 disabled:bg-muted disabled:text-muted-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors "
+                  className="bg-primary text-primary-foreground hover:bg-primary/92 disabled:bg-muted disabled:text-muted-foreground inline-flex size-9 shrink-0 items-center justify-center transition-colors "
                 >
                   <Send className="size-3.5" />
                 </button>
@@ -326,11 +324,11 @@ function AgentBubble({ children }: { children: React.ReactNode }) {
     <div className="flex gap-2">
       <span
         aria-hidden
-        className="text-primary-soft-foreground bg-primary-soft mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg border border-primary-edge/10"
+        className="text-primary-soft-foreground bg-primary-soft mt-0.5 flex size-7 shrink-0 items-center justify-center border border-primary-edge/10"
       >
         <TharrosMark className="size-3" />
       </span>
-      <div className="bg-surface-2 text-foreground/90 max-w-[85%] rounded-2xl rounded-tl-md border border-border/50 px-3.5 py-2.5 text-sm shadow-xs whitespace-pre-wrap">
+      <div className="bg-surface-2 text-foreground/90 max-w-[85%] rounded-tl-md border border-border/50 px-3.5 py-2.5 text-sm shadow-xs whitespace-pre-wrap">
         {children}
       </div>
     </div>

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
+import { Check, RotateCcw } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { spring } from "@/components/motion";
 import { buttonVariants } from "@/components/ui/button";
 import { marketingContainer } from "@/components/marketing/marketing-chrome";
 import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
@@ -15,25 +17,28 @@ const delay = (s: number) => ({ animationDelay: `${s}s` });
 const PROOF = ["14-day free trial", "Human-controlled AI", "Answers cite their sources"];
 
 /*
-  The opening is the mechanism, not a picture of it: a rack with work in it,
-  where the machine prints a strip and a person puts their initials on it
-  before it moves. Sample board, illustrative content only. No customers, no
+  The opening is the mechanism, operable, not a picture of it: real strips the
+  visitor signs, which then travel out of the pending bay and seat in the
+  cleared one. Sample board, illustrative content only. No customers, no
   counts, no metrics.
 */
 const STRIPS = [
   {
+    id: "schedule",
     what: "Schedule draft, two weeks",
-    who: "Generated",
+    from: "Generated",
     hint: "Nothing reaches staff until it is initialled.",
   },
   {
+    id: "lead",
     what: "Lead from the website form",
-    who: "Captured",
+    from: "Captured",
     hint: "The follow-up is drafted, never sent on its own.",
   },
   {
+    id: "sick",
     what: "Sunday close, sick call",
-    who: "Escalated",
+    from: "Escalated",
     hint: "Replacement offers go out once you approve them.",
   },
 ];
@@ -92,7 +97,7 @@ function Hero() {
         </div>
 
         <div style={delay(0.16)} className="animate-fade-up lg:col-span-6">
-          <LiveBay />
+          <LiveBoard />
         </div>
       </div>
     </section>
@@ -100,47 +105,39 @@ function Hero() {
 }
 
 /**
- * The signature interaction, demonstrated rather than described: a strip is
- * printed, a person initials it, and it clears. Rests at the initialled state
- * under reduced motion rather than cycling.
+ * The signature interaction, operable rather than performed: sign a strip and
+ * it travels out of the pending bay and seats in the cleared one. Real
+ * buttons, real keyboard operation, the result announced. Under reduced motion
+ * the strip changes bay without travelling.
  */
-function LiveBay() {
+function LiveBoard() {
   const reduced = useReducedMotionSafe();
-  const [signed, setSigned] = useState(0);
+  const [cleared, setCleared] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (reduced) return;
-    const id = window.setInterval(() => setSigned((n) => (n + 1) % (STRIPS.length + 1)), 2200);
-    return () => window.clearInterval(id);
-  }, [reduced]);
-
-  const done = reduced ? STRIPS.length : signed;
+  const pending = STRIPS.filter((s) => !cleared.includes(s.id));
+  const done = STRIPS.filter((s) => cleared.includes(s.id));
+  const transition = reduced ? { duration: 0 } : spring.snappy;
 
   return (
     <div className="bg-rack-deep border-rack-edge border">
       <div className="border-rack-edge flex items-baseline justify-between gap-3 border-b px-4 py-3">
-        <p className="type-meta text-rack-foreground">Needs your initials</p>
+        <p className="type-meta text-rack-foreground" id="live-board-label">
+          Needs your initials
+        </p>
         <p className="type-meta text-rack-muted-foreground">Sample board</p>
       </div>
 
-      <ul>
-        {STRIPS.map((strip, index) => {
-          const isSigned = index < done;
-          return (
-            <li
-              key={strip.what}
-              className={cn(
-                "on-stock border-border relative flex items-stretch border-b transition-colors last:border-b-0",
-                isSigned ? "bg-stock-cleared" : "bg-stock-pending",
-              )}
+      <m.ul layout aria-labelledby="live-board-label" transition={transition}>
+        <AnimatePresence initial={false} mode="popLayout">
+          {pending.map((strip) => (
+            <m.li
+              key={strip.id}
+              layout
+              layoutId={`strip-${strip.id}`}
+              transition={transition}
+              className="on-stock bg-stock-pending border-border relative flex items-stretch border-b last:border-b-0"
             >
-              <span
-                aria-hidden
-                className={cn(
-                  "w-1 shrink-0 transition-colors",
-                  isSigned ? "bg-success" : "bg-warning",
-                )}
-              />
+              <span aria-hidden className="bg-warning w-1 shrink-0" />
               <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3.5">
                 <span className="min-w-0 flex-1">
                   <span className="type-strip text-foreground block truncate font-semibold">
@@ -149,30 +146,78 @@ function LiveBay() {
                   <span className="type-small text-muted-foreground block">{strip.hint}</span>
                 </span>
                 <span className="type-meta text-muted-foreground hidden shrink-0 sm:block">
-                  {isSigned ? "Cleared" : strip.who}
+                  {strip.from}
                 </span>
-                <span
-                  aria-hidden
-                  className={cn(
-                    "type-meta flex h-7 min-w-11 shrink-0 items-center justify-center border transition-colors",
-                    isSigned
-                      ? "border-primary-edge bg-primary text-primary-foreground"
-                      : "border-foreground/60 bg-card text-foreground",
-                  )}
+                <button
+                  type="button"
+                  onClick={() => setCleared((ids) => [...ids, strip.id])}
+                  className="border-foreground/60 bg-card text-foreground type-meta hover:border-primary-edge hover:bg-primary hover:text-primary-foreground flex h-7 min-w-11 shrink-0 cursor-pointer items-center justify-center border transition-colors active:translate-y-px"
                 >
-                  {isSigned ? <Check className="size-4" strokeWidth={3} /> : <span>Sign</span>}
-                </span>
+                  Sign
+                  <span className="sr-only"> off {strip.what}</span>
+                </button>
               </div>
-            </li>
-          );
-        })}
-      </ul>
+            </m.li>
+          ))}
+        </AnimatePresence>
+      </m.ul>
 
-      <p className="text-rack-muted-foreground type-meta border-rack-edge border-t px-4 py-3">
-        {done === STRIPS.length
-          ? "Board clear. Every move was recorded."
-          : "Nothing moves until a person signs it off."}
-      </p>
+      {done.length ? (
+        <>
+          <div className="border-rack-edge border-y px-4 py-2">
+            <p className="type-meta text-rack-muted-foreground" id="live-board-cleared">
+              Cleared
+            </p>
+          </div>
+          <m.ul layout aria-labelledby="live-board-cleared" transition={transition}>
+            <AnimatePresence initial={false} mode="popLayout">
+              {done.map((strip) => (
+                <m.li
+                  key={strip.id}
+                  layout
+                  layoutId={`strip-${strip.id}`}
+                  transition={transition}
+                  className="on-stock bg-stock-cleared border-border relative flex items-stretch border-b last:border-b-0"
+                >
+                  <span aria-hidden className="bg-success w-1 shrink-0" />
+                  <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3.5">
+                    <span className="type-strip text-foreground min-w-0 flex-1 truncate font-semibold">
+                      {strip.what}
+                    </span>
+                    <span className="type-meta text-muted-foreground hidden shrink-0 sm:block">
+                      Recorded
+                    </span>
+                    <span
+                      aria-hidden
+                      className="border-primary-edge bg-primary text-primary-foreground flex h-7 min-w-11 shrink-0 items-center justify-center border"
+                    >
+                      <Check className="size-4" strokeWidth={3} />
+                    </span>
+                  </div>
+                </m.li>
+              ))}
+            </AnimatePresence>
+          </m.ul>
+        </>
+      ) : null}
+
+      <div className="border-rack-edge flex items-center justify-between gap-3 border-t px-4 py-3">
+        <p aria-live="polite" className="type-meta text-rack-muted-foreground">
+          {done.length === STRIPS.length
+            ? "Board clear. Every move was recorded."
+            : "Nothing moves until a person signs it off."}
+        </p>
+        {done.length ? (
+          <button
+            type="button"
+            onClick={() => setCleared([])}
+            className="type-meta text-rack-muted-foreground hover:text-rack-foreground inline-flex cursor-pointer items-center gap-1.5 transition-colors"
+          >
+            <RotateCcw className="size-3.5" aria-hidden />
+            Reset
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }

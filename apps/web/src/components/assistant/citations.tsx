@@ -52,7 +52,7 @@ export function CitationFooter({
             <button
               type="button"
               onClick={() => onOpen(c.index)}
-              className="group hover:bg-accent/60 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors "
+              className="group hover:bg-accent/60 flex w-full items-center gap-2 px-2 py-1.5 text-left transition-colors "
             >
               <span className="text-primary-soft-foreground bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
                 {c.index}
@@ -71,7 +71,7 @@ export function CitationFooter({
 
 export function NotGroundedNote() {
   return (
-    <p className="border-border bg-muted/40 text-muted-foreground mt-3 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs">
+    <p className="border-border bg-muted/40 text-muted-foreground mt-3 inline-flex items-center gap-1.5 border px-2.5 py-1.5 text-xs">
       <span aria-hidden className="bg-muted-foreground/50 size-1.5 shrink-0 " />
       This answer isn&apos;t based on your documents. Double-check it before relying on it.
     </p>
@@ -106,7 +106,7 @@ export function SourcesDialog({
               <li
                 key={c.documentId}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-md border px-3 py-2 transition-colors",
+                  "flex items-center gap-2.5 border px-3 py-2 transition-colors",
                   active ? "border-ring bg-primary-soft/50" : "border-border bg-card",
                 )}
               >

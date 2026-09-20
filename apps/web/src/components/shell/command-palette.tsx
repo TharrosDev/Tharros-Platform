@@ -211,7 +211,7 @@ function CommandPalette({
       <DialogPortal>
         <DialogBackdrop />
         <DialogPrimitive.Viewport className="z-overlay fixed inset-0 flex items-start justify-center overflow-y-auto p-4 pt-[12vh]">
-          <DialogPrimitive.Popup className="bg-popover text-popover-foreground shadow-modal w-full max-w-xl overflow-hidden rounded-lg border border-border transition-all duration-200 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0">
+          <DialogPrimitive.Popup className="bg-popover text-popover-foreground shadow-modal w-full max-w-xl overflow-hidden border border-border transition-all duration-200 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0">
             <DialogPrimitive.Title className="sr-only">Command menu</DialogPrimitive.Title>
 
             <div className="flex items-center gap-2.5 border-b border-border/60 px-4">
@@ -316,7 +316,7 @@ function PaletteRow({
       onMouseMove={onHover}
       data-active={isActive || undefined}
       className={cn(
-        " flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ",
+        " flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors ",
         isActive ? "bg-primary-soft text-primary-soft-foreground" : "hover:bg-accent",
       )}
     >

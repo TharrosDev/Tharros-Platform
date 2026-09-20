@@ -60,7 +60,7 @@ export function ThreadList({ threads }: { threads: ThreadListItem[] }) {
               onClick={() => setStatus(f.value)}
               data-active={status === f.value || undefined}
               className={cn(
-                " rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
+                " px-3 py-1.5 text-sm font-medium transition-colors ",
                 status === f.value
                   ? "bg-primary-soft text-primary-soft-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -75,7 +75,7 @@ export function ThreadList({ threads }: { threads: ThreadListItem[] }) {
       {visible.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">No conversations match.</p>
       ) : (
-        <ul className="divide-border/60 bg-card shadow-card overflow-hidden rounded-lg border divide-y">
+        <ul className="divide-border/60 bg-card shadow-card overflow-hidden border divide-y">
           {visible.map((t) => {
             const badge = threadStatusBadge(t);
             return (

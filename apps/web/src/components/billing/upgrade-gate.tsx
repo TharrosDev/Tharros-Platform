@@ -23,8 +23,8 @@ export function UpgradeGate({
   blurb: string;
 }) {
   return (
-    <div className="bg-card mx-auto flex max-w-lg flex-col items-center gap-4 rounded-xl border px-8 py-12 text-center shadow-card">
-      <span className="bg-primary-soft text-primary-soft-foreground flex size-11 items-center justify-center rounded-xl">
+    <div className="bg-card mx-auto flex max-w-lg flex-col items-center gap-4 border px-8 py-12 text-center shadow-card">
+      <span className="bg-primary-soft text-primary-soft-foreground flex size-11 items-center justify-center">
         <Lock className="size-5" aria-hidden />
       </span>
       <div className="space-y-1.5">

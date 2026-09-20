@@ -30,7 +30,7 @@ function DropdownMenuContent({
       >
         <MenuPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover min-w-[13rem] origin-[var(--transform-origin)] rounded-xl border p-1 ",
+            "bg-popover text-popover-foreground shadow-popover min-w-[13rem] origin-[var(--transform-origin)] border p-1 ",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0",
             "data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0",
@@ -51,7 +51,7 @@ function DropdownMenuItem({
   return (
     <MenuPrimitive.Item
       className={cn(
-        "text-foreground data-[highlighted]:bg-accent relative flex min-h-9 cursor-default select-none items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:text-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0",
+        "text-foreground data-[highlighted]:bg-accent relative flex min-h-9 cursor-default select-none items-center gap-2.5 px-2.5 py-2 text-sm transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:text-muted-foreground [&_svg]:size-4 [&_svg]:shrink-0",
         inset && "pl-8",
         className,
       )}

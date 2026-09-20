@@ -58,7 +58,7 @@ export function DayList({
               ) : null}
             </div>
             {shifts.length === 0 ? (
-              <p className="text-muted-foreground/70 rounded-md border border-dashed px-3 py-2.5 text-sm">
+              <p className="text-muted-foreground/70 border border-dashed px-3 py-2.5 text-sm">
                 {emptyLabel}
               </p>
             ) : (
@@ -94,7 +94,7 @@ export function DayList({
                           type="button"
                           onClick={() => onShiftClick(s.id)}
                           className={cn(
-                            " w-full rounded-lg border px-3 py-2.5 text-left transition-colors ",
+                            " w-full border px-3 py-2.5 text-left transition-colors ",
                             toneClass,
                             "hover:bg-accent/60",
                           )}
@@ -102,7 +102,7 @@ export function DayList({
                           {body}
                         </button>
                       ) : (
-                        <div className={cn("rounded-lg border px-3 py-2.5", toneClass)}>{body}</div>
+                        <div className={cn(" border px-3 py-2.5", toneClass)}>{body}</div>
                       )}
                     </li>
                   );

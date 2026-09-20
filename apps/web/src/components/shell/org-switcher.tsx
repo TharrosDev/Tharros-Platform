@@ -45,13 +45,13 @@ export function OrgSwitcher({ orgs, activeOrg }: { orgs: UserOrg[]; activeOrg: U
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            "group bg-card flex min-h-11 w-full items-center gap-2.5 rounded-lg border px-2 py-1.5 text-left shadow-xs transition-[background-color,border-color]",
+            "group bg-card flex min-h-11 w-full items-center gap-2.5 border px-2 py-1.5 text-left shadow-xs transition-[background-color,border-color]",
             "hover:border-input hover:bg-accent/50 ",
             pending && "opacity-60",
           )}
           aria-label="Switch organization"
         >
-          <span className="bg-primary-soft text-primary-soft-foreground flex size-7 shrink-0 items-center justify-center rounded-md">
+          <span className="bg-primary-soft text-primary-soft-foreground flex size-7 shrink-0 items-center justify-center">
             <Building2 className="size-3.5" />
           </span>
           <span className="min-w-0 flex-1">

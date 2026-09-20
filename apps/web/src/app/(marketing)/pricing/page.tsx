@@ -43,30 +43,36 @@ const SHARED = [
 export default function PricingPage() {
   return (
     <section className={cn(marketingContainer, "py-16 sm:py-24")}>
-      <div className="max-w-2xl">
-        <h1 className="type-hero text-rack-foreground">One flat price. No per-seat math.</h1>
-        <p className="text-rack-muted-foreground type-body mt-5 max-w-xl text-pretty sm:text-lg">
-          Pick the plan that matches where your business is today, and change it whenever that
-          changes. Every plan starts with a {TRIAL_DAYS}-day free trial. Prices in CAD, tax
-          calculated at checkout.
-        </p>
+      <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-end">
+        <div className="min-w-0">
+          <h1 className="type-hero text-rack-foreground">One flat price. No per-seat math.</h1>
+          <p className="text-rack-muted-foreground type-body mt-5 max-w-xl text-pretty sm:text-lg">
+            Pick the plan that matches where your business is today, and change it whenever that
+            changes. Every plan starts with a {TRIAL_DAYS}-day free trial. Prices in CAD, tax
+            calculated at checkout.
+          </p>
+        </div>
+
+        {/* The shared terms sit beside the heading rather than leaving the
+            right half of the opening empty. */}
+        <ul className="border-rack-edge grid border-t">
+          {SHARED.map((item) => (
+            <li
+              key={item}
+              className="border-rack-edge type-meta text-rack-muted-foreground flex items-center gap-3 border-b py-2.5"
+            >
+              <span aria-hidden className="bg-primary h-px w-4" />
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <div className="mt-14 grid items-stretch gap-px lg:grid-cols-3">
-        {PLANS.map((plan, index) => (
-          <Plan key={plan.name} plan={plan} rung={index + 1} />
+      <div className="mt-12 grid items-start gap-px lg:grid-cols-3">
+        {PLANS.map((plan) => (
+          <Plan key={plan.name} plan={plan} />
         ))}
       </div>
-
-      {/* True for every plan, so it is stated once rather than three times. */}
-      <ul className="border-rack-edge text-rack-muted-foreground mt-12 flex flex-wrap gap-x-8 gap-y-2 border-y py-5">
-        {SHARED.map((item) => (
-          <li key={item} className="type-meta flex items-center gap-3">
-            <span aria-hidden className="bg-primary h-px w-4" />
-            {item}
-          </li>
-        ))}
-      </ul>
 
       <dl className="mt-14 grid gap-x-10 gap-y-8 sm:grid-cols-3">
         {FAQ.map((item) => (
@@ -91,7 +97,7 @@ export default function PricingPage() {
   );
 }
 
-function Plan({ plan, rung }: { plan: (typeof PLANS)[number]; rung: number }) {
+function Plan({ plan }: { plan: (typeof PLANS)[number] }) {
   const recommended = plan.highlight;
 
   return (
@@ -102,11 +108,9 @@ function Plan({ plan, rung }: { plan: (typeof PLANS)[number]; rung: number }) {
       )}
     >
       <div className="flex items-baseline justify-between gap-3">
-        <p className="type-meta text-muted-foreground">
-          {String(rung).padStart(2, "0")} · {plan.name}
-        </p>
+        <h2 className="type-h2 text-foreground">{plan.name}</h2>
         {recommended ? (
-          <p className="type-meta text-foreground">Where most businesses land</p>
+          <p className="type-meta text-foreground">Everything in Starter, plus the team surfaces</p>
         ) : null}
       </div>
 
@@ -117,7 +121,7 @@ function Plan({ plan, rung }: { plan: (typeof PLANS)[number]; rung: number }) {
 
       <p className="type-body text-muted-foreground mt-3 text-pretty">{plan.blurb}</p>
 
-      <ul className="border-border mt-7 flex-1 space-y-2.5 border-t pt-6">
+      <ul className="border-border mt-7 space-y-2.5 border-t pt-6">
         {plan.features.map((feature) => (
           <li key={feature} className="flex items-start gap-2.5">
             <Check aria-hidden className="text-foreground mt-0.5 size-4 shrink-0" strokeWidth={3} />
@@ -130,7 +134,7 @@ function Plan({ plan, rung }: { plan: (typeof PLANS)[number]; rung: number }) {
         href="/signup"
         className={cn(
           buttonVariants({ variant: recommended ? "default" : "outline", size: "lg" }),
-          "mt-8 w-full",
+          "mt-7 w-full",
         )}
       >
         {recommended ? `Start your ${TRIAL_DAYS}-day free trial` : "Start free trial"}

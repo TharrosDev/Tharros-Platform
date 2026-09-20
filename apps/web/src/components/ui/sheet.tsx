@@ -47,7 +47,7 @@ function SheetContent({
         {children}
         {showClose ? (
           <SheetClose
-            className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-3 top-3 inline-flex h-control-sm w-control-sm items-center justify-center rounded-md transition-colors "
+            className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-3 top-3 inline-flex h-control-sm w-control-sm items-center justify-center transition-colors "
             aria-label="Close menu"
           >
             <X className="size-4" />

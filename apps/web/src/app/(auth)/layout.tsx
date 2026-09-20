@@ -61,15 +61,36 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         </p>
       </aside>
 
-      <main className="relative flex min-h-dvh flex-col items-center justify-center gap-8 px-4 py-12 sm:px-8 lg:px-12">
-        <Link
-          href="/"
-          aria-label="Tharros home"
-          className=" inline-flex min-h-10 items-center rounded-md lg:hidden"
-        >
-          <TharrosWordmark markClassName="size-7" />
-        </Link>
-        {children}
+      <main className="relative flex min-h-dvh flex-col lg:items-center lg:justify-center lg:gap-8 lg:px-12 lg:py-12">
+        {/* The rack, carried to mobile so the form is seated in something. */}
+        <div className="on-rack seam-b px-5 py-6 lg:hidden">
+          <Link
+            href="/"
+            aria-label="Tharros home"
+            className="min-h-control inline-flex items-center"
+          >
+            <TharrosWordmark markClassName="size-6" />
+          </Link>
+          <p className="type-h2 text-rack-foreground mt-4">
+            Run the business.
+            <span className="text-primary block">Not the busywork.</span>
+          </p>
+          <ul className="mt-4 space-y-1.5">
+            {PROMISES.map((item) => (
+              <li
+                key={item}
+                className="type-meta text-rack-muted-foreground flex items-center gap-2.5"
+              >
+                <span aria-hidden className="bg-primary h-px w-3" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="flex flex-1 flex-col justify-start gap-8 px-4 py-10 sm:px-8 lg:w-full lg:flex-none lg:justify-center lg:p-0">
+          {children}
+        </div>
       </main>
     </div>
   );

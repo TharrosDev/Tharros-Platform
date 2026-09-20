@@ -88,7 +88,7 @@ export function ApprovalsInbox({
   if (total === 0) {
     return (
       <Card className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-        <span className="bg-success/15 text-success flex size-12 items-center justify-center rounded-xl">
+        <span className="bg-success/15 text-success flex size-12 items-center justify-center">
           <CheckCircle2 className="size-6" />
         </span>
         <p className="text-foreground font-medium">Nothing needs your call</p>
@@ -279,7 +279,7 @@ function ApprovalSection({
     <section className="space-y-3">
       <div>
         <h2 className="type-h2 flex items-center gap-2">
-          <span className="bg-primary-soft text-primary-soft-foreground flex size-7 items-center justify-center rounded-md">
+          <span className="bg-primary-soft text-primary-soft-foreground flex size-7 items-center justify-center">
             {icon}
           </span>
           {title}
@@ -300,7 +300,7 @@ function ApprovalCard({ children, className }: { children: React.ReactNode; clas
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
       className={cn(
-        "bg-card shadow-card flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center",
+        "bg-card shadow-card flex flex-col gap-3 border p-4 sm:flex-row sm:items-center",
         className,
       )}
     >

@@ -85,7 +85,7 @@ export function RoleManager({
   }
 
   return (
-    <section className="bg-card space-y-4 rounded-lg border p-5 shadow-xs">
+    <section className="bg-card space-y-4 border p-5 shadow-xs">
       <h2 className="text-sm font-medium">Role certifications</h2>
 
       {roles.length > 0 ? (

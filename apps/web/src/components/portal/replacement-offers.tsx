@@ -81,7 +81,7 @@ export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
                 key={o.offerId}
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="border-primary-edge/30 bg-primary/5 flex flex-col gap-3 overflow-hidden rounded-xl border p-4"
+                className="border-primary-edge/30 bg-primary/5 flex flex-col gap-3 overflow-hidden border p-4"
               >
                 <div className="min-w-0">
                   <p className="text-foreground font-medium tabular-nums">

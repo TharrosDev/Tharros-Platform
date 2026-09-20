@@ -170,7 +170,7 @@ export function ConversationHistory({
                         href={`/assistant?c=${c.id}`}
                         onClick={() => setOpen(false)}
                         className={cn(
-                          "flex items-start gap-2.5 rounded-md px-2.5 py-2 pr-9 transition-colors",
+                          "flex items-start gap-2.5 px-2.5 py-2 pr-9 transition-colors",
                           active ? "bg-accent" : "hover:bg-accent/60",
                         )}
                       >
@@ -188,7 +188,7 @@ export function ConversationHistory({
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           aria-label={`Actions for ${c.title}`}
-                          className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-1.5 top-1.5 inline-flex size-7 items-center justify-center rounded-md opacity-0 transition group-focus-within/item:opacity-100 group-hover/item:opacity-100 focus-visible:opacity-100 "
+                          className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-1.5 top-1.5 inline-flex size-7 items-center justify-center opacity-0 transition group-focus-within/item:opacity-100 group-hover/item:opacity-100 focus-visible:opacity-100 "
                         >
                           <MoreHorizontal className="size-4" />
                         </DropdownMenuTrigger>

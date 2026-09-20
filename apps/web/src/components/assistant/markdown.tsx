@@ -76,7 +76,7 @@ const BASE_COMPONENTS: Components = {
     );
   },
   pre: ({ children }) => (
-    <pre className="bg-muted my-3 overflow-x-auto rounded-md p-3 text-[0.85em] leading-relaxed">
+    <pre className="bg-muted my-3 overflow-x-auto p-3 text-[0.85em] leading-relaxed">
       {children}
     </pre>
   ),

@@ -43,7 +43,7 @@
   /* --- Stock: warm printed board and strips ------------------------------ */
   --background: oklch(0.945 0.011 86); /* the board the strips lie on */
   --foreground: oklch(0.205 0.013 80); /* press black */
-  --card: oklch(0.985 0.006 86); /* a strip */
+  --card: oklch(0.972 0.01 86); /* a strip: printed stock, not white */
   --card-foreground: oklch(0.205 0.013 80);
   --popover: oklch(0.985 0.006 86);
   --popover-foreground: oklch(0.205 0.013 80);
@@ -522,7 +522,7 @@
   */
   .on-stock {
     --foreground: oklch(0.205 0.013 80);
-    --card: oklch(0.985 0.006 86);
+    --card: oklch(0.972 0.01 86);
     --card-foreground: oklch(0.205 0.013 80);
     --muted: oklch(0.918 0.012 86);
     --muted-foreground: oklch(0.445 0.015 80);
@@ -598,9 +598,6 @@
   }
 
   /* Marketing entrance runs in CSS so the headline paints before hydration (LCP). */
-  .animate-mask-up {
-    animation: mask-up 0.72s var(--ease-out) both;
-  }
   .animate-fade-up {
     animation: fade-up 0.6s var(--ease-out) both;
   }
@@ -619,12 +616,6 @@
   from {
     opacity: 0;
     transform: translateY(-6px);
-  }
-}
-
-@keyframes mask-up {
-  from {
-    transform: translateY(105%);
   }
 }
 

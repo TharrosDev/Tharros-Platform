@@ -93,7 +93,7 @@ function EmployeeCard({
   onRemove: () => void;
 }) {
   return (
-    <div className="bg-card rounded-lg border p-4 shadow-xs">
+    <div className="bg-card border p-4 shadow-xs">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-muted-foreground text-xs font-medium tabular-nums">
           Team member {index + 1}
@@ -196,7 +196,7 @@ export function HoursStep({ state, actions }: { state: WizardState; actions: Ste
         return (
           <div
             key={d.value}
-            className="grid grid-cols-[5.5rem_1fr] items-center gap-3 rounded-lg px-1 py-1.5 sm:grid-cols-[7rem_auto_1fr]"
+            className="grid grid-cols-[5.5rem_1fr] items-center gap-3 px-1 py-1.5 sm:grid-cols-[7rem_auto_1fr]"
           >
             <span className="text-sm font-medium">{d.label}</span>
             {h.is_closed ? (
@@ -251,7 +251,7 @@ export function StaffingStep({ state, actions }: { state: WizardState; actions: 
           return (
             <div
               key={d.value}
-              className="border-border flex flex-wrap items-center gap-3 rounded-lg border border-dashed px-4 py-3"
+              className="border-border flex flex-wrap items-center gap-3 border border-dashed px-4 py-3"
             >
               <span className="text-muted-foreground w-24 text-sm font-medium">{d.label}</span>
               <span className="text-muted-foreground text-sm">Closed</span>
@@ -271,7 +271,7 @@ export function StaffingStep({ state, actions }: { state: WizardState; actions: 
         return (
           <div
             key={d.value}
-            className="bg-card flex flex-wrap items-center gap-3 rounded-lg border px-4 py-3 shadow-xs"
+            className="bg-card flex flex-wrap items-center gap-3 border px-4 py-3 shadow-xs"
           >
             <span className="w-24 text-sm font-medium">{d.label}</span>
             <div className="flex items-center gap-2">
@@ -341,7 +341,7 @@ export function LaborStep({ state, actions }: { state: WizardState; actions: Ste
             <label
               key={opt.value}
               className={cn(
-                "flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors",
+                "flex cursor-pointer items-start gap-3 border p-4 transition-colors",
                 active ? "border-primary-edge bg-primary-soft/40" : "bg-card hover:bg-accent",
               )}
             >
@@ -355,7 +355,7 @@ export function LaborStep({ state, actions }: { state: WizardState; actions: Ste
         })}
       </RadioGroup>
 
-      <dl className="bg-secondary/60 grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg p-4 text-sm sm:grid-cols-3">
+      <dl className="bg-secondary/60 grid grid-cols-2 gap-x-4 gap-y-2 p-4 text-sm sm:grid-cols-3">
         <Rule label="Max daily" value={`${params.max_daily_hours} h`} />
         <Rule label="Max weekly" value={`${params.max_weekly_hours} h`} />
         <Rule label="Min rest" value={`${params.min_rest_hours_between_shifts} h`} />
@@ -397,7 +397,7 @@ export function PersonaStep({ state, actions }: { state: WizardState; actions: S
             <label
               key={t.value}
               className={cn(
-                "flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors",
+                "flex cursor-pointer items-start gap-3 border p-4 transition-colors",
                 active ? "border-primary-edge bg-primary-soft/40" : "bg-card hover:bg-accent",
               )}
             >

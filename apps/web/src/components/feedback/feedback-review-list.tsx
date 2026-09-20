@@ -63,7 +63,7 @@ export function FeedbackReviewList({ submissions }: { submissions: ReviewSubmiss
             Recently reviewed{" "}
             <span className="text-muted-foreground text-base font-normal">({reviewed.length})</span>
           </h2>
-          <ul className="bg-card divide-border/60 overflow-hidden rounded-lg border divide-y">
+          <ul className="bg-card divide-border/60 overflow-hidden border divide-y">
             {reviewed.map((s) => (
               <li key={s.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-sm">
                 <span className="font-medium">{s.orgName}</span>
@@ -109,10 +109,10 @@ function ReviewCard({ submission: s }: { submission: ReviewSubmission }) {
       layout
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="bg-card shadow-card space-y-3 rounded-lg border p-4"
+      className="bg-card shadow-card space-y-3 border p-4"
     >
       <div className="flex flex-wrap items-center gap-2">
-        <span className="bg-primary-soft text-primary-soft-foreground flex size-7 items-center justify-center rounded-md">
+        <span className="bg-primary-soft text-primary-soft-foreground flex size-7 items-center justify-center">
           <Icon className="size-4" aria-hidden />
         </span>
         <span className="font-medium">{s.orgName}</span>
@@ -129,11 +129,11 @@ function ReviewCard({ submission: s }: { submission: ReviewSubmission }) {
         </span>
       </div>
 
-      <div className="bg-surface-2 rounded-md p-3">
+      <div className="bg-surface-2 p-3">
         <p className="type-meta text-muted-foreground">They wrote</p>
         <p className="type-small mt-1 whitespace-pre-wrap">{s.user_text}</p>
       </div>
-      <div className="bg-primary-soft/30 rounded-md p-3">
+      <div className="bg-primary-soft/30 p-3">
         <p className="type-meta text-primary-soft-foreground">Agent summary (internal)</p>
         <p className="type-small mt-1">{s.ai_summary}</p>
       </div>

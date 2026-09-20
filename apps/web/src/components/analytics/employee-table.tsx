@@ -74,7 +74,7 @@ export function EmployeeAnalyticsTable({ employees }: { employees: EmployeeAnaly
   }, [employees, sortKey, dir]);
 
   return (
-    <div className="bg-card shadow-card overflow-hidden rounded-lg border">
+    <div className="bg-card shadow-card overflow-hidden border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -90,7 +90,7 @@ export function EmployeeAnalyticsTable({ employees }: { employees: EmployeeAnaly
                     type="button"
                     onClick={() => toggle(col.key)}
                     className={cn(
-                      " inline-flex items-center gap-1 rounded-sm transition-colors ",
+                      " inline-flex items-center gap-1 transition-colors ",
                       active ? "text-foreground" : "hover:text-foreground",
                     )}
                   >

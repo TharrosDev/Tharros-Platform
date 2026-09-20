@@ -46,7 +46,7 @@ export function PortalSchedule({
 }) {
   if (shifts.length === 0) {
     return (
-      <div className="border-border bg-card rounded-xl border border-dashed p-8 text-center">
+      <div className="border-border bg-card border border-dashed p-8 text-center">
         <p className="text-foreground font-medium">No upcoming shifts</p>
         <p className="text-muted-foreground mt-1 text-sm">
           You have nothing scheduled in the next two weeks. Check back after the next schedule is
@@ -82,10 +82,7 @@ export function PortalSchedule({
           </h2>
           <ul className="space-y-2">
             {day.shifts.map((s) => (
-              <li
-                key={s.id}
-                className="border-border bg-card flex items-start gap-3 rounded-xl border p-4"
-              >
+              <li key={s.id} className="border-border bg-card flex items-start gap-3 border p-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-foreground font-medium tabular-nums">
                     {timeRange(s.startsAt, s.endsAt)}

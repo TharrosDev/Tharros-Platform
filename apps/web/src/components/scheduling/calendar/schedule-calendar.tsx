@@ -394,7 +394,7 @@ export function ScheduleCalendar({
 
       {/* The judge's rationale: a designed AI panel, not an orphan paragraph. */}
       {schedule.optimizationSummary ? (
-        <div className="bg-card flex gap-3 rounded-xl border px-4 py-3.5 shadow-xs">
+        <div className="bg-card flex gap-3 border px-4 py-3.5 shadow-xs">
           <Sparkles className="text-primary-soft-foreground mt-0.5 size-4 shrink-0" aria-hidden />
           <div className="min-w-0">
             <p className="text-sm font-semibold">Why this draft looks the way it does</p>
@@ -408,7 +408,7 @@ export function ScheduleCalendar({
       {moving ? (
         <div
           role="status"
-          className="border-primary-edge/40 bg-primary-soft/50 text-primary-soft-foreground flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-sm"
+          className="border-primary-edge/40 bg-primary-soft/50 text-primary-soft-foreground flex flex-wrap items-center gap-2 border px-3 py-2 text-sm"
         >
           <Move className="size-4 shrink-0" aria-hidden />
           <span className="min-w-0 flex-1">
@@ -421,7 +421,7 @@ export function ScheduleCalendar({
       ) : null}
 
       {/* The grid (hidden on small screens in favour of the day list below) */}
-      <div className="bg-card hidden overflow-x-auto rounded-lg border shadow-xs md:block">
+      <div className="bg-card hidden overflow-x-auto border shadow-xs md:block">
         <div
           className="grid min-w-[64rem]"
           style={{ gridTemplateColumns: `12rem repeat(${WINDOW_DAYS}, minmax(6rem, 1fr))` }}
@@ -502,7 +502,7 @@ export function ScheduleCalendar({
                         disabled={movePending}
                         onClick={() => commitMove(row.key, d)}
                         aria-label={`Move shift to ${row.name} on ${shortDate(d)}`}
-                        className="bg-primary-soft/40 ring-primary/50 hover:bg-primary-soft/70 focus-visible:bg-primary-soft/70 absolute inset-0.5 rounded-md ring-2 transition-colors"
+                        className="bg-primary-soft/40 ring-primary/50 hover:bg-primary-soft/70 focus-visible:bg-primary-soft/70 absolute inset-0.5 ring-2 transition-colors"
                       />
                     ) : null}
                     {moving && !isTarget && !isSource ? (
@@ -651,7 +651,7 @@ function ShiftChip({
         onDragEnd={draggable ? onDragEnd : undefined}
         title={violations.map((v) => v.message).join("\n") || undefined}
         className={[
-          "w-full rounded-md border px-2 py-1 text-left text-xs leading-tight transition-[color,background-color,border-color,opacity]",
+          "w-full border px-2 py-1 text-left text-xs leading-tight transition-[color,background-color,border-color,opacity]",
           dimmed ? "opacity-40" : "",
           draggable ? "cursor-grab active:cursor-grabbing" : "",
           hard
@@ -1160,7 +1160,7 @@ function ViolationList({ violations }: { violations: EditViolation[] }) {
         <li
           key={i}
           className={[
-            "flex items-start gap-2 rounded-md border px-2.5 py-1.5 text-xs",
+            "flex items-start gap-2 border px-2.5 py-1.5 text-xs",
             v.severity === "hard"
               ? "border-destructive/40 bg-destructive/10 text-destructive"
               : "border-warning/40 bg-warning/10 text-warning",
@@ -1176,7 +1176,7 @@ function ViolationList({ violations }: { violations: EditViolation[] }) {
 
 function EmptyState({ canManage }: { canManage: boolean }) {
   return (
-    <div className="bg-card flex flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-16 text-center">
+    <div className="bg-card flex flex-col items-center gap-3 border border-dashed px-6 py-16 text-center">
       <CalendarRange className="text-muted-foreground size-7" />
       <p className="font-medium">No schedule yet</p>
       <p className="text-muted-foreground max-w-sm text-sm">
@@ -1274,7 +1274,7 @@ function PublishDialog({
 
           <div className="space-y-4">
             {blockedHard ? (
-              <div className="border-destructive/40 bg-destructive/10 text-destructive flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
+              <div className="border-destructive/40 bg-destructive/10 text-destructive flex items-start gap-2 border px-3 py-2 text-sm">
                 <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
                 <span>
                   Fix {hardCount} conflict{hardCount > 1 ? "s" : ""} before publishing. Conflicts
@@ -1282,7 +1282,7 @@ function PublishDialog({
                 </span>
               </div>
             ) : needsAck ? (
-              <label className="border-warning/40 bg-warning/10 flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
+              <label className="border-warning/40 bg-warning/10 flex items-start gap-2 border px-3 py-2 text-sm">
                 <Checkbox
                   checked={ack}
                   onCheckedChange={(v) => setAck(v === true)}
@@ -1302,7 +1302,7 @@ function PublishDialog({
                 </span>
               </label>
             ) : (
-              <div className="border-success/40 bg-success/10 text-success flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
+              <div className="border-success/40 bg-success/10 text-success flex items-start gap-2 border px-3 py-2 text-sm">
                 <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden />
                 <span>Fully covered with no conflicts. Ready to publish.</span>
               </div>
@@ -1444,7 +1444,7 @@ function SwapReviewDialog({ swaps, onClose }: { swaps: EscalatedSwap[]; onClose:
             {swaps.map((s) => {
               const busy = pendingId === s.requestId;
               return (
-                <li key={s.requestId} className="border-border rounded-lg border p-3">
+                <li key={s.requestId} className="border-border border p-3">
                   <p className="text-sm">
                     <strong>{s.claimantName}</strong> would take <strong>{s.requesterName}</strong>
                     &apos;s <span className="tabular-nums">{s.shiftLabel}</span> shift
@@ -1557,7 +1557,7 @@ function TimeOffReviewDialog({
               const busy = pendingId === r.id;
               const approved = r.status === "approved";
               return (
-                <li key={r.id} className="border-border rounded-lg border p-3">
+                <li key={r.id} className="border-border border p-3">
                   <div className="flex items-start justify-between gap-2">
                     <p className="text-sm">
                       <strong>{r.employeeName}</strong>{" "}

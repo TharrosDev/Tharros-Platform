@@ -20,7 +20,7 @@ export function AuthCard({
 }) {
   return (
     <div className="w-full max-w-md space-y-5">
-      <Card className="shadow-raised rounded-2xl">
+      <Card className="on-stock w-full">
         <CardHeader className="px-6 pt-7 pb-2 sm:px-8">
           <h1 data-slot="card-title" className="text-2xl font-semibold tracking-[-0.03em]">
             {title}
@@ -58,8 +58,8 @@ export function FormMessage({
         role={tone === "error" ? "alert" : "status"}
         className={
           tone === "error"
-            ? "border-destructive/20 bg-destructive/10 text-destructive rounded-lg border px-3.5 py-3 text-sm leading-relaxed"
-            : "border-success/20 bg-success/10 text-success rounded-lg border px-3.5 py-3 text-sm leading-relaxed"
+            ? "border-destructive/20 bg-destructive/10 text-destructive border px-3.5 py-3 text-sm leading-relaxed"
+            : "border-success/20 bg-success/10 text-success border px-3.5 py-3 text-sm leading-relaxed"
         }
       >
         {children}

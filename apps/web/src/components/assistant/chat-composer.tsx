@@ -50,7 +50,7 @@ export function ChatComposer({
       {header ? <div className="mb-2">{header}</div> : null}
       <div
         className={cn(
-          "border-input bg-card shadow-card focus-within:border-ring focus-within:ring-ring/25 relative flex items-end gap-2 rounded-xl border p-2 transition-[box-shadow,border-color] focus-within:ring-[3px]",
+          "border-input bg-card shadow-card focus-within:border-ring focus-within:ring-ring/25 relative flex items-end gap-2 border p-2 transition-[box-shadow,border-color] focus-within:ring-[3px]",
           disabled && "opacity-60",
         )}
       >
@@ -74,7 +74,7 @@ export function ChatComposer({
           disabled={!streaming && !canSend}
           aria-label={streaming ? "Stop generating" : "Send message"}
           className={cn(
-            "relative inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 active:translate-y-px",
+            "relative inline-flex size-9 shrink-0 items-center justify-center transition-colors duration-150 active:translate-y-px",
             streaming
               ? "bg-foreground text-background hover:bg-foreground/85"
               : "bg-primary text-primary-foreground hover:bg-primary/92 disabled:bg-muted disabled:text-muted-foreground",
