@@ -34,10 +34,9 @@ export const orgNameSchema = z
   .max(80, { error: "Keep the name under 80 characters." })
   .trim();
 
-export const industrySchema = z.enum(
-  INDUSTRY_OPTIONS as unknown as [string, ...string[]],
-  { error: "Choose an industry." },
-);
+export const industrySchema = z.enum(INDUSTRY_OPTIONS as unknown as [string, ...string[]], {
+  error: "Choose an industry.",
+});
 
 export const sizeSchema = z.enum(SIZE_VALUES, { error: "Choose a team size." });
 
@@ -75,9 +74,10 @@ export type NotificationKey = (typeof NOTIFICATION_OPTIONS)[number]["key"];
 
 /** A complete preferences map. Every key is present and boolean. */
 export const notificationsSchema = z.object(
-  Object.fromEntries(
-    NOTIFICATION_OPTIONS.map((o) => [o.key, z.boolean()]),
-  ) as Record<NotificationKey, z.ZodBoolean>,
+  Object.fromEntries(NOTIFICATION_OPTIONS.map((o) => [o.key, z.boolean()])) as Record<
+    NotificationKey,
+    z.ZodBoolean
+  >,
 );
 
 export type Notifications = z.infer<typeof notificationsSchema>;

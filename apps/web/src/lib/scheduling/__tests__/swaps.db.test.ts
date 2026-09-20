@@ -16,7 +16,9 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SECRET_KEY = process.env.SUPABASE_SECRET_KEY!;
 
 const RUN = Date.now().toString(36);
-const admin = createClient(SUPABASE_URL, SECRET_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+const admin = createClient(SUPABASE_URL, SECRET_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 const DAY = 24 * 60 * 60 * 1000;
 const isoIn = (days: number) => new Date(Date.now() + days * DAY).toISOString();
@@ -36,7 +38,11 @@ let roleId = "";
  * grants it deterministically — `isoIn(days)` would cross midnight when CI runs late
  * in the UTC day, flakily making nobody eligible.
  */
-async function shift(employeeId: string, days: number, roleCertId: string | null = null): Promise<string> {
+async function shift(
+  employeeId: string,
+  days: number,
+  roleCertId: string | null = null,
+): Promise<string> {
   const date = isoIn(days).slice(0, 10);
   const { data, error } = await admin
     .from("shifts")
@@ -70,7 +76,12 @@ beforeAll(async () => {
   if (uErr) throw uErr;
   ownerId = u.user.id;
 
-  const { data: m } = await admin.from("memberships").select("org_id").eq("user_id", ownerId).eq("role", "owner").single();
+  const { data: m } = await admin
+    .from("memberships")
+    .select("org_id")
+    .eq("user_id", ownerId)
+    .eq("role", "owner")
+    .single();
   orgA = (m as { org_id: string }).org_id;
 
   const { data: emps, error: eErr } = await admin
@@ -93,11 +104,19 @@ beforeAll(async () => {
     .single();
   roleId = (role as { id: string }).id;
   // Only A holds the role (used for the invalid-swap / escalation case).
-  await admin.from("employee_role_assignments").insert({ org_id: orgA, employee_id: empA, role_certification_id: roleId });
+  await admin
+    .from("employee_role_assignments")
+    .insert({ org_id: orgA, employee_id: empA, role_certification_id: roleId });
 
   const { data: sched } = await admin
     .from("schedules")
-    .insert({ org_id: orgA, name: "Swap sched", period_start: isoIn(0).slice(0, 10), period_end: isoIn(40).slice(0, 10), status: "published" })
+    .insert({
+      org_id: orgA,
+      name: "Swap sched",
+      period_start: isoIn(0).slice(0, 10),
+      period_end: isoIn(40).slice(0, 10),
+      status: "published",
+    })
     .select("id")
     .single();
   scheduleId = (sched as { id: string }).id;
@@ -147,13 +166,22 @@ describe("shift swaps", () => {
     expect(proposed.ok).toBe(true);
     if (!proposed.ok) return;
 
-    const res = await respondToSwap(admin, { orgId: orgA, requestId: proposed.requestId, claimantId: empB, accept: true });
+    const res = await respondToSwap(admin, {
+      orgId: orgA,
+      requestId: proposed.requestId,
+      claimantId: empB,
+      accept: true,
+    });
     expect(res).toEqual({ ok: true, outcome: "applied" });
 
     expect(await shiftOwner(x)).toBe(empB); // X went to B
     expect(await shiftOwner(y)).toBe(empA); // Y went to A
 
-    const { data: req } = await admin.from("shift_swap_requests").select("status").eq("id", proposed.requestId).single();
+    const { data: req } = await admin
+      .from("shift_swap_requests")
+      .select("status")
+      .eq("id", proposed.requestId)
+      .single();
     expect((req as { status: string }).status).toBe("approved");
   });
 
@@ -170,10 +198,19 @@ describe("shift swaps", () => {
     expect(proposed.ok).toBe(true);
     if (!proposed.ok) return;
 
-    const res = await respondToSwap(admin, { orgId: orgA, requestId: proposed.requestId, claimantId: empB, accept: true });
+    const res = await respondToSwap(admin, {
+      orgId: orgA,
+      requestId: proposed.requestId,
+      claimantId: empB,
+      accept: true,
+    });
     expect(res).toEqual({ ok: true, outcome: "escalated" });
 
-    const { data: req } = await admin.from("shift_swap_requests").select("status, target_employee_id").eq("id", proposed.requestId).single();
+    const { data: req } = await admin
+      .from("shift_swap_requests")
+      .select("status, target_employee_id")
+      .eq("id", proposed.requestId)
+      .single();
     expect((req as { status: string }).status).toBe("accepted");
     expect((req as { target_employee_id: string }).target_employee_id).toBe(empB);
     expect(await shiftOwner(x)).toBe(empA); // not yet moved
@@ -187,7 +224,11 @@ describe("shift swaps", () => {
     expect((notes ?? []).some((n) => n.user_id === ownerId)).toBe(true);
 
     // Manager override applies it despite the role gap.
-    const approved = await approveSwap(admin, { orgId: orgA, requestId: proposed.requestId, reviewerUserId: ownerId });
+    const approved = await approveSwap(admin, {
+      orgId: orgA,
+      requestId: proposed.requestId,
+      reviewerUserId: ownerId,
+    });
     expect(approved).toEqual({ ok: true, outcome: "applied" });
     expect(await shiftOwner(x)).toBe(empB);
   });
@@ -195,14 +236,28 @@ describe("shift swaps", () => {
   it("open offer is first-claim-wins under concurrency", async () => {
     const x = await shift(empA, 7); // A's open offer, no role
 
-    const proposed = await proposeSwap(admin, { orgId: orgA, requestingEmployeeId: empA, shiftId: x });
+    const proposed = await proposeSwap(admin, {
+      orgId: orgA,
+      requestingEmployeeId: empA,
+      shiftId: x,
+    });
     expect(proposed.ok).toBe(true);
     if (!proposed.ok) return;
 
     // B and C both try to claim it at once.
     const [b, c] = await Promise.all([
-      respondToSwap(admin, { orgId: orgA, requestId: proposed.requestId, claimantId: empB, accept: true }),
-      respondToSwap(admin, { orgId: orgA, requestId: proposed.requestId, claimantId: empC, accept: true }),
+      respondToSwap(admin, {
+        orgId: orgA,
+        requestId: proposed.requestId,
+        claimantId: empB,
+        accept: true,
+      }),
+      respondToSwap(admin, {
+        orgId: orgA,
+        requestId: proposed.requestId,
+        claimantId: empC,
+        accept: true,
+      }),
     ]);
     const applied = [b, c].filter((r) => r.ok && r.outcome === "applied");
     const losers = [b, c].filter((r) => !r.ok || r.outcome !== "applied");
@@ -215,14 +270,23 @@ describe("shift swaps", () => {
 
   it("rejects as stale when the shift changed underneath", async () => {
     const x = await shift(empA, 9);
-    const proposed = await proposeSwap(admin, { orgId: orgA, requestingEmployeeId: empA, shiftId: x });
+    const proposed = await proposeSwap(admin, {
+      orgId: orgA,
+      requestingEmployeeId: empA,
+      shiftId: x,
+    });
     expect(proposed.ok).toBe(true);
     if (!proposed.ok) return;
 
     // The shift gets reassigned away from A before the claim resolves.
     await admin.from("shifts").update({ employee_id: empC }).eq("id", x);
 
-    const res = await respondToSwap(admin, { orgId: orgA, requestId: proposed.requestId, claimantId: empB, accept: true });
+    const res = await respondToSwap(admin, {
+      orgId: orgA,
+      requestId: proposed.requestId,
+      claimantId: empB,
+      accept: true,
+    });
     expect(res.ok).toBe(false);
   });
 });

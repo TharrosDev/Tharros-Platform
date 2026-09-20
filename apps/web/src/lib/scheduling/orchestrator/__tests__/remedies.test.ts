@@ -78,7 +78,15 @@ function optimizeInput(
 }
 
 function gap(reason: string, missing = 1): GapReportEntry {
-  return { slotId: "s1", date: "2026-06-08", roleId: null, required: 1, filled: 0, missing, reason };
+  return {
+    slotId: "s1",
+    date: "2026-06-08",
+    roleId: null,
+    required: 1,
+    filled: 0,
+    missing,
+    reason,
+  };
 }
 
 describe("totalMissing", () => {

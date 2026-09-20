@@ -1,19 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Archivo, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 import { MotionProvider } from "@/components/motion";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/*
+  Archivo carries the whole system: a DIN-lineage grotesque with a real width
+  axis, so rack labels run condensed and strip data runs normal out of one file.
+*/
+const archivo = Archivo({
+  variable: "--font-archivo",
   subsets: ["latin"],
+  axes: ["wdth"],
+  display: "swap",
 });
 
+/* Reserved for code blocks in assistant and knowledge output. */
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,11 +47,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const enableVercelTelemetry =
-    process.env.NODE_ENV === "production" && process.env.VERCEL === "1";
+  const enableVercelTelemetry = process.env.NODE_ENV === "production" && process.env.VERCEL === "1";
 
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${geistMono.variable}`}>
       <body>
         <MotionProvider>{children}</MotionProvider>
         {enableVercelTelemetry ? (

@@ -27,8 +27,7 @@ export type ConversationActionState = { ok?: boolean; message?: string };
 
 /** Resolve the caller + their active org, asserting an owner/admin role. */
 async function requireManager(): Promise<
-  | { ok: true; userId: string; orgId: string }
-  | { ok: false; message: string }
+  { ok: true; userId: string; orgId: string } | { ok: false; message: string }
 > {
   const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
   if (!user) return { ok: false, message: "You need to sign in again." };
@@ -56,7 +55,8 @@ export async function takeOverThreadAction(
 
   const threadId = String(formData.get("threadId") ?? "");
   if (!threadId) return { message: "Missing conversation." };
-  if (!(await assertThreadInOrg(threadId, auth.orgId))) return { message: "Conversation not found." };
+  if (!(await assertThreadInOrg(threadId, auth.orgId)))
+    return { message: "Conversation not found." };
 
   const supabase = await createClient();
   const updated = await takeOverThread(supabase, threadId);
@@ -84,7 +84,8 @@ export async function releaseThreadAction(
 
   const threadId = String(formData.get("threadId") ?? "");
   if (!threadId) return { message: "Missing conversation." };
-  if (!(await assertThreadInOrg(threadId, auth.orgId))) return { message: "Conversation not found." };
+  if (!(await assertThreadInOrg(threadId, auth.orgId)))
+    return { message: "Conversation not found." };
 
   const supabase = await createClient();
   const updated = await releaseThread(supabase, threadId);

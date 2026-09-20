@@ -242,8 +242,8 @@ export function StaffingStep({ state, actions }: { state: WizardState; actions: 
   return (
     <div className="space-y-2">
       <p className="text-muted-foreground text-sm">
-        The fewest people you need working on a typical day. Closed days (like weekends, by
-        default) can be opened right here. You can fine-tune time blocks later.
+        The fewest people you need working on a typical day. Closed days (like weekends, by default)
+        can be opened right here. You can fine-tune time blocks later.
       </p>
       {DAYS.map((d) => {
         const hoursRow = state.hours.find((h) => h.day_of_week === d.value);

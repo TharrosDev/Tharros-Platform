@@ -18,8 +18,8 @@ export default function PrivacyPage() {
       <section>
         <h2>Information you provide</h2>
         <p>
-          Tharros processes account details such as your name and email address; organization,
-          team, employee and scheduling information you enter; documents uploaded to the knowledge
+          Tharros processes account details such as your name and email address; organization, team,
+          employee and scheduling information you enter; documents uploaded to the knowledge
           workspace; messages and prompts sent to AI features; feedback you submit; and information
           required to administer your subscription.
         </p>
@@ -33,10 +33,10 @@ export default function PrivacyPage() {
       <section>
         <h2>Information created by the service</h2>
         <p>
-          The platform creates operational records needed to run the product, including
-          organization memberships, document-processing state, AI conversation history, citations,
-          token-usage records, schedules and schedule versions, notifications, audit events, job
-          execution state, and security or diagnostic logs.
+          The platform creates operational records needed to run the product, including organization
+          memberships, document-processing state, AI conversation history, citations, token-usage
+          records, schedules and schedule versions, notifications, audit events, job execution
+          state, and security or diagnostic logs.
         </p>
       </section>
 
@@ -45,8 +45,8 @@ export default function PrivacyPage() {
         <p>
           Information is used to authenticate users, isolate organization data, provide the
           assistant and scheduling products, process documents, deliver notifications and email,
-          operate subscriptions, measure plan usage, troubleshoot failures, secure the platform,
-          and maintain an audit trail for important operational actions.
+          operate subscriptions, measure plan usage, troubleshoot failures, secure the platform, and
+          maintain an audit trail for important operational actions.
         </p>
       </section>
 

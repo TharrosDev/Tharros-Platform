@@ -114,8 +114,7 @@ describe("claim_due_jobs — atomic claim", () => {
     // run's rows by id: back-date them a day so they sort ahead of any app-
     // enqueued job (which uses run_at≈now), and since claim_due_jobs orders by
     // run_at, the oldest-due rows it returns are deterministically ours.
-    const past = (sec: number) =>
-      new Date(Date.now() - 86_400_000 + sec * 1000).toISOString();
+    const past = (sec: number) => new Date(Date.now() - 86_400_000 + sec * 1000).toISOString();
     const ids: string[] = [];
     for (let i = 0; i < 3; i++) {
       const { data, error } = await admin

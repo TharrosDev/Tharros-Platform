@@ -20,13 +20,13 @@ function TooltipContent({
 }) {
   return (
     <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Positioner sideOffset={sideOffset} side={side} className="z-50">
+      <TooltipPrimitive.Positioner sideOffset={sideOffset} side={side} className="z-overlay">
         <TooltipPrimitive.Popup
           className={cn(
-            "bg-foreground text-background shadow-popover origin-[var(--transform-origin)] rounded-md px-2.5 py-1.5 text-xs font-medium outline-none",
+            "bg-foreground text-background shadow-popover origin-[var(--transform-origin)] rounded-md px-2.5 py-1.5 text-xs font-medium ",
             "transition-all duration-150 ease-out",
-            "data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0",
-            "data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0",
+            "data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0",
+            "data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0",
             className,
           )}
           {...props}

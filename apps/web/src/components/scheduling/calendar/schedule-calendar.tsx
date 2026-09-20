@@ -164,7 +164,10 @@ export function ScheduleCalendar({
   const pendingTimeOffCount = timeOffRequests.filter((r) => r.status === "pending").length;
 
   const roleName = React.useMemo(() => new Map(roles.map((r) => [r.id, r.name])), [roles]);
-  const employeeName = React.useMemo(() => new Map(employees.map((e) => [e.id, e.name])), [employees]);
+  const employeeName = React.useMemo(
+    () => new Map(employees.map((e) => [e.id, e.name])),
+    [employees],
+  );
 
   // Esc backs out of move mode.
   React.useEffect(() => {
@@ -348,44 +351,44 @@ export function ScheduleCalendar({
         </div>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
-              <History className="size-4" /> History
+          <Button variant="outline" size="sm" onClick={() => setShowHistory(true)}>
+            <History className="size-4" /> History
+          </Button>
+          {canManage && escalatedSwaps.length > 0 ? (
+            <Button variant="outline" size="sm" onClick={() => setShowSwaps(true)}>
+              <ArrowLeftRight className="size-4" /> Swaps
+              <Badge variant="warning" className="ml-1">
+                {escalatedSwaps.length}
+              </Badge>
             </Button>
-            {canManage && escalatedSwaps.length > 0 ? (
-              <Button variant="outline" size="sm" onClick={() => setShowSwaps(true)}>
-                <ArrowLeftRight className="size-4" /> Swaps
+          ) : null}
+          {canManage && timeOffRequests.length > 0 ? (
+            <Button variant="outline" size="sm" onClick={() => setShowTimeOff(true)}>
+              <CalendarClock className="size-4" /> Time off
+              {pendingTimeOffCount > 0 ? (
                 <Badge variant="warning" className="ml-1">
-                  {escalatedSwaps.length}
+                  {pendingTimeOffCount}
                 </Badge>
-              </Button>
-            ) : null}
-            {canManage && timeOffRequests.length > 0 ? (
-              <Button variant="outline" size="sm" onClick={() => setShowTimeOff(true)}>
-                <CalendarClock className="size-4" /> Time off
-                {pendingTimeOffCount > 0 ? (
-                  <Badge variant="warning" className="ml-1">
-                    {pendingTimeOffCount}
-                  </Badge>
-                ) : null}
-              </Button>
-            ) : null}
-            {canManage && isPublished ? <ReopenButton scheduleId={schedule.id} /> : null}
-            {editable && shifts.some((s) => !s.locked) ? (
-              <ClearScheduleButton
-                scheduleId={schedule.id}
-                unlockedCount={shifts.filter((s) => !s.locked).length}
-                lockedCount={shifts.filter((s) => s.locked).length}
-              />
-            ) : null}
-            {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
-            {canManage && isDraft ? (
-              <PublishDialog
-                scheduleId={schedule.id}
-                hardCount={hardCount}
-                softCount={softCount}
-                openShiftCount={openShiftCount}
-              />
-            ) : null}
+              ) : null}
+            </Button>
+          ) : null}
+          {canManage && isPublished ? <ReopenButton scheduleId={schedule.id} /> : null}
+          {editable && shifts.some((s) => !s.locked) ? (
+            <ClearScheduleButton
+              scheduleId={schedule.id}
+              unlockedCount={shifts.filter((s) => !s.locked).length}
+              lockedCount={shifts.filter((s) => s.locked).length}
+            />
+          ) : null}
+          {canManage ? <GenerateDialog defaultStart={schedule.periodStart} /> : null}
+          {canManage && isDraft ? (
+            <PublishDialog
+              scheduleId={schedule.id}
+              hardCount={hardCount}
+              softCount={softCount}
+              openShiftCount={openShiftCount}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -456,9 +459,7 @@ export function ScheduleCalendar({
                     className="border-border group/cell relative min-h-14 border-b px-1.5 py-1.5"
                     // Drop side of drag-to-reassign: only validated targets
                     // accept the drop (same moveTargets the click path uses).
-                    onDragOver={
-                      moving && isTarget ? (event) => event.preventDefault() : undefined
-                    }
+                    onDragOver={moving && isTarget ? (event) => event.preventDefault() : undefined}
                     onDrop={
                       moving && isTarget
                         ? (event) => {
@@ -501,7 +502,7 @@ export function ScheduleCalendar({
                         disabled={movePending}
                         onClick={() => commitMove(row.key, d)}
                         aria-label={`Move shift to ${row.name} on ${shortDate(d)}`}
-                        className="bg-primary-soft/40 ring-primary/50 hover:bg-primary-soft/70 focus-visible:bg-primary-soft/70 absolute inset-0.5 rounded-md ring-2 outline-none transition-colors"
+                        className="bg-primary-soft/40 ring-primary/50 hover:bg-primary-soft/70 focus-visible:bg-primary-soft/70 absolute inset-0.5 rounded-md ring-2 transition-colors"
                       />
                     ) : null}
                     {moving && !isTarget && !isSource ? (
@@ -529,9 +530,7 @@ export function ScheduleCalendar({
               return {
                 id: s.id,
                 timeLabel: `${timeOf(s.startsAt)}–${timeOf(s.endsAt)}`,
-                title: open
-                  ? "Open shift"
-                  : (employeeName.get(s.employeeId!) ?? "Assigned"),
+                title: open ? "Open shift" : (employeeName.get(s.employeeId!) ?? "Assigned"),
                 subtitle: s.roleId ? (roleName.get(s.roleId) ?? null) : null,
                 tone: violations.some((v) => v.severity === "hard")
                   ? "violation"
@@ -632,43 +631,43 @@ function ShiftChip({
   // drag attributes must sit on a plain <button>.
   return (
     <m.div layoutId={`shift-${shift.id}`}>
-    <button
-      type="button"
-      onClick={onClick}
-      draggable={draggable}
-      onDragStart={
-        draggable
-          ? (event: React.DragEvent) => {
-              event.dataTransfer.effectAllowed = "move";
-              event.dataTransfer.setData("text/plain", shift.id);
-              // Defer entering move mode: a synchronous setState re-renders the
-              // grid (overlays mount, add-buttons unmount) during dragstart, and
-              // Chrome cancels a native drag when the DOM under the pointer
-              // mutates mid-event. One frame later the drag is established.
-              window.requestAnimationFrame(() => onDragStart?.());
-            }
-          : undefined
-      }
-      onDragEnd={draggable ? onDragEnd : undefined}
-      title={violations.map((v) => v.message).join("\n") || undefined}
-      className={[
-        "w-full rounded-md border px-2 py-1 text-left text-xs leading-tight transition-[color,background-color,border-color,opacity]",
-        dimmed ? "opacity-40" : "",
-        draggable ? "cursor-grab active:cursor-grabbing" : "",
-        hard
-          ? "border-destructive/50 bg-destructive/10 text-destructive"
-          : open
-            ? "border-warning/50 border-dashed bg-warning/10 text-warning hover:bg-warning/15"
-            : "border-primary/20 bg-primary-soft/70 text-primary-soft-foreground hover:bg-primary-soft",
-      ].join(" ")}
-    >
-      <span className="flex items-center gap-1 font-semibold whitespace-nowrap tabular-nums">
-        {timeOf(shift.startsAt)}–{timeOf(shift.endsAt)}
-        {shift.locked ? <Lock className="size-3" aria-label="Locked" /> : null}
-        {hard ? <TriangleAlert className="size-3" aria-hidden /> : null}
-      </span>
-      {roleName ? <span className="block truncate opacity-85">{roleName}</span> : null}
-    </button>
+      <button
+        type="button"
+        onClick={onClick}
+        draggable={draggable}
+        onDragStart={
+          draggable
+            ? (event: React.DragEvent) => {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", shift.id);
+                // Defer entering move mode: a synchronous setState re-renders the
+                // grid (overlays mount, add-buttons unmount) during dragstart, and
+                // Chrome cancels a native drag when the DOM under the pointer
+                // mutates mid-event. One frame later the drag is established.
+                window.requestAnimationFrame(() => onDragStart?.());
+              }
+            : undefined
+        }
+        onDragEnd={draggable ? onDragEnd : undefined}
+        title={violations.map((v) => v.message).join("\n") || undefined}
+        className={[
+          "w-full rounded-md border px-2 py-1 text-left text-xs leading-tight transition-[color,background-color,border-color,opacity]",
+          dimmed ? "opacity-40" : "",
+          draggable ? "cursor-grab active:cursor-grabbing" : "",
+          hard
+            ? "border-destructive/50 bg-destructive/10 text-destructive"
+            : open
+              ? "border-warning/50 border-dashed bg-warning/10 text-warning hover:bg-warning/15"
+              : "border-primary/20 bg-primary-soft/70 text-primary-soft-foreground hover:bg-primary-soft",
+        ].join(" ")}
+      >
+        <span className="flex items-center gap-1 font-semibold whitespace-nowrap tabular-nums">
+          {timeOf(shift.startsAt)}–{timeOf(shift.endsAt)}
+          {shift.locked ? <Lock className="size-3" aria-label="Locked" /> : null}
+          {hard ? <TriangleAlert className="size-3" aria-hidden /> : null}
+        </span>
+        {roleName ? <span className="block truncate opacity-85">{roleName}</span> : null}
+      </button>
     </m.div>
   );
 }
@@ -956,10 +955,11 @@ function ClearScheduleButton({
           <DialogHeader>
             <DialogTitle>Are you sure?</DialogTitle>
             <DialogDescription>
-              This removes all {unlockedCount} shift{unlockedCount === 1 ? "" : "s"} from this
-              draft{lockedCount > 0
+              This removes all {unlockedCount} shift{unlockedCount === 1 ? "" : "s"} from this draft
+              {lockedCount > 0
                 ? `. Your ${lockedCount} locked shift${lockedCount === 1 ? " stays" : "s stay"} pinned`
-                : ""}. You can&apos;t undo it, but you can always generate a fresh draft.
+                : ""}
+              . You can&apos;t undo it, but you can always generate a fresh draft.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

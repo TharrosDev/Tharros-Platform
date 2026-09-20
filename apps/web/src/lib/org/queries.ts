@@ -2,10 +2,7 @@ import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
 import { getAuthUser } from "@/lib/auth/current-user";
-import {
-  resolveNotifications,
-  type Notifications,
-} from "@/lib/org/schemas";
+import { resolveNotifications, type Notifications } from "@/lib/org/schemas";
 
 /** An org the current user belongs to, flattened for the shell + switcher. */
 export type UserOrg = {
@@ -102,9 +99,7 @@ export const getOrgSettings = cache(async (): Promise<OrgSettings | null> => {
     .eq("org_id", activeOrg.id)
     .single();
 
-  const row = data as
-    | { timezone: string; locale: string; notifications: unknown }
-    | null;
+  const row = data as { timezone: string; locale: string; notifications: unknown } | null;
 
   return {
     timezone: row?.timezone ?? "America/Toronto",

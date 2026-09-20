@@ -4,7 +4,8 @@ import { PublicDocument } from "@/components/marketing/public-document";
 
 export const metadata: Metadata = {
   title: "Security",
-  description: "How Tharros approaches tenant isolation, access control, monitoring, and data handling.",
+  description:
+    "How Tharros approaches tenant isolation, access control, monitoring, and data handling.",
 };
 
 export default function SecurityPage() {

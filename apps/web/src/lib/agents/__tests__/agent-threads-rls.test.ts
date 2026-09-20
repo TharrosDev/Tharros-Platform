@@ -149,14 +149,24 @@ describe("agent_turns RLS (inherit parent thread visibility)", () => {
   it("a member may insert a 'user' turn; a non-member cannot", async () => {
     const ok = await clientC
       .from("agent_turns")
-      .insert({ thread_id: threadA, org_id: orgA, role: "user", content: [{ type: "text", text: "q" }] })
+      .insert({
+        thread_id: threadA,
+        org_id: orgA,
+        role: "user",
+        content: [{ type: "text", text: "q" }],
+      })
       .select("id")
       .single();
     expect(ok.error).toBeNull();
 
     const denied = await clientB
       .from("agent_turns")
-      .insert({ thread_id: threadA, org_id: orgA, role: "user", content: [{ type: "text", text: "x" }] })
+      .insert({
+        thread_id: threadA,
+        org_id: orgA,
+        role: "user",
+        content: [{ type: "text", text: "x" }],
+      })
       .select("id")
       .single();
     expect(denied.error).not.toBeNull();

@@ -27,7 +27,11 @@ function ProductStory() {
   const ActivePanel = PANELS[active];
 
   return (
-    <section id="product" aria-labelledby="product-heading" className="relative scroll-mt-16 py-24 sm:py-32">
+    <section
+      id="product"
+      aria-labelledby="product-heading"
+      className="relative scroll-mt-16 py-24 sm:py-32"
+    >
       <div className={marketingContainer}>
         <SectionHeading
           id="product-heading"
@@ -47,7 +51,12 @@ function ProductStory() {
               style={{ scaleY: reduced ? 1 : scrollYProgress }}
             />
             {PRODUCTS.map((product) => (
-              <Step key={product.key} product={product} active={active === product.key} onActive={setActive} />
+              <Step
+                key={product.key}
+                product={product}
+                active={active === product.key}
+                onActive={setActive}
+              />
             ))}
           </ol>
 
@@ -69,7 +78,9 @@ function ProductStory() {
                   </AnimatePresence>
                 </div>
               </WorkspaceFrame>
-              <p className="type-meta text-muted-foreground mt-5 text-right">Illustrative workspace</p>
+              <p className="type-meta text-muted-foreground mt-5 text-right">
+                Illustrative workspace
+              </p>
             </div>
           </div>
         </div>
@@ -96,7 +107,10 @@ function Step({
   const Panel = PANELS[product.key];
 
   return (
-    <li ref={ref} className="relative pb-20 pl-12 last:pb-0 lg:flex lg:min-h-[78vh] lg:items-center lg:pb-0">
+    <li
+      ref={ref}
+      className="relative pb-20 pl-12 last:pb-0 lg:flex lg:min-h-[78vh] lg:items-center lg:pb-0"
+    >
       <span
         aria-hidden
         className={cn(
@@ -104,7 +118,12 @@ function Step({
           active ? "border-primary" : "border-border",
         )}
       >
-        <span className={cn("size-2 rounded-full transition-colors duration-300", active ? "bg-primary" : "bg-border")} />
+        <span
+          className={cn(
+            "size-2 rounded-full transition-colors duration-300",
+            active ? "bg-primary" : "bg-border",
+          )}
+        />
       </span>
       <div>
         <p className="type-meta flex items-center gap-3">
@@ -119,7 +138,9 @@ function Step({
         >
           {product.title}
         </h3>
-        <p className="text-muted-foreground mt-5 max-w-md text-lg leading-relaxed text-pretty">{product.body}</p>
+        <p className="text-muted-foreground mt-5 max-w-md text-lg leading-relaxed text-pretty">
+          {product.body}
+        </p>
         <ul className="mt-6 flex flex-wrap gap-2" aria-label={`${product.title} highlights`}>
           {product.tags.map((tag) => (
             <li key={tag} className="bg-card rounded-full border px-3 py-1.5 text-sm font-medium">

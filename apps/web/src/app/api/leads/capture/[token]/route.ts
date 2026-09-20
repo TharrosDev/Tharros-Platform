@@ -86,10 +86,19 @@ export async function POST(
 
   if (!result.ok) {
     if (result.reason === "rate_limited") {
-      return Response.json({ error: "Capture form is receiving too many requests" }, { status: 429, headers: { ...PUBLIC_HEADERS, "Retry-After": "60" } });
+      return Response.json(
+        { error: "Capture form is receiving too many requests" },
+        { status: 429, headers: { ...PUBLIC_HEADERS, "Retry-After": "60" } },
+      );
     }
-    return Response.json({ error: "Capture form not found" }, { status: 404, headers: PUBLIC_HEADERS });
+    return Response.json(
+      { error: "Capture form not found" },
+      { status: 404, headers: PUBLIC_HEADERS },
+    );
   }
 
-  return Response.json({ id: result.leadId, status: "captured" }, { status: 201, headers: PUBLIC_HEADERS });
+  return Response.json(
+    { id: result.leadId, status: "captured" },
+    { status: 201, headers: PUBLIC_HEADERS },
+  );
 }

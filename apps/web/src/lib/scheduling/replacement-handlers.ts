@@ -56,9 +56,12 @@ export const replacementOfferNotifyHandler: JobHandler = async (job: Job) => {
     .eq("org_id", orgId)
     .maybeSingle();
   if (shiftErr) throw shiftErr;
-  const shift = shiftRow as
-    | { starts_at: string; ends_at: string; status: string; employee_id: string | null }
-    | null;
+  const shift = shiftRow as {
+    starts_at: string;
+    ends_at: string;
+    status: string;
+    employee_id: string | null;
+  } | null;
   if (!shift || shift.status !== "open" || shift.employee_id !== null) return;
 
   // Employees with a still-outstanding offer for this shift.
@@ -68,7 +71,9 @@ export const replacementOfferNotifyHandler: JobHandler = async (job: Job) => {
     .eq("shift_id", shiftId)
     .eq("status", "offered");
   if (offerErr) throw offerErr;
-  const employeeIds = ((offerRows ?? []) as Array<{ employee_id: string }>).map((r) => r.employee_id);
+  const employeeIds = ((offerRows ?? []) as Array<{ employee_id: string }>).map(
+    (r) => r.employee_id,
+  );
   if (employeeIds.length === 0) return;
 
   const { data: empRows, error: empErr } = await admin
@@ -76,9 +81,18 @@ export const replacementOfferNotifyHandler: JobHandler = async (job: Job) => {
     .select("id, name, email, active")
     .in("id", employeeIds);
   if (empErr) throw empErr;
-  const employees = (empRows ?? []) as Array<{ id: string; name: string; email: string; active: boolean }>;
+  const employees = (empRows ?? []) as Array<{
+    id: string;
+    name: string;
+    email: string;
+    active: boolean;
+  }>;
 
-  const { data: orgRow } = await admin.from("organizations").select("name").eq("id", orgId).maybeSingle();
+  const { data: orgRow } = await admin
+    .from("organizations")
+    .select("name")
+    .eq("id", orgId)
+    .maybeSingle();
   const orgName = (orgRow as { name: string } | null)?.name ?? "your team";
   const label = shiftLabel(shift.starts_at, shift.ends_at);
 
@@ -108,7 +122,10 @@ export const replacementOfferNotifyHandler: JobHandler = async (job: Job) => {
     });
     if (!sent.ok) {
       // One bad address shouldn't fail the whole fan-out; log and continue.
-      logger.warn("replacement-offer-notify.email_failed", { employeeId: employee.id, error: sent.error });
+      logger.warn("replacement-offer-notify.email_failed", {
+        employeeId: employee.id,
+        error: sent.error,
+      });
     }
   }
 };

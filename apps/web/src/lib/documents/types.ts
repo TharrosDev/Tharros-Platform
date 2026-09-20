@@ -74,10 +74,6 @@ export type IngestionJob = {
  * be the org_id — the storage.objects RLS policy scopes access by
  * `(storage.foldername(name))[1]::uuid in current_user_orgs()`.
  */
-export function storagePathFor(
-  orgId: string,
-  documentId: string,
-  filename: string,
-): string {
+export function storagePathFor(orgId: string, documentId: string, filename: string): string {
   return `${orgId}/${documentId}/${filename}`;
 }

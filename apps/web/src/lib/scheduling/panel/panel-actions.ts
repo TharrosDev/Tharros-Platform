@@ -16,9 +16,7 @@ import type { PanelResult } from "./types";
  * (the judge) meters into `ai_usage_events`.
  */
 
-export type PanelState =
-  | { ok: true; result: PanelResult }
-  | { ok: false; message: string };
+export type PanelState = { ok: true; result: PanelResult } | { ok: false; message: string };
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 

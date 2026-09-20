@@ -68,7 +68,6 @@ describe("isSameOriginMutation", () => {
   });
 });
 
-
 describe("opaqueRateLimitKey", () => {
   it("does not store the sensitive identifier in the bucket key", () => {
     const key = opaqueRateLimitKey("login-email", "person@example.test");

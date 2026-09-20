@@ -20,12 +20,7 @@ export function ResendVerification({ email, next }: { email: string; next?: stri
           Sent again. Give it a minute, then check your inbox and spam folder.
         </FormMessage>
       ) : null}
-      <Button
-        type="submit"
-        variant="outline"
-        className="w-full"
-        disabled={pending || !email}
-      >
+      <Button type="submit" variant="outline" className="w-full" disabled={pending || !email}>
         {pending ? "Resending…" : "Resend confirmation email"}
       </Button>
     </form>

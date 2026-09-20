@@ -32,9 +32,7 @@ const ALL_OFF: Record<FeatureFlag, boolean> = {
 const loadFlags = cache(async (): Promise<Record<string, boolean>> => {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("feature_flags")
-      .select("key, enabled");
+    const { data, error } = await supabase.from("feature_flags").select("key, enabled");
 
     if (error) {
       logger.warn("Feature flags unreadable; defaulting all OFF", {

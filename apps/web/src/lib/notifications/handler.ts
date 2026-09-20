@@ -79,10 +79,7 @@ export const notificationSendHandler: JobHandler = async (job: Job) => {
 
   if (!result.ok) {
     // Record the error and throw so the job runtime retries with backoff.
-    await admin
-      .from("notification_events")
-      .update({ email_error: result.error })
-      .eq("id", n.id);
+    await admin.from("notification_events").update({ email_error: result.error }).eq("id", n.id);
     throw new Error(`notification-send: email send failed: ${result.error}`);
   }
 

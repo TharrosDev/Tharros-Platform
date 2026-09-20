@@ -19,11 +19,7 @@ import { SchedulingSubnav } from "@/components/scheduling/subnav";
  * section rail (with a pending-approvals badge for managers). Before setup the
  * rail is hidden so the wizard stands alone.
  */
-export default async function SchedulingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function SchedulingLayout({ children }: { children: React.ReactNode }) {
   const access = await getFeatureAccess("scheduling");
 
   if (!access.entitled) {

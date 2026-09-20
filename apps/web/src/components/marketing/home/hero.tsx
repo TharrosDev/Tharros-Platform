@@ -3,13 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import {
-  m,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  type MotionValue,
-} from "motion/react";
+import { m, useMotionValue, useSpring, useTransform, type MotionValue } from "motion/react";
 import { useReducedMotionSafe } from "@/components/motion/reduced-motion";
 
 import { cn } from "@/lib/utils";
@@ -27,8 +21,16 @@ const PROOF = ["14-day free trial", "Human-controlled AI", "Answers cite their s
 function Hero() {
   return (
     <section aria-labelledby="hero-heading" className="relative pt-8 pb-16 sm:pt-12 lg:pb-20">
-      <div className={cn(marketingContainer, "grid grid-cols-[minmax(0,1fr)] gap-y-10 lg:grid-cols-12 lg:gap-x-10")}>
-        <p style={delay(0)} className="animate-fade-up type-meta text-muted-foreground flex items-center gap-3 lg:col-span-12">
+      <div
+        className={cn(
+          marketingContainer,
+          "grid grid-cols-[minmax(0,1fr)] gap-y-10 lg:grid-cols-12 lg:gap-x-10",
+        )}
+      >
+        <p
+          style={delay(0)}
+          className="animate-fade-up type-meta text-muted-foreground flex items-center gap-3 lg:col-span-12"
+        >
           <span className="bg-primary size-1.5 rounded-full" aria-hidden />
           The operating workspace for small business
         </p>
@@ -40,22 +42,43 @@ function Hero() {
           <MaskedLines
             onMount
             delay={0.1}
-            lines={[{ text: "Run the business." }, { text: "Not the busywork.", className: "text-primary" }]}
+            lines={[
+              { text: "Run the business." },
+              { text: "Not the busywork.", className: "text-primary" },
+            ]}
           />
         </h1>
 
         <div className="lg:col-span-5 lg:pt-4">
-          <p style={delay(0.45)} className="animate-fade-up text-muted-foreground max-w-md text-lg leading-relaxed text-pretty sm:text-xl">
+          <p
+            style={delay(0.45)}
+            className="animate-fade-up text-muted-foreground max-w-md text-lg leading-relaxed text-pretty sm:text-xl"
+          >
             Tharros brings your knowledge, scheduling, lead capture and automations into one
             workspace. AI does the groundwork. Your team stays in control of every decision.
           </p>
 
-          <div style={delay(0.55)} className="animate-fade-up mt-9 flex flex-wrap items-center gap-3">
-            <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "group h-13 px-7 text-base")}>
+          <div
+            style={delay(0.55)}
+            className="animate-fade-up mt-9 flex flex-wrap items-center gap-3"
+          >
+            <Link
+              href="/signup"
+              className={cn(buttonVariants({ size: "lg" }), "group h-13 px-7 text-base")}
+            >
               Start free
-              <ArrowRight className="transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
+              <ArrowRight
+                className="transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden
+              />
             </Link>
-            <Link href="/pricing" className={cn(buttonVariants({ size: "lg", variant: "outline" }), "h-13 px-7 text-base")}>
+            <Link
+              href="/pricing"
+              className={cn(
+                buttonVariants({ size: "lg", variant: "outline" }),
+                "h-13 px-7 text-base",
+              )}
+            >
               Explore plans
             </Link>
           </div>
@@ -80,10 +103,30 @@ function Hero() {
 
 /* Node anchors in the 500×340 diagram space (percent positions mirror them). */
 const NODES = [
-  { key: "knowledge", state: "Sources cited", pos: "left-0 top-0", path: "M250 170 C 190 170 110 150 110 70" },
-  { key: "scheduling", state: "Draft to review", pos: "right-0 top-0", path: "M250 170 C 310 170 390 150 390 70" },
-  { key: "leads", state: "Draft for review", pos: "left-0 bottom-0", path: "M250 170 C 190 170 110 190 110 270" },
-  { key: "automations", state: "Run recorded", pos: "right-0 bottom-0", path: "M250 170 C 310 170 390 190 390 270" },
+  {
+    key: "knowledge",
+    state: "Sources cited",
+    pos: "left-0 top-0",
+    path: "M250 170 C 190 170 110 150 110 70",
+  },
+  {
+    key: "scheduling",
+    state: "Draft to review",
+    pos: "right-0 top-0",
+    path: "M250 170 C 310 170 390 150 390 70",
+  },
+  {
+    key: "leads",
+    state: "Draft for review",
+    pos: "left-0 bottom-0",
+    path: "M250 170 C 190 170 110 190 110 270",
+  },
+  {
+    key: "automations",
+    state: "Run recorded",
+    pos: "right-0 bottom-0",
+    path: "M250 170 C 310 170 390 190 390 270",
+  },
 ] as const;
 
 /**
@@ -177,7 +220,12 @@ function OperatingLayer() {
           </svg>
 
           {/* Hub */}
-          <Layer x={sx} y={sy} depth={8} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+          <Layer
+            x={sx}
+            y={sy}
+            depth={8}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          >
             <m.div
               initial={{ opacity: 0, scale: reduced ? 1 : 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -185,7 +233,9 @@ function OperatingLayer() {
               className="bg-primary text-primary-foreground flex flex-col items-center gap-1.5 rounded-2xl px-4 py-3 shadow-raised sm:px-6 sm:py-4"
             >
               <TharrosMark className="size-5 sm:size-6" />
-              <span className="text-xs font-semibold whitespace-nowrap sm:text-sm">One workspace</span>
+              <span className="text-xs font-semibold whitespace-nowrap sm:text-sm">
+                One workspace
+              </span>
             </m.div>
           </Layer>
 
@@ -193,7 +243,13 @@ function OperatingLayer() {
             const product = PRODUCTS.find((p) => p.key === node.key)!;
             const Icon = product.icon;
             return (
-              <Layer key={node.key} x={sx} y={sy} depth={22} className={cn("absolute w-[44%]", node.pos)}>
+              <Layer
+                key={node.key}
+                x={sx}
+                y={sy}
+                depth={22}
+                className={cn("absolute w-[44%]", node.pos)}
+              >
                 <m.div
                   initial={{ opacity: 0, y: reduced ? 0 : 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -207,12 +263,16 @@ function OperatingLayer() {
                     <span
                       className={cn(
                         "flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-500",
-                        focus === i ? "bg-primary text-primary-foreground" : "bg-primary-soft text-primary-soft-foreground",
+                        focus === i
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-primary-soft text-primary-soft-foreground",
                       )}
                     >
                       <Icon className="size-3.5" />
                     </span>
-                    <span className="truncate text-sm font-semibold tracking-tight">{product.label}</span>
+                    <span className="truncate text-sm font-semibold tracking-tight">
+                      {product.label}
+                    </span>
                   </div>
                   <p className="type-meta text-muted-foreground mt-3 hidden truncate sm:block">
                     <span className="text-primary">{product.index}</span> · {node.state}

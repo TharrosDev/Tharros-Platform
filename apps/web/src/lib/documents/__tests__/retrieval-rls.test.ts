@@ -64,7 +64,12 @@ async function ownOrgId(userId: string): Promise<string> {
 async function seedDoc(orgId: string, name: string): Promise<string> {
   const { data, error } = await admin
     .from("documents")
-    .insert({ org_id: orgId, storage_path: `${orgId}/seed/${name}`, filename: name, status: "ready" })
+    .insert({
+      org_id: orgId,
+      storage_path: `${orgId}/seed/${name}`,
+      filename: name,
+      status: "ready",
+    })
     .select("id")
     .single();
   if (error) throw error;
@@ -92,9 +97,27 @@ beforeAll(async () => {
   // org A: chunk aligned with axis 0 (will match the query) + one on axis 1.
   // org B: also aligned with axis 0 — must NOT appear for user A.
   await admin.from("document_chunks").insert([
-    { document_id: docA1, org_id: orgA, chunk_index: 0, content: "A-near (axis0)", embedding: unitVecLiteral(0) },
-    { document_id: docA2, org_id: orgA, chunk_index: 0, content: "A-far (axis1)", embedding: unitVecLiteral(1) },
-    { document_id: docB, org_id: orgB, chunk_index: 0, content: "B-near (axis0)", embedding: unitVecLiteral(0) },
+    {
+      document_id: docA1,
+      org_id: orgA,
+      chunk_index: 0,
+      content: "A-near (axis0)",
+      embedding: unitVecLiteral(0),
+    },
+    {
+      document_id: docA2,
+      org_id: orgA,
+      chunk_index: 0,
+      content: "A-far (axis1)",
+      embedding: unitVecLiteral(1),
+    },
+    {
+      document_id: docB,
+      org_id: orgB,
+      chunk_index: 0,
+      content: "B-near (axis0)",
+      embedding: unitVecLiteral(0),
+    },
   ]);
 
   clientA = await asUser(emailFor("a"));

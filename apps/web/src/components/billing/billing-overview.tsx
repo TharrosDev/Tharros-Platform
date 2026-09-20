@@ -5,13 +5,7 @@ import { getPlan, formatMonthly } from "@/lib/billing/plans";
 import { statusBadgeVariant, statusLabel } from "@/lib/billing/status";
 import type { SubscriptionSnapshot } from "@/lib/billing/entitlements";
 import type { InvoiceSummary } from "@/lib/billing/queries";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -104,7 +98,10 @@ export function BillingOverview({
             <ul className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
               {plan.features.map((feature) => (
                 <li key={feature} className="type-small flex items-start gap-2">
-                  <Check className="text-primary-soft-foreground mt-0.5 size-4 shrink-0" aria-hidden />
+                  <Check
+                    className="text-primary-soft-foreground mt-0.5 size-4 shrink-0"
+                    aria-hidden
+                  />
                   {feature}
                 </li>
               ))}
@@ -122,8 +119,7 @@ export function BillingOverview({
         <h2 className="type-h2">Invoices</h2>
         {invoices.length === 0 ? (
           <p className="text-muted-foreground type-small">
-            No invoices yet. They&apos;ll appear here once your first payment is
-            processed.
+            No invoices yet. They&apos;ll appear here once your first payment is processed.
           </p>
         ) : (
           <Table>

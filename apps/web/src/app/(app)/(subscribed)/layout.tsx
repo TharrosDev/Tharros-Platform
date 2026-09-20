@@ -10,11 +10,7 @@ import { getEntitlement } from "@/lib/billing/entitlements";
  * subscribe or fix payment. Auth, onboarding, and the shell are handled by the
  * parent (app)/layout; this is a thin pass-through that only enforces billing.
  */
-export default async function SubscribedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function SubscribedLayout({ children }: { children: React.ReactNode }) {
   const { allowed } = await getEntitlement();
   if (!allowed) redirect("/billing");
 

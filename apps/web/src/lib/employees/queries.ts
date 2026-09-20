@@ -80,19 +80,17 @@ export const getRoster = cache(async (): Promise<Roster> => {
     ((tokensRes.data ?? []) as unknown as TokenRow[]).map((t) => [t.employee_id, t]),
   );
 
-  const employees: Employee[] = ((employeesRes.data ?? []) as unknown as EmployeeRow[]).map(
-    (e) => {
-      const token = liveTokens.get(e.id);
-      return {
-        id: e.id,
-        name: e.name,
-        email: e.email,
-        active: e.active,
-        hasPortalAccess: Boolean(token),
-        lastUsedAt: token?.last_used_at ?? null,
-      };
-    },
-  );
+  const employees: Employee[] = ((employeesRes.data ?? []) as unknown as EmployeeRow[]).map((e) => {
+    const token = liveTokens.get(e.id);
+    return {
+      id: e.id,
+      name: e.name,
+      email: e.email,
+      active: e.active,
+      hasPortalAccess: Boolean(token),
+      lastUsedAt: token?.last_used_at ?? null,
+    };
+  });
 
   return { activeOrg, viewerRole: activeOrg.role, employees };
 });
@@ -155,8 +153,10 @@ export const getEmployeeProfile = cache(
         .eq("employee_id", employeeId),
     ]);
 
-    if (empErr) logger.error("getEmployeeProfile: employee query failed", { err: empErr, employeeId });
-    if (roleErr) logger.error("getEmployeeProfile: roles query failed", { err: roleErr, employeeId });
+    if (empErr)
+      logger.error("getEmployeeProfile: employee query failed", { err: empErr, employeeId });
+    if (roleErr)
+      logger.error("getEmployeeProfile: roles query failed", { err: roleErr, employeeId });
     if (!emp) return null;
 
     type CatalogRef = { name: string; kind: "role" | "certification" };
@@ -206,8 +206,7 @@ export const getEmployeeProfile = cache(
  */
 export const getEmployeeHours = cache(
   async (employeeId: string, sinceISO?: string): Promise<HoursSummary> => {
-    const since =
-      sinceISO ?? new Date(Date.now() - 28 * 86_400_000).toISOString();
+    const since = sinceISO ?? new Date(Date.now() - 28 * 86_400_000).toISOString();
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("shifts")

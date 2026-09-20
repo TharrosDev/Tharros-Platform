@@ -126,14 +126,14 @@ export const getTeam = cache(async (): Promise<Team> => {
     };
   });
 
-  const pendingInvites: PendingInvite[] = (
-    (invitesRes.data ?? []) as unknown as InviteRow[]
-  ).map((r) => ({
-    id: r.id,
-    email: r.email,
-    role: r.role,
-    expiresAt: r.expires_at,
-  }));
+  const pendingInvites: PendingInvite[] = ((invitesRes.data ?? []) as unknown as InviteRow[]).map(
+    (r) => ({
+      id: r.id,
+      email: r.email,
+      role: r.role,
+      expiresAt: r.expires_at,
+    }),
+  );
 
   return { activeOrg, viewerRole: activeOrg.role, members, pendingInvites };
 });

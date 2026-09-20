@@ -29,7 +29,12 @@ const PRINCIPLES = [
 function Principles() {
   return (
     <section aria-labelledby="control-heading" className="relative py-24 sm:py-32">
-      <div className={cn(marketingContainer, "grid grid-cols-[minmax(0,1fr)] gap-16 lg:grid-cols-12 lg:gap-10")}>
+      <div
+        className={cn(
+          marketingContainer,
+          "grid grid-cols-[minmax(0,1fr)] gap-16 lg:grid-cols-12 lg:gap-10",
+        )}
+      >
         <div className="lg:col-span-5">
           <div className="lg:sticky lg:top-32">
             <SectionHeading
@@ -49,7 +54,9 @@ function Principles() {
                   0{i + 1}
                 </span>
                 <div>
-                  <h3 className="text-xl font-[700] tracking-[-0.03em] sm:text-2xl">{item.title}</h3>
+                  <h3 className="text-xl font-[700] tracking-[-0.03em] sm:text-2xl">
+                    {item.title}
+                  </h3>
                   <p className="text-muted-foreground mt-2.5 max-w-lg text-base leading-relaxed sm:text-lg">
                     {item.body}
                   </p>

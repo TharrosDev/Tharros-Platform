@@ -40,19 +40,27 @@ export default async function PublicLeadFormPage({
       <section className="relative mx-auto flex w-full max-w-xl flex-1 items-center px-5 py-14">
         <Card className="shadow-raised w-full rounded-2xl">
           <CardHeader className="px-6 pt-7 sm:px-8">
-            <CardTitle className="text-[1.75rem] font-semibold tracking-[-0.03em]">{form.headline}</CardTitle>
+            <CardTitle className="text-[1.75rem] font-semibold tracking-[-0.03em]">
+              {form.headline}
+            </CardTitle>
             <CardDescription>{form.name}</CardDescription>
           </CardHeader>
           <CardContent className="px-6 pb-7 sm:px-8">
             {query.submitted ? (
-              <div role="status" className="bg-success/[0.07] text-success rounded-lg border border-success/25 p-5">
+              <div
+                role="status"
+                className="bg-success/[0.07] text-success rounded-lg border border-success/25 p-5"
+              >
                 <p className="font-semibold">Message received</p>
                 <p className="mt-1 text-sm">{form.successMessage}</p>
               </div>
             ) : (
               <form action={action} className="space-y-4">
                 {query.error ? (
-                  <div role="alert" className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm">
+                  <div
+                    role="alert"
+                    className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm"
+                  >
                     We could not submit that message. Check the fields and try again.
                   </div>
                 ) : null}
@@ -69,7 +77,13 @@ export default async function PublicLeadFormPage({
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" name="email" type="email" autoComplete="email" maxLength={320} />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      maxLength={320}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="phone">Phone</Label>
@@ -88,7 +102,8 @@ export default async function PublicLeadFormPage({
                   Send message
                 </Button>
                 <p className="text-muted-foreground text-center text-xs">
-                  Powered by Tharros. Submission details are sent to the business that shared this form.
+                  Powered by Tharros. Submission details are sent to the business that shared this
+                  form.
                 </p>
               </form>
             )}

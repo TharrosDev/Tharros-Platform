@@ -1,10 +1,4 @@
-import {
-  EmailButton,
-  EmailFallbackLink,
-  EmailHeading,
-  EmailLayout,
-  EmailText,
-} from "./layout";
+import { EmailButton, EmailFallbackLink, EmailHeading, EmailLayout, EmailText } from "./layout";
 
 /**
  * Day 40 — generic notification email. App-sent (via lib/email/send) by the
@@ -20,12 +14,7 @@ export type NotificationEmailProps = {
   actionLabel?: string;
 };
 
-export function NotificationEmail({
-  title,
-  body,
-  actionUrl,
-  actionLabel,
-}: NotificationEmailProps) {
+export function NotificationEmail({ title, body, actionUrl, actionLabel }: NotificationEmailProps) {
   return (
     <EmailLayout preview={title}>
       <EmailHeading>{title}</EmailHeading>

@@ -15,10 +15,7 @@ export const passwordSchema = z
   .regex(/[a-zA-Z]/, { error: "Include at least one letter." })
   .regex(/[0-9]/, { error: "Include at least one number." });
 
-export const fullNameSchema = z
-  .string()
-  .min(2, { error: "Enter your name." })
-  .trim();
+export const fullNameSchema = z.string().min(2, { error: "Enter your name." }).trim();
 
 export const signUpSchema = z.object({
   fullName: fullNameSchema,

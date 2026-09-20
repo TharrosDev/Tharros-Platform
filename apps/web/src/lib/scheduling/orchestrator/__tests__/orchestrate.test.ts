@@ -104,10 +104,7 @@ function scriptedSolve(results: SolverResult[]) {
   return (_si: SolverInput): SolverResult => results[Math.min(i++, results.length - 1)];
 }
 
-function makeIO(
-  results: SolverResult[],
-  events: OptimizeAuditEvent[],
-): OptimizeIO {
+function makeIO(results: SolverResult[], events: OptimizeAuditEvent[]): OptimizeIO {
   return {
     solve: scriptedSolve(results),
     audit: (e) => {

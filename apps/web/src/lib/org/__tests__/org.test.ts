@@ -88,10 +88,7 @@ afterAll(async () => {
   // Orgs first (cascade skips the last-owner guard), then users — per Day 11.
   const ids = [userA, userB, userC].filter(Boolean);
   if (ids.length) {
-    const { data: orgs } = await admin
-      .from("memberships")
-      .select("org_id")
-      .in("user_id", ids);
+    const { data: orgs } = await admin.from("memberships").select("org_id").in("user_id", ids);
     const orgIds = [...new Set((orgs ?? []).map((m) => m.org_id))];
     for (const id of orgIds) {
       await admin.from("organizations").delete().eq("id", id);

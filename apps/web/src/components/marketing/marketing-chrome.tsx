@@ -9,7 +9,7 @@ import { HeaderShell } from "./header-shell";
 const marketingContainer = "mx-auto w-full max-w-[84rem] px-4 sm:px-8";
 
 const quietLinkClass =
-  "text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-sm font-medium outline-none transition-[color,background-color] hover:bg-accent focus-visible:ring-[4px]";
+  "text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center rounded-xl px-3 py-2 text-sm font-medium transition-[color,background-color] hover:bg-accent ";
 
 function MarketingBackdrop() {
   return (
@@ -43,7 +43,7 @@ function MarketingHeader({ showPricing = false }: { showPricing?: boolean }) {
         <Link
           href="/"
           aria-label="Tharros home"
-          className="focus-visible:ring-ring/40 -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 outline-none focus-visible:ring-[4px]"
+          className=" -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 "
         >
           <TharrosWordmark markClassName="size-7" />
         </Link>
@@ -62,7 +62,10 @@ function MarketingHeader({ showPricing = false }: { showPricing?: boolean }) {
           <Link href="/login" className={quietLinkClass}>
             Sign in
           </Link>
-          <Link href="/signup" className={cn(buttonVariants({ size: "sm" }), "ml-1 h-11 px-4 sm:h-10")}>
+          <Link
+            href="/signup"
+            className={cn(buttonVariants({ size: "sm" }), "ml-1 h-11 px-4 sm:h-10")}
+          >
             Get started
           </Link>
         </nav>
@@ -74,12 +77,14 @@ function MarketingHeader({ showPricing = false }: { showPricing?: boolean }) {
 function MarketingFooter() {
   return (
     <footer className="bg-background relative border-t">
-      <div className={cn(marketingContainer, "grid gap-10 py-14 sm:grid-cols-[1fr_auto] sm:items-end")}>
+      <div
+        className={cn(marketingContainer, "grid gap-10 py-14 sm:grid-cols-[1fr_auto] sm:items-end")}
+      >
         <div className="space-y-3">
           <Link
             href="/"
             aria-label="Tharros home"
-            className="focus-visible:ring-ring/40 -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 outline-none focus-visible:ring-[4px]"
+            className=" -ml-1 inline-flex min-h-11 items-center rounded-xl px-1 "
           >
             <TharrosWordmark markClassName="size-7" />
           </Link>

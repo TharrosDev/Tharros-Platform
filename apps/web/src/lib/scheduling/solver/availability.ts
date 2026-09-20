@@ -46,14 +46,22 @@ function slotWindow(slot: CoverageSlot): { start: number; end: number } {
 }
 
 /** Does row's [start,end) window fully contain the slot window? */
-function windowContains(start: string | null, end: string | null, win: { start: number; end: number }): boolean {
+function windowContains(
+  start: string | null,
+  end: string | null,
+  win: { start: number; end: number },
+): boolean {
   const ws = timeToMinutes(start, 0);
   const we = timeToMinutes(end, MINUTES_PER_DAY);
   return win.start >= ws && win.end <= we;
 }
 
 /** Does row's [start,end) window overlap the slot window at all? */
-function windowOverlaps(start: string | null, end: string | null, win: { start: number; end: number }): boolean {
+function windowOverlaps(
+  start: string | null,
+  end: string | null,
+  win: { start: number; end: number },
+): boolean {
   const ws = timeToMinutes(start, 0);
   const we = timeToMinutes(end, MINUTES_PER_DAY);
   return win.start < we && win.end > ws;

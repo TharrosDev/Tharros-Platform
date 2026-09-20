@@ -4,12 +4,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/* An initials plate: square stock, condensed caps, cut to the same grid. */
 function Avatar({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
       data-slot="avatar"
       className={cn(
-        "relative flex size-8 shrink-0 overflow-hidden rounded-full bg-muted",
+        "border-border bg-muted relative flex h-control-sm w-control-sm shrink-0 overflow-hidden border",
         className,
       )}
       {...props}
@@ -17,11 +18,7 @@ function Avatar({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
-function AvatarImage({
-  className,
-  alt = "",
-  ...props
-}: React.ComponentProps<"img">) {
+function AvatarImage({ className, alt = "", ...props }: React.ComponentProps<"img">) {
   const [failed, setFailed] = React.useState(false);
   if (failed || !props.src) return null;
   return (
@@ -41,7 +38,7 @@ function AvatarFallback({ className, ...props }: React.ComponentProps<"span">) {
     <span
       data-slot="avatar-fallback"
       className={cn(
-        "bg-primary-soft text-primary-soft-foreground flex size-full items-center justify-center rounded-full text-xs font-semibold",
+        "bg-primary-soft text-primary-soft-foreground type-meta flex size-full items-center justify-center",
         className,
       )}
       {...props}

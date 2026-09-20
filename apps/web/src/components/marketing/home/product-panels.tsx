@@ -59,7 +59,13 @@ const PRODUCTS = [
 
 type ProductKey = (typeof PRODUCTS)[number]["key"];
 
-function Chip({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "cobalt" | "ok" }) {
+function Chip({
+  children,
+  tone = "neutral",
+}: {
+  children: React.ReactNode;
+  tone?: "neutral" | "cobalt" | "ok";
+}) {
   return (
     <span
       className={cn(
@@ -74,7 +80,17 @@ function Chip({ children, tone = "neutral" }: { children: React.ReactNode; tone?
   );
 }
 
-function PanelTitle({ icon: Icon, crumb, title, aside }: { icon: typeof BookOpen; crumb: string; title: string; aside?: React.ReactNode }) {
+function PanelTitle({
+  icon: Icon,
+  crumb,
+  title,
+  aside,
+}: {
+  icon: typeof BookOpen;
+  crumb: string;
+  title: string;
+  aside?: React.ReactNode;
+}) {
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
@@ -99,8 +115,8 @@ function KnowledgePanel() {
       <div className="bg-card max-w-[92%] rounded-2xl rounded-bl-md border p-4 shadow-xs">
         <p className="text-sm leading-relaxed">
           The staff member calls the manager on duty before the shift starts
-          <sup className="text-primary ml-0.5 font-semibold">1</sup>. The manager opens the shift for
-          replacement and records the absence
+          <sup className="text-primary ml-0.5 font-semibold">1</sup>. The manager opens the shift
+          for replacement and records the absence
           <sup className="text-primary ml-0.5 font-semibold">2</sup>.
         </p>
         <div className="mt-3.5 flex flex-wrap gap-1.5 border-t pt-3">
@@ -249,7 +265,17 @@ function AutomationsPanel() {
   );
 }
 
-function FlowStep({ icon: Icon, label, value, strong }: { icon: typeof Zap; label: string; value: string; strong?: boolean }) {
+function FlowStep({
+  icon: Icon,
+  label,
+  value,
+  strong,
+}: {
+  icon: typeof Zap;
+  label: string;
+  value: string;
+  strong?: boolean;
+}) {
   return (
     <div
       className={cn(
@@ -266,7 +292,14 @@ function FlowStep({ icon: Icon, label, value, strong }: { icon: typeof Zap; labe
         <Icon className="size-3.5" aria-hidden />
       </span>
       <span className="type-meta text-muted-foreground w-9">{label}</span>
-      <span className={cn("min-w-0 truncate text-sm font-medium", strong && "text-primary-soft-foreground")}>{value}</span>
+      <span
+        className={cn(
+          "min-w-0 truncate text-sm font-medium",
+          strong && "text-primary-soft-foreground",
+        )}
+      >
+        {value}
+      </span>
     </div>
   );
 }

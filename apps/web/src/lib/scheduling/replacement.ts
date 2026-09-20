@@ -50,7 +50,11 @@ export function resolveReplacementPolicy(value: unknown): ReplacementPolicy {
   const policy = { ...DEFAULT_REPLACEMENT_POLICY };
   if (value && typeof value === "object") {
     const v = value as Record<string, unknown>;
-    if (typeof v.timeoutMinutes === "number" && Number.isFinite(v.timeoutMinutes) && v.timeoutMinutes > 0) {
+    if (
+      typeof v.timeoutMinutes === "number" &&
+      Number.isFinite(v.timeoutMinutes) &&
+      v.timeoutMinutes > 0
+    ) {
       policy.timeoutMinutes = v.timeoutMinutes;
     }
     if (typeof v.escalateToManager === "boolean") {
@@ -121,8 +125,7 @@ function shiftLabel(startsAt: string, endsAt: string): string {
 /** Two shifts overlap iff each starts before the other ends. */
 function overlaps(a: ShiftInput, b: ShiftInput): boolean {
   return (
-    Date.parse(a.startsAt) < Date.parse(b.endsAt) &&
-    Date.parse(b.startsAt) < Date.parse(a.endsAt)
+    Date.parse(a.startsAt) < Date.parse(b.endsAt) && Date.parse(b.startsAt) < Date.parse(a.endsAt)
   );
 }
 
@@ -173,11 +176,9 @@ export function findEligibleEmployees(input: FindEligibleInput): FindEligibleRes
       continue;
     }
 
-    const hard = validateLaborRules(
-      [...c.assignedShifts, prospective],
-      laborRules,
-      [{ id: c.id, isMinor: c.isMinor }],
-    ).filter((v) => v.severity === "hard" && v.employeeId === c.id);
+    const hard = validateLaborRules([...c.assignedShifts, prospective], laborRules, [
+      { id: c.id, isMinor: c.isMinor },
+    ]).filter((v) => v.severity === "hard" && v.employeeId === c.id);
     if (hard.length > 0) {
       rejected.push({ employeeId: c.id, reason: hard[0].message });
       continue;
@@ -206,17 +207,14 @@ type ShiftRow = {
   status: string;
 };
 
-const num = (v: number | string | null): number => (v === null ? 0 : typeof v === "string" ? Number(v) : v);
+const num = (v: number | string | null): number =>
+  v === null ? 0 : typeof v === "string" ? Number(v) : v;
 
 /** Window (± a week) of shifts to feed the labor checks around the open shift. */
 const LABOR_WINDOW_MS = 8 * 24 * 60 * 60 * 1000;
 
 export async function readLaborRules(admin: SupabaseClient, orgId: string): Promise<LaborRules> {
-  const { data } = await admin
-    .from("labor_rules")
-    .select("*")
-    .eq("org_id", orgId)
-    .maybeSingle();
+  const { data } = await admin.from("labor_rules").select("*").eq("org_id", orgId).maybeSingle();
   if (!data) return defaultLaborRules(orgId, new Date(0).toISOString());
   const r = data as Record<string, unknown>;
   return {
@@ -257,7 +255,9 @@ async function readCandidates(
       .eq("org_id", orgId),
     admin
       .from("availability")
-      .select("id, employee_id, kind, day_of_week, effective_date, end_date, start_time, end_time, is_available")
+      .select(
+        "id, employee_id, kind, day_of_week, effective_date, end_date, start_time, end_time, is_available",
+      )
       .eq("org_id", orgId),
     admin
       .from("shifts")
@@ -275,7 +275,8 @@ async function readCandidates(
     ["availability", availRes],
     ["assigned_shifts", assignedRes],
   ] as const) {
-    if (res.error) logger.warn("replacement.candidate_query_failed", { label, err: res.error, orgId });
+    if (res.error)
+      logger.warn("replacement.candidate_query_failed", { label, err: res.error, orgId });
   }
 
   const employees = (empRes.data ?? []) as Array<{ id: string; is_minor: boolean }>;
@@ -361,13 +362,18 @@ async function readCandidates(
   }));
 }
 
-async function readReplacementPolicy(admin: SupabaseClient, orgId: string): Promise<ReplacementPolicy> {
+async function readReplacementPolicy(
+  admin: SupabaseClient,
+  orgId: string,
+): Promise<ReplacementPolicy> {
   const { data } = await admin
     .from("org_settings")
     .select("replacement_policy")
     .eq("org_id", orgId)
     .maybeSingle();
-  return resolveReplacementPolicy((data as { replacement_policy?: unknown } | null)?.replacement_policy);
+  return resolveReplacementPolicy(
+    (data as { replacement_policy?: unknown } | null)?.replacement_policy,
+  );
 }
 
 /* ------------------------------ Orchestration ----------------------------- */
@@ -399,7 +405,9 @@ export async function openReplacement(
 
   const { data: shiftRaw, error: shiftErr } = await admin
     .from("shifts")
-    .select("id, org_id, schedule_id, employee_id, role_certification_id, starts_at, ends_at, break_minutes, status")
+    .select(
+      "id, org_id, schedule_id, employee_id, role_certification_id, starts_at, ends_at, break_minutes, status",
+    )
     .eq("id", shiftId)
     .eq("org_id", orgId)
     .maybeSingle();
@@ -410,7 +418,11 @@ export async function openReplacement(
   const shift = shiftRaw as ShiftRow | null;
   if (!shift) return { ok: false, code: "not_found", message: "Shift not found." };
   // Only an open, future shift can be filled. (Past/cancelled/assigned → nothing to do.)
-  if (shift.status !== "open" || shift.employee_id !== null || Date.parse(shift.starts_at) <= Date.now()) {
+  if (
+    shift.status !== "open" ||
+    shift.employee_id !== null ||
+    Date.parse(shift.starts_at) <= Date.now()
+  ) {
     return { ok: false, code: "not_open", message: "That shift isn't open for replacement." };
   }
 
@@ -472,7 +484,11 @@ export async function openReplacement(
       .update({ status: "filling" })
       .eq("id", input.sickCallId)
       .eq("status", "open");
-    if (error) logger.warn("replacement.sick_call_filling_failed", { err: error, sickCallId: input.sickCallId });
+    if (error)
+      logger.warn("replacement.sick_call_filling_failed", {
+        err: error,
+        sickCallId: input.sickCallId,
+      });
   }
 
   // Arm the timeout/escalation timer (required).
@@ -530,7 +546,11 @@ export async function acceptOffer(
   });
   if (error) {
     logger.error("replacement.claim_failed", { err: error, offerId: input.offerId });
-    return { ok: false, outcome: "invalid", message: "Couldn't accept that just now. Please try again." };
+    return {
+      ok: false,
+      outcome: "invalid",
+      message: "Couldn't accept that just now. Please try again.",
+    };
   }
   const row = (Array.isArray(data) ? data[0] : data) as
     | { outcome: string; shift_id: string | null }
@@ -538,11 +558,19 @@ export async function acceptOffer(
   const outcome = row?.outcome ?? "invalid";
 
   if (outcome === "accepted" && row?.shift_id) {
-    await reEnqueueShiftReminder(admin, { shiftId: row.shift_id, employeeId: input.employeeId, orgId: input.orgId });
+    await reEnqueueShiftReminder(admin, {
+      shiftId: row.shift_id,
+      employeeId: input.employeeId,
+      orgId: input.orgId,
+    });
     return { ok: true, outcome: "accepted", shiftId: row.shift_id };
   }
   if (outcome === "already_filled") {
-    return { ok: false, outcome: "already_filled", message: "That shift was just filled by someone else." };
+    return {
+      ok: false,
+      outcome: "already_filled",
+      message: "That shift was just filled by someone else.",
+    };
   }
   if (outcome === "conflict") {
     return {
@@ -618,9 +646,13 @@ export async function escalateReplacement(
     .eq("id", input.shiftId)
     .eq("org_id", input.orgId)
     .maybeSingle();
-  const shift = shiftRaw as
-    | { id: string; status: string; employee_id: string | null; starts_at: string; ends_at: string }
-    | null;
+  const shift = shiftRaw as {
+    id: string;
+    status: string;
+    employee_id: string | null;
+    starts_at: string;
+    ends_at: string;
+  } | null;
   if (!shift || shift.status !== "open" || shift.employee_id !== null) {
     return { escalated: false }; // filled or gone — nothing to escalate.
   }
@@ -639,7 +671,11 @@ export async function escalateReplacement(
       .update({ status: "escalated", resolution: input.reason })
       .eq("id", input.sickCallId)
       .neq("status", "resolved");
-    if (error) logger.warn("replacement.sick_call_escalate_failed", { err: error, sickCallId: input.sickCallId });
+    if (error)
+      logger.warn("replacement.sick_call_escalate_failed", {
+        err: error,
+        sickCallId: input.sickCallId,
+      });
   }
 
   const label = shiftLabel(shift.starts_at, shift.ends_at);

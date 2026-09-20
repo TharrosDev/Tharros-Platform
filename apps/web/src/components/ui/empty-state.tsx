@@ -2,6 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/*
+  An empty bay. Not a dashed box with an icon tile: a rail with nothing seated
+  in it, ruled slots showing through, and a printed note saying what belongs
+  here and how to put it there.
+*/
 function EmptyState({
   icon,
   title,
@@ -24,27 +29,35 @@ function EmptyState({
   return (
     <div
       data-slot="empty-state"
+      data-tone={tone}
       className={cn(
-        "relative flex min-h-64 flex-col items-center justify-center rounded-xl border border-dashed bg-card/60 px-6 py-12 text-center",
+        "border-border bg-surface-2 relative flex min-h-56 flex-col items-center justify-center border px-6 py-12 text-center",
         className,
       )}
     >
+      {/* Empty slots: a rail is ruled whether or not a strip is seated in it. */}
       <span
-        className={cn(
-          "relative mb-4 flex size-11 items-center justify-center rounded-xl border bg-card shadow-xs [&>svg]:size-5",
-          tone === "danger"
-            ? "text-destructive"
-            : "text-primary-soft-foreground",
-        )}
         aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-60 [background-image:repeating-linear-gradient(to_bottom,var(--border)_0,var(--border)_1px,transparent_1px,transparent_2.25rem)]"
+      />
+      <span
+        aria-hidden
+        className={cn(
+          "bg-card h-control w-control relative mb-4 flex items-center justify-center border [&>svg]:size-5",
+          tone === "danger"
+            ? "border-destructive text-destructive"
+            : "border-input text-muted-foreground",
+        )}
       >
         {icon}
       </span>
-      <Heading className="type-h2 text-balance">{title}</Heading>
-      <p className="text-muted-foreground mt-1.5 max-w-sm text-pretty text-sm leading-relaxed">
+      <Heading className="type-h2 relative text-balance">{title}</Heading>
+      <p className="text-muted-foreground type-small relative mt-1.5 max-w-sm text-pretty">
         {description}
       </p>
-      {action ? <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div> : null}
+      {action ? (
+        <div className="relative mt-5 flex flex-wrap justify-center gap-2">{action}</div>
+      ) : null}
     </div>
   );
 }

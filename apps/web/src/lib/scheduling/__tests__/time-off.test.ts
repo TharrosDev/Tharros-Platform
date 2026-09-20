@@ -63,10 +63,22 @@ const BASE: EvaluateTimeOffArgs = {
 
 describe("resolveTimeOffPolicy", () => {
   it("defaults to auto-approve + escalate when unset or malformed", () => {
-    expect(resolveTimeOffPolicy(null)).toEqual({ autoApproveLowImpact: true, escalateHighImpact: true });
-    expect(resolveTimeOffPolicy(undefined)).toEqual({ autoApproveLowImpact: true, escalateHighImpact: true });
-    expect(resolveTimeOffPolicy("nope")).toEqual({ autoApproveLowImpact: true, escalateHighImpact: true });
-    expect(resolveTimeOffPolicy({})).toEqual({ autoApproveLowImpact: true, escalateHighImpact: true });
+    expect(resolveTimeOffPolicy(null)).toEqual({
+      autoApproveLowImpact: true,
+      escalateHighImpact: true,
+    });
+    expect(resolveTimeOffPolicy(undefined)).toEqual({
+      autoApproveLowImpact: true,
+      escalateHighImpact: true,
+    });
+    expect(resolveTimeOffPolicy("nope")).toEqual({
+      autoApproveLowImpact: true,
+      escalateHighImpact: true,
+    });
+    expect(resolveTimeOffPolicy({})).toEqual({
+      autoApproveLowImpact: true,
+      escalateHighImpact: true,
+    });
   });
 
   it("reads stored overrides", () => {
@@ -136,7 +148,11 @@ describe("evaluateTimeOff", () => {
   it("passes the band + impact + reason into the prompt and meters usage", async () => {
     const onUsage = vi.fn();
     const chat: DeepSeekChat = vi.fn(async () =>
-      toolCall({ recommendation: "Review.", message: "We'll let your manager know.", category: "unspecified" }),
+      toolCall({
+        recommendation: "Review.",
+        message: "We'll let your manager know.",
+        category: "unspecified",
+      }),
     );
     await evaluateTimeOff(
       { ...BASE, band: "high", conflictCount: 2, uncoverableCount: 2, willAutoApprove: false },
@@ -195,6 +211,8 @@ describe("formatting helpers", () => {
   });
 
   it("builds a thread title", () => {
-    expect(timeOffThreadTitle("Jane Doe", "Jun 15 – Jun 18")).toBe("Time off — Jane Doe — Jun 15 – Jun 18");
+    expect(timeOffThreadTitle("Jane Doe", "Jun 15 – Jun 18")).toBe(
+      "Time off — Jane Doe — Jun 15 – Jun 18",
+    );
   });
 });

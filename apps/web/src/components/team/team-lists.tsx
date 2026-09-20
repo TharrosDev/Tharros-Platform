@@ -4,13 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, MoreHorizontal, RotateCw, ShieldCheck, ShieldMinus, Trash2 } from "lucide-react";
 
-import {
-  changeRole,
-  leaveOrg,
-  removeMember,
-  resendInvite,
-  revokeInvite,
-} from "@/lib/team/actions";
+import { changeRole, leaveOrg, removeMember, resendInvite, revokeInvite } from "@/lib/team/actions";
 import type { PendingInvite, TeamMember, TeamRole } from "@/lib/team/queries";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -251,9 +245,7 @@ export function TeamLists({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem
-                          onClick={() =>
-                            run(() => resendInvite(inv.id), "Invite resent.")
-                          }
+                          onClick={() => run(() => resendInvite(inv.id), "Invite resent.")}
                         >
                           <RotateCw />
                           Resend invite

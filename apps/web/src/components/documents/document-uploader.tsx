@@ -103,7 +103,13 @@ export function DocumentUploader() {
           file,
           item: valid.ok
             ? ({ key, name: file.name, size: file.size, status: "uploading" } as UploadItem)
-            : ({ key, name: file.name, size: file.size, status: "failed", error: valid.error } as UploadItem),
+            : ({
+                key,
+                name: file.name,
+                size: file.size,
+                status: "failed",
+                error: valid.error,
+              } as UploadItem),
           valid: valid.ok,
         };
       });
@@ -155,7 +161,7 @@ export function DocumentUploader() {
         }}
         className={cn(
           "group bg-card/60 relative flex cursor-pointer items-center gap-4 rounded-xl border border-dashed px-4 py-4 text-left transition-colors duration-150 sm:px-5",
-          "hover:border-primary/40 hover:bg-primary-soft/25 focus-visible:ring-ring/40 focus-visible:outline-none focus-visible:ring-[3px]",
+          "hover:border-primary/40 hover:bg-primary-soft/25 ",
           dragging ? "border-primary bg-primary-soft/50" : "border-input",
         )}
       >
@@ -169,7 +175,10 @@ export function DocumentUploader() {
         </span>
         <div className="min-w-0 space-y-0.5">
           <p className="text-foreground text-sm font-semibold">
-            Drop files to upload, or <span className="text-primary-soft-foreground underline underline-offset-2">browse</span>
+            Drop files to upload, or{" "}
+            <span className="text-primary-soft-foreground underline underline-offset-2">
+              browse
+            </span>
           </p>
           <p className="text-muted-foreground text-sm">
             {ACCEPTED_LABEL} · up to {formatBytes(MAX_FILE_BYTES)} each
@@ -191,34 +200,34 @@ export function DocumentUploader() {
       {items.length > 0 ? (
         <ul className="space-y-1.5" aria-label="Upload progress">
           <AnimatePresence initial={false}>
-          {items.map((it) => (
-            <m.li
-              key={it.key}
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              className="bg-card flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm shadow-xs"
-            >
-              <StatusIcon status={it.status} />
-              <span className="text-foreground min-w-0 flex-1 truncate" title={it.name}>
-                {it.name}
-              </span>
-              <span className="text-muted-foreground shrink-0 text-xs">
-                {it.status === "failed" ? it.error : formatBytes(it.size)}
-              </span>
-              {it.status !== "uploading" ? (
-                <button
-                  type="button"
-                  onClick={() => dismiss(it.key)}
-                  aria-label={`Dismiss ${it.name}`}
-                  className="text-muted-foreground hover:text-foreground shrink-0"
-                >
-                  <X className="size-4" />
-                </button>
-              ) : null}
-            </m.li>
-          ))}
+            {items.map((it) => (
+              <m.li
+                key={it.key}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="bg-card flex items-center gap-3 rounded-lg border px-3.5 py-2.5 text-sm shadow-xs"
+              >
+                <StatusIcon status={it.status} />
+                <span className="text-foreground min-w-0 flex-1 truncate" title={it.name}>
+                  {it.name}
+                </span>
+                <span className="text-muted-foreground shrink-0 text-xs">
+                  {it.status === "failed" ? it.error : formatBytes(it.size)}
+                </span>
+                {it.status !== "uploading" ? (
+                  <button
+                    type="button"
+                    onClick={() => dismiss(it.key)}
+                    aria-label={`Dismiss ${it.name}`}
+                    className="text-muted-foreground hover:text-foreground shrink-0"
+                  >
+                    <X className="size-4" />
+                  </button>
+                ) : null}
+              </m.li>
+            ))}
           </AnimatePresence>
         </ul>
       ) : null}
@@ -228,7 +237,12 @@ export function DocumentUploader() {
 
 function StatusIcon({ status }: { status: UploadStatus }) {
   if (status === "uploading") {
-    return <Loader2 className="text-muted-foreground size-4 shrink-0 animate-spin" aria-label="Uploading" />;
+    return (
+      <Loader2
+        className="text-muted-foreground size-4 shrink-0 animate-spin"
+        aria-label="Uploading"
+      />
+    );
   }
   if (status === "done") {
     return <CheckCircle2 className="text-success size-4 shrink-0" aria-label="Uploaded" />;

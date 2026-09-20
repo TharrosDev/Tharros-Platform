@@ -59,8 +59,7 @@ export function fuzzyMatch(query: string, text: string): FuzzyResult | null {
     const prev = indices.length ? indices[indices.length - 1] : -1;
     // Mid-run, continue the consecutive streak when possible before hunting
     // for a fresh word start.
-    const found =
-      prev !== -1 && t[prev + 1] === ch ? prev + 1 : findChar(t, ch, ti);
+    const found = prev !== -1 && t[prev + 1] === ch ? prev + 1 : findChar(t, ch, ti);
     if (found === -1) return null;
 
     score += 1;

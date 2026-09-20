@@ -72,83 +72,83 @@ export function EmployeeRoster({
     <section className="space-y-3">
       <h2 className="type-h2">Roster</h2>
       <div className="bg-card shadow-card overflow-hidden rounded-lg border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Employee</TableHead>
-            <TableHead>Portal</TableHead>
-            {canManage ? <TableHead className="w-10 text-right">Actions</TableHead> : null}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {employees.map((e) => (
-            <TableRow key={e.id}>
-              <TableCell>
-                <Link
-                  href={`/scheduling/employees/${e.id}`}
-                  className="group flex items-center gap-3"
-                >
-                  <span
-                    aria-hidden
-                    className="bg-secondary text-secondary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
-                  >
-                    {e.name
-                      .split(/\s+/)
-                      .slice(0, 2)
-                      .map((part) => part[0]?.toUpperCase() ?? "")
-                      .join("")}
-                  </span>
-                  <span className="flex min-w-0 flex-col">
-                    <span className="text-foreground truncate font-medium group-hover:underline">
-                      {e.name}
-                    </span>
-                    <span className="text-muted-foreground truncate text-xs">{e.email}</span>
-                  </span>
-                </Link>
-              </TableCell>
-              <TableCell>
-                {e.hasPortalAccess ? (
-                  <Badge variant="info">{e.lastUsedAt ? "Active" : "Link sent"}</Badge>
-                ) : (
-                  <Badge variant="outline">No link</Badge>
-                )}
-              </TableCell>
-              {canManage ? (
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
-                      aria-label={`Actions for ${e.name}`}
-                    >
-                      <MoreHorizontal className="size-4" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          run(
-                            () => sendPortalLink(e.id),
-                            e.hasPortalAccess ? "Portal link resent." : "Portal link sent.",
-                          )
-                        }
-                      >
-                        {e.hasPortalAccess ? <RotateCw /> : <Mail />}
-                        {e.hasPortalAccess ? "Resend portal link" : "Send portal link"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => setConfirm(e)}
-                      >
-                        <Trash2 />
-                        Remove employee
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              ) : null}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Employee</TableHead>
+              <TableHead>Portal</TableHead>
+              {canManage ? <TableHead className="w-10 text-right">Actions</TableHead> : null}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {employees.map((e) => (
+              <TableRow key={e.id}>
+                <TableCell>
+                  <Link
+                    href={`/scheduling/employees/${e.id}`}
+                    className="group flex items-center gap-3"
+                  >
+                    <span
+                      aria-hidden
+                      className="bg-secondary text-secondary-foreground flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                    >
+                      {e.name
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((part) => part[0]?.toUpperCase() ?? "")
+                        .join("")}
+                    </span>
+                    <span className="flex min-w-0 flex-col">
+                      <span className="text-foreground truncate font-medium group-hover:underline">
+                        {e.name}
+                      </span>
+                      <span className="text-muted-foreground truncate text-xs">{e.email}</span>
+                    </span>
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  {e.hasPortalAccess ? (
+                    <Badge variant="info">{e.lastUsedAt ? "Active" : "Link sent"}</Badge>
+                  ) : (
+                    <Badge variant="outline">No link</Badge>
+                  )}
+                </TableCell>
+                {canManage ? (
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+                        aria-label={`Actions for ${e.name}`}
+                      >
+                        <MoreHorizontal className="size-4" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            run(
+                              () => sendPortalLink(e.id),
+                              e.hasPortalAccess ? "Portal link resent." : "Portal link sent.",
+                            )
+                          }
+                        >
+                          {e.hasPortalAccess ? <RotateCw /> : <Mail />}
+                          {e.hasPortalAccess ? "Resend portal link" : "Send portal link"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => setConfirm(e)}
+                        >
+                          <Trash2 />
+                          Remove employee
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                ) : null}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
       <Dialog open={confirm !== null} onOpenChange={(open) => !open && setConfirm(null)}>

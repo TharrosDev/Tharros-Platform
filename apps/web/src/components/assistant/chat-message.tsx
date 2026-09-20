@@ -5,11 +5,7 @@ import * as React from "react";
 import type { ChatMessage } from "@/lib/assistant/types";
 import { TharrosMark } from "@/components/brand/logo";
 import { AssistantMarkdown } from "@/components/assistant/markdown";
-import {
-  CitationFooter,
-  NotGroundedNote,
-  SourcesDialog,
-} from "@/components/assistant/citations";
+import { CitationFooter, NotGroundedNote, SourcesDialog } from "@/components/assistant/citations";
 import { MessageActions } from "@/components/assistant/message-actions";
 
 /**

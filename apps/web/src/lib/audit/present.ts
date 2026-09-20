@@ -48,7 +48,10 @@ const ACTION_META: Record<string, { title: string; category: ActivityCategory }>
   "candidate_panel.judged": { title: "Schedule candidates judged", category: "decision" },
   "replacement.offered": { title: "Replacement offered", category: "change" },
   "replacement.accepted": { title: "Replacement accepted", category: "change" },
-  "replacement.conflict": { title: "Replacement declined — scheduling conflict", category: "change" },
+  "replacement.conflict": {
+    title: "Replacement declined — scheduling conflict",
+    category: "change",
+  },
   "replacement.escalated": { title: "Replacement escalated to a manager", category: "escalation" },
   "sick_call.reported": { title: "Sick call reported", category: "change" },
   "time_off.requested": { title: "Time-off requested", category: "change" },

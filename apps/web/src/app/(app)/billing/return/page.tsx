@@ -26,9 +26,7 @@ export default async function CheckoutReturnPage({
     redirect("/billing");
   }
 
-  const planName = result.tier
-    ? getPlan(tierSchema.parse(result.tier)).name
-    : "your plan";
+  const planName = result.tier ? getPlan(tierSchema.parse(result.tier)).name : "your plan";
   const complete = result.status === "complete";
 
   return (

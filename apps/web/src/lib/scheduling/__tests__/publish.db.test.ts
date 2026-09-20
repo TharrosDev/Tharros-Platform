@@ -39,7 +39,10 @@ async function asUser(who: string): Promise<SupabaseClient> {
   const client = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { error } = await client.auth.signInWithPassword({ email: emailFor(who), password: PASSWORD });
+  const { error } = await client.auth.signInWithPassword({
+    email: emailFor(who),
+    password: PASSWORD,
+  });
   if (error) throw error;
   return client;
 }
@@ -147,7 +150,11 @@ describe("publish flow (manager-write / member-read)", () => {
     expect(e3).toBeNull();
     expect(version?.source).toBe("published");
 
-    const { data: sched } = await admin.from("schedules").select("status").eq("id", scheduleId).single();
+    const { data: sched } = await admin
+      .from("schedules")
+      .select("status")
+      .eq("id", scheduleId)
+      .single();
     expect(sched?.status).toBe("published");
   });
 
@@ -173,7 +180,10 @@ describe("publish flow (manager-write / member-read)", () => {
   });
 
   it("a manager reopens the schedule (published → draft)", async () => {
-    const { error } = await ownerClient.from("schedules").update({ status: "draft" }).eq("id", scheduleId);
+    const { error } = await ownerClient
+      .from("schedules")
+      .update({ status: "draft" })
+      .eq("id", scheduleId);
     expect(error).toBeNull();
     const { data } = await admin.from("schedules").select("status").eq("id", scheduleId).single();
     expect(data?.status).toBe("draft");

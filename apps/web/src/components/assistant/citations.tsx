@@ -52,7 +52,7 @@ export function CitationFooter({
             <button
               type="button"
               onClick={() => onOpen(c.index)}
-              className="group hover:bg-accent/60 focus-visible:ring-ring/40 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none transition-colors focus-visible:ring-2"
+              className="group hover:bg-accent/60 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors "
             >
               <span className="text-primary-soft-foreground bg-primary-soft flex size-5 shrink-0 items-center justify-center rounded text-xs font-semibold tabular-nums">
                 {c.index}
@@ -121,7 +121,10 @@ export function SourcesDialog({
             );
           })}
         </ul>
-        <Link href="/knowledge" className={cn(buttonVariants({ variant: "outline" }), "mt-1 w-full")}>
+        <Link
+          href="/knowledge"
+          className={cn(buttonVariants({ variant: "outline" }), "mt-1 w-full")}
+        >
           <BookOpen className="size-4" />
           View in Knowledge
         </Link>

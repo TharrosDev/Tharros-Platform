@@ -31,10 +31,7 @@ function acceptUrlFor(token: string): string {
 }
 
 /** Invite an email into the active org as member or admin, then email the link. */
-export async function sendInvite(
-  _prev: TeamFormState,
-  formData: FormData,
-): Promise<TeamFormState> {
+export async function sendInvite(_prev: TeamFormState, formData: FormData): Promise<TeamFormState> {
   const raw = {
     email: String(formData.get("email") ?? ""),
     role: String(formData.get("role") ?? ""),

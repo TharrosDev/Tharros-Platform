@@ -49,12 +49,20 @@ describe("usageBannerState (Day 61)", () => {
   });
 
   it("warns at/above the near-limit threshold while still allowed", () => {
-    expect(usageBannerState(capDecision(400, 500))).toEqual({ tone: "warning", used: 400, cap: 500 });
+    expect(usageBannerState(capDecision(400, 500))).toEqual({
+      tone: "warning",
+      used: 400,
+      cap: 500,
+    });
     expect(usageBannerState(capDecision(450, 500))?.tone).toBe("warning");
   });
 
   it("flips to 'reached' once the cap is hit", () => {
-    expect(usageBannerState(capDecision(500, 500))).toEqual({ tone: "reached", used: 500, cap: 500 });
+    expect(usageBannerState(capDecision(500, 500))).toEqual({
+      tone: "reached",
+      used: 500,
+      cap: 500,
+    });
     expect(usageBannerState(capDecision(520, 500))?.tone).toBe("reached");
   });
 

@@ -117,7 +117,12 @@ export async function runOptimizeLoop(args: RunOptimizeLoopArgs): Promise<Optimi
     await io.audit({
       action: "escalation_emitted",
       actor: "system",
-      detail: { kind: esc.kind, slotId: esc.slotId, missing: esc.missing, employees: esc.employeeIds.length },
+      detail: {
+        kind: esc.kind,
+        slotId: esc.slotId,
+        missing: esc.missing,
+        employees: esc.employeeIds.length,
+      },
     });
   }
 

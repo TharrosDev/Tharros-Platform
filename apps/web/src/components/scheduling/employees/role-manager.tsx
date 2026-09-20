@@ -92,11 +92,12 @@ export function RoleManager({
         <ul className="flex flex-wrap gap-2">
           {roles.map((r) => (
             <li key={r.assignmentId}>
-              <Badge variant={r.kind === "certification" ? "info" : "secondary"} className="gap-1.5">
+              <Badge
+                variant={r.kind === "certification" ? "info" : "secondary"}
+                className="gap-1.5"
+              >
                 {r.name}
-                {r.expiresAt ? (
-                  <span className="opacity-70">· exp {r.expiresAt}</span>
-                ) : null}
+                {r.expiresAt ? <span className="opacity-70">· exp {r.expiresAt}</span> : null}
                 {canManage ? (
                   <button
                     type="button"
@@ -146,7 +147,12 @@ export function RoleManager({
           <Button type="button" onClick={add} disabled={pending || selected === PICK}>
             <Plus className="size-4" /> Assign
           </Button>
-          <Button type="button" variant="outline" onClick={() => setCreating(true)} disabled={pending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCreating(true)}
+            disabled={pending}
+          >
             New role/cert
           </Button>
         </div>
@@ -167,13 +173,7 @@ export function RoleManager({
   );
 }
 
-function CreateRoleDialog({
-  onClose,
-  onCreated,
-}: {
-  onClose: () => void;
-  onCreated: () => void;
-}) {
+function CreateRoleDialog({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
   const toast = useToast();
   const [pending, start] = React.useTransition();
   const [name, setName] = React.useState("");
@@ -214,7 +214,10 @@ function CreateRoleDialog({
           </label>
           <label className="space-y-1.5">
             <span className="text-muted-foreground text-xs font-medium">Type</span>
-            <Select value={kind} onValueChange={(v) => setKind((v as "role" | "certification") ?? "role")}>
+            <Select
+              value={kind}
+              onValueChange={(v) => setKind((v as "role" | "certification") ?? "role")}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

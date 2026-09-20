@@ -78,7 +78,12 @@ export type TurnLoopResult =
 
 /** A tool_result content block fed back to Claude. */
 function toolResultBlock(toolUseId: string, content: string, isError?: boolean): ContentBlockParam {
-  return { type: "tool_result", tool_use_id: toolUseId, content, ...(isError ? { is_error: true } : {}) };
+  return {
+    type: "tool_result",
+    tool_use_id: toolUseId,
+    content,
+    ...(isError ? { is_error: true } : {}),
+  };
 }
 
 /** Map stored turns → Anthropic message params. Tool turns ride a user message. */

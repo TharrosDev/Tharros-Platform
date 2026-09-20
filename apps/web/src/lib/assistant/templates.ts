@@ -52,7 +52,8 @@ export const TEMPLATES: TemplateMeta[] = [
     id: "draft_email",
     label: "Draft email",
     description: "A professional email grounded in your documents",
-    placeholder: "Who is it to, and what should it cover? e.g. reply to a customer asking about our refund window",
+    placeholder:
+      "Who is it to, and what should it cover? e.g. reply to a customer asking about our refund window",
   },
   {
     id: "write_sop",

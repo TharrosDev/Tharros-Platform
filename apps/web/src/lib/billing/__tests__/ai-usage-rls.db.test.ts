@@ -67,10 +67,42 @@ beforeAll(async () => {
 
   // Two opus calls + one haiku call for org A this month; one call for org B.
   await admin.from("ai_usage_events").insert([
-    { org_id: orgA, user_id: userA, model: "claude-opus-4-8", input_tokens: 100, output_tokens: 50, cache_read_tokens: 10, cache_creation_tokens: 0 },
-    { org_id: orgA, user_id: userA, model: "claude-opus-4-8", input_tokens: 200, output_tokens: 80, cache_read_tokens: 0, cache_creation_tokens: 20 },
-    { org_id: orgA, user_id: userA, model: "claude-haiku-4-5", input_tokens: 300, output_tokens: 40, cache_read_tokens: 0, cache_creation_tokens: 0 },
-    { org_id: orgB, user_id: userB, model: "claude-opus-4-8", input_tokens: 999, output_tokens: 999, cache_read_tokens: 0, cache_creation_tokens: 0 },
+    {
+      org_id: orgA,
+      user_id: userA,
+      model: "claude-opus-4-8",
+      input_tokens: 100,
+      output_tokens: 50,
+      cache_read_tokens: 10,
+      cache_creation_tokens: 0,
+    },
+    {
+      org_id: orgA,
+      user_id: userA,
+      model: "claude-opus-4-8",
+      input_tokens: 200,
+      output_tokens: 80,
+      cache_read_tokens: 0,
+      cache_creation_tokens: 20,
+    },
+    {
+      org_id: orgA,
+      user_id: userA,
+      model: "claude-haiku-4-5",
+      input_tokens: 300,
+      output_tokens: 40,
+      cache_read_tokens: 0,
+      cache_creation_tokens: 0,
+    },
+    {
+      org_id: orgB,
+      user_id: userB,
+      model: "claude-opus-4-8",
+      input_tokens: 999,
+      output_tokens: 999,
+      cache_read_tokens: 0,
+      cache_creation_tokens: 0,
+    },
   ]);
 
   clientA = await asUser(emailFor("a"));

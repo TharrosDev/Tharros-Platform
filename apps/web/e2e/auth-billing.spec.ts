@@ -121,9 +121,7 @@ test("auth + billing spine", async ({ page, browser }) => {
 
   await test.step("the subscribe surface loads", async () => {
     await page.goto("/billing/subscribe?plan=growth");
-    await expect(
-      page.getByRole("heading", { name: /Subscribe to Growth/ }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Subscribe to Growth/ })).toBeVisible();
     // The embedded Checkout container mounts (the Stripe iframe loads inside it).
     await expect(page.locator("#checkout")).toBeAttached();
   });

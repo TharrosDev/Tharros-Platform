@@ -42,7 +42,11 @@ function toolCall(args: unknown): DeepSeekChatResponse {
         message: {
           content: null,
           tool_calls: [
-            { id: "c1", type: "function", function: { name: "record_judge_verdict", arguments: JSON.stringify(args) } },
+            {
+              id: "c1",
+              type: "function",
+              function: { name: "record_judge_verdict", arguments: JSON.stringify(args) },
+            },
           ],
         },
       },
@@ -54,7 +58,11 @@ function toolCall(args: unknown): DeepSeekChatResponse {
 describe("judgeCandidates", () => {
   it("uses the model's winner and rationale on a valid verdict", async () => {
     const chat: DeepSeekChat = vi.fn(async () =>
-      toolCall({ winnerLabel: "fairness", ranking: ["fairness", "seniority", "balanced"], rationale: "Best coverage, fairest." }),
+      toolCall({
+        winnerLabel: "fairness",
+        ranking: ["fairness", "seniority", "balanced"],
+        rationale: "Best coverage, fairest.",
+      }),
     );
     const v = await judgeCandidates(CANDS, { chat });
     expect(v.winnerLabel).toBe("fairness");
@@ -97,7 +105,11 @@ describe("judgeCandidates", () => {
 
   it("sends letter grades to the model and never the raw solver score", async () => {
     const chat = vi.fn(async () =>
-      toolCall({ winnerLabel: "fairness", ranking: ["fairness", "seniority", "balanced"], rationale: "x" }),
+      toolCall({
+        winnerLabel: "fairness",
+        ranking: ["fairness", "seniority", "balanced"],
+        rationale: "x",
+      }),
     );
     await judgeCandidates(CANDS, { chat });
     const payload = JSON.stringify(chat.mock.calls[0]);

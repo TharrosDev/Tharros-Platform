@@ -74,12 +74,14 @@ async function buildForecastContext(
       roles: roleNames,
       employmentMix,
     },
-    manualBaseline: ((baselineRes.data ?? []) as Array<{
-      day_of_week: number | null;
-      start_time: string;
-      end_time: string;
-      min_staff: number;
-    }>).map((r) => ({
+    manualBaseline: (
+      (baselineRes.data ?? []) as Array<{
+        day_of_week: number | null;
+        start_time: string;
+        end_time: string;
+        min_staff: number;
+      }>
+    ).map((r) => ({
       day_of_week: r.day_of_week,
       start_time: r.start_time,
       end_time: r.end_time,
@@ -111,7 +113,8 @@ export async function runStaffingForecast(): Promise<ForecastState> {
       {
         chat: chatCompletion,
         model: SCHEDULING_MODEL_PRO,
-        onUsage: (model, usage) => recordUsage(activeOrg.id, user.id, model, mapDeepSeekUsage(usage)),
+        onUsage: (model, usage) =>
+          recordUsage(activeOrg.id, user.id, model, mapDeepSeekUsage(usage)),
       },
     );
     return { ok: true, preview };
@@ -147,7 +150,10 @@ export async function saveStaffingForecast(
     .from("roles_certifications")
     .select("id, name")
     .eq("org_id", activeOrg.id);
-  const resolved = resolveStaffingRoles(valid.data, (roles ?? []) as Array<{ id: string; name: string }>);
+  const resolved = resolveStaffingRoles(
+    valid.data,
+    (roles ?? []) as Array<{ id: string; name: string }>,
+  );
 
   const del = await supabase
     .from("staffing_requirements")

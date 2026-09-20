@@ -13,12 +13,7 @@ export const MAX_TAG_LENGTH = 32;
  * Returns `""` for anything with no usable characters (caller drops empties).
  */
 export function normalizeTag(raw: string): string {
-  return raw
-    .trim()
-    .replace(/\s+/g, " ")
-    .toLowerCase()
-    .slice(0, MAX_TAG_LENGTH)
-    .trim();
+  return raw.trim().replace(/\s+/g, " ").toLowerCase().slice(0, MAX_TAG_LENGTH).trim();
 }
 
 /**
@@ -43,10 +38,7 @@ export function normalizeTags(raw: string[]): string[] {
  * Does a document match a free-text library query? Matches against the filename
  * and any tag, case-insensitively. An empty/blank query matches everything.
  */
-export function matchesQuery(
-  doc: { filename: string; tags: string[] },
-  query: string,
-): boolean {
+export function matchesQuery(doc: { filename: string; tags: string[] }, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
   if (doc.filename.toLowerCase().includes(q)) return true;

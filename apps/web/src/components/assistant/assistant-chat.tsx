@@ -3,7 +3,16 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, BookOpen, ArrowUp, Mail, ClipboardList, FileText, RefreshCw, X } from "lucide-react";
+import {
+  Sparkles,
+  BookOpen,
+  ArrowUp,
+  Mail,
+  ClipboardList,
+  FileText,
+  RefreshCw,
+  X,
+} from "lucide-react";
 
 import type { Citation } from "@/lib/documents/rag-prompt";
 import type { ChatMessage } from "@/lib/assistant/types";
@@ -117,14 +126,17 @@ export function AssistantChat({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-          question,
-          conversationId: selectedId ?? undefined,
-          template: template ?? undefined,
-        }),
+            question,
+            conversationId: selectedId ?? undefined,
+            template: template ?? undefined,
+          }),
           signal: controller.signal,
         });
         if (res.status === 429) {
-          const data = (await res.json().catch(() => null)) as { code?: string; error?: string } | null;
+          const data = (await res.json().catch(() => null)) as {
+            code?: string;
+            error?: string;
+          } | null;
           if (data?.code === "usage_cap") {
             // Drop the optimistic turns — no answer is coming — and surface the
             // hard cap banner instead.
@@ -210,9 +222,7 @@ export function AssistantChat({
               const turn = (
                 <ChatTurn
                   message={m}
-                  streaming={
-                    streaming && m.role === "assistant" && i === messages.length - 1
-                  }
+                  streaming={streaming && m.role === "assistant" && i === messages.length - 1}
                 />
               );
               return i >= initialCount ? (
@@ -266,9 +276,16 @@ export function AssistantChat({
           placeholder={activeMeta?.placeholder}
           header={
             readOnly ? null : activeMeta ? (
-              <ActiveTemplateChip label={activeMeta.label} onClear={() => setActiveTemplate(null)} />
+              <ActiveTemplateChip
+                label={activeMeta.label}
+                onClear={() => setActiveTemplate(null)}
+              />
             ) : (
-              <TemplateChips active={null} onPick={setActiveTemplate} disabled={hasDocuments === false} />
+              <TemplateChips
+                active={null}
+                onPick={setActiveTemplate}
+                disabled={hasDocuments === false}
+              />
             )
           }
         />
@@ -288,13 +305,18 @@ function EmptyState({
 }) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col px-1 pb-10 pt-8 sm:pt-14">
-      <span className="bg-card text-primary flex size-10 items-center justify-center rounded-xl border shadow-xs" aria-hidden>
+      <span
+        className="bg-card text-primary flex size-10 items-center justify-center rounded-xl border shadow-xs"
+        aria-hidden
+      >
         <Sparkles className="size-5" />
       </span>
-      <h2 className="mt-5 text-[1.375rem] font-semibold tracking-[-0.025em]">Ask about your business</h2>
+      <h2 className="mt-5 text-[1.375rem] font-semibold tracking-[-0.025em]">
+        Ask about your business
+      </h2>
       <p className="text-muted-foreground type-body mt-1.5 max-w-lg">
-        The assistant answers only from the documents in your Knowledge base, and cites the
-        source for every answer.
+        The assistant answers only from the documents in your Knowledge base, and cites the source
+        for every answer.
       </p>
 
       {readOnly ? null : hasDocuments ? (
@@ -306,10 +328,13 @@ function EmptyState({
                 key={p}
                 type="button"
                 onClick={() => onPick(p)}
-                className="group focus-visible:ring-ring/40 flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm outline-none transition-colors hover:bg-accent/60 focus-visible:ring-[3px] focus-visible:ring-inset"
+                className="group flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-accent/60 "
               >
                 <span className="text-foreground">{p}</span>
-                <ArrowUp className="text-muted-foreground group-hover:text-primary-soft-foreground size-4 shrink-0 rotate-90 transition-colors" aria-hidden />
+                <ArrowUp
+                  className="text-muted-foreground group-hover:text-primary-soft-foreground size-4 shrink-0 rotate-90 transition-colors"
+                  aria-hidden
+                />
               </button>
             ))}
           </div>
@@ -334,7 +359,10 @@ function EmptyState({
               </li>
             ))}
           </ol>
-          <Link href="/knowledge" className={cn(buttonVariants({ variant: "default", size: "sm" }), "self-start")}>
+          <Link
+            href="/knowledge"
+            className={cn(buttonVariants({ variant: "default", size: "sm" }), "self-start")}
+          >
             <BookOpen className="size-4" />
             Add documents
           </Link>
@@ -367,7 +395,7 @@ function TemplateChips({
             aria-pressed={active === t.id}
             title={t.description}
             className={cn(
-              "bg-card focus-visible:ring-ring/40 inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[0.8125rem] font-medium outline-none transition-colors hover:border-input hover:bg-accent focus-visible:ring-[3px]",
+              "bg-card inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-[0.8125rem] font-medium transition-colors hover:border-input hover:bg-accent ",
               active === t.id && "border-primary/30 bg-primary-soft text-primary-soft-foreground",
             )}
           >
@@ -381,13 +409,7 @@ function TemplateChips({
 }
 
 /** Day 33 — a small inline notice above the composer for usage-cap states. */
-function UsageNotice({
-  tone,
-  children,
-}: {
-  tone: "warning" | "error";
-  children: React.ReactNode;
-}) {
+function UsageNotice({ tone, children }: { tone: "warning" | "error"; children: React.ReactNode }) {
   return (
     <div
       role="status"

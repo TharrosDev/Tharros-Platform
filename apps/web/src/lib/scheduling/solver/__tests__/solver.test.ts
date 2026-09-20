@@ -81,7 +81,9 @@ const TUE = "2026-06-09";
 
 describe("solveSchedule — coverage", () => {
   it("fills all required heads when staff are plentiful", () => {
-    const res = solveSchedule(input([emp("a"), emp("b")], [slot("s1", MON, "09:00", "17:00", { requiredStaff: 2 })]));
+    const res = solveSchedule(
+      input([emp("a"), emp("b")], [slot("s1", MON, "09:00", "17:00", { requiredStaff: 2 })]),
+    );
     expect(res.assignments.every((a) => a.employeeId !== null)).toBe(true);
     expect(res.gapReport[0]).toMatchObject({ required: 2, filled: 2, missing: 0 });
     expect(res.hardViolations).toHaveLength(0);
@@ -95,7 +97,9 @@ describe("solveSchedule — coverage", () => {
   });
 
   it("never double-books to fill a slot it can't legally cover", () => {
-    const res = solveSchedule(input([emp("a")], [slot("s1", MON, "09:00", "17:00", { requiredStaff: 2 })]));
+    const res = solveSchedule(
+      input([emp("a")], [slot("s1", MON, "09:00", "17:00", { requiredStaff: 2 })]),
+    );
     const filled = res.assignments.filter((a) => a.employeeId !== null);
     expect(filled).toHaveLength(1);
     expect(res.gapReport[0].missing).toBe(1);
@@ -136,7 +140,10 @@ describe("solveSchedule — hard constraints", () => {
 describe("solveSchedule — soft objectives", () => {
   it("distributes work fairly across identical employees", () => {
     const res = solveSchedule(
-      input([emp("a"), emp("b")], [slot("s1", MON, "09:00", "17:00"), slot("s2", MON, "18:00", "22:00")]),
+      input(
+        [emp("a"), emp("b")],
+        [slot("s1", MON, "09:00", "17:00"), slot("s2", MON, "18:00", "22:00")],
+      ),
     );
     const assigned = res.assignments.map((a) => a.employeeId).sort();
     expect(assigned).toEqual(["a", "b"]);
@@ -170,7 +177,11 @@ describe("solveSchedule — soft objectives", () => {
 describe("solveSchedule — determinism & local search", () => {
   const complex = () =>
     input(
-      [emp("a", { seniorityRank: 1 }), emp("b", { seniorityRank: 2 }), emp("c", { performanceScore: 3 })],
+      [
+        emp("a", { seniorityRank: 1 }),
+        emp("b", { seniorityRank: 2 }),
+        emp("c", { performanceScore: 3 }),
+      ],
       [
         slot("s1", MON, "09:00", "17:00", { requiredStaff: 2 }),
         slot("s2", TUE, "10:00", "18:00"),
@@ -189,7 +200,10 @@ describe("solveSchedule — determinism & local search", () => {
   });
 
   it("local search repairs a deliberately imbalanced assignment", () => {
-    const inp = input([emp("a"), emp("b")], [slot("s1", MON, "09:00", "17:00"), slot("s2", MON, "18:00", "22:00")]);
+    const inp = input(
+      [emp("a"), emp("b")],
+      [slot("s1", MON, "09:00", "17:00"), slot("s2", MON, "18:00", "22:00")],
+    );
     const heads = expandHeads(inp.slots);
     const eligible = buildEligibility(inp.employees, heads);
     const bad = ["a", "a"]; // both heads on one employee — legal but unfair

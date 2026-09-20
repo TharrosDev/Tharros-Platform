@@ -219,7 +219,10 @@ describe("processSickCall", () => {
   it("rejects when the org requires a reason and none is given", async () => {
     await admin
       .from("org_settings")
-      .upsert({ org_id: orgA, agent_persona: { sickCallReason: "required" } }, { onConflict: "org_id" });
+      .upsert(
+        { org_id: orgA, agent_persona: { sickCallReason: "required" } },
+        { onConflict: "org_id" },
+      );
 
     const shiftId = await addShift(emp1, 5);
     const result = await processSickCall(

@@ -1,9 +1,5 @@
 export const AUTOMATION_TRIGGERS = ["lead.created", "lead.status_changed"] as const;
-export const AUTOMATION_ACTIONS = [
-  "notify_team",
-  "set_lead_status",
-  "draft_follow_up",
-] as const;
+export const AUTOMATION_ACTIONS = ["notify_team", "set_lead_status", "draft_follow_up"] as const;
 
 export type AutomationTrigger = (typeof AUTOMATION_TRIGGERS)[number];
 export type AutomationAction = (typeof AUTOMATION_ACTIONS)[number];

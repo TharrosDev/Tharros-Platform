@@ -12,10 +12,7 @@ export function ResetPasswordForm() {
   const [state, action, pending] = useActionState(updatePassword, undefined);
 
   return (
-    <AuthCard
-      title="Choose a new password"
-      description="Enter a new password for your account."
-    >
+    <AuthCard title="Choose a new password" description="Enter a new password for your account.">
       <form action={action} className="space-y-4" noValidate>
         {state?.message ? <FormMessage>{state.message}</FormMessage> : null}
 

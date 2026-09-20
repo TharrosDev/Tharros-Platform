@@ -7,10 +7,12 @@ import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 import { cn } from "@/lib/utils";
 
 /**
- * Radio primitives on Base UI (`@base-ui/react/radio-group` + `radio`).
- * Controlled or uncontrolled; submits via a hidden input when the group has a
- * `name`. Matches the Workshop UI kit. `RadioGroupItem` renders the dial only;
- * compose it with a `<Label>` for the option text.
+ * Radio primitives on Base UI. Controlled or uncontrolled; submits via a
+ * hidden input when the group has a name. RadioGroupItem renders the mark
+ * only; compose it with a Label for the option text.
+ *
+ * Square like everything else on the board: the role, not the silhouette,
+ * tells a screen reader this is a radio.
  */
 function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive>) {
   return (
@@ -27,15 +29,14 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
     <RadioPrimitive.Root
       data-slot="radio-group-item"
       className={cn(
-        "border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center rounded-full border shadow-xs outline-none transition-[color,box-shadow]",
-        "focus-visible:border-ring focus-visible:ring-ring/40 focus-visible:ring-[3px]",
-        "data-[checked]:border-primary",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center border transition-colors hover:border-foreground/50",
+        "data-[checked]:border-primary-edge data-[checked]:border-2",
+        "disabled:cursor-not-allowed disabled:opacity-45",
         className,
       )}
       {...props}
     >
-      <RadioPrimitive.Indicator className="bg-primary size-2 rounded-full" />
+      <RadioPrimitive.Indicator className="bg-primary size-2.5" />
     </RadioPrimitive.Root>
   );
 }

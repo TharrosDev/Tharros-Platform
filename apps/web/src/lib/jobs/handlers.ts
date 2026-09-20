@@ -3,18 +3,12 @@ import { logger } from "@/lib/observability/logger";
 import type { Job, JobHandler } from "@/lib/jobs/types";
 import { notificationSendHandler } from "@/lib/notifications/handler";
 import { availabilityNudgeHandler } from "@/lib/scheduling/availability-nudge";
-import {
-  scheduleDeliveryHandler,
-  shiftReminderHandler,
-} from "@/lib/scheduling/delivery-handler";
+import { scheduleDeliveryHandler, shiftReminderHandler } from "@/lib/scheduling/delivery-handler";
 import {
   replacementOfferNotifyHandler,
   replacementTimeoutHandler,
 } from "@/lib/scheduling/replacement-handlers";
-import {
-  swapProposalNotifyHandler,
-  swapResultNotifyHandler,
-} from "@/lib/scheduling/swap-handlers";
+import { swapProposalNotifyHandler, swapResultNotifyHandler } from "@/lib/scheduling/swap-handlers";
 import { automationDispatchHandler } from "@/lib/automations/handler";
 
 const noop: JobHandler = async (job: Job) => {

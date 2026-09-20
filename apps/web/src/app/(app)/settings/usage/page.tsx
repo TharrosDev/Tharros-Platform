@@ -5,13 +5,7 @@ import { getSubscription } from "@/lib/billing/entitlements";
 import { queryCapFor } from "@/lib/billing/plans";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormMessage } from "@/components/auth/auth-card";
 import { cn } from "@/lib/utils";
 

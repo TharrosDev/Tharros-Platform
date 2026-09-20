@@ -55,7 +55,10 @@ beforeAll(async () => {
   userClient = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { error: signInErr } = await userClient.auth.signInWithPassword({ email, password: PASSWORD });
+  const { error: signInErr } = await userClient.auth.signInWithPassword({
+    email,
+    password: PASSWORD,
+  });
   if (signInErr) throw signInErr;
 }, 30_000);
 
@@ -66,7 +69,11 @@ afterAll(async () => {
 
 describe("agent_audit_log deny-all RLS", () => {
   it("the service-role client can write and read the audit row", async () => {
-    const { data } = await admin.from("agent_audit_log").select("id, action").eq("id", auditId).single();
+    const { data } = await admin
+      .from("agent_audit_log")
+      .select("id, action")
+      .eq("id", auditId)
+      .single();
     expect(data?.action).toBe("turn_started");
   });
 

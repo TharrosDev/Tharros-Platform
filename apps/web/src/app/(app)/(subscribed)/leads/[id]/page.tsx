@@ -104,7 +104,10 @@ export default async function LeadDetailPage({
   return (
     <>
       <div className="space-y-4">
-        <Link href="/leads" className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "-ml-2.5")}>
+        <Link
+          href="/leads"
+          className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "-ml-2.5")}
+        >
           <ArrowLeft />
           Lead Capture
         </Link>
@@ -116,15 +119,24 @@ export default async function LeadDetailPage({
       </div>
 
       {query.error ? (
-        <div role="alert" className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm">
+        <div
+          role="alert"
+          className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm"
+        >
           That action could not be completed.
         </div>
       ) : query.drafted ? (
-        <div role="status" className="border-primary/20 bg-primary-soft/50 text-primary-soft-foreground rounded-lg border px-4 py-3 text-sm">
+        <div
+          role="status"
+          className="border-primary/20 bg-primary-soft/50 text-primary-soft-foreground rounded-lg border px-4 py-3 text-sm"
+        >
           A new follow-up draft is ready. Review it below before sending.
         </div>
       ) : query.sent ? (
-        <div role="status" className="border-success/25 bg-success/[0.07] text-success rounded-lg border px-4 py-3 text-sm">
+        <div
+          role="status"
+          className="border-success/25 bg-success/[0.07] text-success rounded-lg border px-4 py-3 text-sm"
+        >
           Follow-up sent. The timeline has been updated.
         </div>
       ) : null}
@@ -139,7 +151,11 @@ export default async function LeadDetailPage({
               {lead.email ? (
                 <form action={generateLeadFollowUp}>
                   <input type="hidden" name="leadId" value={lead.id} />
-                  <Button type="submit" variant={lead.followUpDraft ? "ghost" : "outline"} size="sm">
+                  <Button
+                    type="submit"
+                    variant={lead.followUpDraft ? "ghost" : "outline"}
+                    size="sm"
+                  >
                     <Sparkles />
                     {lead.followUpDraft ? "Regenerate" : "Draft with AI"}
                   </Button>
@@ -162,15 +178,21 @@ export default async function LeadDetailPage({
                 <header className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3">
                   <div className="min-w-0">
                     <p className="text-muted-foreground text-xs">To {lead.email}</p>
-                    <p className="truncate font-semibold">{lead.followUpSubject ?? "Following up"}</p>
+                    <p className="truncate font-semibold">
+                      {lead.followUpSubject ?? "Following up"}
+                    </p>
                   </div>
                   <Badge variant="warning">Awaiting your review</Badge>
                 </header>
-                <p className="px-5 py-4 text-[0.9375rem] leading-relaxed whitespace-pre-wrap">{lead.followUpDraft}</p>
+                <p className="px-5 py-4 text-[0.9375rem] leading-relaxed whitespace-pre-wrap">
+                  {lead.followUpDraft}
+                </p>
                 <footer className="bg-surface-2/60 flex flex-wrap items-center justify-between gap-3 rounded-b-xl border-t px-5 py-3">
                   <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
                     <ShieldCheck className="size-3.5" aria-hidden />
-                    {lead.followUpDraftedAt ? `Drafted ${formatDate(lead.followUpDraftedAt)}. ` : ""}
+                    {lead.followUpDraftedAt
+                      ? `Drafted ${formatDate(lead.followUpDraftedAt)}. `
+                      : ""}
                     Nothing is sent until you choose to.
                   </p>
                   <form action={sendLeadFollowUp}>
@@ -186,8 +208,8 @@ export default async function LeadDetailPage({
               <div className="bg-card/60 rounded-xl border border-dashed px-5 py-5">
                 <p className="text-sm font-semibold">No draft yet</p>
                 <p className="text-muted-foreground type-small mt-1">
-                  Draft a reply with AI from the enquiry and your documents. You review the exact copy before
-                  anything is sent.
+                  Draft a reply with AI from the enquiry and your documents. You review the exact
+                  copy before anything is sent.
                 </p>
               </div>
             )}
@@ -197,7 +219,10 @@ export default async function LeadDetailPage({
             <h2 id="timeline-heading" className="type-h2 mb-3">
               Activity
             </h2>
-            <form action={addLeadNote} className="bg-card mb-5 space-y-2 rounded-xl border p-3 shadow-card">
+            <form
+              action={addLeadNote}
+              className="bg-card mb-5 space-y-2 rounded-xl border p-3 shadow-card"
+            >
               <input type="hidden" name="leadId" value={lead.id} />
               <Textarea
                 name="note"
@@ -205,10 +230,12 @@ export default async function LeadDetailPage({
                 placeholder="Add an internal note: call outcome, context, next step…"
                 maxLength={4000}
                 required
-                className="min-h-16 border-0 px-1 shadow-none hover:border-0 focus-visible:ring-0"
+                className="min-h-16 border-0 px-1 shadow-none hover:border-0 "
               />
               <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground text-xs">Visible to your organization only</span>
+                <span className="text-muted-foreground text-xs">
+                  Visible to your organization only
+                </span>
                 <Button type="submit" variant="outline" size="sm">
                   <StickyNote />
                   Add note
@@ -258,7 +285,10 @@ export default async function LeadDetailPage({
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-20">
-          <section aria-labelledby="status-heading" className="bg-card rounded-xl border p-4 shadow-card">
+          <section
+            aria-labelledby="status-heading"
+            className="bg-card rounded-xl border p-4 shadow-card"
+          >
             <h2 id="status-heading" className="text-sm font-semibold">
               Pipeline
             </h2>
@@ -293,7 +323,10 @@ export default async function LeadDetailPage({
             </dl>
           </section>
 
-          <section aria-labelledby="details-heading" className="bg-card rounded-xl border p-4 shadow-card">
+          <section
+            aria-labelledby="details-heading"
+            className="bg-card rounded-xl border p-4 shadow-card"
+          >
             <h2 id="details-heading" className="text-sm font-semibold">
               Contact details
             </h2>
@@ -301,23 +334,51 @@ export default async function LeadDetailPage({
               <input type="hidden" name="leadId" value={lead.id} />
               <div className="space-y-1.5">
                 <Label htmlFor="lead-edit-name">Name</Label>
-                <Input id="lead-edit-name" name="name" defaultValue={lead.name} maxLength={160} required />
+                <Input
+                  id="lead-edit-name"
+                  name="name"
+                  defaultValue={lead.name}
+                  maxLength={160}
+                  required
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="lead-edit-email">Email</Label>
-                <Input id="lead-edit-email" name="email" type="email" defaultValue={lead.email ?? ""} maxLength={320} />
+                <Input
+                  id="lead-edit-email"
+                  name="email"
+                  type="email"
+                  defaultValue={lead.email ?? ""}
+                  maxLength={320}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="lead-edit-phone">Phone</Label>
-                <Input id="lead-edit-phone" name="phone" type="tel" defaultValue={lead.phone ?? ""} maxLength={80} />
+                <Input
+                  id="lead-edit-phone"
+                  name="phone"
+                  type="tel"
+                  defaultValue={lead.phone ?? ""}
+                  maxLength={80}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="lead-edit-company">Company</Label>
-                <Input id="lead-edit-company" name="company" defaultValue={lead.company ?? ""} maxLength={160} />
+                <Input
+                  id="lead-edit-company"
+                  name="company"
+                  defaultValue={lead.company ?? ""}
+                  maxLength={160}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="lead-edit-message">Enquiry</Label>
-                <Textarea id="lead-edit-message" name="message" defaultValue={lead.message ?? ""} maxLength={4000} />
+                <Textarea
+                  id="lead-edit-message"
+                  name="message"
+                  defaultValue={lead.message ?? ""}
+                  maxLength={4000}
+                />
               </div>
               <Button type="submit" variant="outline" className="justify-self-start">
                 Save details

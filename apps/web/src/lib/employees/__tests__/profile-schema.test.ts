@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  employeeProfileSchema,
-  roleAssignmentSchema,
-  roleCertificationSchema,
-} from "../schemas";
+import { employeeProfileSchema, roleAssignmentSchema, roleCertificationSchema } from "../schemas";
 import { summarizeHours } from "../hours";
 
 describe("employeeProfileSchema", () => {

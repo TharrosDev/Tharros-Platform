@@ -38,7 +38,13 @@ function Sidebar({
   showAdmin?: boolean;
 }) {
   const sections = showAdmin
-    ? [...navSections, { label: "Admin", items: [{ label: "Feedback inbox", href: "/admin/feedback", icon: Inbox }] }]
+    ? [
+        ...navSections,
+        {
+          label: "Admin",
+          items: [{ label: "Feedback inbox", href: "/admin/feedback", icon: Inbox }],
+        },
+      ]
     : navSections;
 
   return (
@@ -48,7 +54,7 @@ function Sidebar({
           href="/dashboard"
           onClick={onNavigate}
           aria-label="Tharros dashboard"
-          className="focus-visible:ring-ring/40 -ml-1 inline-flex items-center rounded-md px-1 py-1 outline-none focus-visible:ring-[3px]"
+          className=" -ml-1 inline-flex items-center rounded-md px-1 py-1 "
         >
           <TharrosWordmark markClassName="size-6" />
         </Link>
@@ -98,7 +104,7 @@ function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNaviga
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "focus-visible:ring-sidebar-ring/40 relative flex min-h-9 items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm outline-none transition-colors focus-visible:ring-[3px]",
+        " relative flex min-h-9 items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors ",
         active
           ? "text-sidebar-accent-foreground font-semibold"
           : "text-sidebar-muted-foreground hover:bg-accent hover:text-sidebar-foreground font-medium",

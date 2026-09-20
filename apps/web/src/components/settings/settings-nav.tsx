@@ -17,5 +17,12 @@ const SECTIONS: SectionNavItem[] = [
  * desktop, a horizontal scrollable row on mobile, sliding active pill.
  */
 export function SettingsNav() {
-  return <SectionNav items={SECTIONS} ariaLabel="Settings sections" ns="settings" orientation="responsive" />;
+  return (
+    <SectionNav
+      items={SECTIONS}
+      ariaLabel="Settings sections"
+      ns="settings"
+      orientation="responsive"
+    />
+  );
 }

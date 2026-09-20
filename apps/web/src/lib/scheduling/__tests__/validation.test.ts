@@ -55,7 +55,12 @@ function emp(overrides: Partial<ValidationEmployee> = {}): ValidationEmployee {
 function shift(
   startsAt: string,
   endsAt: string,
-  opts: { employeeId?: string | null; roleId?: string | null; id?: string; breakMinutes?: number } = {},
+  opts: {
+    employeeId?: string | null;
+    roleId?: string | null;
+    id?: string;
+    breakMinutes?: number;
+  } = {},
 ): EditShift {
   return {
     id: opts.id,

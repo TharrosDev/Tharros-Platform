@@ -8,9 +8,7 @@ import { soleOwnedOrgIds } from "@/lib/account/owned-orgs";
  */
 describe("soleOwnedOrgIds", () => {
   it("returns orgs the user is the only owner of", () => {
-    expect(
-      soleOwnedOrgIds(["o1", "o2"], { o1: 1, o2: 1 }),
-    ).toEqual(["o1", "o2"]);
+    expect(soleOwnedOrgIds(["o1", "o2"], { o1: 1, o2: 1 })).toEqual(["o1", "o2"]);
   });
 
   it("excludes orgs with other owners", () => {

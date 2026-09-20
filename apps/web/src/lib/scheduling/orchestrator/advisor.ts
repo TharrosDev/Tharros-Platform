@@ -117,9 +117,10 @@ export async function adviseDirectiveNudges(
     "Keep coverageGapPenalty dominant — never lower it. Add short notes explaining each nudge.",
   ].join("\n");
 
-  const userContent = ["Directives the solver can't enforce:", JSON.stringify(args.directives, null, 2)].join(
-    "\n",
-  );
+  const userContent = [
+    "Directives the solver can't enforce:",
+    JSON.stringify(args.directives, null, 2),
+  ].join("\n");
 
   try {
     const { data } = await generateStructuredDeepSeek({
@@ -200,7 +201,11 @@ export async function summarizeOptimization(
     {
       covered: args.covered,
       adjustments: args.trace.filter((s) => s.remedy).map((s) => s.remedy?.kind),
-      escalations: args.escalations.map((e) => ({ kind: e.kind, date: e.date, missing: e.missing })),
+      escalations: args.escalations.map((e) => ({
+        kind: e.kind,
+        date: e.date,
+        missing: e.missing,
+      })),
     },
     null,
     2,

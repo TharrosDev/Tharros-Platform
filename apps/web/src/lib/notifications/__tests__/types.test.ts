@@ -69,7 +69,14 @@ describe("mapNotification", () => {
       created_at: "2026-06-04T12:00:00Z",
     };
     const n = mapNotification(row);
-    expect(n).toMatchObject({ id: "n1", orgId: "o1", userId: "u1", email: true, emailStatus: "pending", data: {} });
+    expect(n).toMatchObject({
+      id: "n1",
+      orgId: "o1",
+      userId: "u1",
+      email: true,
+      emailStatus: "pending",
+      data: {},
+    });
     expect(n.readAt).toBeNull();
   });
 });

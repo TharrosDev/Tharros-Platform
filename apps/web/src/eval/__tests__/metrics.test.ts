@@ -111,7 +111,9 @@ describe("factHitRate", () => {
 
 describe("looksDeclined / negativeHandled", () => {
   it("detects the grounded 'I don't know' shape", () => {
-    expect(looksDeclined("I couldn't find anything in your uploaded documents that covers this.")).toBe(true);
+    expect(
+      looksDeclined("I couldn't find anything in your uploaded documents that covers this."),
+    ).toBe(true);
     expect(looksDeclined("The documents don't cover warranty periods.")).toBe(true);
     expect(looksDeclined("Refunds are 30 days [1].")).toBe(false);
   });

@@ -2,15 +2,15 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+/* The ruled box, grown to hold several lines. Same rule work as Input. */
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea
       data-slot="textarea"
       className={cn(
-        "border-input bg-card text-foreground placeholder:text-muted-foreground/70 flex min-h-24 w-full rounded-lg border px-3 py-2.5 text-sm leading-relaxed shadow-xs transition-[box-shadow,border-color] outline-none field-sizing-content hover:border-muted-foreground/40",
-        "focus-visible:border-ring focus-visible:ring-ring/25 focus-visible:ring-[3px]",
-        "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "border-input bg-card text-foreground placeholder:text-muted-foreground/75 type-body field-sizing-content flex min-h-24 w-full border px-3 py-2.5 transition-colors hover:border-foreground/45",
+        "aria-invalid:border-destructive aria-invalid:border-2",
+        "disabled:cursor-not-allowed disabled:opacity-45",
         className,
       )}
       {...props}

@@ -73,7 +73,8 @@ export type ForecastStaffingDeps = {
   onUsage?: (model: string, usage: DeepSeekUsage | null) => void | Promise<void>;
 };
 
-const WEEKDAY_LEGEND = "0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday";
+const WEEKDAY_LEGEND =
+  "0=Sunday, 1=Monday, 2=Tuesday, 3=Wednesday, 4=Thursday, 5=Friday, 6=Saturday";
 
 function buildSystemPrompt(roles: string[]): string {
   return [

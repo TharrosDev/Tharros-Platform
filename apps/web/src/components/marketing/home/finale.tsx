@@ -59,14 +59,17 @@ function Finale() {
           <div className="flex flex-wrap items-center gap-3 lg:col-span-6 lg:justify-end">
             <Link
               href="/signup"
-              className="bg-card text-primary group focus-visible:ring-primary-foreground/60 inline-flex h-13 items-center gap-2 rounded-xl px-7 text-base font-semibold shadow-raised outline-none transition-transform duration-200 hover:-translate-y-0.5 focus-visible:ring-[4px]"
+              className="bg-card text-primary group inline-flex h-13 items-center gap-2 rounded-xl px-7 text-base font-semibold shadow-raised transition-transform duration-200 hover:-translate-y-0.5 "
             >
               Start your 14-day trial
-              <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
+              <ArrowRight
+                className="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden
+              />
             </Link>
             <Link
               href="/pricing"
-              className="focus-visible:ring-primary-foreground/60 inline-flex h-13 items-center rounded-xl px-1 text-base sm:px-5 font-semibold underline decoration-primary-foreground/40 underline-offset-[6px] outline-none transition-[text-decoration-color] hover:decoration-primary-foreground focus-visible:ring-[4px]"
+              className=" inline-flex h-13 items-center rounded-xl px-1 text-base sm:px-5 font-semibold underline decoration-primary-foreground/40 underline-offset-[6px] transition-[text-decoration-color] hover:decoration-primary-foreground "
             >
               Compare plans
             </Link>

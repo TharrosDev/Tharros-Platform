@@ -1,10 +1,4 @@
-import {
-  EmailButton,
-  EmailFallbackLink,
-  EmailHeading,
-  EmailLayout,
-  EmailText,
-} from "./layout";
+import { EmailButton, EmailFallbackLink, EmailHeading, EmailLayout, EmailText } from "./layout";
 
 /**
  * Day 56 — sent to a coworker when an employee proposes swapping a shift with them

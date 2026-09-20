@@ -7,19 +7,20 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * Checkbox primitive on Base UI (`@base-ui/react/checkbox`). Controlled or
- * uncontrolled; submits via a hidden input when given a `name`. Matches the
- * Workshop UI kit (tight radius, cobalt when checked).
+ * Checkbox primitive on Base UI. Controlled or uncontrolled; submits via a
+ * hidden input when given a name.
+ *
+ * Drawn as the box you mark on a printed form: square, one rule, and a
+ * press-black check struck into hi-vis when it is set.
  */
 function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center rounded-[5px] border shadow-xs outline-none transition-[color,box-shadow,background-color,border-color] hover:border-muted-foreground/50",
-        "focus-visible:border-ring focus-visible:ring-ring/30 focus-visible:ring-[4px]",
-        "data-[checked]:bg-primary data-[checked]:border-primary data-[checked]:text-primary-foreground",
-        "disabled:cursor-not-allowed disabled:opacity-50",
+        "peer border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center border transition-colors hover:border-foreground/50",
+        "data-[checked]:bg-primary data-[checked]:border-primary-edge data-[checked]:text-primary-foreground data-[checked]:border-2",
+        "disabled:cursor-not-allowed disabled:opacity-45",
         className,
       )}
       {...props}

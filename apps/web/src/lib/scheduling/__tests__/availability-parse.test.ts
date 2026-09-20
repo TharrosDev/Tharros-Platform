@@ -16,7 +16,12 @@ const VALID = {
     { day_of_week: 2, is_available: true, start_time: "09:00", end_time: "17:00" },
   ],
   temporary: [
-    { effective_date: "2026-06-20", end_date: "2026-06-25", is_available: false, notes: "Vacation" },
+    {
+      effective_date: "2026-06-20",
+      end_date: "2026-06-25",
+      is_available: false,
+      notes: "Vacation",
+    },
   ],
   summary: "You can work Mondays, and Tuesdays 9–5. Off June 20–25.",
 };
@@ -52,7 +57,10 @@ describe("parseAvailabilityText", () => {
     );
 
     expect(result.permanent).toHaveLength(2);
-    expect(result.temporary[0]).toMatchObject({ effective_date: "2026-06-20", is_available: false });
+    expect(result.temporary[0]).toMatchObject({
+      effective_date: "2026-06-20",
+      is_available: false,
+    });
     expect(result.summary).toContain("Mondays");
   });
 

@@ -20,10 +20,7 @@ export type InvoiceSummary = {
 };
 
 /** The org's most recent invoices, newest first. `[]` on error or none. */
-export async function getRecentInvoices(
-  customerId: string,
-  limit = 5,
-): Promise<InvoiceSummary[]> {
+export async function getRecentInvoices(customerId: string, limit = 5): Promise<InvoiceSummary[]> {
   try {
     const res = await getStripe().invoices.list({ customer: customerId, limit });
     return res.data.map((inv) => ({

@@ -21,8 +21,8 @@ export default async function VerifyEmailPage({
         email ? (
           <>
             We sent a confirmation link to{" "}
-            <span className="text-foreground font-medium">{email}</span>. Click it
-            to activate your account.
+            <span className="text-foreground font-medium">{email}</span>. Click it to activate your
+            account.
           </>
         ) : (
           "We sent you a confirmation link. Click it to activate your account."

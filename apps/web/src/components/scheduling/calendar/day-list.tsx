@@ -51,7 +51,7 @@ export function DayList({
                   type="button"
                   onClick={() => onAddShift(day)}
                   aria-label={`Add shift on ${dayLabel(day)}`}
-                  className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 rounded p-1 outline-none transition-colors focus-visible:ring-[3px]"
+                  className="text-muted-foreground hover:text-foreground rounded p-1 transition-colors "
                 >
                   <Plus className="size-4" />
                 </button>
@@ -94,7 +94,7 @@ export function DayList({
                           type="button"
                           onClick={() => onShiftClick(s.id)}
                           className={cn(
-                            "focus-visible:ring-ring/40 w-full rounded-lg border px-3 py-2.5 text-left outline-none transition-colors focus-visible:ring-[3px]",
+                            " w-full rounded-lg border px-3 py-2.5 text-left transition-colors ",
                             toneClass,
                             "hover:bg-accent/60",
                           )}

@@ -1,10 +1,4 @@
-import {
-  EmailButton,
-  EmailFallbackLink,
-  EmailHeading,
-  EmailLayout,
-  EmailText,
-} from "./layout";
+import { EmailButton, EmailFallbackLink, EmailHeading, EmailLayout, EmailText } from "./layout";
 
 /**
  * Email-verification template. Used by Supabase Auth (signup confirmation):
@@ -21,8 +15,7 @@ export function VerifyEmail({ confirmUrl }: VerifyEmailProps) {
     <EmailLayout preview="Confirm your email to finish setting up Tharros">
       <EmailHeading>Confirm your email</EmailHeading>
       <EmailText>
-        Welcome to Tharros. Confirm this email address to activate your account
-        and get started.
+        Welcome to Tharros. Confirm this email address to activate your account and get started.
       </EmailText>
       <EmailButton href={confirmUrl}>Confirm email</EmailButton>
       <EmailText>This link expires in 24 hours.</EmailText>

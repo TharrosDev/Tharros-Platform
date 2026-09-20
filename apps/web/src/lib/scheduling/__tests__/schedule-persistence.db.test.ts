@@ -37,7 +37,10 @@ async function asUser(who: string): Promise<SupabaseClient> {
   const client = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { error } = await client.auth.signInWithPassword({ email: emailFor(who), password: PASSWORD });
+  const { error } = await client.auth.signInWithPassword({
+    email: emailFor(who),
+    password: PASSWORD,
+  });
   if (error) throw error;
   return client;
 }
@@ -126,8 +129,24 @@ describe("schedule + versions persistence (manager-write / member-read)", () => 
 
   it("a manager writes candidate schedule_versions", async () => {
     const { error } = await ownerClient.from("schedule_versions").insert([
-      { org_id: orgA, schedule_id: scheduleId, label: "balanced", covered: true, total_missing: 0, judge_rank: 2, is_selected: false },
-      { org_id: orgA, schedule_id: scheduleId, label: "fairness", covered: true, total_missing: 0, judge_rank: 1, is_selected: true },
+      {
+        org_id: orgA,
+        schedule_id: scheduleId,
+        label: "balanced",
+        covered: true,
+        total_missing: 0,
+        judge_rank: 2,
+        is_selected: false,
+      },
+      {
+        org_id: orgA,
+        schedule_id: scheduleId,
+        label: "fairness",
+        covered: true,
+        total_missing: 0,
+        judge_rank: 1,
+        is_selected: true,
+      },
     ]);
     expect(error).toBeNull();
 

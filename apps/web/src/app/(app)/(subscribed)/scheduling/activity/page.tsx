@@ -6,7 +6,11 @@ import { Bot, CalendarClock, ScrollText } from "lucide-react";
 import { getOrgContext } from "@/lib/org/queries";
 import { getSchedulingStatus } from "@/lib/scheduling/queries";
 import { getActivityPage, getScheduleActivityPage } from "@/lib/audit/queries";
-import { presentActivityFeed, type ActivitySource, type ActivityCategory } from "@/lib/audit/present";
+import {
+  presentActivityFeed,
+  type ActivitySource,
+  type ActivityCategory,
+} from "@/lib/audit/present";
 import { formatTimestamp } from "@/lib/notifications/types";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
@@ -21,7 +25,10 @@ const SOURCES: { key: ActivitySource | "all"; label: string }[] = [
   { key: "schedule", label: "Schedule changes" },
 ];
 
-const CATEGORY_BADGE: Record<ActivityCategory, { label: string; tone: "secondary" | "outline" | "destructive" }> = {
+const CATEGORY_BADGE: Record<
+  ActivityCategory,
+  { label: string; tone: "secondary" | "outline" | "destructive" }
+> = {
   decision: { label: "Decision", tone: "secondary" },
   change: { label: "Change", tone: "outline" },
   escalation: { label: "Escalation", tone: "destructive" },
@@ -92,7 +99,7 @@ export default async function ActivityLogPage({
               href={href({ source: s.key })}
               aria-current={s.key === source ? "page" : undefined}
               className={cn(
-                "focus-visible:ring-ring/40 rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                " rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
                 s.key === source
                   ? "bg-card text-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground",
@@ -162,7 +169,10 @@ export default async function ActivityLogPage({
 
       <div className="flex items-center justify-between">
         {before ? (
-          <Link href={href({ source })} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+          <Link
+            href={href({ source })}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
             ← Back to latest
           </Link>
         ) : (

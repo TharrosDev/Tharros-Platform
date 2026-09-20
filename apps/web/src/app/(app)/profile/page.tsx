@@ -4,13 +4,7 @@ import { getAuthUser } from "@/lib/auth/current-user";
 import { getDisplayUser } from "@/lib/auth/user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm, type ProfileDetails } from "@/components/profile/profile-form";
 
 export const metadata: Metadata = { title: "Profile" };

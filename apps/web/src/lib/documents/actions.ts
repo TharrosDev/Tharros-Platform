@@ -28,9 +28,7 @@ import { opaqueRateLimitKey } from "@/lib/security/request";
 
 const KNOWLEDGE_PATH = "/knowledge";
 
-export type CreateDocumentResult =
-  | { id: string; storagePath: string }
-  | { error: string };
+export type CreateDocumentResult = { id: string; storagePath: string } | { error: string };
 
 /** Reserve a documents row + Storage path for an upload in the active org. */
 export async function createDocumentRecord(input: {
@@ -51,7 +49,11 @@ export async function createDocumentRecord(input: {
   }
 
   // Re-validate server-side — never trust the client.
-  const valid = validateUploadFile({ name: input.filename, size: input.sizeBytes, type: input.mimeType ?? undefined });
+  const valid = validateUploadFile({
+    name: input.filename,
+    size: input.sizeBytes,
+    type: input.mimeType ?? undefined,
+  });
   if (!valid.ok) {
     return { error: valid.error };
   }

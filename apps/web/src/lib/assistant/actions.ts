@@ -34,10 +34,7 @@ export async function renameConversation(id: string, title: string): Promise<Act
   if (!cleaned) return { error: "Give the conversation a name." };
 
   const supabase = await createClient();
-  const { error } = await supabase
-    .from("conversations")
-    .update({ title: cleaned })
-    .eq("id", id);
+  const { error } = await supabase.from("conversations").update({ title: cleaned }).eq("id", id);
 
   if (error) {
     logger.error("assistant.rename_failed", { conversation_id: id, error: error.message });

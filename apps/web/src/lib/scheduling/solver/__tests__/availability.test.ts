@@ -22,7 +22,14 @@ function dow(date: string): number {
 }
 
 function permanent(day: number, opts: Partial<PermanentRow> = {}): PermanentRow {
-  return { id: "", day_of_week: day, is_available: true, start_time: null, end_time: null, ...opts };
+  return {
+    id: "",
+    day_of_week: day,
+    is_available: true,
+    start_time: null,
+    end_time: null,
+    ...opts,
+  };
 }
 
 function temporary(opts: Partial<TemporaryRow> & { effective_date: string }): TemporaryRow {
@@ -72,7 +79,9 @@ describe("isAvailable — permanent grid", () => {
   });
 
   it("respects a narrower permanent time window", () => {
-    const e = emp({ permanent: [permanent(dow(DATE), { start_time: "12:00", end_time: "20:00" })] });
+    const e = emp({
+      permanent: [permanent(dow(DATE), { start_time: "12:00", end_time: "20:00" })],
+    });
     expect(isAvailable(e, slot(DATE, "09:00", "17:00"))).toBe(false); // starts before window
     expect(isAvailable(e, slot(DATE, "13:00", "19:00"))).toBe(true); // inside window
   });

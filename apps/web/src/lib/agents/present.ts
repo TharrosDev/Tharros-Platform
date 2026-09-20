@@ -64,7 +64,10 @@ function stringifyToolResult(content: unknown): string {
   if (Array.isArray(content)) {
     return content
       .map((b) =>
-        b && typeof b === "object" && "text" in b && typeof (b as { text: unknown }).text === "string"
+        b &&
+        typeof b === "object" &&
+        "text" in b &&
+        typeof (b as { text: unknown }).text === "string"
           ? (b as { text: string }).text
           : "",
       )
@@ -130,8 +133,7 @@ export function classifyTurn(turn: {
  */
 export function presentTurn(turn: AgentTurn, viewerIsAuthor = false): PresentedTurn {
   const voice = classifyTurn(turn);
-  const label =
-    voice === "manager" && viewerIsAuthor ? "You (manager)" : VOICE_LABEL[voice];
+  const label = voice === "manager" && viewerIsAuthor ? "You (manager)" : VOICE_LABEL[voice];
   return {
     id: turn.id,
     voice,
@@ -169,9 +171,7 @@ export type ThreadStatusBadge = {
   tone: "default" | "secondary" | "outline" | "destructive";
 };
 
-export function threadStatusBadge(
-  thread: Pick<AgentThread, "mode" | "status">,
-): ThreadStatusBadge {
+export function threadStatusBadge(thread: Pick<AgentThread, "mode" | "status">): ThreadStatusBadge {
   if (thread.status === "closed") return { label: "Resolved", tone: "secondary" };
   if (thread.mode === "human") return { label: "You took over", tone: "destructive" };
   return { label: "AI handling", tone: "outline" };

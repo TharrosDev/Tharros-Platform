@@ -15,12 +15,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import {
-  Dialog,
-  DialogPortal,
-  DialogBackdrop,
-  DialogPrimitive,
-} from "@/components/ui/dialog";
+import { Dialog, DialogPortal, DialogBackdrop, DialogPrimitive } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
 import { allNav, type NavIcon } from "@/components/shell/nav";
 import { fuzzyFilter } from "@/lib/search/fuzzy";
@@ -203,8 +198,7 @@ function CommandPalette({
     }
   }
 
-  const showEmpty =
-    flat.length === 0 && !isSearching && query.trim().length >= MIN_QUERY;
+  const showEmpty = flat.length === 0 && !isSearching && query.trim().length >= MIN_QUERY;
 
   return (
     <Dialog
@@ -217,10 +211,8 @@ function CommandPalette({
       <DialogPortal>
         <DialogBackdrop />
         <DialogPrimitive.Viewport className="z-overlay fixed inset-0 flex items-start justify-center overflow-y-auto p-4 pt-[12vh]">
-          <DialogPrimitive.Popup className="bg-popover text-popover-foreground shadow-modal w-full max-w-xl overflow-hidden rounded-lg border border-border outline-none transition-all duration-200 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0">
-            <DialogPrimitive.Title className="sr-only">
-              Command menu
-            </DialogPrimitive.Title>
+          <DialogPrimitive.Popup className="bg-popover text-popover-foreground shadow-modal w-full max-w-xl overflow-hidden rounded-lg border border-border transition-all duration-200 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0">
+            <DialogPrimitive.Title className="sr-only">Command menu</DialogPrimitive.Title>
 
             <div className="flex items-center gap-2.5 border-b border-border/60 px-4">
               <Search className="text-muted-foreground size-4 shrink-0" />
@@ -231,7 +223,7 @@ function CommandPalette({
                 onKeyDown={onInputKeyDown}
                 placeholder="Search pages, actions, documents, people…"
                 aria-label="Search pages, actions, documents, people"
-                className="placeholder:text-muted-foreground h-12 w-full bg-transparent text-sm outline-none"
+                className="placeholder:text-muted-foreground h-12 w-full bg-transparent text-sm "
               />
               {isSearching ? (
                 <Loader2
@@ -300,7 +292,7 @@ function PaletteRow({
       onMouseMove={onHover}
       data-active={isActive || undefined}
       className={cn(
-        "focus-visible:ring-ring/40 flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm outline-none transition-colors focus-visible:ring-[3px]",
+        " flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ",
         isActive ? "bg-primary-soft text-primary-soft-foreground" : "hover:bg-accent",
       )}
     >

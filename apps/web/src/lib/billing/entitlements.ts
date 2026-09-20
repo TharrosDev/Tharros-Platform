@@ -63,21 +63,19 @@ export function entitlementFor(sub: SubscriptionSnapshot | null): Entitlement {
 }
 
 /** The active org's subscription snapshot, or null. Deduped per request. */
-export const getSubscription = cache(
-  async (): Promise<SubscriptionSnapshot | null> => {
-    const { activeOrg } = await getOrgContext();
-    if (!activeOrg) return null;
+export const getSubscription = cache(async (): Promise<SubscriptionSnapshot | null> => {
+  const { activeOrg } = await getOrgContext();
+  if (!activeOrg) return null;
 
-    const supabase = await createClient();
-    const { data } = await supabase
-      .from("subscriptions")
-      .select("status, tier, current_period_end, cancel_at_period_end, trial_ends_at")
-      .eq("org_id", activeOrg.id)
-      .maybeSingle();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("subscriptions")
+    .select("status, tier, current_period_end, cancel_at_period_end, trial_ends_at")
+    .eq("org_id", activeOrg.id)
+    .maybeSingle();
 
-    return (data as SubscriptionSnapshot | null) ?? null;
-  },
-);
+  return (data as SubscriptionSnapshot | null) ?? null;
+});
 
 /** The access decision for the active org. Deduped across the gate + shell. */
 export const getEntitlement = cache(async (): Promise<Entitlement> => {
@@ -112,8 +110,6 @@ export function featureAccessFor(
 }
 
 /** The active org's access decision for one product feature. Deduped per request. */
-export const getFeatureAccess = cache(
-  async (feature: ProductFeature): Promise<FeatureAccess> => {
-    return featureAccessFor(await getSubscription(), feature);
-  },
-);
+export const getFeatureAccess = cache(async (feature: ProductFeature): Promise<FeatureAccess> => {
+  return featureAccessFor(await getSubscription(), feature);
+});

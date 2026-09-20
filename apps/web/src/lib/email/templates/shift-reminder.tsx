@@ -1,10 +1,4 @@
-import {
-  EmailButton,
-  EmailFallbackLink,
-  EmailHeading,
-  EmailLayout,
-  EmailText,
-} from "./layout";
+import { EmailButton, EmailFallbackLink, EmailHeading, EmailLayout, EmailText } from "./layout";
 
 /**
  * Day 53 — a reminder sent ~24h before a shift starts (scheduled at publish via

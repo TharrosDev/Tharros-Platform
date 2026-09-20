@@ -66,7 +66,7 @@ export default async function SchedulingAnalyticsPage({
             href={`/scheduling/analytics?days=${w}`}
             aria-current={w === days ? "page" : undefined}
             className={cn(
-              "focus-visible:ring-ring/40 rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+              " rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
               w === days
                 ? "bg-card text-foreground shadow-xs"
                 : "text-muted-foreground hover:text-foreground",

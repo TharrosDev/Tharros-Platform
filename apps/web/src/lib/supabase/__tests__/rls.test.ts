@@ -105,10 +105,7 @@ afterAll(async () => {
   // parent org is already gone) and leaves the users membership-free.
   const ids = [userA, userB, userC].filter(Boolean);
   if (ids.length) {
-    const { data: orgs } = await admin
-      .from("memberships")
-      .select("org_id")
-      .in("user_id", ids);
+    const { data: orgs } = await admin.from("memberships").select("org_id").in("user_id", ids);
     const orgIds = [...new Set((orgs ?? []).map((m) => m.org_id))];
     for (const id of orgIds) {
       await admin.from("organizations").delete().eq("id", id);
@@ -129,10 +126,7 @@ describe("cross-tenant isolation", () => {
   });
 
   it("A cannot read B's org even when naming its id", async () => {
-    const { data } = await clientA
-      .from("organizations")
-      .select("id")
-      .eq("id", orgB);
+    const { data } = await clientA.from("organizations").select("id").eq("id", orgB);
     expect(data).toEqual([]);
   });
 
@@ -140,9 +134,7 @@ describe("cross-tenant isolation", () => {
     const { data } = await clientA.from("memberships").select("user_id, org_id");
     const orgIds = new Set(data?.map((m) => m.org_id));
     expect(orgIds).toEqual(new Set([orgA]));
-    expect(new Set(data?.map((m) => m.user_id))).toEqual(
-      new Set([userA, userC]),
-    );
+    expect(new Set(data?.map((m) => m.user_id))).toEqual(new Set([userA, userC]));
   });
 });
 
@@ -207,20 +199,12 @@ describe("organization writes", () => {
       })
       .select()
       .single();
-    await admin
-      .from("memberships")
-      .insert({ user_id: userB, org_id: org!.id, role: "owner" });
+    await admin.from("memberships").insert({ user_id: userB, org_id: org!.id, role: "owner" });
 
-    const { error } = await clientB
-      .from("organizations")
-      .delete()
-      .eq("id", org!.id);
+    const { error } = await clientB.from("organizations").delete().eq("id", org!.id);
     expect(error).toBeNull();
 
-    const { data: gone } = await admin
-      .from("organizations")
-      .select("id")
-      .eq("id", org!.id);
+    const { data: gone } = await admin.from("organizations").select("id").eq("id", org!.id);
     expect(gone).toEqual([]);
   });
 
@@ -232,11 +216,7 @@ describe("organization writes", () => {
       .select();
     expect(upd.data).toEqual([]);
 
-    const del = await clientB
-      .from("organizations")
-      .delete()
-      .eq("id", orgA)
-      .select();
+    const del = await clientB.from("organizations").delete().eq("id", orgA).select();
     expect(del.data).toEqual([]);
   });
 });

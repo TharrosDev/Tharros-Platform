@@ -68,9 +68,7 @@ export async function generateStructured<T>(
     input_schema: z.toJSONSchema(args.schema) as Tool["input_schema"],
   };
 
-  const messages: Array<Record<string, unknown>> = [
-    { role: "user", content: args.userContent },
-  ];
+  const messages: Array<Record<string, unknown>> = [{ role: "user", content: args.userContent }];
 
   let lastError = "no response";
 

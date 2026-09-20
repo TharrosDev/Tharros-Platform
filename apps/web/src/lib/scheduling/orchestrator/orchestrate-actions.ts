@@ -16,9 +16,7 @@ import type { AgentInputs, OptimizeResult } from "./types";
  * inside the handler meter into `ai_usage_events`.
  */
 
-export type OptimizeState =
-  | { ok: true; result: OptimizeResult }
-  | { ok: false; message: string };
+export type OptimizeState = { ok: true; result: OptimizeResult } | { ok: false; message: string };
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 

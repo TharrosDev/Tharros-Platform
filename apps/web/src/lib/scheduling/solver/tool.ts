@@ -54,7 +54,10 @@ export const SOLVE_SCHEDULE_TOOL: AgentTool<SolveScheduleInput> = {
   handler: async (ctx, input) => {
     const parsed = solveScheduleInputSchema.safeParse(input);
     if (!parsed.success) {
-      return { content: `Invalid solve_schedule input: ${z.prettifyError(parsed.error)}`, isError: true };
+      return {
+        content: `Invalid solve_schedule input: ${z.prettifyError(parsed.error)}`,
+        isError: true,
+      };
     }
     if (parsed.data.periodEnd < parsed.data.periodStart) {
       return { content: "periodEnd must be on or after periodStart.", isError: true };

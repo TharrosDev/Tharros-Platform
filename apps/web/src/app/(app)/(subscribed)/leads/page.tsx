@@ -25,7 +25,14 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
 import { PanelSheet } from "@/components/ui/panel-sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 const statusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
@@ -69,7 +76,9 @@ export default async function LeadsPage({
   const selectedStatus = LEAD_STATUSES.includes(params.status as LeadStatus)
     ? (params.status as LeadStatus)
     : null;
-  const visibleLeads = selectedStatus ? leads.filter((lead) => lead.status === selectedStatus) : leads;
+  const visibleLeads = selectedStatus
+    ? leads.filter((lead) => lead.status === selectedStatus)
+    : leads;
   const canManageForms = activeOrg.role === "owner" || activeOrg.role === "admin";
   const baseUrl = getURL();
 
@@ -84,7 +93,13 @@ export default async function LeadsPage({
     return s ? `/leads?${s}` : "/leads";
   };
   const filters: { key: string; label: string; count: number; href: string; active: boolean }[] = [
-    { key: "all", label: "All", count: leads.length, href: withSearch(null), active: !selectedStatus },
+    {
+      key: "all",
+      label: "All",
+      count: leads.length,
+      href: withSearch(null),
+      active: !selectedStatus,
+    },
     ...LEAD_STATUSES.map((status) => ({
       key: status,
       label: statusLabel(status),
@@ -148,11 +163,18 @@ export default async function LeadsPage({
       />
 
       {params.error ? (
-        <div role="alert" className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm">
-          {ERRORS[params.error] ?? "That action could not be completed. Check the fields or your permissions."}
+        <div
+          role="alert"
+          className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm"
+        >
+          {ERRORS[params.error] ??
+            "That action could not be completed. Check the fields or your permissions."}
         </div>
       ) : params.created || params["form-created"] ? (
-        <div role="status" className="border-success/25 bg-success/[0.07] text-success rounded-lg border px-4 py-3 text-sm">
+        <div
+          role="status"
+          className="border-success/25 bg-success/[0.07] text-success rounded-lg border px-4 py-3 text-sm"
+        >
           {params.created ? "Lead added to the pipeline." : "Capture form created."}
         </div>
       ) : null}
@@ -162,21 +184,29 @@ export default async function LeadsPage({
           Pipeline
         </h2>
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <nav aria-label="Filter by status" className="-mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <nav
+            aria-label="Filter by status"
+            className="-mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+          >
             {filters.map((f) => (
               <Link
                 key={f.key}
                 href={f.href}
                 aria-current={f.active ? "page" : undefined}
                 className={cn(
-                  "focus-visible:ring-ring/40 inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                  " inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ",
                   f.active
                     ? "bg-card text-foreground border shadow-xs"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >
                 {f.label}
-                <span className={cn("num text-xs", f.active ? "text-primary-soft-foreground" : "text-muted-foreground")}>
+                <span
+                  className={cn(
+                    "num text-xs",
+                    f.active ? "text-primary-soft-foreground" : "text-muted-foreground",
+                  )}
+                >
                   {f.count}
                 </span>
               </Link>
@@ -185,7 +215,10 @@ export default async function LeadsPage({
           <form action="/leads" role="search" className="flex w-full gap-2 sm:w-auto">
             {selectedStatus ? <input type="hidden" name="status" value={selectedStatus} /> : null}
             <div className="relative flex-1 sm:w-72">
-              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" aria-hidden />
+              <Search
+                className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+                aria-hidden
+              />
               <Input
                 name="q"
                 defaultValue={search}
@@ -227,7 +260,7 @@ export default async function LeadsPage({
                   <TableCell className="max-w-64">
                     <Link
                       href={`/leads/${lead.id}`}
-                      className="focus-visible:ring-ring/40 rounded-sm font-semibold outline-none hover:underline focus-visible:ring-[3px]"
+                      className=" rounded-sm font-semibold hover:underline "
                     >
                       {lead.name}
                     </Link>
@@ -241,7 +274,9 @@ export default async function LeadsPage({
                       <div className="text-muted-foreground text-xs">{lead.phone}</div>
                     ) : null}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{sourceLabel(lead.source)}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {sourceLabel(lead.source)}
+                  </TableCell>
                   <TableCell>
                     <form action={updateLeadStatus} className="flex items-center gap-1.5">
                       <input type="hidden" name="leadId" value={lead.id} />
@@ -264,10 +299,7 @@ export default async function LeadsPage({
                   </TableCell>
                   <TableCell className="min-w-44">
                     {lead.followUpDraft ? (
-                      <Link
-                        href={`/leads/${lead.id}`}
-                        className="focus-visible:ring-ring/40 inline-flex rounded-md outline-none focus-visible:ring-[3px]"
-                      >
+                      <Link href={`/leads/${lead.id}`} className=" inline-flex rounded-md ">
                         <Badge variant="default">Draft ready to review</Badge>
                       </Link>
                     ) : lead.email ? (
@@ -294,7 +326,9 @@ export default async function LeadsPage({
         ) : (
           <div className="bg-card/60 rounded-xl border border-dashed px-6 py-10 text-center">
             <Users className="text-muted-foreground mx-auto size-5" aria-hidden />
-            <p className="mt-3 font-semibold">{search || selectedStatus ? "No leads match" : "No leads yet"}</p>
+            <p className="mt-3 font-semibold">
+              {search || selectedStatus ? "No leads match" : "No leads yet"}
+            </p>
             <p className="text-muted-foreground type-small mx-auto mt-1 max-w-sm">
               {search || selectedStatus
                 ? "Try another status or search."
@@ -347,7 +381,9 @@ function CaptureForms({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="truncate text-sm font-semibold">{form.name}</p>
-                      <Badge variant={form.active ? "success" : "secondary"}>{form.active ? "Live" : "Paused"}</Badge>
+                      <Badge variant={form.active ? "success" : "secondary"}>
+                        {form.active ? "Live" : "Paused"}
+                      </Badge>
                     </div>
                     <p className="text-muted-foreground mt-1 truncate text-xs">{publicUrl}</p>
                     <p className="text-muted-foreground num mt-0.5 truncate text-xs">
@@ -374,11 +410,22 @@ function CaptureForms({
                         <input type="hidden" name="formId" value={form.id} />
                         <div className="space-y-1.5">
                           <Label htmlFor={`form-name-${form.id}`}>Internal name</Label>
-                          <Input id={`form-name-${form.id}`} name="name" defaultValue={form.name} maxLength={120} required />
+                          <Input
+                            id={`form-name-${form.id}`}
+                            name="name"
+                            defaultValue={form.name}
+                            maxLength={120}
+                            required
+                          />
                         </div>
                         <div className="space-y-1.5">
                           <Label htmlFor={`form-headline-${form.id}`}>Public headline</Label>
-                          <Input id={`form-headline-${form.id}`} name="headline" defaultValue={form.headline} maxLength={240} />
+                          <Input
+                            id={`form-headline-${form.id}`}
+                            name="headline"
+                            defaultValue={form.headline}
+                            maxLength={240}
+                          />
                         </div>
                         <div className="space-y-1.5">
                           <Label htmlFor={`form-success-${form.id}`}>Success message</Label>
@@ -389,7 +436,12 @@ function CaptureForms({
                             maxLength={500}
                           />
                         </div>
-                        <Button type="submit" variant="outline" size="sm" className="justify-self-start">
+                        <Button
+                          type="submit"
+                          variant="outline"
+                          size="sm"
+                          className="justify-self-start"
+                        >
                           Save form settings
                         </Button>
                       </form>
@@ -410,7 +462,12 @@ function CaptureForms({
                       </form>
                       <form action={deleteCaptureForm}>
                         <input type="hidden" name="formId" value={form.id} />
-                        <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
+                        <Button
+                          type="submit"
+                          variant="ghost"
+                          size="sm"
+                          className="text-muted-foreground hover:text-destructive"
+                        >
                           Delete
                         </Button>
                       </form>
@@ -426,7 +483,9 @@ function CaptureForms({
         </ul>
       ) : (
         <p className="text-muted-foreground rounded-xl border border-dashed px-4 py-6 text-center text-sm">
-          {canManage ? "No capture forms yet. Create one above to get a shareable link." : "An owner or admin can create public forms."}
+          {canManage
+            ? "No capture forms yet. Create one above to get a shareable link."
+            : "An owner or admin can create public forms."}
         </p>
       )}
     </div>

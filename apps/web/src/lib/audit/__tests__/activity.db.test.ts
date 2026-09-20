@@ -68,7 +68,9 @@ beforeAll(async () => {
   orgA = await ownOrgId(owner);
 
   // member is a plain member of org A.
-  const mem = await admin.from("memberships").insert({ user_id: member, org_id: orgA, role: "member" });
+  const mem = await admin
+    .from("memberships")
+    .insert({ user_id: member, org_id: orgA, role: "member" });
   if (mem.error) throw mem.error;
 
   // Seed both audit trails with controlled timestamps (newest = schedule row).
@@ -129,13 +131,19 @@ describe("org_activity_log", () => {
   });
 
   it("denies a plain member (agent internals are management-only)", async () => {
-    const { data, error } = await clientMember.rpc("org_activity_log", { p_org: orgA, p_limit: 50 });
+    const { data, error } = await clientMember.rpc("org_activity_log", {
+      p_org: orgA,
+      p_limit: 50,
+    });
     expect(error).toBeNull();
     expect((data ?? []) as unknown[]).toHaveLength(0);
   });
 
   it("denies a user from another org", async () => {
-    const { data, error } = await clientOutsider.rpc("org_activity_log", { p_org: orgA, p_limit: 50 });
+    const { data, error } = await clientOutsider.rpc("org_activity_log", {
+      p_org: orgA,
+      p_limit: 50,
+    });
     expect(error).toBeNull();
     expect((data ?? []) as unknown[]).toHaveLength(0);
   });

@@ -9,13 +9,10 @@ import { logger } from "@/lib/observability/logger";
 import { leadCaptureRequesterKey } from "@/lib/leads/request";
 
 const optional = (max: number) =>
-  z.preprocess(
-    (value) => {
-      const text = String(value ?? "").trim();
-      return text.length ? text : null;
-    },
-    z.string().max(max).nullable(),
-  );
+  z.preprocess((value) => {
+    const text = String(value ?? "").trim();
+    return text.length ? text : null;
+  }, z.string().max(max).nullable());
 
 const schema = z
   .object({
@@ -48,11 +45,7 @@ export async function submitPublicLead(token: string, formData: FormData): Promi
   let result: Awaited<ReturnType<typeof capturePublicLead>>;
   try {
     const requestHeaders = await headers();
-    result = await capturePublicLead(
-      token,
-      parsed.data,
-      leadCaptureRequesterKey(requestHeaders),
-    );
+    result = await capturePublicLead(token, parsed.data, leadCaptureRequesterKey(requestHeaders));
   } catch (err) {
     logger.error("leads.public_submit_failed", { err });
     redirect(`/forms/${safeToken}?error=submit`);

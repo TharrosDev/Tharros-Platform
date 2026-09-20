@@ -82,7 +82,10 @@ export function PortalSchedule({
           </h2>
           <ul className="space-y-2">
             {day.shifts.map((s) => (
-              <li key={s.id} className="border-border bg-card flex items-start gap-3 rounded-xl border p-4">
+              <li
+                key={s.id}
+                className="border-border bg-card flex items-start gap-3 rounded-xl border p-4"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="text-foreground font-medium tabular-nums">
                     {timeRange(s.startsAt, s.endsAt)}

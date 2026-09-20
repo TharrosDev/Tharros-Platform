@@ -53,13 +53,15 @@ function formatUpdatedAt(value: string) {
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 export default async function DashboardPage() {
-  const [user, { activeOrg }, schedulingAccess, leadsAccess, automationsAccess] = await Promise.all([
-    getAuthUser(),
-    getOrgContext(),
-    getFeatureAccess("scheduling"),
-    getFeatureAccess("leads"),
-    getFeatureAccess("automations"),
-  ]);
+  const [user, { activeOrg }, schedulingAccess, leadsAccess, automationsAccess] = await Promise.all(
+    [
+      getAuthUser(),
+      getOrgContext(),
+      getFeatureAccess("scheduling"),
+      getFeatureAccess("leads"),
+      getFeatureAccess("automations"),
+    ],
+  );
   if (!activeOrg) redirect("/onboarding");
   const canManage = activeOrg.role === "owner" || activeOrg.role === "admin";
 
@@ -80,14 +82,18 @@ export default async function DashboardPage() {
     listConversationsPage(activeOrg.id, { limit: 5 }),
     leadsAccess.entitled ? countNewLeads(activeOrg.id) : Promise.resolve(null),
     automationsAccess.entitled ? listAutomationRuns(activeOrg.id, 10) : Promise.resolve([]),
-    schedulingAccess.entitled && canManage ? countPendingApprovals(activeOrg.id) : Promise.resolve(0),
+    schedulingAccess.entitled && canManage
+      ? countPendingApprovals(activeOrg.id)
+      : Promise.resolve(0),
   ]);
 
   const firstName = user ? getDisplayUser(user).name.split(/\s+/)[0] : null;
   const failedRuns = recentAutomationRuns.filter((run) => run.status === "failed").length;
-  const today = new Intl.DateTimeFormat("en-CA", { weekday: "long", month: "long", day: "numeric" }).format(
-    new Date(),
-  );
+  const today = new Intl.DateTimeFormat("en-CA", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
 
   // Everything below comes from real org state; nothing is shown when it is zero.
   const attention: Attention[] = [];
@@ -187,7 +193,9 @@ export default async function DashboardPage() {
           { label: "Schedule", value: scheduleState, href: "/scheduling/calendar" },
         ]
       : []),
-    ...(leadsAccess.entitled ? [{ label: "New leads", value: newLeadCount ?? 0, href: "/leads" }] : []),
+    ...(leadsAccess.entitled
+      ? [{ label: "New leads", value: newLeadCount ?? 0, href: "/leads" }]
+      : []),
     ...(automationsAccess.entitled
       ? [{ label: "Failed runs (last 10)", value: failedRuns, href: "/automations" }]
       : []),
@@ -213,7 +221,9 @@ export default async function DashboardPage() {
               Needs attention
             </h2>
             {attention.length ? (
-              <span className="text-muted-foreground text-sm">{plural(attention.length, "item", "items")}</span>
+              <span className="text-muted-foreground text-sm">
+                {plural(attention.length, "item", "items")}
+              </span>
             ) : null}
           </div>
           {attention.length ? (
@@ -222,7 +232,7 @@ export default async function DashboardPage() {
                 <li key={item.key}>
                   <Link
                     href={item.href}
-                    className="group focus-visible:ring-ring/40 flex items-center gap-4 px-4 py-3.5 outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-inset sm:px-5"
+                    className="group flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-accent/50 sm:px-5"
                   >
                     <span
                       className={cn(
@@ -241,9 +251,15 @@ export default async function DashboardPage() {
                     </span>
                     <span className="text-primary-soft-foreground hidden shrink-0 items-center gap-1 text-sm font-semibold sm:inline-flex">
                       {item.action}
-                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                      <ArrowRight
+                        className="size-4 transition-transform group-hover:translate-x-0.5"
+                        aria-hidden
+                      />
                     </span>
-                    <ArrowRight className="text-muted-foreground size-4 shrink-0 sm:hidden" aria-hidden />
+                    <ArrowRight
+                      className="text-muted-foreground size-4 shrink-0 sm:hidden"
+                      aria-hidden
+                    />
                   </Link>
                 </li>
               ))}
@@ -270,10 +286,14 @@ export default async function DashboardPage() {
               <li key={row.label}>
                 <Link
                   href={row.href}
-                  className="focus-visible:ring-ring/40 flex items-center justify-between gap-3 px-4 py-3 outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-inset"
+                  className=" flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-accent/50 "
                 >
                   <span className="text-muted-foreground text-sm">{row.label}</span>
-                  <span className={cn("text-sm font-semibold", typeof row.value === "number" && "num")}>{row.value}</span>
+                  <span
+                    className={cn("text-sm font-semibold", typeof row.value === "number" && "num")}
+                  >
+                    {row.value}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -297,10 +317,15 @@ export default async function DashboardPage() {
                 <li key={conversation.id}>
                   <Link
                     href={`/assistant?c=${conversation.id}`}
-                    className="focus-visible:ring-ring/40 flex items-center gap-3 px-4 py-3 outline-none transition-colors hover:bg-accent/50 focus-visible:ring-[3px] focus-visible:ring-inset"
+                    className=" flex items-center gap-3 px-4 py-3 transition-colors hover:bg-accent/50 "
                   >
-                    <MessageSquareText className="text-muted-foreground size-4 shrink-0" aria-hidden />
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium">{conversation.title}</span>
+                    <MessageSquareText
+                      className="text-muted-foreground size-4 shrink-0"
+                      aria-hidden
+                    />
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                      {conversation.title}
+                    </span>
                     <span className="text-muted-foreground type-small shrink-0">
                       {formatUpdatedAt(conversation.updatedAt)}
                     </span>
@@ -312,9 +337,13 @@ export default async function DashboardPage() {
             <div className="bg-card rounded-xl border border-dashed px-5 py-6">
               <p className="text-sm font-semibold">No conversations yet</p>
               <p className="text-muted-foreground type-small mt-1">
-                Ask a question about your policies or procedures and the answer will cite its sources.
+                Ask a question about your policies or procedures and the answer will cite its
+                sources.
               </p>
-              <Link href="/assistant" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}>
+              <Link
+                href="/assistant"
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "mt-4")}
+              >
                 Start a conversation
               </Link>
             </div>
@@ -345,7 +374,9 @@ export default async function DashboardPage() {
               ) : latestSchedule ? (
                 <>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold">{formatDateRange(latestSchedule.periodStart, latestSchedule.periodEnd)}</p>
+                    <p className="font-semibold">
+                      {formatDateRange(latestSchedule.periodStart, latestSchedule.periodEnd)}
+                    </p>
                     <Badge variant={latestSchedule.status === "published" ? "success" : "default"}>
                       {latestSchedule.status === "published" ? "Published" : "Draft"}
                     </Badge>
@@ -356,7 +387,12 @@ export default async function DashboardPage() {
                   </p>
                   <Link
                     href="/scheduling/calendar"
-                    className={cn(buttonVariants({ variant: latestSchedule.status === "draft" ? "default" : "outline" }), "mt-4")}
+                    className={cn(
+                      buttonVariants({
+                        variant: latestSchedule.status === "draft" ? "default" : "outline",
+                      }),
+                      "mt-4",
+                    )}
                   >
                     {latestSchedule.status === "draft" ? "Review and publish" : "Open schedule"}
                   </Link>
@@ -365,7 +401,8 @@ export default async function DashboardPage() {
                 <>
                   <p className="font-semibold">No schedule yet</p>
                   <p className="text-muted-foreground type-small mt-1">
-                    Setup is complete. Generate a draft when you&apos;re ready; you review it before anyone sees it.
+                    Setup is complete. Generate a draft when you&apos;re ready; you review it before
+                    anyone sees it.
                   </p>
                   <Link href="/scheduling/calendar" className={cn(buttonVariants(), "mt-4")}>
                     Create schedule

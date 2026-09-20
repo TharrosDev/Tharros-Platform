@@ -111,11 +111,15 @@ function checkNoNewHardViolation(
   next: EditShift[],
   ctx: ValidationContext,
 ): string | null {
-  const beforeHard = validateEdits(current.map(toEditShift), ctx).filter((v) => v.severity === "hard");
+  const beforeHard = validateEdits(current.map(toEditShift), ctx).filter(
+    (v) => v.severity === "hard",
+  );
   const afterHard = validateEdits(next, ctx).filter((v) => v.severity === "hard");
   if (afterHard.length > beforeHard.length) {
     // Surface a violation that's new this edit (best-effort: first beyond the prior count).
-    const known = new Set(beforeHard.map((v) => `${v.rule}:${v.shiftId ?? ""}:${v.employeeId ?? ""}`));
+    const known = new Set(
+      beforeHard.map((v) => `${v.rule}:${v.shiftId ?? ""}:${v.employeeId ?? ""}`),
+    );
     const fresh =
       afterHard.find((v) => !known.has(`${v.rule}:${v.shiftId ?? ""}:${v.employeeId ?? ""}`)) ??
       afterHard[afterHard.length - 1];
@@ -208,7 +212,11 @@ export async function assignShift(args: {
       .eq("shift_id", args.shiftId)
       .eq("org_id", auth.orgId)
       .eq("status", "offered");
-    if (expErr) logger.warn("assignShift: expire stale offers failed", { err: expErr, shiftId: args.shiftId });
+    if (expErr)
+      logger.warn("assignShift: expire stale offers failed", {
+        err: expErr,
+        shiftId: args.shiftId,
+      });
   }
 
   await audit(auth.orgId, auth.userId, "shift.assigned", {
@@ -618,7 +626,8 @@ export async function publishSchedule(args: {
 
   const loaded = await loadSchedule(args.scheduleId, auth.orgId);
   if (!loaded) return { ok: false, message: "That schedule no longer exists." };
-  if (loaded.status === "published") return { ok: false, message: "This schedule is already published." };
+  if (loaded.status === "published")
+    return { ok: false, message: "This schedule is already published." };
 
   const violations = validateEdits(loaded.shifts.map(toEditShift), loaded.ctx);
   const openShiftCount = loaded.shifts.filter((s) => s.employeeId === null).length;
@@ -635,7 +644,10 @@ export async function publishSchedule(args: {
     .eq("id", args.scheduleId)
     .eq("org_id", auth.orgId);
   if (schedErr) {
-    logger.error("publishSchedule: schedule update failed", { err: schedErr, scheduleId: args.scheduleId });
+    logger.error("publishSchedule: schedule update failed", {
+      err: schedErr,
+      scheduleId: args.scheduleId,
+    });
     return { ok: false, message: "Couldn't publish the schedule. Please try again." };
   }
 
@@ -647,7 +659,10 @@ export async function publishSchedule(args: {
     .eq("org_id", auth.orgId)
     .eq("status", "draft");
   if (shiftErr) {
-    logger.error("publishSchedule: shifts update failed", { err: shiftErr, scheduleId: args.scheduleId });
+    logger.error("publishSchedule: shifts update failed", {
+      err: shiftErr,
+      scheduleId: args.scheduleId,
+    });
   }
 
   // 3. Immutable snapshot of the published shift set as a version.
@@ -672,7 +687,10 @@ export async function publishSchedule(args: {
     note: args.note && args.note.trim().length > 0 ? args.note.trim() : null,
   });
   if (versionErr) {
-    logger.error("publishSchedule: version insert failed", { err: versionErr, scheduleId: args.scheduleId });
+    logger.error("publishSchedule: version insert failed", {
+      err: versionErr,
+      scheduleId: args.scheduleId,
+    });
   }
 
   await audit(auth.orgId, auth.userId, "schedule.published", {
@@ -767,7 +785,8 @@ export async function reopenSchedule(args: { scheduleId: string }): Promise<Cale
     .eq("org_id", auth.orgId)
     .maybeSingle();
   if (!sched) return { ok: false, message: "That schedule no longer exists." };
-  if (sched.status !== "published") return { ok: false, message: "Only a published schedule can be reopened." };
+  if (sched.status !== "published")
+    return { ok: false, message: "Only a published schedule can be reopened." };
 
   const { error } = await supabase
     .from("schedules")

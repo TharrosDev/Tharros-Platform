@@ -30,8 +30,7 @@ export function ThreadList({ threads }: { threads: ThreadListItem[] }) {
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<StatusFilter>("all");
 
-  const byStatus =
-    status === "all" ? threads : threads.filter((t) => t.status === status);
+  const byStatus = status === "all" ? threads : threads.filter((t) => t.status === status);
   const visible = fuzzyFilter(
     query,
     byStatus,
@@ -61,7 +60,7 @@ export function ThreadList({ threads }: { threads: ThreadListItem[] }) {
               onClick={() => setStatus(f.value)}
               data-active={status === f.value || undefined}
               className={cn(
-                "focus-visible:ring-ring/40 rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                " rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
                 status === f.value
                   ? "bg-primary-soft text-primary-soft-foreground"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -74,9 +73,7 @@ export function ThreadList({ threads }: { threads: ThreadListItem[] }) {
       </div>
 
       {visible.length === 0 ? (
-        <p className="text-muted-foreground py-10 text-center text-sm">
-          No conversations match.
-        </p>
+        <p className="text-muted-foreground py-10 text-center text-sm">No conversations match.</p>
       ) : (
         <ul className="divide-border/60 bg-card shadow-card overflow-hidden rounded-lg border divide-y">
           {visible.map((t) => {

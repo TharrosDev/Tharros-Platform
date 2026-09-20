@@ -28,7 +28,10 @@ function toolMessage(input: unknown): Message {
   } as unknown as Message;
 }
 
-function fakeAnthropic(responses: Message[]): { client: StructuredAnthropic; create: ReturnType<typeof vi.fn> } {
+function fakeAnthropic(responses: Message[]): {
+  client: StructuredAnthropic;
+  create: ReturnType<typeof vi.fn>;
+} {
   let i = 0;
   const create = vi.fn(async () => responses[Math.min(i++, responses.length - 1)]);
   return { client: { messages: { create } }, create };

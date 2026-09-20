@@ -30,14 +30,27 @@ type Admin = import("@supabase/supabase-js").SupabaseClient;
 
 /** "Mon Jun 15, 9:00 AM – 5:00 PM" from local-as-UTC ISO strings (UTC accessors). */
 function shiftLabel(startsAt: string, endsAt: string): string {
-  const fmtDay = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
-  const fmtTime = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
+  const fmtDay = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+  const fmtTime = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
   const s = new Date(Date.parse(startsAt));
   const e = new Date(Date.parse(endsAt));
   return `${fmtDay.format(s)}, ${fmtTime.format(s)} – ${fmtTime.format(e)}`;
 }
 
-async function livePortalUrl(admin: Admin, employeeId: string, getURL: () => string): Promise<string | null> {
+async function livePortalUrl(
+  admin: Admin,
+  employeeId: string,
+  getURL: () => string,
+): Promise<string | null> {
   const { data } = await admin
     .from("employee_portal_tokens")
     .select("token")
@@ -51,7 +64,11 @@ async function livePortalUrl(admin: Admin, employeeId: string, getURL: () => str
   return `${getURL()}/portal/enter?token=${encodeURIComponent(token)}&next=${encodeURIComponent(PORTAL_NEXT)}`;
 }
 
-async function loadRequest(admin: Admin, requestId: string, orgId: string): Promise<SwapRequest | null> {
+async function loadRequest(
+  admin: Admin,
+  requestId: string,
+  orgId: string,
+): Promise<SwapRequest | null> {
   const { data } = await admin
     .from("shift_swap_requests")
     .select("shift_id, requesting_employee_id, target_employee_id, target_shift_id, org_id")
@@ -61,13 +78,27 @@ async function loadRequest(admin: Admin, requestId: string, orgId: string): Prom
   return (data as SwapRequest | null) ?? null;
 }
 
-async function employee(admin: Admin, id: string): Promise<{ name: string; email: string; active: boolean } | null> {
-  const { data } = await admin.from("employees").select("name, email, active").eq("id", id).maybeSingle();
+async function employee(
+  admin: Admin,
+  id: string,
+): Promise<{ name: string; email: string; active: boolean } | null> {
+  const { data } = await admin
+    .from("employees")
+    .select("name, email, active")
+    .eq("id", id)
+    .maybeSingle();
   return (data as { name: string; email: string; active: boolean } | null) ?? null;
 }
 
-async function shiftRow(admin: Admin, id: string): Promise<{ starts_at: string; ends_at: string } | null> {
-  const { data } = await admin.from("shifts").select("starts_at, ends_at").eq("id", id).maybeSingle();
+async function shiftRow(
+  admin: Admin,
+  id: string,
+): Promise<{ starts_at: string; ends_at: string } | null> {
+  const { data } = await admin
+    .from("shifts")
+    .select("starts_at, ends_at")
+    .eq("id", id)
+    .maybeSingle();
   return (data as { starts_at: string; ends_at: string } | null) ?? null;
 }
 
@@ -79,7 +110,8 @@ async function orgName(admin: Admin, orgId: string): Promise<string> {
 export const swapProposalNotifyHandler: JobHandler = async (job: Job) => {
   const requestId = typeof job.payload.requestId === "string" ? job.payload.requestId : null;
   const orgId = typeof job.payload.orgId === "string" ? job.payload.orgId : null;
-  if (!requestId || !orgId) throw new Error("swap-proposal-notify: missing requestId/orgId in payload");
+  if (!requestId || !orgId)
+    throw new Error("swap-proposal-notify: missing requestId/orgId in payload");
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const admin = createAdminClient();
@@ -128,8 +160,12 @@ export const swapProposalNotifyHandler: JobHandler = async (job: Job) => {
 export const swapResultNotifyHandler: JobHandler = async (job: Job) => {
   const requestId = typeof job.payload.requestId === "string" ? job.payload.requestId : null;
   const orgId = typeof job.payload.orgId === "string" ? job.payload.orgId : null;
-  const result = job.payload.result === "approved" || job.payload.result === "denied" ? job.payload.result : null;
-  if (!requestId || !orgId || !result) throw new Error("swap-result-notify: missing requestId/orgId/result");
+  const result =
+    job.payload.result === "approved" || job.payload.result === "denied"
+      ? job.payload.result
+      : null;
+  if (!requestId || !orgId || !result)
+    throw new Error("swap-result-notify: missing requestId/orgId/result");
 
   const { createAdminClient } = await import("@/lib/supabase/admin");
   const admin = createAdminClient();

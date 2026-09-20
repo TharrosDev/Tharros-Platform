@@ -128,7 +128,7 @@ export function FeedbackWidget() {
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Minimize"
-                className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 inline-flex size-10 items-center justify-center rounded-lg outline-none transition-colors focus-visible:ring-[3px]"
+                className="text-muted-foreground hover:bg-accent hover:text-foreground inline-flex size-10 items-center justify-center rounded-lg transition-colors "
               >
                 <Minus className="size-4" />
               </button>
@@ -146,7 +146,7 @@ export function FeedbackWidget() {
                   }}
                   aria-current={tab === t ? "page" : undefined}
                   className={cn(
-                    "focus-visible:ring-ring/40 relative rounded-md px-3 py-1.5 text-sm font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                    " relative rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
                     tab === t
                       ? "text-primary-soft-foreground"
                       : "text-muted-foreground hover:text-foreground",
@@ -178,7 +178,7 @@ export function FeedbackWidget() {
                       onClick={() => setKind(value)}
                       data-active={kind === value || undefined}
                       className={cn(
-                        "focus-visible:ring-ring/40 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium outline-none transition-colors focus-visible:ring-[3px]",
+                        " inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ",
                         kind === value
                           ? "border-primary/40 bg-primary-soft text-primary-soft-foreground"
                           : "border-border text-muted-foreground hover:bg-accent hover:text-foreground",
@@ -261,14 +261,14 @@ export function FeedbackWidget() {
                           : "Pick a type above, then describe it…"
                   }
                   aria-label={tab === "ask" ? "Ask a question" : "Describe your feedback"}
-                  className="max-h-28 min-h-9 resize-none border-0 bg-transparent px-2 py-1.5 text-sm shadow-none focus-visible:ring-0"
+                  className="max-h-28 min-h-9 resize-none border-0 bg-transparent px-2 py-1.5 text-sm shadow-none "
                 />
                 <button
                   type="button"
                   onClick={send}
                   disabled={!canSend}
                   aria-label="Send"
-                  className="bg-primary text-primary-foreground hover:bg-primary/92 focus-visible:ring-ring/40 disabled:bg-muted disabled:text-muted-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-[3px]"
+                  className="bg-primary text-primary-foreground hover:bg-primary/92 disabled:bg-muted disabled:text-muted-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-md transition-colors "
                 >
                   <Send className="size-3.5" />
                 </button>
@@ -282,7 +282,7 @@ export function FeedbackWidget() {
             transition={spring.gentle}
             type="button"
             onClick={() => setOpen(true)}
-            className="bg-card text-foreground shadow-raised focus-visible:ring-ring/40 hover:text-primary-soft-foreground flex size-11 items-center justify-center rounded-full border outline-none transition-colors focus-visible:ring-[3px]"
+            className="bg-card text-foreground shadow-raised hover:text-primary-soft-foreground flex size-11 items-center justify-center rounded-full border transition-colors "
             aria-label="Open help and feedback"
             title="Help & feedback"
           >

@@ -22,13 +22,13 @@ re-run — until coverage is met or it escalates. Every step audit-logged."
    written to `agent_audit_log` via `recordAuditEvent`. No new migration:
    `kind`/`action` are free-text and `AgentAuditAction` is `… | (string & {})`.
 4. **Conservative remedy ladder.** Autonomous moves only relax orchestrator-imposed
-   soft constraints and push hours to the *legal* labor ceiling, then escalate.
+   soft constraints and push hours to the _legal_ labor ceiling, then escalate.
    The loop never silently trades away fairness/seniority/performance.
 
 ## What this day is (and is not)
 
 A **no-new-migration orchestration day**, like Days 46/47 — but unlike them it
-*writes to existing Day-39 tables* (threads + audit log). It produces a schedule
+_writes to existing Day-39 tables_ (threads + audit log). It produces a schedule
 **preview** plus an iteration trace and escalations; it does **not** persist a
 draft schedule (that is Day 49) and ships **no UI** (dashboard is Days 50–51).
 
@@ -95,7 +95,7 @@ silently trade schedule quality.
 - **`propose_overtime`** — residual gap fillable only by exceeding comfort hours:
   `{ slotId, date, candidateEmployeeIds[], draftMessage }`.
 - **`request_availability`** — gap from nobody available: `{ employeeIds[],
-  period, note }`.
+period, note }`.
 - **`manager_decision`** — structurally infeasible (no qualified staff exists at
   all for the role): `{ slotId, reason }`.
 
@@ -126,11 +126,11 @@ preserves "correct by construction" and lets committed tests stay provider-free
 type OptimizeResult = {
   threadId: string;
   schedule: { assignments: Assignment[]; shifts: ShiftInput[] }; // final solve
-  gapReport: GapReportEntry[];   // residual after the loop
+  gapReport: GapReportEntry[]; // residual after the loop
   covered: boolean;
-  trace: RemedyStep[];           // ordered solve→remedy→solve, score + gap deltas
+  trace: RemedyStep[]; // ordered solve→remedy→solve, score + gap deltas
   escalations: Escalation[];
-  summary: string;               // advisor-drafted plain-language recap
+  summary: string; // advisor-drafted plain-language recap
 };
 ```
 

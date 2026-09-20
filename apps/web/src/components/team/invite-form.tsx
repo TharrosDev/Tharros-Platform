@@ -57,7 +57,11 @@ export function InviteForm() {
         <div className="space-y-1.5">
           <Label htmlFor="invite-role">Role</Label>
           <Select name="role" defaultValue="member">
-            <SelectTrigger id="invite-role" className="sm:w-40" aria-invalid={Boolean(state?.errors?.role)}>
+            <SelectTrigger
+              id="invite-role"
+              className="sm:w-40"
+              aria-invalid={Boolean(state?.errors?.role)}
+            >
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>

@@ -100,7 +100,9 @@ export const scheduleDeliveryHandler: JobHandler = async (job: Job) => {
     .eq("id", scheduleId)
     .maybeSingle();
   const period = schedRow as { period_start: string; period_end: string } | null;
-  const periodLabel = period ? `${period.period_start} to ${period.period_end}` : "the next two weeks";
+  const periodLabel = period
+    ? `${period.period_start} to ${period.period_end}`
+    : "the next two weeks";
 
   const [{ sendEmail }, { getURL }, { ScheduleDeliveryEmail }] = await Promise.all([
     import("@/lib/email/send"),

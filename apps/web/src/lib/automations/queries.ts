@@ -38,10 +38,7 @@ export async function listAutomations(orgId: string): Promise<Automation[]> {
   }));
 }
 
-export async function listAutomationRuns(
-  orgId: string,
-  limit = 30,
-): Promise<AutomationRun[]> {
+export async function listAutomationRuns(orgId: string, limit = 30): Promise<AutomationRun[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("automation_runs")

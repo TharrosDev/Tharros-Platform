@@ -38,7 +38,10 @@ async function asUser(who: string): Promise<SupabaseClient> {
   const client = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { error } = await client.auth.signInWithPassword({ email: emailFor(who), password: PASSWORD });
+  const { error } = await client.auth.signInWithPassword({
+    email: emailFor(who),
+    password: PASSWORD,
+  });
   if (error) throw error;
   return client;
 }
@@ -158,10 +161,7 @@ describe("employee profile + roles (manager-write / member-read)", () => {
   });
 
   it("a plain member cannot edit the profile or assign roles", async () => {
-    await memberClient
-      .from("employees")
-      .update({ performance_score: 10 })
-      .eq("id", employeeId);
+    await memberClient.from("employees").update({ performance_score: 10 }).eq("id", employeeId);
     const { data } = await admin
       .from("employees")
       .select("performance_score")

@@ -107,10 +107,7 @@ beforeAll(async () => {
 afterAll(async () => {
   const ids = [userA, userB, userC, userD, userE].filter(Boolean);
   if (ids.length) {
-    const { data: orgs } = await admin
-      .from("memberships")
-      .select("org_id")
-      .in("user_id", ids);
+    const { data: orgs } = await admin.from("memberships").select("org_id").in("user_id", ids);
     const orgIds = [...new Set((orgs ?? []).map((m) => m.org_id))];
     for (const id of orgIds) {
       await admin.from("organizations").delete().eq("id", id);
@@ -297,41 +294,63 @@ describe("revoke_invite + resend_invite", () => {
 
 describe("invite token secrecy", () => {
   it("managers cannot read invite token hashes through PostgREST", async () => {
-    const { error } = await clientA
-      .from("invites")
-      .select("id, token_hash")
-      .eq("org_id", orgA);
+    const { error } = await clientA.from("invites").select("id, token_hash").eq("org_id", orgA);
     expect(error).not.toBeNull();
   });
 });
 
 describe("changeRole + removeMember", () => {
   it("owner A promotes member D to admin, then back to member", async () => {
-    const up = await clientA.from("memberships").update({ role: "admin" }).eq("org_id", orgA).eq("user_id", userD).select();
+    const up = await clientA
+      .from("memberships")
+      .update({ role: "admin" })
+      .eq("org_id", orgA)
+      .eq("user_id", userD)
+      .select();
     expect(up.error).toBeNull();
     expect(await membershipRole(userD, orgA)).toBe("admin");
 
-    const down = await clientA.from("memberships").update({ role: "member" }).eq("org_id", orgA).eq("user_id", userD).select();
+    const down = await clientA
+      .from("memberships")
+      .update({ role: "member" })
+      .eq("org_id", orgA)
+      .eq("user_id", userD)
+      .select();
     expect(down.error).toBeNull();
     expect(await membershipRole(userD, orgA)).toBe("member");
   });
 
   it("a non-owner cannot change roles (owners-only UPDATE policy)", async () => {
     // B is a member of org A; B cannot promote D.
-    const res = await clientB.from("memberships").update({ role: "admin" }).eq("org_id", orgA).eq("user_id", userD).select();
+    const res = await clientB
+      .from("memberships")
+      .update({ role: "admin" })
+      .eq("org_id", orgA)
+      .eq("user_id", userD)
+      .select();
     // RLS denies the UPDATE → 0 rows affected, role unchanged.
     expect(res.data ?? []).toEqual([]);
     expect(await membershipRole(userD, orgA)).toBe("member");
   });
 
   it("the last owner cannot be removed (last-owner guard)", async () => {
-    const res = await clientA.from("memberships").delete().eq("org_id", orgA).eq("user_id", userA).select();
+    const res = await clientA
+      .from("memberships")
+      .delete()
+      .eq("org_id", orgA)
+      .eq("user_id", userA)
+      .select();
     expect(res.error).not.toBeNull();
     expect(await membershipRole(userA, orgA)).toBe("owner");
   });
 
   it("owner A removes member D", async () => {
-    const res = await clientA.from("memberships").delete().eq("org_id", orgA).eq("user_id", userD).select();
+    const res = await clientA
+      .from("memberships")
+      .delete()
+      .eq("org_id", orgA)
+      .eq("user_id", userD)
+      .select();
     expect(res.error).toBeNull();
     expect(await membershipRole(userD, orgA)).toBeNull();
   });

@@ -49,11 +49,9 @@ type ValidateRow = {
 
 /** Anon Supabase client (no session) — the RPC is granted to the anon role. */
 function anonClient() {
-  return createClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 /** Validate a raw token → the scoped employee identity, or null. */

@@ -89,7 +89,10 @@ function takerEligible(
   };
   const res = findEligibleEmployees({ shift: take, candidates: [candidate], laborRules });
   if (res.eligible.includes(taker.id)) return { ok: true, reason: null };
-  return { ok: false, reason: res.rejected.find((r) => r.employeeId === taker.id)?.reason ?? "not eligible" };
+  return {
+    ok: false,
+    reason: res.rejected.find((r) => r.employeeId === taker.id)?.reason ?? "not eligible",
+  };
 }
 
 /**
@@ -110,7 +113,8 @@ export function validateSwap(input: ValidateSwapInput): ValidateSwapResult {
 
   if (input.shiftY) {
     const aTakesY = takerEligible(input.shiftY, input.requester, input.shiftX.id, input.laborRules);
-    if (!aTakesY.ok) reasons.push(`${input.requester.id} can't take the other shift: ${aTakesY.reason}`);
+    if (!aTakesY.ok)
+      reasons.push(`${input.requester.id} can't take the other shift: ${aTakesY.reason}`);
   }
 
   return { valid: reasons.length === 0, reasons };
@@ -120,7 +124,8 @@ export function validateSwap(input: ValidateSwapInput): ValidateSwapResult {
 /* Raw admin reads (auth-light portal — RLS doesn't apply; the caller validated the
  * session). Mirrors the replacement engine's direct reads. */
 
-const num = (v: number | string | null): number => (v === null ? 0 : typeof v === "string" ? Number(v) : v);
+const num = (v: number | string | null): number =>
+  v === null ? 0 : typeof v === "string" ? Number(v) : v;
 const WINDOW_MS = 8 * 24 * 60 * 60 * 1000;
 
 type ShiftRow = {
@@ -134,10 +139,16 @@ type ShiftRow = {
   status: string;
 };
 
-async function readShift(admin: SupabaseClient, orgId: string, shiftId: string): Promise<ShiftRow | null> {
+async function readShift(
+  admin: SupabaseClient,
+  orgId: string,
+  shiftId: string,
+): Promise<ShiftRow | null> {
   const { data } = await admin
     .from("shifts")
-    .select("id, org_id, employee_id, role_certification_id, starts_at, ends_at, break_minutes, status")
+    .select(
+      "id, org_id, employee_id, role_certification_id, starts_at, ends_at, break_minutes, status",
+    )
     .eq("id", shiftId)
     .eq("org_id", orgId)
     .maybeSingle();
@@ -165,7 +176,12 @@ async function readParty(
   windowEnd: string,
 ): Promise<EligibilityCandidate | null> {
   const [empRes, roleRes, availRes, shiftsRes] = await Promise.all([
-    admin.from("employees").select("id, is_minor, active").eq("id", employeeId).eq("org_id", orgId).maybeSingle(),
+    admin
+      .from("employees")
+      .select("id, is_minor, active")
+      .eq("id", employeeId)
+      .eq("org_id", orgId)
+      .maybeSingle(),
     admin
       .from("employee_role_assignments")
       .select("role_certification_id, expires_at")
@@ -190,7 +206,9 @@ async function readParty(
   if (!emp || !emp.active) return null;
 
   const today = new Date().toISOString().slice(0, 10);
-  const roleIds = ((roleRes.data ?? []) as Array<{ role_certification_id: string; expires_at: string | null }>)
+  const roleIds = (
+    (roleRes.data ?? []) as Array<{ role_certification_id: string; expires_at: string | null }>
+  )
     .filter((r) => r.expires_at === null || r.expires_at >= today)
     .map((r) => r.role_certification_id);
 
@@ -227,12 +245,14 @@ async function readParty(
     }
   }
 
-  const assignedShifts: ShiftInput[] = ((shiftsRes.data ?? []) as Array<{
-    id: string;
-    starts_at: string;
-    ends_at: string;
-    break_minutes: number | null;
-  }>).map((s) => ({
+  const assignedShifts: ShiftInput[] = (
+    (shiftsRes.data ?? []) as Array<{
+      id: string;
+      starts_at: string;
+      ends_at: string;
+      break_minutes: number | null;
+    }>
+  ).map((s) => ({
     id: s.id,
     employeeId,
     startsAt: s.starts_at,
@@ -282,12 +302,20 @@ export async function proposeSwap(
 
   // An open offer can't name a counterpart shift.
   if (targetEmployeeId === null && targetShiftId !== null) {
-    return { ok: false, code: "invalid", message: "An open offer can't include a specific shift to trade." };
+    return {
+      ok: false,
+      code: "invalid",
+      message: "An open offer can't include a specific shift to trade.",
+    };
   }
 
   const x = await readShift(admin, orgId, shiftId);
   if (!x || x.employee_id !== requestingEmployeeId || x.status !== "published") {
-    return { ok: false, code: "not_found", message: "That shift isn't one of your upcoming published shifts." };
+    return {
+      ok: false,
+      code: "not_found",
+      message: "That shift isn't one of your upcoming published shifts.",
+    };
   }
   if (Date.parse(x.starts_at) <= Date.now()) {
     return { ok: false, code: "invalid", message: "That shift has already started." };
@@ -295,11 +323,24 @@ export async function proposeSwap(
 
   if (targetShiftId !== null) {
     if (targetEmployeeId === null) {
-      return { ok: false, code: "invalid", message: "Pick the coworker whose shift you want to trade for." };
+      return {
+        ok: false,
+        code: "invalid",
+        message: "Pick the coworker whose shift you want to trade for.",
+      };
     }
     const y = await readShift(admin, orgId, targetShiftId);
-    if (!y || y.employee_id !== targetEmployeeId || y.status !== "published" || Date.parse(y.starts_at) <= Date.now()) {
-      return { ok: false, code: "invalid", message: "That coworker's shift isn't available to trade." };
+    if (
+      !y ||
+      y.employee_id !== targetEmployeeId ||
+      y.status !== "published" ||
+      Date.parse(y.starts_at) <= Date.now()
+    ) {
+      return {
+        ok: false,
+        code: "invalid",
+        message: "That coworker's shift isn't available to trade.",
+      };
     }
   }
 
@@ -318,7 +359,11 @@ export async function proposeSwap(
     .single();
   if (error || !data) {
     logger.error("swap.propose_insert_failed", { err: error, orgId, shiftId });
-    return { ok: false, code: "failed", message: "Couldn't create the swap request. Please try again." };
+    return {
+      ok: false,
+      code: "failed",
+      message: "Couldn't create the swap request. Please try again.",
+    };
   }
   const requestId = (data as { id: string }).id;
 
@@ -333,7 +378,11 @@ export async function proposeSwap(
   // Targeted → email the coworker; open offer → coworkers see it in their portal.
   if (targetEmployeeId !== null) {
     try {
-      await enqueueJob(admin, { type: "swap-proposal-notify", payload: { requestId, orgId }, orgId });
+      await enqueueJob(admin, {
+        type: "swap-proposal-notify",
+        payload: { requestId, orgId },
+        orgId,
+      });
     } catch (err) {
       logger.warn("swap.proposal_notify_enqueue_failed", { err, requestId });
     }
@@ -365,7 +414,9 @@ async function loadRequest(
 ): Promise<SwapRequestRow | null> {
   const { data } = await admin
     .from("shift_swap_requests")
-    .select("id, org_id, shift_id, requesting_employee_id, target_employee_id, target_shift_id, status")
+    .select(
+      "id, org_id, shift_id, requesting_employee_id, target_employee_id, target_shift_id, status",
+    )
     .eq("id", requestId)
     .eq("org_id", orgId)
     .maybeSingle();
@@ -383,7 +434,8 @@ export async function respondToSwap(
 ): Promise<SwapDecisionResult> {
   const req = await loadRequest(admin, input.orgId, input.requestId);
   if (!req) return { ok: false, code: "not_found", message: "That swap request no longer exists." };
-  if (req.status !== "pending") return { ok: false, code: "stale", message: "That swap has already been handled." };
+  if (req.status !== "pending")
+    return { ok: false, code: "stale", message: "That swap has already been handled." };
 
   // Targeted proposals can only be answered by their named target; open offers by anyone (not the requester).
   if (req.target_employee_id !== null && req.target_employee_id !== input.claimantId) {
@@ -422,10 +474,17 @@ export async function approveSwap(
 ): Promise<SwapDecisionResult> {
   const req = await loadRequest(admin, input.orgId, input.requestId);
   if (!req) return { ok: false, code: "not_found", message: "That swap request no longer exists." };
-  if (req.status !== "accepted") return { ok: false, code: "stale", message: "That swap isn't awaiting approval." };
+  if (req.status !== "accepted")
+    return { ok: false, code: "stale", message: "That swap isn't awaiting approval." };
   const claimantId = req.target_employee_id;
-  if (!claimantId) return { ok: false, code: "invalid", message: "This swap has no claimant to approve." };
-  return applyOrEscalate(admin, { req, claimantId, reviewerUserId: input.reviewerUserId, force: true });
+  if (!claimantId)
+    return { ok: false, code: "invalid", message: "This swap has no claimant to approve." };
+  return applyOrEscalate(admin, {
+    req,
+    claimantId,
+    reviewerUserId: input.reviewerUserId,
+    force: true,
+  });
 }
 
 /** Manager denies an escalated (or pending) swap. */
@@ -440,7 +499,11 @@ export async function denySwap(
   }
   await admin
     .from("shift_swap_requests")
-    .update({ status: "denied", reviewed_by: input.reviewerUserId, reviewed_at: new Date().toISOString() })
+    .update({
+      status: "denied",
+      reviewed_by: input.reviewerUserId,
+      reviewed_at: new Date().toISOString(),
+    })
     .eq("id", req.id);
   await writeAudit(admin, {
     orgId: input.orgId,
@@ -465,13 +528,21 @@ async function applyOrEscalate(
   // Load the world for validation.
   const x = await readShift(admin, req.org_id, req.shift_id);
   if (!x || x.employee_id !== req.requesting_employee_id || x.status !== "published") {
-    return { ok: false, code: "stale", message: "The shift has changed since this swap was proposed." };
+    return {
+      ok: false,
+      code: "stale",
+      message: "The shift has changed since this swap was proposed.",
+    };
   }
   let y: ShiftRow | null = null;
   if (req.target_shift_id) {
     y = await readShift(admin, req.org_id, req.target_shift_id);
     if (!y || y.employee_id !== claimantId || y.status !== "published") {
-      return { ok: false, code: "stale", message: "The other shift has changed since this swap was proposed." };
+      return {
+        ok: false,
+        code: "stale",
+        message: "The other shift has changed since this swap was proposed.",
+      };
     }
   }
 
@@ -513,9 +584,15 @@ async function applyOrEscalate(
       logger.error("swap.apply_failed", { err: error, requestId: req.id });
       return { ok: false, code: "failed", message: "Couldn't apply that swap. Please try again." };
     }
-    const outcome = (Array.isArray(data) ? data[0]?.outcome : (data as { outcome?: string } | null)?.outcome) ?? "invalid";
+    const outcome =
+      (Array.isArray(data) ? data[0]?.outcome : (data as { outcome?: string } | null)?.outcome) ??
+      "invalid";
     if (outcome !== "applied") {
-      return { ok: false, code: "stale", message: "That swap couldn't be applied — a shift changed in the meantime." };
+      return {
+        ok: false,
+        code: "stale",
+        message: "That swap couldn't be applied — a shift changed in the meantime.",
+      };
     }
 
     if (args.reviewerUserId) {
@@ -524,7 +601,11 @@ async function applyOrEscalate(
         .update({ reviewed_by: args.reviewerUserId })
         .eq("id", req.id);
     }
-    await reEnqueueReminder(admin, { shiftId: req.shift_id, employeeId: claimantId, orgId: req.org_id });
+    await reEnqueueReminder(admin, {
+      shiftId: req.shift_id,
+      employeeId: claimantId,
+      orgId: req.org_id,
+    });
     if (req.target_shift_id) {
       await reEnqueueReminder(admin, {
         shiftId: req.target_shift_id,
@@ -552,7 +633,9 @@ async function applyOrEscalate(
     .eq("status", "pending");
   await escalateToManagers(admin, {
     orgId: req.org_id,
-    reason: validation.valid ? "manager approval required" : validation.reasons[0] ?? "swap needs review",
+    reason: validation.valid
+      ? "manager approval required"
+      : (validation.reasons[0] ?? "swap needs review"),
   });
   await writeAudit(admin, {
     orgId: req.org_id,
@@ -597,10 +680,17 @@ async function escalateToManagers(
 }
 
 /** Fire-and-forget result email to the swap's participants (best-effort). */
-function notifyResult(admin: SupabaseClient, orgId: string, requestId: string, result: "approved" | "denied"): void {
-  void enqueueJob(admin, { type: "swap-result-notify", payload: { requestId, orgId, result }, orgId }).catch(
-    (err) => logger.warn("swap.result_notify_enqueue_failed", { err, requestId }),
-  );
+function notifyResult(
+  admin: SupabaseClient,
+  orgId: string,
+  requestId: string,
+  result: "approved" | "denied",
+): void {
+  void enqueueJob(admin, {
+    type: "swap-result-notify",
+    payload: { requestId, orgId, result },
+    orgId,
+  }).catch((err) => logger.warn("swap.result_notify_enqueue_failed", { err, requestId }));
 }
 
 /** Re-arm the Day-53 shift-reminder for a shift that just changed hands. */
@@ -608,7 +698,11 @@ async function reEnqueueReminder(
   admin: SupabaseClient,
   input: { shiftId: string; employeeId: string; orgId: string },
 ): Promise<void> {
-  const { data } = await admin.from("shifts").select("starts_at").eq("id", input.shiftId).maybeSingle();
+  const { data } = await admin
+    .from("shifts")
+    .select("starts_at")
+    .eq("id", input.shiftId)
+    .maybeSingle();
   const startsAt = (data as { starts_at: string } | null)?.starts_at;
   if (!startsAt) return;
   const runAt = new Date(Date.parse(startsAt) - 24 * 60 * 60 * 1000);

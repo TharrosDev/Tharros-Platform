@@ -22,9 +22,7 @@ import { getPortalSession } from "./session";
 
 const INACTIVE = "This link isn't active anymore. Ask your manager for a fresh one.";
 
-export type ReportSickCallResult =
-  | { ok: true; message: string }
-  | { ok: false; message: string };
+export type ReportSickCallResult = { ok: true; message: string } | { ok: false; message: string };
 
 export async function reportSickCall(
   shiftId: string,
@@ -50,8 +48,7 @@ export async function reportSickCall(
     {
       chat: chatCompletion,
       model: SCHEDULING_MODEL,
-      onUsage: (model, usage) =>
-        recordUsage(session.orgId, null, model, mapDeepSeekUsage(usage)),
+      onUsage: (model, usage) => recordUsage(session.orgId, null, model, mapDeepSeekUsage(usage)),
     },
   );
 

@@ -38,7 +38,10 @@ async function asUser(who: string): Promise<SupabaseClient> {
   const client = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { error } = await client.auth.signInWithPassword({ email: emailFor(who), password: PASSWORD });
+  const { error } = await client.auth.signInWithPassword({
+    email: emailFor(who),
+    password: PASSWORD,
+  });
   if (error) throw error;
   return client;
 }
@@ -137,7 +140,10 @@ describe("schedule-calendar shift edits (manager-write / member-read)", () => {
   });
 
   it("a plain member can read the shift but cannot lock/unlock it", async () => {
-    const { data: readable } = await memberClient.from("shifts").select("id, locked").eq("id", shiftId);
+    const { data: readable } = await memberClient
+      .from("shifts")
+      .select("id, locked")
+      .eq("id", shiftId);
     expect((readable ?? []).length).toBe(1);
 
     // RLS filters the row out of the member's UPDATE — no rows change, value unchanged.

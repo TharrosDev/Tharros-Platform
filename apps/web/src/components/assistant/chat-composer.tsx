@@ -66,7 +66,7 @@ export function ChatComposer({
               : (placeholder ?? "Ask about your documents…")
           }
           aria-label="Ask the assistant a question"
-          className="max-h-44 min-h-10 resize-none border-0 bg-transparent px-2 py-2 text-[0.9375rem] shadow-none hover:border-0 focus-visible:ring-0"
+          className="max-h-44 min-h-10 resize-none border-0 bg-transparent px-2 py-2 text-[0.9375rem] shadow-none hover:border-0 "
         />
         <button
           type="button"
@@ -74,7 +74,7 @@ export function ChatComposer({
           disabled={!streaming && !canSend}
           aria-label={streaming ? "Stop generating" : "Send message"}
           className={cn(
-            "relative inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 outline-none focus-visible:ring-ring/40 focus-visible:ring-[3px] active:translate-y-px",
+            "relative inline-flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 active:translate-y-px",
             streaming
               ? "bg-foreground text-background hover:bg-foreground/85"
               : "bg-primary text-primary-foreground hover:bg-primary/92 disabled:bg-muted disabled:text-muted-foreground",

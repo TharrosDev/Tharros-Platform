@@ -35,9 +35,7 @@ export default defineConfig({
     trace: "on-first-retry",
     video: "retain-on-failure",
   },
-  projects: [
-    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
-  ],
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: "pnpm start",
     url: baseURL,

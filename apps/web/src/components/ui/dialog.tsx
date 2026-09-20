@@ -41,10 +41,10 @@ function DialogContent({
       <DialogPrimitive.Viewport className="fixed inset-0 z-overlay flex min-h-full items-center justify-center overflow-y-auto p-4 sm:p-6">
         <DialogPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-modal relative w-full max-w-lg overflow-hidden rounded-xl border p-5 outline-none sm:p-6",
+            "bg-popover text-popover-foreground shadow-modal relative w-full max-w-lg overflow-hidden rounded-xl border p-5 sm:p-6",
             "transition-all duration-200 ease-out",
-            "data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0",
-            "data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0",
+            "data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0",
+            "data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0",
             className,
           )}
           {...props}
@@ -52,7 +52,7 @@ function DialogContent({
           {children}
           {showClose ? (
             <DialogClose
-              className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 absolute right-3 top-3 inline-flex size-9 items-center justify-center rounded-md transition-colors outline-none focus-visible:ring-[3px] sm:right-4 sm:top-4"
+              className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-3 top-3 inline-flex h-control-sm w-control-sm items-center justify-center rounded-md transition-colors sm:right-4 sm:top-4"
               aria-label="Close"
             >
               <X className="size-4" />
@@ -80,7 +80,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
 function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      className={cn("text-[1.0625rem] font-semibold leading-snug tracking-[-0.015em]", className)}
+      className={cn("type-h2 font-semibold leading-snug", className)}
       {...props}
     />
   );

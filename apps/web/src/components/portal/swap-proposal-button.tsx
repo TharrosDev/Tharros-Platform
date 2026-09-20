@@ -33,8 +33,17 @@ import { proposeSwap } from "@/lib/portal/swap-actions";
 const OPEN = "__open__";
 const HANDOFF = "__handoff__";
 
-const fmtDay = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
-const fmtTime = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
+const fmtDay = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+const fmtTime = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "UTC",
+});
 function label(startsAt: string, endsAt: string): string {
   const s = new Date(Date.parse(startsAt));
   const e = new Date(Date.parse(endsAt));
@@ -92,7 +101,10 @@ export function SwapProposalButton({
         <ArrowLeftRight className="size-4" /> Swap
       </button>
 
-      <Dialog open={open} onOpenChange={(o) => !pending && (o ? setOpen(true) : (setOpen(false), reset()))}>
+      <Dialog
+        open={open}
+        onOpenChange={(o) => !pending && (o ? setOpen(true) : (setOpen(false), reset()))}
+      >
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Swap this shift?</DialogTitle>
@@ -127,7 +139,11 @@ export function SwapProposalButton({
             {selected ? (
               <div className="flex flex-col gap-2">
                 <label className="type-small font-medium">Trade for</label>
-                <Select value={theirShift} onValueChange={(v) => setTheirShift(v ?? HANDOFF)} disabled={pending}>
+                <Select
+                  value={theirShift}
+                  onValueChange={(v) => setTheirShift(v ?? HANDOFF)}
+                  disabled={pending}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

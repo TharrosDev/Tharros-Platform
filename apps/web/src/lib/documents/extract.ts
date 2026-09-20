@@ -65,7 +65,9 @@ function assertExpectedSignature(ext: string, bytes: ArrayBuffer | Buffer): void
   }
 }
 
-async function extractPdf(bytes: ArrayBuffer | Buffer): Promise<{ text: string; pageCount: number }> {
+async function extractPdf(
+  bytes: ArrayBuffer | Buffer,
+): Promise<{ text: string; pageCount: number }> {
   // unpdf wants a Uint8Array; getDocumentProxy + extractText gives merged text + total pages.
   const data = new Uint8Array(toBuffer(bytes));
   const pdf = await getDocumentProxy(data);

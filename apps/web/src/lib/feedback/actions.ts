@@ -7,11 +7,7 @@ import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
 import { chatCompletion } from "@/lib/deepseek/client";
 import { mapDeepSeekUsage } from "@/lib/deepseek/usage";
 import { logger } from "@/lib/observability/logger";
-import {
-  runFeedbackTurn,
-  type FeedbackKind,
-  type FeedbackMessage,
-} from "@/lib/feedback/agent";
+import { runFeedbackTurn, type FeedbackKind, type FeedbackMessage } from "@/lib/feedback/agent";
 
 /**
  * The feedback widget's one server entry point. Auth-gated (the widget only
@@ -60,7 +56,8 @@ export async function sendFeedbackTurn(args: {
   if (!cap.allowed) {
     return {
       ok: false,
-      message: "Your workspace has reached this month's AI limit. The widget will be back next month.",
+      message:
+        "Your workspace has reached this month's AI limit. The widget will be back next month.",
     };
   }
 

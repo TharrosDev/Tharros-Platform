@@ -5,31 +5,40 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 /*
-  Buttons act immediately: colour/border feedback only, no hover lift. One
-  `default` (solid cobalt) per view; everything else is outline, ghost or soft.
+  A control on the board is a key: square, condensed caps, answering the press
+  with colour and a single pixel of travel. Hi-vis yellow is struck with a
+  press-black rule, because the fill alone has no edge against warm stock.
+  Focus comes from the one base outline rule in globals.css; no variant here
+  draws its own ring.
 */
 const buttonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold tracking-[-0.01em] transition-[color,background-color,border-color,box-shadow] duration-150 ease-out outline-none select-none active:translate-y-px disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 focus-visible:ring-[3px] focus-visible:ring-ring/40 aria-invalid:border-destructive aria-invalid:ring-destructive/20",
+  [
+    "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap",
+    "transition-colors select-none active:translate-y-px",
+    "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45",
+    "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+    "aria-invalid:border-destructive",
+  ].join(" "),
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-[0_1px_2px_oklch(0.2_0.1_267/0.22),inset_0_1px_0_oklch(1_0_0/0.14)] hover:bg-primary/92",
-        soft: "bg-primary-soft text-primary-soft-foreground hover:bg-primary-soft/75",
+          "type-control border-primary-edge bg-primary text-primary-foreground border-2 hover:bg-primary/85",
+        soft: "type-control border-primary-edge/30 bg-primary-soft text-primary-soft-foreground border hover:bg-primary-soft/70",
         destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/30",
-        outline:
-          "border border-border bg-card text-foreground shadow-xs hover:border-input hover:bg-accent",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-surface-3",
-        ghost: "text-foreground hover:bg-accent",
-        link: "text-primary-soft-foreground underline-offset-4 hover:underline",
+          "type-control border-primary-edge bg-destructive text-destructive-foreground border-2 hover:bg-destructive/88",
+        outline: "type-control border-input bg-card text-foreground border hover:bg-accent",
+        secondary:
+          "type-control border-input bg-secondary text-secondary-foreground border hover:bg-surface-3",
+        ghost: "type-control text-foreground border border-transparent hover:bg-accent",
+        link: "type-small text-foreground decoration-primary-soft-foreground border-0 font-medium underline underline-offset-4 hover:decoration-2",
       },
       size: {
-        default: "h-10 px-4 has-[>svg]:px-3.5",
-        sm: "h-8 gap-1.5 rounded-md px-3 text-[0.8125rem] has-[>svg]:px-2.5",
-        lg: "h-11 px-5 has-[>svg]:px-4",
-        icon: "size-10",
-        "icon-sm": "size-8 rounded-md",
+        default: "h-control px-4 has-[>svg]:px-3.5",
+        sm: "h-control-sm px-3 has-[>svg]:px-2.5",
+        lg: "h-control-lg px-5 has-[>svg]:px-4",
+        icon: "h-control w-control px-0",
+        "icon-sm": "h-control-sm w-control-sm px-0",
       },
     },
     defaultVariants: {
@@ -54,7 +63,7 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size }), className)}
       {...props}
     />
   );

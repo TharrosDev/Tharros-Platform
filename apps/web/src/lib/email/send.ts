@@ -26,9 +26,7 @@ export type SendEmailParams = {
   idempotencyKey?: string;
 };
 
-export type SendEmailResult =
-  | { ok: true; id: string }
-  | { ok: false; error: string };
+export type SendEmailResult = { ok: true; id: string } | { ok: false; error: string };
 
 export async function sendEmail({
   to,

@@ -43,91 +43,91 @@ export default function PricingPage() {
       <MarketingHeader />
 
       <main className="relative">
-      <section className="relative mx-auto w-full max-w-6xl px-4 pb-24 pt-20 sm:px-6 sm:pt-24">
-        <div className="max-w-2xl">
-          <p className="type-meta text-primary-soft-foreground">Simple pricing</p>
-          <h1 className="mt-3 text-5xl font-bold tracking-[-0.05em] text-balance sm:text-6xl">
-            One flat price. No per-seat math.
-          </h1>
-          <p className="text-muted-foreground mt-5 max-w-xl text-lg leading-relaxed text-pretty">
-            Pick the plan that matches where your business is today, and change it whenever that
-            changes. Every plan starts with a {TRIAL_DAYS}-day free trial. Prices in CAD; tax
-            calculated at checkout.
-          </p>
-        </div>
+        <section className="relative mx-auto w-full max-w-6xl px-4 pb-24 pt-20 sm:px-6 sm:pt-24">
+          <div className="max-w-2xl">
+            <p className="type-meta text-primary-soft-foreground">Simple pricing</p>
+            <h1 className="mt-3 text-5xl font-bold tracking-[-0.05em] text-balance sm:text-6xl">
+              One flat price. No per-seat math.
+            </h1>
+            <p className="text-muted-foreground mt-5 max-w-xl text-lg leading-relaxed text-pretty">
+              Pick the plan that matches where your business is today, and change it whenever that
+              changes. Every plan starts with a {TRIAL_DAYS}-day free trial. Prices in CAD; tax
+              calculated at checkout.
+            </p>
+          </div>
 
-        {/* The ladder: Growth is the raised, cobalt-edged panel between two quiet plans. */}
-        <div className="mt-16 grid items-stretch gap-4 lg:grid-cols-[1fr_1.22fr_1fr] lg:gap-3">
-          {starter ? <QuietPlan plan={starter} side="left" /> : null}
+          {/* The ladder: Growth is the raised, cobalt-edged panel between two quiet plans. */}
+          <div className="mt-16 grid items-stretch gap-4 lg:grid-cols-[1fr_1.22fr_1fr] lg:gap-3">
+            {starter ? <QuietPlan plan={starter} side="left" /> : null}
 
-          {growth ? (
-            <div className="visual-panel-strong text-card-foreground ring-primary/20 relative z-10 flex flex-col overflow-hidden rounded-3xl p-7 ring-1 sm:p-8 lg:-my-7">
-              <div className="flex items-baseline justify-between gap-3">
-                <h2 className="type-h2">{growth.name}</h2>
-                <span className="text-primary text-sm font-semibold">
-                  Where most businesses land
-                </span>
+            {growth ? (
+              <div className="visual-panel-strong text-card-foreground ring-primary/20 relative z-10 flex flex-col overflow-hidden rounded-3xl p-7 ring-1 sm:p-8 lg:-my-7">
+                <div className="flex items-baseline justify-between gap-3">
+                  <h2 className="type-h2">{growth.name}</h2>
+                  <span className="text-primary text-sm font-semibold">
+                    Where most businesses land
+                  </span>
+                </div>
+                <p className="text-muted-foreground mt-1.5 text-sm">{growth.blurb}</p>
+
+                <p className="mt-6">
+                  <span className="num text-5xl font-bold tracking-tight">
+                    {formatMonthly(growth.priceMonthly)}
+                  </span>
+                  <span className="text-muted-foreground text-sm"> /month CAD</span>
+                </p>
+
+                <ul className="mt-7 flex-1 space-y-3">
+                  {growth.features.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5">
+                      <Check aria-hidden className="text-primary mt-0.5 size-4 shrink-0" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "mt-8 w-full")}>
+                  Start your {TRIAL_DAYS}-day free trial
+                  <ArrowRight className="size-4" aria-hidden />
+                </Link>
               </div>
-              <p className="text-muted-foreground mt-1.5 text-sm">{growth.blurb}</p>
+            ) : null}
 
-              <p className="mt-6">
-                <span className="num text-5xl font-bold tracking-tight">
-                  {formatMonthly(growth.priceMonthly)}
-                </span>
-                <span className="text-muted-foreground text-sm"> /month CAD</span>
-              </p>
+            {pro ? <QuietPlan plan={pro} side="right" /> : null}
+          </div>
 
-              <ul className="mt-7 flex-1 space-y-3">
-                {growth.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5">
-                    <Check aria-hidden className="text-primary mt-0.5 size-4 shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+          {/* Shared ground — true for every plan. */}
+          <div className="text-muted-foreground mt-16 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 border-y py-5 text-sm">
+            <span>{TRIAL_DAYS}-day free trial</span>
+            <span aria-hidden className="bg-border hidden h-1 w-1 rounded-full sm:block" />
+            <span>Flat price per business, not per seat</span>
+            <span aria-hidden className="bg-border hidden h-1 w-1 rounded-full sm:block" />
+            <span>Cancel anytime</span>
+            <span aria-hidden className="bg-border hidden h-1 w-1 rounded-full sm:block" />
+            <span>CAD pricing, tax at checkout</span>
+          </div>
 
-              <Link href="/signup" className={cn(buttonVariants({ size: "lg" }), "mt-8 w-full")}>
-                Start your {TRIAL_DAYS}-day free trial
-                <ArrowRight className="size-4" aria-hidden />
-              </Link>
-            </div>
-          ) : null}
+          {/* The three questions every owner actually asks. */}
+          <div className="mx-auto mt-16 grid max-w-4xl gap-8 sm:grid-cols-3">
+            {FAQ.map((item) => (
+              <div key={item.q}>
+                <h3 className="text-sm font-semibold">{item.q}</h3>
+                <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{item.a}</p>
+              </div>
+            ))}
+          </div>
 
-          {pro ? <QuietPlan plan={pro} side="right" /> : null}
-        </div>
-
-        {/* Shared ground — true for every plan. */}
-        <div className="text-muted-foreground mt-16 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 border-y py-5 text-sm">
-          <span>{TRIAL_DAYS}-day free trial</span>
-          <span aria-hidden className="bg-border hidden h-1 w-1 rounded-full sm:block" />
-          <span>Flat price per business, not per seat</span>
-          <span aria-hidden className="bg-border hidden h-1 w-1 rounded-full sm:block" />
-          <span>Cancel anytime</span>
-          <span aria-hidden className="bg-border hidden h-1 w-1 rounded-full sm:block" />
-          <span>CAD pricing, tax at checkout</span>
-        </div>
-
-        {/* The three questions every owner actually asks. */}
-        <div className="mx-auto mt-16 grid max-w-4xl gap-8 sm:grid-cols-3">
-          {FAQ.map((item) => (
-            <div key={item.q}>
-              <h3 className="text-sm font-semibold">{item.q}</h3>
-              <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{item.a}</p>
-            </div>
-          ))}
-        </div>
-
-        <p className="text-muted-foreground mt-16 text-center text-sm">
-          Not sure which plan fits?{" "}
-          <Link
-            href="/signup"
-            className="text-foreground focus-visible:ring-ring/50 rounded-sm underline underline-offset-4 outline-none hover:no-underline focus-visible:ring-[3px]"
-          >
-            Start the trial
-          </Link>{" "}
-          — you can switch plans at any point.
-        </p>
-      </section>
+          <p className="text-muted-foreground mt-16 text-center text-sm">
+            Not sure which plan fits?{" "}
+            <Link
+              href="/signup"
+              className="text-foreground rounded-sm underline underline-offset-4 hover:no-underline "
+            >
+              Start the trial
+            </Link>{" "}
+            — you can switch plans at any point.
+          </p>
+        </section>
       </main>
       <MarketingFooter />
     </div>
@@ -165,8 +165,8 @@ function QuietPlan({ plan, side }: { plan: (typeof PLANS)[number]; side: "left" 
       <Link
         href="/signup"
         className={cn(
-          "bg-card text-foreground hover:bg-accent focus-visible:ring-ring/40",
-          "mt-8 inline-flex h-11 w-full items-center justify-center rounded-xl border text-sm font-semibold outline-none transition-[background-color,border-color,transform] hover:-translate-y-px focus-visible:ring-[4px]",
+          "bg-card text-foreground hover:bg-accent ",
+          "mt-8 inline-flex h-11 w-full items-center justify-center rounded-xl border text-sm font-semibold transition-[background-color,border-color,transform] hover:-translate-y-px ",
         )}
       >
         Start free trial

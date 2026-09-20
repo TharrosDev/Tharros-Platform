@@ -54,12 +54,7 @@ function emit(level: LogLevel, msg: string, context: LogContext = {}) {
   if (err !== undefined) record.err = serializeError(err);
 
   // Route to the matching console method so platform log levels line up.
-  const sink =
-    level === "error"
-      ? console.error
-      : level === "warn"
-        ? console.warn
-        : console.log;
+  const sink = level === "error" ? console.error : level === "warn" ? console.warn : console.log;
 
   if (isProd) {
     sink(JSON.stringify(record));

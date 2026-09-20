@@ -39,6 +39,14 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Format check
+        run: pnpm format:check
+
+      # Parses the design tokens out of globals.css and fails on any text or
+      # non-text pair below WCAG AA. Cheap, deterministic, no services needed.
+      - name: Contrast (WCAG AA design tokens)
+        run: pnpm contrast
+
       - name: Test (deterministic unit suites)
         run: pnpm --filter @tharros/web test:unit
 

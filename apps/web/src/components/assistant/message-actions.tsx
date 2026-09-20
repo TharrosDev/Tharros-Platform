@@ -109,7 +109,7 @@ function ActionButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "hover:bg-accent hover:text-foreground inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors focus-visible:ring-ring/40 focus-visible:ring-[3px] outline-none",
+        "hover:bg-accent hover:text-foreground inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors ",
         active && "bg-accent text-foreground",
       )}
     >

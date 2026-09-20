@@ -114,9 +114,7 @@ export async function createCheckoutClientSecret(tier: Tier): Promise<string> {
 
   const plan = getPlan(parsedTier.data);
   if (!plan.priceId) {
-    throw new CheckoutError(
-      "This plan isn't available yet. Please contact support.",
-    );
+    throw new CheckoutError("This plan isn't available yet. Please contact support.");
   }
 
   const { orgId, customerId } = await ensureCustomerForOwner();
@@ -174,9 +172,7 @@ export type CheckoutStatus = {
  * confirmation — the authoritative subscription record is written by the Day-18
  * webhook, not here.
  */
-export async function getCheckoutStatus(
-  sessionId: string,
-): Promise<CheckoutStatus | null> {
+export async function getCheckoutStatus(sessionId: string): Promise<CheckoutStatus | null> {
   if (!sessionId) return null;
   // Guard: only the active org's owner may inspect their own session.
   const { activeOrg } = await getOrgContext();
@@ -194,9 +190,7 @@ export async function getCheckoutStatus(
   }
 
   const sub =
-    session.subscription && typeof session.subscription !== "string"
-      ? session.subscription
-      : null;
+    session.subscription && typeof session.subscription !== "string" ? session.subscription : null;
   const parsedTier = tierSchema.safeParse(session.metadata?.tier);
   const tier = parsedTier.success ? parsedTier.data : null;
 

@@ -20,12 +20,7 @@
 import { validateLaborRules } from "../labor-rules";
 import type { EmployeeContext, ShiftInput, Violation } from "../types";
 import { isAvailable } from "./availability";
-import {
-  allShifts,
-  filledShifts,
-  scoreSolution,
-  toAssignments,
-} from "./score";
+import { allShifts, filledShifts, scoreSolution, toAssignments } from "./score";
 import type {
   CoverageSlot,
   GapReportEntry,
@@ -248,7 +243,8 @@ function buildGapReport(
       const qualified = input.employees.filter((e) => roleMatch(slot, e));
       const available = qualified.filter((e) => isAvailable(e, slot));
       if (qualified.length === 0) reason = "No employee holds the required role.";
-      else if (available.length === 0) reason = "No qualified employee is available for this window.";
+      else if (available.length === 0)
+        reason = "No qualified employee is available for this window.";
       else reason = "Qualified, available staff were exhausted or blocked by labor limits.";
     }
     return {

@@ -5,26 +5,26 @@ Embeddings: text-embedding-3-small. Answers: claude-opus-4-8. Judge: claude-haik
 
 ## Retrieval sweep (chunk × top-k)
 
-| chunk | k | recall | precision | MRR |
-| --- | --- | --- | --- | --- |
-| 300/60 | 4 | 100% | 25% | 1.00 |
-| 300/60 | 6 | 100% | 20% | 1.00 |
-| 300/60 | 8 | 100% | 20% | 1.00 |
-| 500/80 | 4 | 100% | 25% | 1.00 |
-| 500/80 | 6 | 100% | 20% | 1.00 |
-| 500/80 | 8 | 100% | 20% | 1.00 |
-| 800/120 | 4 | 100% | 25% | 1.00 |
-| 800/120 | 6 | 100% | 20% | 1.00 |
-| 800/120 | 8 | 100% | 20% | 1.00 |
+| chunk   | k   | recall | precision | MRR  |
+| ------- | --- | ------ | --------- | ---- |
+| 300/60  | 4   | 100%   | 25%       | 1.00 |
+| 300/60  | 6   | 100%   | 20%       | 1.00 |
+| 300/60  | 8   | 100%   | 20%       | 1.00 |
+| 500/80  | 4   | 100%   | 25%       | 1.00 |
+| 500/80  | 6   | 100%   | 20%       | 1.00 |
+| 500/80  | 8   | 100%   | 20%       | 1.00 |
+| 800/120 | 4   | 100%   | 25%       | 1.00 |
+| 800/120 | 6   | 100%   | 20%       | 1.00 |
+| 800/120 | 8   | 100%   | 20%       | 1.00 |
 
 **Retrieval winner:** chunk 300/60, k=4 (recall 100%, MRR 1.00). Baseline 500/80/k4: recall 100%, MRR 1.00.
 
 ## Answer quality (baseline + winner)
 
-| config | chunk | k | citation acc | cite jaccard | cite coverage | fact-hit | faithfulness | negatives handled |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| baseline | 500/80 | 4 | 100% | 1.00 | 100% | 100% | 0.97 | 75% |
-| winner | 300/60 | 4 | 100% | 1.00 | 100% | 100% | 0.94 | 100% |
+| config   | chunk  | k   | citation acc | cite jaccard | cite coverage | fact-hit | faithfulness | negatives handled |
+| -------- | ------ | --- | ------------ | ------------ | ------------- | -------- | ------------ | ----------------- |
+| baseline | 500/80 | 4   | 100%         | 1.00         | 100%          | 100%     | 0.97         | 75%               |
+| winner   | 300/60 | 4   | 100%         | 1.00         | 100%          | 100%     | 0.94         | 100%              |
 
 ## Baseline per-question citations
 

@@ -4,7 +4,10 @@ import { encodeCursor, decodeCursor, nextCursorFrom } from "@/lib/pagination";
 
 describe("pagination cursor codec", () => {
   it("round-trips a cursor", () => {
-    const c = { ts: "2026-06-03T14:58:46.123456+00:00", id: "11111111-2222-3333-4444-555555555555" };
+    const c = {
+      ts: "2026-06-03T14:58:46.123456+00:00",
+      id: "11111111-2222-3333-4444-555555555555",
+    };
     expect(decodeCursor(encodeCursor(c))).toEqual(c);
   });
 

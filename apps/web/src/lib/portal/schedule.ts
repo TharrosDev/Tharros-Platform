@@ -2,10 +2,7 @@ import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/observability/logger";
-import {
-  resolveSickCallReasonPolicy,
-  type SickCallReasonPolicy,
-} from "@/lib/scheduling/sick-call";
+import { resolveSickCallReasonPolicy, type SickCallReasonPolicy } from "@/lib/scheduling/sick-call";
 
 /**
  * Day 53 — the employee's hosted portal schedule (next 2 weeks of published
@@ -26,10 +23,7 @@ export type PortalShift = {
 
 const WINDOW_DAYS = 14;
 
-export async function getPortalSchedule(
-  employeeId: string,
-  orgId: string,
-): Promise<PortalShift[]> {
+export async function getPortalSchedule(employeeId: string, orgId: string): Promise<PortalShift[]> {
   const admin = createAdminClient();
   const now = new Date();
   const until = new Date(now.getTime() + WINDOW_DAYS * 24 * 60 * 60 * 1000);
@@ -215,7 +209,12 @@ export async function getProposableCoworkers(
     roles_certifications: { name: string } | { name: string }[] | null;
   }>) {
     const list = byEmp.get(r.employee_id) ?? [];
-    list.push({ id: r.id, startsAt: r.starts_at, endsAt: r.ends_at, roleName: roleNameOf(r.roles_certifications) });
+    list.push({
+      id: r.id,
+      startsAt: r.starts_at,
+      endsAt: r.ends_at,
+      roleName: roleNameOf(r.roles_certifications),
+    });
     byEmp.set(r.employee_id, list);
   }
 
@@ -246,7 +245,11 @@ async function assembleSwaps(
   rows: SwapReqRow[],
 ): Promise<PortalSwap[]> {
   if (rows.length === 0) return [];
-  const shiftIds = [...new Set(rows.flatMap((r) => [r.shift_id, r.target_shift_id]).filter((v): v is string => !!v))];
+  const shiftIds = [
+    ...new Set(
+      rows.flatMap((r) => [r.shift_id, r.target_shift_id]).filter((v): v is string => !!v),
+    ),
+  ];
   const reqIds = [...new Set(rows.map((r) => r.requesting_employee_id))];
 
   const [{ data: shiftRows }, { data: empRows }] = await Promise.all([
@@ -259,17 +262,21 @@ async function assembleSwaps(
   ]);
 
   const shiftById = new Map(
-    ((shiftRows ?? []) as Array<{
-      id: string;
-      starts_at: string;
-      ends_at: string;
-      roles_certifications: { name: string } | { name: string }[] | null;
-    }>).map((s) => [
+    (
+      (shiftRows ?? []) as Array<{
+        id: string;
+        starts_at: string;
+        ends_at: string;
+        roles_certifications: { name: string } | { name: string }[] | null;
+      }>
+    ).map((s) => [
       s.id,
       { startsAt: s.starts_at, endsAt: s.ends_at, roleName: roleNameOf(s.roles_certifications) },
     ]),
   );
-  const nameById = new Map(((empRows ?? []) as Array<{ id: string; name: string }>).map((e) => [e.id, e.name]));
+  const nameById = new Map(
+    ((empRows ?? []) as Array<{ id: string; name: string }>).map((e) => [e.id, e.name]),
+  );
 
   return rows
     .map((r) => {
@@ -332,13 +339,15 @@ export async function getMyTimeOff(employeeId: string, orgId: string): Promise<M
     logger.error("getMyTimeOff: query failed", { err: error, employeeId });
     return [];
   }
-  return ((data ?? []) as Array<{
-    id: string;
-    start_date: string;
-    end_date: string;
-    reason: string | null;
-    status: string;
-  }>).map((r) => ({
+  return (
+    (data ?? []) as Array<{
+      id: string;
+      start_date: string;
+      end_date: string;
+      reason: string | null;
+      status: string;
+    }>
+  ).map((r) => ({
     id: r.id,
     startDate: r.start_date,
     endDate: r.end_date,

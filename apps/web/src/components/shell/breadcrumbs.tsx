@@ -69,7 +69,7 @@ function Breadcrumbs({ className }: { className?: string }) {
               <>
                 <Link
                   href={crumb.href}
-                  className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 truncate rounded-md px-1.5 py-1 outline-none transition-colors focus-visible:ring-[3px]"
+                  className="text-muted-foreground hover:bg-accent hover:text-foreground truncate rounded-md px-1.5 py-1 transition-colors "
                 >
                   {crumb.label}
                 </Link>

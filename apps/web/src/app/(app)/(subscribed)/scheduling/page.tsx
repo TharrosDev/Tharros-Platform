@@ -73,7 +73,7 @@ export default async function SchedulingPage() {
       {canManage ? (
         <Link
           href="/scheduling/approvals"
-          className="group bg-card focus-visible:ring-ring/40 flex items-center gap-4 rounded-xl border px-4 py-3.5 shadow-card outline-none transition-colors hover:bg-accent/40 focus-visible:ring-[3px] sm:px-5"
+          className="group bg-card flex items-center gap-4 rounded-xl border px-4 py-3.5 shadow-card transition-colors hover:bg-accent/40 sm:px-5"
         >
           <span
             aria-hidden
@@ -134,7 +134,8 @@ export default async function SchedulingPage() {
               <>
                 <p className="font-semibold">No schedule yet</p>
                 <p className="text-muted-foreground type-small mt-1">
-                  Generate a draft from the calendar. Nothing reaches your team until you publish it.
+                  Generate a draft from the calendar. Nothing reaches your team until you publish
+                  it.
                 </p>
                 <Link
                   href="/scheduling/calendar"
@@ -152,7 +153,10 @@ export default async function SchedulingPage() {
             <h2 id="setup-heading" className="type-h2">
               Setup
             </h2>
-            <Link href="/scheduling/setup" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            <Link
+              href="/scheduling/setup"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
               Edit
             </Link>
           </div>
@@ -174,7 +178,10 @@ export default async function SchedulingPage() {
           <h2 id="activity-heading" className="type-h2">
             Recent activity
           </h2>
-          <Link href="/scheduling/activity" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+          <Link
+            href="/scheduling/activity"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
             Full log
           </Link>
         </div>
@@ -186,7 +193,10 @@ export default async function SchedulingPage() {
           <ul className="bg-card divide-y rounded-xl border shadow-card">
             {recentActivity.map((entry) => (
               <li key={entry.id} className="flex items-baseline gap-3 px-4 py-2.5 text-sm">
-                <span aria-hidden className="bg-primary mt-1.5 size-1.5 shrink-0 self-start rounded-full" />
+                <span
+                  aria-hidden
+                  className="bg-primary mt-1.5 size-1.5 shrink-0 self-start rounded-full"
+                />
                 <span className="min-w-0 flex-1">
                   {entry.title}
                   <span className="text-muted-foreground"> · {entry.actorLabel}</span>

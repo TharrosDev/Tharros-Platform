@@ -60,10 +60,7 @@ async function acquireRun(
     finished_at: null,
   };
 
-  let reclaimQuery = admin
-    .from("automation_runs")
-    .update(patch)
-    .eq("id", existing.id);
+  let reclaimQuery = admin.from("automation_runs").update(patch).eq("id", existing.id);
 
   // Make the lease acquisition itself conditional. The earlier read decides
   // whether a retry is eligible; these predicates ensure two overlapping
@@ -75,9 +72,7 @@ async function acquireRun(
           .eq("status", "running")
           .lte("started_at", new Date(now - AUTOMATION_RUN_STALE_MS).toISOString());
 
-  const { data: reclaimed, error: reclaimError } = await reclaimQuery
-    .select("id")
-    .maybeSingle();
+  const { data: reclaimed, error: reclaimError } = await reclaimQuery.select("id").maybeSingle();
   if (reclaimError) throw reclaimError;
   return reclaimed ? String(reclaimed.id) : null;
 }

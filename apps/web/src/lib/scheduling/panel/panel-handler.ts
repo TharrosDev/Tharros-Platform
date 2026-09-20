@@ -66,7 +66,11 @@ export async function runSchedulePanelHandler(input: RunPanelInput): Promise<Pan
 
   // Roster + labor rules for metrics + the legality self-check.
   const [{ data: rosterData }, laborRules] = await Promise.all([
-    supabase.from("employees").select("id, is_minor, seniority_rank").eq("org_id", input.orgId).eq("active", true),
+    supabase
+      .from("employees")
+      .select("id, is_minor, seniority_rank")
+      .eq("org_id", input.orgId)
+      .eq("active", true),
     getLaborRules(input.orgId),
   ]);
   const roster = (rosterData ?? []) as RosterRow[];
@@ -74,7 +78,10 @@ export async function runSchedulePanelHandler(input: RunPanelInput): Promise<Pan
     id: e.id,
     seniorityRank: e.seniority_rank,
   }));
-  const employeeContexts: EmployeeContext[] = roster.map((e) => ({ id: e.id, isMinor: e.is_minor }));
+  const employeeContexts: EmployeeContext[] = roster.map((e) => ({
+    id: e.id,
+    isMinor: e.is_minor,
+  }));
 
   // 1. Generate one candidate per weighting profile (deterministic — no LLM).
   const candidates: Candidate[] = [];
@@ -97,7 +104,8 @@ export async function runSchedulePanelHandler(input: RunPanelInput): Promise<Pan
 
   // 2. Judge (the only LLM call) + select.
   const outcome = await runCandidatePanel(candidates, {
-    metricsOf: (c) => candidateMetrics(c.result, metricsRoster, laborRules.overtime_threshold_weekly),
+    metricsOf: (c) =>
+      candidateMetrics(c.result, metricsRoster, laborRules.overtime_threshold_weekly),
     judge: (cands) =>
       judgeCandidates(cands, {
         chat: chatCompletion,
@@ -172,7 +180,8 @@ async function persist(
   }));
   if (shiftRows.length > 0) {
     const { error: shiftErr } = await supabase.from("shifts").insert(shiftRows);
-    if (shiftErr) logger.error("runSchedulePanel: shifts insert failed", { err: shiftErr, scheduleId });
+    if (shiftErr)
+      logger.error("runSchedulePanel: shifts insert failed", { err: shiftErr, scheduleId });
   }
 
   // Every candidate as a version.
@@ -190,7 +199,8 @@ async function persist(
     is_selected: r.isSelected,
   }));
   const { error: versionErr } = await supabase.from("schedule_versions").insert(versionRows);
-  if (versionErr) logger.error("runSchedulePanel: versions insert failed", { err: versionErr, scheduleId });
+  if (versionErr)
+    logger.error("runSchedulePanel: versions insert failed", { err: versionErr, scheduleId });
 
   // Audit trail (service-role; scheduling_audit_log is write-restricted).
   await admin.from("scheduling_audit_log").insert([

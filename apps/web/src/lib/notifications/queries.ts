@@ -2,7 +2,11 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/observability/logger";
-import { mapNotification, type Notification, type NotificationRow } from "@/lib/notifications/types";
+import {
+  mapNotification,
+  type Notification,
+  type NotificationRow,
+} from "@/lib/notifications/types";
 
 /**
  * Day 40 — in-app inbox reads. RLS scopes `notification_events` to the calling
@@ -10,7 +14,8 @@ import { mapNotification, type Notification, type NotificationRow } from "@/lib/
  * database guarantees a user only ever sees their own notifications.
  */
 
-const COLS = "id, org_id, user_id, type, title, body, data, read_at, email, email_status, created_at";
+const COLS =
+  "id, org_id, user_id, type, title, body, data, read_at, email, email_status, created_at";
 
 /** The caller's notifications, newest-first (bounded). */
 export async function listNotifications(opts?: { limit?: number }): Promise<Notification[]> {

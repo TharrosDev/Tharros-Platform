@@ -20,7 +20,10 @@ import {
 import type { EscalatedReplacement, EscalatedSwap } from "@/lib/scheduling/queries";
 import type { PendingTimeOff } from "@/lib/scheduling/time-off";
 
-const IMPACT_BADGE: Record<string, { label: string; variant: "success" | "warning" | "destructive" }> = {
+const IMPACT_BADGE: Record<
+  string,
+  { label: string; variant: "success" | "warning" | "destructive" }
+> = {
   low: { label: "Low impact", variant: "success" },
   medium: { label: "Medium impact", variant: "warning" },
   high: { label: "High impact", variant: "destructive" },
@@ -90,8 +93,8 @@ export function ApprovalsInbox({
         </span>
         <p className="text-foreground font-medium">Nothing needs your call</p>
         <p className="text-muted-foreground max-w-sm text-sm">
-          Swap requests, time off, and unfilled shifts that the agent can&apos;t resolve on
-          its own will land here.
+          Swap requests, time off, and unfilled shifts that the agent can&apos;t resolve on its own
+          will land here.
         </p>
       </Card>
     );
@@ -124,7 +127,10 @@ export function ApprovalsInbox({
                     onClick={() =>
                       resolve(
                         r.sickCallId,
-                        () => setReplacements((prev) => prev.filter((x) => x.sickCallId !== r.sickCallId)),
+                        () =>
+                          setReplacements((prev) =>
+                            prev.filter((x) => x.sickCallId !== r.sickCallId),
+                          ),
                         () => findReplacement({ shiftId: r.shiftId }),
                         "Replacement offers sent",
                       )

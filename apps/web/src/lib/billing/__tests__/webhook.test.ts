@@ -79,8 +79,6 @@ describe("signature verification wiring", () => {
   it("rejects a tampered payload", () => {
     const payload = JSON.stringify({ id: "evt_1", type: "ping" });
     const header = stripe.webhooks.generateTestHeaderString({ payload, secret });
-    expect(() =>
-      stripe.webhooks.constructEvent(payload + " ", header, secret),
-    ).toThrow();
+    expect(() => stripe.webhooks.constructEvent(payload + " ", header, secret)).toThrow();
   });
 });

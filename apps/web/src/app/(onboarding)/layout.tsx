@@ -21,7 +21,7 @@ export default async function OnboardingLayout({ children }: { children: React.R
       <Link
         href="/"
         aria-label="Tharros home"
-        className="focus-visible:ring-ring/40 relative inline-flex min-h-10 items-center rounded-md outline-none focus-visible:ring-[3px]"
+        className=" relative inline-flex min-h-10 items-center rounded-md "
       >
         <TharrosWordmark markClassName="size-7" />
       </Link>

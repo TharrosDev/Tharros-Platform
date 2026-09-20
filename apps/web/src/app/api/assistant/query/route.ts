@@ -23,11 +23,7 @@ import {
 } from "@/lib/assistant/templates";
 import { logger } from "@/lib/observability/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
-import {
-  isSameOriginMutation,
-  opaqueRateLimitKey,
-  readJsonBody,
-} from "@/lib/security/request";
+import { isSameOriginMutation, opaqueRateLimitKey, readJsonBody } from "@/lib/security/request";
 
 // Node runtime: the RAG pipeline transitively uses the embeddings seam + the
 // Anthropic SDK, and we hold a streaming response open — Node, not Edge.
@@ -61,7 +57,9 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const [userBurst, orgBurst] = await Promise.all([
-    checkRateLimit(opaqueRateLimitKey("assistant-user", activeOrg.id, user.id), 30, 60, { failOpen: false }),
+    checkRateLimit(opaqueRateLimitKey("assistant-user", activeOrg.id, user.id), 30, 60, {
+      failOpen: false,
+    }),
     checkRateLimit(opaqueRateLimitKey("assistant-org", activeOrg.id), 180, 60, { failOpen: false }),
   ]);
   if (!userBurst.allowed || !orgBurst.allowed) {
@@ -91,7 +89,10 @@ export async function POST(req: Request): Promise<Response> {
   const bodyResult = await readJsonBody<QueryBody>(req, MAX_BODY_BYTES);
   if (!bodyResult.ok) {
     return Response.json(
-      { error: bodyResult.reason === "too_large" ? "Request body is too large" : "Invalid JSON body" },
+      {
+        error:
+          bodyResult.reason === "too_large" ? "Request body is too large" : "Invalid JSON body",
+      },
       { status: bodyResult.reason === "too_large" ? 413 : 400 },
     );
   }
@@ -162,7 +163,12 @@ export async function POST(req: Request): Promise<Response> {
         controller.enqueue(encoder.encode(encodeFrame(event)));
 
       try {
-        send({ type: "meta", conversationId: finalConversationId, citations, grounded: grounded.length > 0 });
+        send({
+          type: "meta",
+          conversationId: finalConversationId,
+          citations,
+          grounded: grounded.length > 0,
+        });
 
         let answer = "";
         let usage: Usage | null = null;
@@ -223,7 +229,10 @@ export async function POST(req: Request): Promise<Response> {
         // the user it's transient rather than implying their answer failed.
         if (err instanceof Anthropic.APIError && (err.status === 429 || err.status === 529)) {
           logger.warn("assistant.rate_limited", { org_id: orgId, status: err.status });
-          send({ type: "error", message: "The assistant is busy right now. Please try again in a moment." });
+          send({
+            type: "error",
+            message: "The assistant is busy right now. Please try again in a moment.",
+          });
         } else {
           logger.error("assistant.stream_failed", { org_id: orgId, err });
           send({ type: "error", message: "Couldn't generate an answer. Please try again." });

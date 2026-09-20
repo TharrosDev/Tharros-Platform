@@ -84,7 +84,10 @@ beforeAll(async () => {
   userClient = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { error: signInErr } = await userClient.auth.signInWithPassword({ email, password: PASSWORD });
+  const { error: signInErr } = await userClient.auth.signInWithPassword({
+    email,
+    password: PASSWORD,
+  });
   if (signInErr) throw signInErr;
 }, 30_000);
 
@@ -105,16 +108,16 @@ describe("schedule_opt thread + optimize audit trail", () => {
   });
 
   it("records every optimize-loop step (free-text actions accepted)", async () => {
-    const { data } = await admin
-      .from("agent_audit_log")
-      .select("action")
-      .eq("thread_id", threadId);
+    const { data } = await admin.from("agent_audit_log").select("action").eq("thread_id", threadId);
     const actions = (data ?? []).map((r) => r.action as string).sort();
     expect(actions).toEqual([...OPTIMIZE_ACTIONS].sort());
   });
 
   it("keeps the audit trail deny-all for signed-in users", async () => {
-    const { data } = await userClient.from("agent_audit_log").select("id").eq("thread_id", threadId);
+    const { data } = await userClient
+      .from("agent_audit_log")
+      .select("id")
+      .eq("thread_id", threadId);
     expect(data ?? []).toHaveLength(0);
   });
 });

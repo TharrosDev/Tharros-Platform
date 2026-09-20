@@ -19,7 +19,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/native-select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
 const statusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1);
@@ -32,9 +39,12 @@ function triggerLabel(type: string, config: Record<string, unknown>) {
 }
 
 function actionLabel(type: string, config: Record<string, unknown>) {
-  if (type === "notify_team") return config.email === true ? "Notify managers and email them" : "Notify managers";
+  if (type === "notify_team")
+    return config.email === true ? "Notify managers and email them" : "Notify managers";
   if (type === "draft_follow_up") return "Prepare an AI follow-up draft for review";
-  return typeof config.status === "string" ? `Set status to ${statusLabel(config.status)}` : "Set lead status";
+  return typeof config.status === "string"
+    ? `Set status to ${statusLabel(config.status)}`
+    : "Set lead status";
 }
 
 function runVariant(status: string) {
@@ -80,12 +90,18 @@ export default async function AutomationsPage({
       />
 
       {params.queued ? (
-        <div role="status" className="border-success/25 bg-success/[0.07] text-success rounded-lg border px-4 py-3 text-sm">
+        <div
+          role="status"
+          className="border-success/25 bg-success/[0.07] text-success rounded-lg border px-4 py-3 text-sm"
+        >
           Workflow queued. Its result appears in Run history once the jobs worker processes it.
         </div>
       ) : null}
       {params.error ? (
-        <div role="alert" className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm">
+        <div
+          role="alert"
+          className="border-destructive/25 bg-destructive/[0.06] text-destructive rounded-lg border px-4 py-3 text-sm"
+        >
           That automation could not be saved. Check the fields and your permissions.
         </div>
       ) : null}
@@ -123,7 +139,11 @@ export default async function AutomationsPage({
                       <div className="flex items-center gap-1">
                         <form action={toggleAutomation}>
                           <input type="hidden" name="automationId" value={automation.id} />
-                          <input type="hidden" name="enabled" value={automation.enabled ? "false" : "true"} />
+                          <input
+                            type="hidden"
+                            name="enabled"
+                            value={automation.enabled ? "false" : "true"}
+                          />
                           <Button type="submit" variant="outline" size="sm">
                             {automation.enabled ? "Pause" : "Turn on"}
                           </Button>
@@ -146,8 +166,15 @@ export default async function AutomationsPage({
 
                   {/* The flow itself: trigger → action, read left to right. */}
                   <div className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
-                    <FlowStep icon={Zap} label="When" value={triggerLabel(automation.triggerType, automation.triggerConfig)} />
-                    <ArrowRight className="text-muted-foreground mx-auto size-4 shrink-0 rotate-90 sm:mx-0 sm:rotate-0" aria-hidden />
+                    <FlowStep
+                      icon={Zap}
+                      label="When"
+                      value={triggerLabel(automation.triggerType, automation.triggerConfig)}
+                    />
+                    <ArrowRight
+                      className="text-muted-foreground mx-auto size-4 shrink-0 rotate-90 sm:mx-0 sm:rotate-0"
+                      aria-hidden
+                    />
                     <FlowStep
                       icon={automation.actionType === "draft_follow_up" ? ShieldCheck : Workflow}
                       label="Then"
@@ -217,7 +244,9 @@ export default async function AutomationsPage({
                             </NativeSelect>
                           </div>
                           <div className="space-y-1.5">
-                            <Label htmlFor={`edit-trigger-status-${automation.id}`}>Only when status is</Label>
+                            <Label htmlFor={`edit-trigger-status-${automation.id}`}>
+                              Only when status is
+                            </Label>
                             <NativeSelect
                               id={`edit-trigger-status-${automation.id}`}
                               name="triggerStatus"
@@ -244,7 +273,9 @@ export default async function AutomationsPage({
                             </NativeSelect>
                           </div>
                           <div className="space-y-1.5">
-                            <Label htmlFor={`edit-action-status-${automation.id}`}>Set status to</Label>
+                            <Label htmlFor={`edit-action-status-${automation.id}`}>
+                              Set status to
+                            </Label>
                             <NativeSelect
                               id={`edit-action-status-${automation.id}`}
                               name="actionStatus"
@@ -315,14 +346,22 @@ export default async function AutomationsPage({
                   </legend>
                   <div className="space-y-1.5">
                     <Label htmlFor="automation-trigger">Trigger</Label>
-                    <NativeSelect id="automation-trigger" name="triggerType" defaultValue="lead.created">
+                    <NativeSelect
+                      id="automation-trigger"
+                      name="triggerType"
+                      defaultValue="lead.created"
+                    >
                       <option value="lead.created">Lead created</option>
                       <option value="lead.status_changed">Lead status changed</option>
                     </NativeSelect>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="automation-trigger-status">Only when status is</Label>
-                    <NativeSelect id="automation-trigger-status" name="triggerStatus" defaultValue="">
+                    <NativeSelect
+                      id="automation-trigger-status"
+                      name="triggerStatus"
+                      defaultValue=""
+                    >
                       <option value="">Any status</option>
                       <StatusOptions />
                     </NativeSelect>
@@ -334,14 +373,20 @@ export default async function AutomationsPage({
                   </legend>
                   <div className="space-y-1.5">
                     <Label htmlFor="automation-action">Action</Label>
-                    <NativeSelect id="automation-action" name="actionType" defaultValue="notify_team">
+                    <NativeSelect
+                      id="automation-action"
+                      name="actionType"
+                      defaultValue="notify_team"
+                    >
                       <option value="notify_team">Notify owners and admins</option>
                       <option value="set_lead_status">Set lead status</option>
                       <option value="draft_follow_up">Prepare AI follow-up draft</option>
                     </NativeSelect>
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="automation-action-status">Set status to (status action only)</Label>
+                    <Label htmlFor="automation-action-status">
+                      Set status to (status action only)
+                    </Label>
                     <NativeSelect id="automation-action-status" name="actionStatus" defaultValue="">
                       <option value="">Choose a status</option>
                       <StatusOptions />
@@ -353,8 +398,12 @@ export default async function AutomationsPage({
                   </label>
                 </fieldset>
                 <p className="text-muted-foreground flex gap-2 text-xs leading-relaxed">
-                  <ShieldCheck className="text-primary-soft-foreground mt-px size-4 shrink-0" aria-hidden />
-                  AI follow-up automations prepare a draft only. Nothing is sent to a customer automatically.
+                  <ShieldCheck
+                    className="text-primary-soft-foreground mt-px size-4 shrink-0"
+                    aria-hidden
+                  />
+                  AI follow-up automations prepare a draft only. Nothing is sent to a customer
+                  automatically.
                 </p>
                 <Button type="submit" className="w-full">
                   Create automation
@@ -387,11 +436,18 @@ export default async function AutomationsPage({
             <TableBody>
               {runs.map((run) => (
                 <TableRow key={run.id}>
-                  <TableCell className="font-medium">{names.get(run.automationId) ?? "Deleted automation"}</TableCell>
+                  <TableCell className="font-medium">
+                    {names.get(run.automationId) ?? "Deleted automation"}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={runVariant(run.status)}>{statusLabel(run.status)}</Badge>
                   </TableCell>
-                  <TableCell className={cn("max-w-md", run.error ? "text-destructive" : "text-muted-foreground")}>
+                  <TableCell
+                    className={cn(
+                      "max-w-md",
+                      run.error ? "text-destructive" : "text-muted-foreground",
+                    )}
+                  >
                     {run.error ??
                       (Object.keys(run.result).length
                         ? Object.entries(run.result)
@@ -425,10 +481,21 @@ export default async function AutomationsPage({
   );
 }
 
-function FlowStep({ icon: Icon, label, value }: { icon: typeof Zap; label: string; value: string }) {
+function FlowStep({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Zap;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="bg-surface-2/70 flex min-w-0 flex-1 items-center gap-3 rounded-lg border px-3 py-2.5">
-      <span aria-hidden className="bg-card text-primary-soft-foreground flex size-7 shrink-0 items-center justify-center rounded-md border">
+      <span
+        aria-hidden
+        className="bg-card text-primary-soft-foreground flex size-7 shrink-0 items-center justify-center rounded-md border"
+      >
         <Icon className="size-3.5" />
       </span>
       <span className="min-w-0">

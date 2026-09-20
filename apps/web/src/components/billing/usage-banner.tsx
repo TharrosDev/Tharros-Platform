@@ -36,7 +36,10 @@ export function UsageBanner({ state }: { state: UsageBannerState }) {
       </div>
       <Link
         href="/billing"
-        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-fit shrink-0 bg-background/60")}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "w-fit shrink-0 bg-background/60",
+        )}
       >
         Upgrade plan
       </Link>

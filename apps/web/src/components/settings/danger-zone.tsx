@@ -8,13 +8,7 @@ import { deleteAccount } from "@/lib/account/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 
 /**
@@ -23,13 +17,7 @@ import { useToast } from "@/components/ui/toast";
  * before the destructive button enables — no accidental clicks. The server
  * actions are the authoritative guard; this is just the UI gate.
  */
-export function DangerZone({
-  orgName,
-  isOwner,
-}: {
-  orgName: string;
-  isOwner: boolean;
-}) {
+export function DangerZone({ orgName, isOwner }: { orgName: string; isOwner: boolean }) {
   const router = useRouter();
   const toast = useToast();
   const [pending, startTransition] = React.useTransition();
@@ -67,9 +55,8 @@ export function DangerZone({
           <CardHeader>
             <CardTitle>Delete this organization</CardTitle>
             <CardDescription>
-              Permanently deletes <strong>{orgName}</strong> and all its data:
-              its team, settings, and subscription. Any active subscription is
-              cancelled. This cannot be undone.
+              Permanently deletes <strong>{orgName}</strong> and all its data: its team, settings,
+              and subscription. Any active subscription is cancelled. This cannot be undone.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -100,9 +87,9 @@ export function DangerZone({
         <CardHeader>
           <CardTitle>Delete your account</CardTitle>
           <CardDescription>
-            Permanently deletes your account and personal data. Organizations you
-            solely own are deleted with it (and their subscriptions cancelled);
-            those you share are left for the other owners. This cannot be undone.
+            Permanently deletes your account and personal data. Organizations you solely own are
+            deleted with it (and their subscriptions cancelled); those you share are left for the
+            other owners. This cannot be undone.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

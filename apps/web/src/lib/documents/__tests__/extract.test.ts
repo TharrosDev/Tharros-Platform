@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  extractText,
-  looksLikeScanned,
-  MAX_EXTRACTED_CHARS,
-} from "@/lib/documents/extract";
+import { extractText, looksLikeScanned, MAX_EXTRACTED_CHARS } from "@/lib/documents/extract";
 
 const enc = (s: string) => new TextEncoder().encode(s).buffer;
 

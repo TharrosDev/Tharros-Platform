@@ -3,10 +3,7 @@ import { createHash } from "node:crypto";
 export type HeaderReader = Pick<Headers, "get">;
 
 export function opaqueRateLimitKey(namespace: string, ...parts: string[]): string {
-  const digest = createHash("sha256")
-    .update(parts.join("\n"))
-    .digest("hex")
-    .slice(0, 32);
+  const digest = createHash("sha256").update(parts.join("\n")).digest("hex").slice(0, 32);
   return `${namespace}:${digest}`;
 }
 
@@ -23,10 +20,7 @@ export function requestFingerprint(headers: HeaderReader): string {
     "unknown";
   const userAgent = headers.get("user-agent")?.trim().slice(0, 256) || "unknown";
 
-  return createHash("sha256")
-    .update(`${ip}\n${userAgent}`)
-    .digest("hex")
-    .slice(0, 32);
+  return createHash("sha256").update(`${ip}\n${userAgent}`).digest("hex").slice(0, 32);
 }
 
 /**
@@ -67,7 +61,6 @@ export function isSameOriginMutation(request: Request): boolean {
 
   return false;
 }
-
 
 export type JsonBodyResult<T> =
   | { ok: true; value: T }

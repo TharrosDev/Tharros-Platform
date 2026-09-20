@@ -28,9 +28,7 @@ import { soleOwnedOrgIds } from "@/lib/account/owned-orgs";
  * The admin client bypasses RLS, so every org id it touches is derived from the
  * verified caller's own ownership rows — not from any client-supplied value.
  */
-export async function deleteAccount(
-  confirmText: string,
-): Promise<{ error?: string }> {
+export async function deleteAccount(confirmText: string): Promise<{ error?: string }> {
   if (confirmText.trim().toUpperCase() !== "DELETE") {
     return { error: 'Type "DELETE" to confirm. Deletion cancelled.' };
   }

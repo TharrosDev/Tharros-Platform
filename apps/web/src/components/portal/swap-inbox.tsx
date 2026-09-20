@@ -14,8 +14,17 @@ import { respondToSwap } from "@/lib/portal/swap-actions";
  * validates + auto-approves or escalates to a manager.
  */
 
-const fmtDay = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
-const fmtTime = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
+const fmtDay = new Intl.DateTimeFormat("en-US", {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+const fmtTime = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  timeZone: "UTC",
+});
 function label(startsAt: string, endsAt: string): string {
   const s = new Date(Date.parse(startsAt));
   const e = new Date(Date.parse(endsAt));
@@ -56,13 +65,20 @@ export function SwapInbox({ incoming, open }: { incoming: PortalSwap[]; open: Po
             {incoming.map((s) => {
               const busy = pendingId === s.requestId;
               return (
-                <li key={s.requestId} className="border-primary/30 bg-primary/5 flex flex-col gap-3 rounded-xl border p-4">
+                <li
+                  key={s.requestId}
+                  className="border-primary/30 bg-primary/5 flex flex-col gap-3 rounded-xl border p-4"
+                >
                   <div className="min-w-0">
                     <p className="text-foreground text-sm">
                       <strong>{s.fromName}</strong> wants you to take:
                     </p>
-                    <p className="text-foreground font-medium tabular-nums">{label(s.shift.startsAt, s.shift.endsAt)}</p>
-                    {s.shift.roleName ? <p className="text-muted-foreground text-sm">{s.shift.roleName}</p> : null}
+                    <p className="text-foreground font-medium tabular-nums">
+                      {label(s.shift.startsAt, s.shift.endsAt)}
+                    </p>
+                    {s.shift.roleName ? (
+                      <p className="text-muted-foreground text-sm">{s.shift.roleName}</p>
+                    ) : null}
                     {s.tradeFor ? (
                       <p className="text-muted-foreground mt-1 text-xs">
                         In exchange for your {label(s.tradeFor.startsAt, s.tradeFor.endsAt)} shift.
@@ -70,10 +86,22 @@ export function SwapInbox({ incoming, open }: { incoming: PortalSwap[]; open: Po
                     ) : null}
                   </div>
                   <div className="flex gap-2">
-                    <Button type="button" size="sm" onClick={() => run(s.requestId, true)} disabled={busy} className="flex-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => run(s.requestId, true)}
+                      disabled={busy}
+                      className="flex-1"
+                    >
                       {busy ? "Working…" : "Accept"}
                     </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={() => run(s.requestId, false)} disabled={busy}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => run(s.requestId, false)}
+                      disabled={busy}
+                    >
                       Decline
                     </Button>
                   </div>
@@ -93,13 +121,27 @@ export function SwapInbox({ incoming, open }: { incoming: PortalSwap[]; open: Po
             {open.map((s) => {
               const busy = pendingId === s.requestId;
               return (
-                <li key={s.requestId} className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4">
+                <li
+                  key={s.requestId}
+                  className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4"
+                >
                   <div className="min-w-0">
-                    <p className="text-foreground font-medium tabular-nums">{label(s.shift.startsAt, s.shift.endsAt)}</p>
-                    {s.shift.roleName ? <p className="text-muted-foreground text-sm">{s.shift.roleName}</p> : null}
-                    <p className="text-muted-foreground mt-1 text-xs">Offered by {s.fromName}. First to take it gets it.</p>
+                    <p className="text-foreground font-medium tabular-nums">
+                      {label(s.shift.startsAt, s.shift.endsAt)}
+                    </p>
+                    {s.shift.roleName ? (
+                      <p className="text-muted-foreground text-sm">{s.shift.roleName}</p>
+                    ) : null}
+                    <p className="text-muted-foreground mt-1 text-xs">
+                      Offered by {s.fromName}. First to take it gets it.
+                    </p>
                   </div>
-                  <Button type="button" size="sm" onClick={() => run(s.requestId, true)} disabled={busy}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => run(s.requestId, true)}
+                    disabled={busy}
+                  >
                     {busy ? "Working…" : "Take this shift"}
                   </Button>
                 </li>

@@ -70,7 +70,7 @@ export default async function PortalPage() {
           {/* The one thing most visits are about: when do I work next. */}
           <Link
             href="/portal/schedule"
-            className="group bg-primary text-primary-foreground shadow-raised mt-8 block rounded-xl p-5 outline-none transition-colors hover:bg-primary/94 focus-visible:ring-[3px] focus-visible:ring-ring/40 focus-visible:ring-offset-2"
+            className="group bg-primary text-primary-foreground shadow-raised mt-8 block rounded-xl p-5 transition-colors hover:bg-primary/94 "
           >
             <p className="text-sm font-medium">Your next shift</p>
             {nextShift ? (
@@ -78,9 +78,7 @@ export default async function PortalPage() {
                 <p className="mt-1.5 text-xl font-bold tracking-tight tabular-nums">
                   {nextShiftLabel(nextShift)}
                 </p>
-                {nextShift.roleName ? (
-                  <p className="mt-0.5 text-sm">{nextShift.roleName}</p>
-                ) : null}
+                {nextShift.roleName ? <p className="mt-0.5 text-sm">{nextShift.roleName}</p> : null}
               </>
             ) : (
               <p className="mt-1.5 text-xl font-bold tracking-tight">Nothing scheduled yet</p>
@@ -94,7 +92,7 @@ export default async function PortalPage() {
           <div className="mt-4 grid gap-3 lg:grid-cols-2 lg:gap-4">
             <Link
               href="/portal/schedule"
-              className="group bg-card focus-visible:ring-ring/40 flex min-h-24 items-center gap-3 rounded-xl border p-4 shadow-card outline-none transition-colors hover:bg-accent/40 focus-visible:ring-[3px] lg:items-start lg:p-5"
+              className="group bg-card flex min-h-24 items-center gap-3 rounded-xl border p-4 shadow-card transition-colors hover:bg-accent/40 lg:items-start lg:p-5"
             >
               <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <CalendarDays className="size-4.5" aria-hidden />
@@ -113,7 +111,7 @@ export default async function PortalPage() {
 
             <Link
               href="/portal/availability"
-              className="group bg-card focus-visible:ring-ring/40 flex min-h-24 items-center gap-3 rounded-xl border p-4 shadow-card outline-none transition-colors hover:bg-accent/40 focus-visible:ring-[3px] lg:items-start lg:p-5"
+              className="group bg-card flex min-h-24 items-center gap-3 rounded-xl border p-4 shadow-card transition-colors hover:bg-accent/40 lg:items-start lg:p-5"
             >
               <span className="bg-primary-soft text-primary-soft-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
                 <Clock className="size-4.5" aria-hidden />

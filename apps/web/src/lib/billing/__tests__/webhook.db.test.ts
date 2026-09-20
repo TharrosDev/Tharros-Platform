@@ -32,11 +32,7 @@ let orgId = "";
 const eventIds: string[] = [];
 
 /** Build a customer.subscription.* event tied to our seeded org. */
-function subEvent(
-  type: Stripe.Event.Type,
-  status: string,
-  evtSuffix: string,
-): Stripe.Event {
+function subEvent(type: Stripe.Event.Type, status: string, evtSuffix: string): Stripe.Event {
   const id = `evt_${RUN}_${evtSuffix}`;
   eventIds.push(id);
   return {
@@ -120,16 +116,23 @@ describe("handleStripeEvent", () => {
     const evt = subEvent("customer.subscription.updated", "active", "dup");
     const first = await handleStripeEvent(evt, admin);
     expect(first).toEqual({ handled: true, type: "customer.subscription.updated" });
-    expect(await admin.from("subscriptions").select("status").eq("org_id", orgId).single())
-      .toMatchObject({ data: { status: "active" } });
+    expect(
+      await admin.from("subscriptions").select("status").eq("org_id", orgId).single(),
+    ).toMatchObject({ data: { status: "active" } });
 
     // Re-deliver the SAME event id but with a stale status — must be ignored.
-    const stale = { ...evt, data: { object: { ...((evt.data.object as object) as Record<string, unknown>), status: "canceled" } } } as Stripe.Event;
+    const stale = {
+      ...evt,
+      data: {
+        object: { ...(evt.data.object as object as Record<string, unknown>), status: "canceled" },
+      },
+    } as Stripe.Event;
     const second = await handleStripeEvent(stale, admin);
     expect(second).toEqual({ duplicate: true });
     // Status unchanged (still active) — the duplicate did not write.
-    expect(await admin.from("subscriptions").select("status").eq("org_id", orgId).single())
-      .toMatchObject({ data: { status: "active" } });
+    expect(
+      await admin.from("subscriptions").select("status").eq("org_id", orgId).single(),
+    ).toMatchObject({ data: { status: "active" } });
   });
 
   it("marks past_due on invoice.payment_failed", async () => {

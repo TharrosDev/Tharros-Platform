@@ -47,11 +47,11 @@ provider keys are present.
 Live integration tests must use a dedicated non-production Supabase project.
 The repository expects:
 
-| Secret | Purpose |
-| --- | --- |
-| `TEST_SUPABASE_URL` | project API URL |
-| `TEST_SUPABASE_PUBLISHABLE_KEY` | user-session test client |
-| `TEST_SUPABASE_SECRET_KEY` | service-role fixture setup/teardown |
+| Secret                          | Purpose                             |
+| ------------------------------- | ----------------------------------- |
+| `TEST_SUPABASE_URL`             | project API URL                     |
+| `TEST_SUPABASE_PUBLISHABLE_KEY` | user-session test client            |
+| `TEST_SUPABASE_SECRET_KEY`      | service-role fixture setup/teardown |
 
 Keep its schema in lockstep with every migration under
 `supabase/migrations/`. Never point these secrets at production.

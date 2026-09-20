@@ -51,7 +51,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <TooltipProvider>
         <a
           href="#main-content"
-          className="bg-primary text-primary-foreground focus-visible:ring-ring fixed left-4 top-4 z-toast -translate-y-24 rounded-lg px-4 py-2 text-sm font-semibold shadow-raised outline-none transition-transform focus:translate-y-0 focus-visible:ring-[3px]"
+          className="bg-primary text-primary-foreground fixed left-4 top-4 z-toast -translate-y-24 rounded-lg px-4 py-2 text-sm font-semibold shadow-raised transition-transform focus:translate-y-0 "
         >
           Skip to content
         </a>

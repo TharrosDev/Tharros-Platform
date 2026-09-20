@@ -86,7 +86,12 @@ beforeAll(async () => {
 
   const sched = await admin
     .from("schedules")
-    .insert({ org_id: orgId, period_start: "2026-06-01", period_end: "2026-06-14", status: "published" })
+    .insert({
+      org_id: orgId,
+      period_start: "2026-06-01",
+      period_end: "2026-06-14",
+      status: "published",
+    })
     .select("id")
     .single();
   if (sched.error) throw sched.error;
@@ -99,9 +104,30 @@ beforeAll(async () => {
   const shiftsRes = await admin
     .from("shifts")
     .insert([
-      { org_id: orgId, schedule_id: scheduleId, employee_id: employeeId, status: "published", break_minutes: 30, ...a },
-      { org_id: orgId, schedule_id: scheduleId, employee_id: employeeId, status: "published", break_minutes: 30, ...b },
-      { org_id: orgId, schedule_id: scheduleId, employee_id: null, status: "open", break_minutes: 0, ...open },
+      {
+        org_id: orgId,
+        schedule_id: scheduleId,
+        employee_id: employeeId,
+        status: "published",
+        break_minutes: 30,
+        ...a,
+      },
+      {
+        org_id: orgId,
+        schedule_id: scheduleId,
+        employee_id: employeeId,
+        status: "published",
+        break_minutes: 30,
+        ...b,
+      },
+      {
+        org_id: orgId,
+        schedule_id: scheduleId,
+        employee_id: null,
+        status: "open",
+        break_minutes: 0,
+        ...open,
+      },
     ])
     .select("id");
   if (shiftsRes.error) throw shiftsRes.error;
@@ -118,9 +144,12 @@ beforeAll(async () => {
   ]);
   if (offers.error) throw offers.error;
 
-  const swap = await admin
-    .from("shift_swap_requests")
-    .insert({ org_id: orgId, shift_id: aShiftId, requesting_employee_id: employeeId, status: "pending" });
+  const swap = await admin.from("shift_swap_requests").insert({
+    org_id: orgId,
+    shift_id: aShiftId,
+    requesting_employee_id: employeeId,
+    status: "pending",
+  });
   if (swap.error) throw swap.error;
 
   const timeOff = await admin.from("time_off_requests").insert({

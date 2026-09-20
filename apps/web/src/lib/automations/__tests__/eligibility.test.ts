@@ -25,17 +25,17 @@ describe("canReclaimAutomationRun", () => {
 
   it("retries failed runs immediately", () => {
     expect(
-      canReclaimAutomationRun(
-        { status: "failed", started_at: "2026-09-19T02:29:59.000Z" },
-        now,
-      ),
+      canReclaimAutomationRun({ status: "failed", started_at: "2026-09-19T02:29:59.000Z" }, now),
     ).toBe(true);
   });
 
   it("does not reclaim an active running lease", () => {
     expect(
       canReclaimAutomationRun(
-        { status: "running", started_at: new Date(now - AUTOMATION_RUN_STALE_MS + 1).toISOString() },
+        {
+          status: "running",
+          started_at: new Date(now - AUTOMATION_RUN_STALE_MS + 1).toISOString(),
+        },
         now,
       ),
     ).toBe(false);

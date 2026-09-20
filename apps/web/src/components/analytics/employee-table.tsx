@@ -16,7 +16,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type SortKey = "name" | "assignedShifts" | "assignedHours" | "reliability" | "sickCalls" | "acceptanceRate";
+type SortKey =
+  | "name"
+  | "assignedShifts"
+  | "assignedHours"
+  | "reliability"
+  | "sickCalls"
+  | "acceptanceRate";
 type SortDir = "asc" | "desc";
 
 const COLUMNS: { key: SortKey; label: string; numeric: boolean }[] = [
@@ -84,7 +90,7 @@ export function EmployeeAnalyticsTable({ employees }: { employees: EmployeeAnaly
                     type="button"
                     onClick={() => toggle(col.key)}
                     className={cn(
-                      "focus-visible:ring-ring/40 inline-flex items-center gap-1 rounded-sm outline-none transition-colors focus-visible:ring-[3px]",
+                      " inline-flex items-center gap-1 rounded-sm transition-colors ",
                       active ? "text-foreground" : "hover:text-foreground",
                     )}
                   >
@@ -119,10 +125,7 @@ export function EmployeeAnalyticsTable({ employees }: { employees: EmployeeAnaly
                     <span className="text-muted-foreground">—</span>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 tabular-nums">
-                      <span
-                        aria-hidden
-                        className={cn("size-1.5 rounded-full", BAND_DOT[band])}
-                      />
+                      <span aria-hidden className={cn("size-1.5 rounded-full", BAND_DOT[band])} />
                       {formatPercent(e.reliability)}
                     </span>
                   )}

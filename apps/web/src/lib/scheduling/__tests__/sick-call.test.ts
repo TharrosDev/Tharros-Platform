@@ -144,8 +144,6 @@ describe("formatting helpers", () => {
   });
 
   it("builds a thread title", () => {
-    expect(sickCallThreadTitle("Jane Doe", "Mon Jun 15")).toBe(
-      "Sick call — Jane Doe — Mon Jun 15",
-    );
+    expect(sickCallThreadTitle("Jane Doe", "Mon Jun 15")).toBe("Sick call — Jane Doe — Mon Jun 15");
   });
 });

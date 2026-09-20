@@ -26,10 +26,7 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
             )}
           >
             {plan.highlight && (
-              <Badge
-                variant="solid"
-                className="absolute -top-2.5 left-5"
-              >
+              <Badge variant="solid" className="absolute -top-2.5 left-5">
                 Most popular
               </Badge>
             )}
@@ -45,9 +42,7 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
               </span>
               <span className="text-muted-foreground type-small">CAD / month</span>
             </div>
-            <p className="text-muted-foreground type-meta mt-2">
-              {TRIAL_DAYS}-day free trial
-            </p>
+            <p className="text-muted-foreground type-meta mt-2">{TRIAL_DAYS}-day free trial</p>
 
             <ul className="relative mt-6 flex-1 space-y-2.5">
               {plan.features.map((feature) => (
@@ -84,8 +79,8 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
       </div>
 
       <p className="text-muted-foreground type-small mt-6 text-center">
-        Your card is collected now and charged when the trial ends. Cancel anytime
-        before then and you won&apos;t be billed.
+        Your card is collected now and charged when the trial ends. Cancel anytime before then and
+        you won&apos;t be billed.
       </p>
     </div>
   );

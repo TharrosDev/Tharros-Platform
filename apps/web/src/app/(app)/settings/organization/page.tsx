@@ -3,13 +3,7 @@ import type { Metadata } from "next";
 import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/page-header";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormMessage } from "@/components/auth/auth-card";
 import { OrgSettingsForm } from "@/components/org/org-settings-form";
 
@@ -22,9 +16,7 @@ export default async function OrganizationSettingsPage() {
     return (
       <>
         <PageHeader title="Business profile" description="Your business details." />
-        <p className="text-muted-foreground type-body">
-          Select or create an organization first.
-        </p>
+        <p className="text-muted-foreground type-body">Select or create an organization first.</p>
       </>
     );
   }

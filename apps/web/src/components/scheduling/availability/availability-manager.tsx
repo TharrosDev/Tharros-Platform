@@ -255,9 +255,7 @@ function WeeklyGrid({
         })}
       </div>
 
-      {canManage ? (
-        <SaveButton pending={pending}>Save weekly availability</SaveButton>
-      ) : null}
+      {canManage ? <SaveButton pending={pending}>Save weekly availability</SaveButton> : null}
     </form>
   );
 }

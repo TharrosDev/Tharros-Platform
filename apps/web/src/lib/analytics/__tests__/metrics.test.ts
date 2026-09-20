@@ -77,7 +77,12 @@ describe("deriveOrgAnalytics", () => {
 
   it("coerces PostgREST numeric-as-string hours", () => {
     const o = deriveOrgAnalytics(
-      overview({ assigned_shifts: 1, assigned_hours: "7.5" as unknown as number, open_hours: "2.5" as unknown as number, open_shifts: 1 }),
+      overview({
+        assigned_shifts: 1,
+        assigned_hours: "7.5" as unknown as number,
+        open_hours: "2.5" as unknown as number,
+        open_shifts: 1,
+      }),
     );
     expect(o.assignedHours).toBe(7.5);
     expect(o.laborUtilization).toBe(0.75); // 7.5 / 10
@@ -129,9 +134,24 @@ describe("deriveEmployeeAnalytics", () => {
 describe("dailyAssignedHours", () => {
   it("buckets net hours by start date over the trailing window", () => {
     const rows = [
-      { starts_at: "2026-06-09T09:00:00Z", ends_at: "2026-06-09T17:00:00Z", employee_id: "a", break_minutes: 30 },
-      { starts_at: "2026-06-09T10:00:00Z", ends_at: "2026-06-09T14:00:00Z", employee_id: "b", break_minutes: null },
-      { starts_at: "2026-06-10T09:00:00Z", ends_at: "2026-06-10T12:00:00Z", employee_id: "a", break_minutes: 0 },
+      {
+        starts_at: "2026-06-09T09:00:00Z",
+        ends_at: "2026-06-09T17:00:00Z",
+        employee_id: "a",
+        break_minutes: 30,
+      },
+      {
+        starts_at: "2026-06-09T10:00:00Z",
+        ends_at: "2026-06-09T14:00:00Z",
+        employee_id: "b",
+        break_minutes: null,
+      },
+      {
+        starts_at: "2026-06-10T09:00:00Z",
+        ends_at: "2026-06-10T12:00:00Z",
+        employee_id: "a",
+        break_minutes: 0,
+      },
     ];
     const out = dailyAssignedHours(rows, "2026-06-10", 3);
     expect(out).toEqual([
@@ -143,10 +163,25 @@ describe("dailyAssignedHours", () => {
 
   it("ignores open shifts, out-of-window days, and malformed rows", () => {
     const rows = [
-      { starts_at: "2026-06-10T09:00:00Z", ends_at: "2026-06-10T17:00:00Z", employee_id: null, break_minutes: 0 },
-      { starts_at: "2026-05-01T09:00:00Z", ends_at: "2026-05-01T17:00:00Z", employee_id: "a", break_minutes: 0 },
+      {
+        starts_at: "2026-06-10T09:00:00Z",
+        ends_at: "2026-06-10T17:00:00Z",
+        employee_id: null,
+        break_minutes: 0,
+      },
+      {
+        starts_at: "2026-05-01T09:00:00Z",
+        ends_at: "2026-05-01T17:00:00Z",
+        employee_id: "a",
+        break_minutes: 0,
+      },
       { starts_at: "bad", ends_at: "2026-06-10T17:00:00Z", employee_id: "a", break_minutes: 0 },
-      { starts_at: "2026-06-10T17:00:00Z", ends_at: "2026-06-10T09:00:00Z", employee_id: "a", break_minutes: 0 },
+      {
+        starts_at: "2026-06-10T17:00:00Z",
+        ends_at: "2026-06-10T09:00:00Z",
+        employee_id: "a",
+        break_minutes: 0,
+      },
     ];
     const out = dailyAssignedHours(rows, "2026-06-10", 2);
     expect(out).toEqual([

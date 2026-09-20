@@ -28,6 +28,7 @@ claiming success. Add a real handler by registering it in `handlers.ts` and addi
 its type to `JobType` in `types.ts`.
 
 **Registered handlers:**
+
 - `noop` (Day 38) — proves the loop end-to-end.
 - `notification-send` (Day 40) — delivers the email channel of a `notification_events` row.
 - `availability-nudge` (Day 45) — emails an employee a portal link to set their availability,

@@ -67,9 +67,7 @@ describe("check_rate_limit", () => {
 
   it("serializes concurrent attempts for the same bucket", async () => {
     const key = keyFor("concurrent");
-    const results = await Promise.all(
-      Array.from({ length: 12 }, () => check(key, 3, 900)),
-    );
+    const results = await Promise.all(Array.from({ length: 12 }, () => check(key, 3, 900)));
 
     expect(results.filter(Boolean)).toHaveLength(3);
     expect(results.filter((allowed) => !allowed)).toHaveLength(9);

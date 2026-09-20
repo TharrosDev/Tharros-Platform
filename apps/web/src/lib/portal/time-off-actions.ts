@@ -22,9 +22,7 @@ import { getPortalSession } from "./session";
 
 const INACTIVE = "This link isn't active anymore. Ask your manager for a fresh one.";
 
-export type RequestTimeOffResult =
-  | { ok: true; message: string }
-  | { ok: false; message: string };
+export type RequestTimeOffResult = { ok: true; message: string } | { ok: false; message: string };
 
 export async function requestTimeOff(
   startDate: string,

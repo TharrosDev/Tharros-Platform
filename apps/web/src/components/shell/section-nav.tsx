@@ -58,7 +58,7 @@ export function SectionNav({
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "focus-visible:ring-ring/40 relative flex min-h-10 shrink-0 items-center gap-2 px-2.5 text-sm outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-inset",
+              " relative flex min-h-10 shrink-0 items-center gap-2 px-2.5 text-sm transition-colors ",
               vertical && "lg:min-h-9 lg:rounded-md",
               active
                 ? cn("font-semibold", danger ? "text-destructive" : "text-foreground")

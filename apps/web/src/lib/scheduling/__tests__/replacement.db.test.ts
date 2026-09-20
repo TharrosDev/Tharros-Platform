@@ -277,7 +277,11 @@ describe("claim_replacement_offer (first-accept-wins)", () => {
       .in("id", offerIds);
     const byEmp = new Map((offerRows ?? []).map((o) => [o.employee_id as string, o.id as string]));
 
-    const win = await acceptOffer(admin, { offerId: byEmp.get(emp1)!, employeeId: emp1, orgId: orgA });
+    const win = await acceptOffer(admin, {
+      offerId: byEmp.get(emp1)!,
+      employeeId: emp1,
+      orgId: orgA,
+    });
     expect(win.ok).toBe(true);
     if (win.ok) expect(win.shiftId).toBe(shiftId);
 
@@ -289,7 +293,11 @@ describe("claim_replacement_offer (first-accept-wins)", () => {
     expect(sc!.status).toBe("resolved");
 
     // emp2's offer is now expired → claiming it loses.
-    const lose = await acceptOffer(admin, { offerId: byEmp.get(emp2)!, employeeId: emp2, orgId: orgA });
+    const lose = await acceptOffer(admin, {
+      offerId: byEmp.get(emp2)!,
+      employeeId: emp2,
+      orgId: orgA,
+    });
     expect(lose.ok).toBe(false);
   });
 });
@@ -324,12 +332,22 @@ describe("claim_replacement_offer (Day 60 overlap conflict guard)", () => {
     const openId = openShift!.id as string;
     const { data: offer } = await admin
       .from("replacement_pool_events")
-      .insert({ org_id: orgA, shift_id: openId, employee_id: emp2, status: "offered", expires_at: isoIn(11) })
+      .insert({
+        org_id: orgA,
+        shift_id: openId,
+        employee_id: emp2,
+        status: "offered",
+        expires_at: isoIn(11),
+      })
       .select("id")
       .single();
 
     // emp2 tries to take it → the guard rejects with 'conflict'.
-    const res = await acceptOffer(admin, { offerId: offer!.id as string, employeeId: emp2, orgId: orgA });
+    const res = await acceptOffer(admin, {
+      offerId: offer!.id as string,
+      employeeId: emp2,
+      orgId: orgA,
+    });
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.outcome).toBe("conflict");
 

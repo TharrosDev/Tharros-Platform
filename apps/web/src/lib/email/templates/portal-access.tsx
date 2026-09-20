@@ -1,10 +1,4 @@
-import {
-  EmailButton,
-  EmailFallbackLink,
-  EmailHeading,
-  EmailLayout,
-  EmailText,
-} from "./layout";
+import { EmailButton, EmailFallbackLink, EmailHeading, EmailLayout, EmailText } from "./layout";
 
 /**
  * Employee portal-access template. App-sent (not Supabase Auth) — passed as a
@@ -21,23 +15,19 @@ export type PortalAccessEmailProps = {
   portalUrl: string;
 };
 
-export function PortalAccessEmail({
-  employeeName,
-  orgName,
-  portalUrl,
-}: PortalAccessEmailProps) {
+export function PortalAccessEmail({ employeeName, orgName, portalUrl }: PortalAccessEmailProps) {
   return (
     <EmailLayout preview={`Your ${orgName} schedule access`}>
       <EmailHeading>Your {orgName} schedule</EmailHeading>
       <EmailText>
-        Hi {employeeName}, {orgName} uses Tharros to manage scheduling. Open your
-        personal portal to set your availability, view your shifts, and handle
-        time-off — no account or password needed.
+        Hi {employeeName}, {orgName} uses Tharros to manage scheduling. Open your personal portal to
+        set your availability, view your shifts, and handle time-off — no account or password
+        needed.
       </EmailText>
       <EmailButton href={portalUrl}>Open my portal</EmailButton>
       <EmailText>
-        This link is personal to you — please don&apos;t forward it. If you didn&apos;t
-        expect this, you can ignore the email.
+        This link is personal to you — please don&apos;t forward it. If you didn&apos;t expect this,
+        you can ignore the email.
       </EmailText>
       <EmailFallbackLink href={portalUrl} />
     </EmailLayout>

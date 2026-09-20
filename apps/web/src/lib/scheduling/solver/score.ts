@@ -91,7 +91,8 @@ export function scoreSolution(
   const hours = new Map<string, number>();
   for (const e of input.employees) hours.set(e.id, 0);
   for (const s of input.lockedShifts ?? []) {
-    if (s.employeeId !== null) hours.set(s.employeeId, (hours.get(s.employeeId) ?? 0) + shiftHours(s));
+    if (s.employeeId !== null)
+      hours.set(s.employeeId, (hours.get(s.employeeId) ?? 0) + shiftHours(s));
   }
   let gapCount = 0;
   for (let i = 0; i < heads.length; i++) {

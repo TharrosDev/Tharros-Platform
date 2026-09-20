@@ -9,11 +9,7 @@ import { getAuthUser } from "@/lib/auth/current-user";
 import { getOrgContext } from "@/lib/org/queries";
 import { getStripe } from "@/lib/billing/client";
 import { logger } from "@/lib/observability/logger";
-import {
-  notificationsSchema,
-  orgDetailsSchema,
-  type OrgFormState,
-} from "@/lib/org/schemas";
+import { notificationsSchema, orgDetailsSchema, type OrgFormState } from "@/lib/org/schemas";
 
 /**
  * Org server actions. Each validates with zod, calls a SECURITY DEFINER RPC
@@ -213,9 +209,7 @@ export async function updateNotifications(
  * last-owner guard intentionally skips when the org itself is going away.
  * Finally repoints the caller's active org so the switcher doesn't dangle.
  */
-export async function deleteOrganization(
-  confirmName: string,
-): Promise<{ error?: string }> {
+export async function deleteOrganization(confirmName: string): Promise<{ error?: string }> {
   const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
   if (!user || !activeOrg) return { error: "No active organization." };
   if (activeOrg.role !== "owner") {
@@ -233,8 +227,7 @@ export async function deleteOrganization(
     .select("stripe_subscription_id, status")
     .eq("org_id", activeOrg.id)
     .maybeSingle();
-  const subId = (sub as { stripe_subscription_id: string | null } | null)
-    ?.stripe_subscription_id;
+  const subId = (sub as { stripe_subscription_id: string | null } | null)?.stripe_subscription_id;
   const status = (sub as { status: string | null } | null)?.status;
   if (subId && status && status !== "canceled" && status !== "incomplete_expired") {
     try {
@@ -251,10 +244,7 @@ export async function deleteOrganization(
     }
   }
 
-  const { error } = await supabase
-    .from("organizations")
-    .delete()
-    .eq("id", activeOrg.id);
+  const { error } = await supabase.from("organizations").delete().eq("id", activeOrg.id);
   if (error) return { error: error.message };
 
   await repointActiveOrg(supabase, user.id);

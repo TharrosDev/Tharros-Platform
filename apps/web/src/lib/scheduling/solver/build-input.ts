@@ -46,12 +46,19 @@ export async function buildSolverInput(
         .eq("org_id", orgId),
       supabase
         .from("availability")
-        .select("employee_id, kind, day_of_week, effective_date, end_date, start_time, end_time, is_available")
+        .select(
+          "employee_id, kind, day_of_week, effective_date, end_date, start_time, end_time, is_available",
+        )
         .eq("org_id", orgId),
-      supabase.from("business_hours").select("day_of_week, opens_at, closes_at, is_closed").eq("org_id", orgId),
+      supabase
+        .from("business_hours")
+        .select("day_of_week, opens_at, closes_at, is_closed")
+        .eq("org_id", orgId),
       supabase
         .from("staffing_requirements")
-        .select("id, role_certification_id, day_of_week, specific_date, start_time, end_time, min_staff")
+        .select(
+          "id, role_certification_id, day_of_week, specific_date, start_time, end_time, min_staff",
+        )
         .eq("org_id", orgId),
       getLaborRules(orgId),
     ]);
@@ -63,7 +70,8 @@ export async function buildSolverInput(
     ["business_hours", hoursRes],
     ["staffing_requirements", staffingRes],
   ] as const) {
-    if (res.error) logger.error(`buildSolverInput: ${label} query failed`, { err: res.error, orgId });
+    if (res.error)
+      logger.error(`buildSolverInput: ${label} query failed`, { err: res.error, orgId });
   }
 
   return assembleSolverInput({

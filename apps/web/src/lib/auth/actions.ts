@@ -8,10 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getURL } from "@/lib/site-url";
 import { sanitizeNext } from "@/lib/auth/safe-redirect";
 import { checkRateLimit } from "@/lib/rate-limit";
-import {
-  opaqueRateLimitKey,
-  requestFingerprint,
-} from "@/lib/security/request";
+import { opaqueRateLimitKey, requestFingerprint } from "@/lib/security/request";
 import {
   logInSchema,
   requestResetSchema,
@@ -42,10 +39,7 @@ async function authIdentityKey(namespace: string, value: string): Promise<string
   return opaqueRateLimitKey(namespace, value.trim().toLowerCase());
 }
 
-export async function signUp(
-  _prev: AuthFormState,
-  formData: FormData,
-): Promise<AuthFormState> {
+export async function signUp(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const raw = {
     fullName: String(formData.get("fullName") ?? ""),
     email: String(formData.get("email") ?? ""),
@@ -53,14 +47,19 @@ export async function signUp(
   };
   const parsed = signUpSchema.safeParse(raw);
   if (!parsed.success) {
-    return { errors: fieldErrors(parsed.error), values: { fullName: raw.fullName, email: raw.email } };
+    return {
+      errors: fieldErrors(parsed.error),
+      values: { fullName: raw.fullName, email: raw.email },
+    };
   }
 
   const next = sanitizeNext(String(formData.get("next") ?? "")) ?? "/dashboard";
 
   const [requesterLimit, identityLimit] = await Promise.all([
     checkRateLimit(await authRequesterKey("signup-requester"), 8, 3600, { failOpen: false }),
-    checkRateLimit(await authIdentityKey("signup-email", parsed.data.email), 5, 3600, { failOpen: false }),
+    checkRateLimit(await authIdentityKey("signup-email", parsed.data.email), 5, 3600, {
+      failOpen: false,
+    }),
   ]);
   if (!requesterLimit.allowed || !identityLimit.allowed) {
     return {
@@ -89,10 +88,7 @@ export async function signUp(
   redirect(verifyUrl);
 }
 
-export async function logIn(
-  _prev: AuthFormState,
-  formData: FormData,
-): Promise<AuthFormState> {
+export async function logIn(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const raw = {
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
@@ -106,7 +102,9 @@ export async function logIn(
 
   const [requesterLimit, identityLimit] = await Promise.all([
     checkRateLimit(await authRequesterKey("login-requester"), 60, 900, { failOpen: false }),
-    checkRateLimit(await authIdentityKey("login-email", parsed.data.email), 12, 900, { failOpen: false }),
+    checkRateLimit(await authIdentityKey("login-email", parsed.data.email), 12, 900, {
+      failOpen: false,
+    }),
   ]);
   if (!requesterLimit.allowed || !identityLimit.allowed) {
     return {
@@ -122,11 +120,15 @@ export async function logIn(
     // Supabase returns this when the account exists but the email isn't verified.
     if (/confirm/i.test(error.message)) {
       return {
-        message: "Please verify your email before signing in. Check your inbox for the confirmation link.",
+        message:
+          "Please verify your email before signing in. Check your inbox for the confirmation link.",
         values: { email: raw.email },
       };
     }
-    return { message: "That email or password doesn't match our records.", values: { email: raw.email } };
+    return {
+      message: "That email or password doesn't match our records.",
+      values: { email: raw.email },
+    };
   }
 
   redirect(next ?? "/dashboard");
@@ -145,7 +147,9 @@ export async function requestPasswordReset(
   // Throttle by opaque email + requester buckets. On limit, return the same
   // neutral "sent" response: no account-enumeration signal and no email bombing.
   const [identityLimit, requesterLimit] = await Promise.all([
-    checkRateLimit(await authIdentityKey("pwreset-email", parsed.data.email), 3, 900, { failOpen: false }),
+    checkRateLimit(await authIdentityKey("pwreset-email", parsed.data.email), 3, 900, {
+      failOpen: false,
+    }),
     checkRateLimit(await authRequesterKey("pwreset-requester"), 12, 900, { failOpen: false }),
   ]);
   if (!identityLimit.allowed || !requesterLimit.allowed) return { message: "sent" };

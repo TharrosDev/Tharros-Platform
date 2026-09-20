@@ -30,7 +30,4 @@ export const SUBSCRIPTION_STATUSES = [
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 
 /** States in which an org retains product access (used by Day-19 gating). */
-export const ACTIVE_STATUSES: readonly SubscriptionStatus[] = [
-  "trialing",
-  "active",
-];
+export const ACTIVE_STATUSES: readonly SubscriptionStatus[] = ["trialing", "active"];

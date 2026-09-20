@@ -31,10 +31,7 @@ describe("assignedEmployeeIds", () => {
 
 describe("planReminders", () => {
   it("plans one reminder per assigned future shift, fired lead-time before start", () => {
-    const plans = planReminders(
-      [shift("a", "e1", "2026-06-15T09:00:00Z")],
-      NOW,
-    );
+    const plans = planReminders([shift("a", "e1", "2026-06-15T09:00:00Z")], NOW);
     expect(plans).toHaveLength(1);
     expect(plans[0]).toMatchObject({ shiftId: "a", employeeId: "e1" });
     expect(Date.parse(plans[0].runAt)).toBe(Date.parse("2026-06-15T09:00:00Z") - REMINDER_LEAD_MS);

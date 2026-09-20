@@ -41,7 +41,10 @@ export default async function ScheduleCalendarPage() {
   ]);
   const canManage = roster.viewerRole === "owner" || roster.viewerRole === "admin";
   const [escalatedSwaps, timeOffRequests]: [EscalatedSwap[], PendingTimeOff[]] = canManage
-    ? await Promise.all([getEscalatedSwaps(activeOrg.id), getPendingTimeOff(createAdminClient(), activeOrg.id)])
+    ? await Promise.all([
+        getEscalatedSwaps(activeOrg.id),
+        getPendingTimeOff(createAdminClient(), activeOrg.id),
+      ])
     : [[], []];
 
   let shifts: CalendarShift[] = [];

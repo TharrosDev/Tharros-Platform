@@ -119,10 +119,7 @@ export async function appendTurn(
 }
 
 /** Bump a thread's updated_at so it sorts to the top. */
-export async function touchThread(
-  supabase: SupabaseClient,
-  threadId: string,
-): Promise<void> {
+export async function touchThread(supabase: SupabaseClient, threadId: string): Promise<void> {
   const { error } = await supabase
     .from("ai_conversation_threads")
     .update({ updated_at: new Date().toISOString() })

@@ -200,10 +200,7 @@ describe("portal token secrecy", () => {
 
 describe("employees — RLS isolation", () => {
   it("a member of the org can read its roster", async () => {
-    const { data, error } = await memberClient
-      .from("employees")
-      .select("id")
-      .eq("org_id", orgA);
+    const { data, error } = await memberClient.from("employees").select("id").eq("org_id", orgA);
     expect(error).toBeNull();
     expect((data ?? []).length).toBeGreaterThan(0);
   });

@@ -60,8 +60,14 @@ describe("translateIntent", () => {
     );
 
     expect(result.weights).toMatchObject({ fairness: 2 });
-    expect(result.employeeAdjustments?.[0]).toMatchObject({ employeeId: "emp-sarah", targetHoursWeekly: 32 });
-    expect(result.directives?.[0]).toMatchObject({ type: "avoid_pairing", employeeIds: ["emp-tom", "emp-jamie"] });
+    expect(result.employeeAdjustments?.[0]).toMatchObject({
+      employeeId: "emp-sarah",
+      targetHoursWeekly: 32,
+    });
+    expect(result.directives?.[0]).toMatchObject({
+      type: "avoid_pairing",
+      employeeIds: ["emp-tom", "emp-jamie"],
+    });
   });
 
   it("passes the roster + current weights into the prompt, and defaults to the pro model", async () => {

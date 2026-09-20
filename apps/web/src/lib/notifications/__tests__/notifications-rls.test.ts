@@ -195,7 +195,10 @@ describe("createNotification (service-role)", () => {
   it("email gated off by the org preference → 'skipped', no job", async () => {
     await admin
       .from("org_settings")
-      .upsert({ org_id: orgA, notifications: { billing_account: false } }, { onConflict: "org_id" });
+      .upsert(
+        { org_id: orgA, notifications: { billing_account: false } },
+        { onConflict: "org_id" },
+      );
 
     const res = await createNotification(admin, {
       orgId: orgA,

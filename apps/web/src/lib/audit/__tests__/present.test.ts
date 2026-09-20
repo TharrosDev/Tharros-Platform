@@ -60,11 +60,15 @@ describe("presentActivity", () => {
 
   it("flags escalations distinctly", () => {
     expect(presentActivity(row({ action: "replacement.escalated" })).category).toBe("escalation");
-    expect(presentActivity(row({ source: "agent", action: "tool_error" })).category).toBe("escalation");
+    expect(presentActivity(row({ source: "agent", action: "tool_error" })).category).toBe(
+      "escalation",
+    );
   });
 
   it("treats takeover/manual_reply as manager decisions", () => {
-    expect(presentActivity(row({ source: "agent", action: "takeover", actor: "human" }))).toMatchObject({
+    expect(
+      presentActivity(row({ source: "agent", action: "takeover", actor: "human" })),
+    ).toMatchObject({
       title: "Manager took over the agent",
       category: "decision",
       actorLabel: "Manager",
@@ -78,9 +82,9 @@ describe("presentActivity", () => {
   });
 
   it("normalizes an unexpected source to 'schedule'", () => {
-    expect(presentActivity(row({ source: "weird" as unknown as ActivityRow["source"] })).source).toBe(
-      "schedule",
-    );
+    expect(
+      presentActivity(row({ source: "weird" as unknown as ActivityRow["source"] })).source,
+    ).toBe("schedule");
   });
 });
 
@@ -91,6 +95,9 @@ describe("presentActivityFeed", () => {
       row({ id: "2", source: "agent", action: "takeover" }),
     ]);
     expect(out.map((e) => e.id)).toEqual(["1", "2"]);
-    expect(out.map((e) => e.title)).toEqual(["Schedule draft created", "Manager took over the agent"]);
+    expect(out.map((e) => e.title)).toEqual([
+      "Schedule draft created",
+      "Manager took over the agent",
+    ]);
   });
 });

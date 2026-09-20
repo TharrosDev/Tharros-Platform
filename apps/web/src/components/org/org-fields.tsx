@@ -16,13 +16,7 @@ import { INDUSTRY_OPTIONS, SIZE_OPTIONS, type OrgFormState } from "@/lib/org/sch
  * The three shared business-identity fields (name, industry, size). Used by both
  * the first-run onboarding form and the "New organization" dialog.
  */
-export function OrgFields({
-  state,
-  autoFocus,
-}: {
-  state: OrgFormState;
-  autoFocus?: boolean;
-}) {
+export function OrgFields({ state, autoFocus }: { state: OrgFormState; autoFocus?: boolean }) {
   return (
     <>
       <div className="space-y-1.5">

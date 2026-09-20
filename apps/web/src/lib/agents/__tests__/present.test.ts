@@ -32,14 +32,21 @@ function turn(over: Partial<AgentTurn>): AgentTurn {
 
 describe("extractText / renderTurnText", () => {
   it("joins multiple text blocks", () => {
-    const t = turn({ content: [{ type: "text", text: "Hi" }, { type: "text", text: "there" }] });
+    const t = turn({
+      content: [
+        { type: "text", text: "Hi" },
+        { type: "text", text: "there" },
+      ],
+    });
     expect(extractText(t.content)).toBe("Hi\n\nthere");
   });
 
   it("summarizes a tool_use block when there is no text", () => {
     const t = turn({
       role: "assistant",
-      content: [{ type: "tool_use", id: "x", name: "solve_schedule", input: { weekOf: "2026-06-08" } }],
+      content: [
+        { type: "tool_use", id: "x", name: "solve_schedule", input: { weekOf: "2026-06-08" } },
+      ],
     });
     expect(renderTurnText(t)).toBe("Ran tool solve_schedule (weekOf)");
   });
@@ -86,17 +93,25 @@ describe("classifyTurn", () => {
 
   it("classifies a tool-role turn and a tool-only assistant turn as tool", () => {
     expect(
-      classifyTurn(turn({ role: "tool", content: [{ type: "tool_result", tool_use_id: "x", content: "y" }] })),
+      classifyTurn(
+        turn({ role: "tool", content: [{ type: "tool_result", tool_use_id: "x", content: "y" }] }),
+      ),
     ).toBe("tool");
     expect(
-      classifyTurn(turn({ role: "assistant", content: [{ type: "tool_use", id: "x", name: "n", input: {} }] })),
+      classifyTurn(
+        turn({ role: "assistant", content: [{ type: "tool_use", id: "x", name: "n", input: {} }] }),
+      ),
     ).toBe("tool");
   });
 });
 
 describe("presentTurn labels", () => {
   it("relabels a manager turn the viewer authored as 'You (manager)'", () => {
-    const t = turn({ role: "assistant", stopReason: HUMAN_TAKEOVER_STOP_REASON, content: [{ type: "text", text: "x" }] });
+    const t = turn({
+      role: "assistant",
+      stopReason: HUMAN_TAKEOVER_STOP_REASON,
+      content: [{ type: "text", text: "x" }],
+    });
     expect(presentTurn(t, true).label).toBe("You (manager)");
     expect(presentTurn(t, false).label).toBe("Manager");
   });

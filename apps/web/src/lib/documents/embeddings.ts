@@ -48,9 +48,10 @@ async function embedBatch(inputs: string[], apiKey: string): Promise<number[][]>
     // Retry rate-limits + transient server errors with exponential backoff.
     if ((res.status === 429 || res.status >= 500) && attempt < MAX_RETRIES) {
       const retryAfter = Number(res.headers.get("retry-after"));
-      const backoffMs = Number.isFinite(retryAfter) && retryAfter > 0
-        ? retryAfter * 1000
-        : Math.min(2 ** attempt * 500, 8000);
+      const backoffMs =
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? retryAfter * 1000
+          : Math.min(2 ** attempt * 500, 8000);
       logger.warn("embeddings.retry", { status: res.status, attempt, backoffMs });
       await sleep(backoffMs);
       continue;

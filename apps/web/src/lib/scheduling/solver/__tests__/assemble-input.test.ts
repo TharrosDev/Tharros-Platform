@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { assembleSolverInput } from "../assemble-input";
-import type {
-  AssembleSolverInputArgs,
-  RawBusinessHours,
-  RawStaffing,
-} from "../assemble-input";
+import type { AssembleSolverInputArgs, RawBusinessHours, RawStaffing } from "../assemble-input";
 import type { LaborRules } from "../../types";
 
 function laborRules(): LaborRules {
@@ -126,7 +122,9 @@ describe("assembleSolverInput — roles & cert expiry", () => {
     const out = assembleSolverInput(
       args({
         employees: [employee],
-        roleAssignments: [{ employee_id: "e1", role_certification_id: "cert-expired", expires_at: "2026-06-01" }],
+        roleAssignments: [
+          { employee_id: "e1", role_certification_id: "cert-expired", expires_at: "2026-06-01" },
+        ],
       }),
     );
     expect(out.employees[0].roleIds).toEqual([]);

@@ -50,7 +50,7 @@ export async function getActivityPage(
   // filter that hides this page's tail would strand "load more".
   const hasMore = all.length > ACTIVITY_PAGE_SIZE;
   const page = all.slice(0, ACTIVITY_PAGE_SIZE);
-  const nextBefore = hasMore ? page[page.length - 1]?.created_at ?? null : null;
+  const nextBefore = hasMore ? (page[page.length - 1]?.created_at ?? null) : null;
 
   const rows = source === "all" ? page : page.filter((r) => r.source === source);
 
@@ -109,7 +109,7 @@ export async function getScheduleActivityPage(
 
   const hasMore = mapped.length > ACTIVITY_PAGE_SIZE;
   const rows = mapped.slice(0, ACTIVITY_PAGE_SIZE);
-  const nextBefore = hasMore ? rows[rows.length - 1]?.created_at ?? null : null;
+  const nextBefore = hasMore ? (rows[rows.length - 1]?.created_at ?? null) : null;
 
   return { rows, nextBefore, source: "schedule" };
 }

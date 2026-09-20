@@ -108,10 +108,7 @@ function buildSystemPrompt(policy: SickCallReasonPolicy): string {
 }
 
 function buildUserContent(args: ConfirmSickCallArgs): string {
-  const lines = [
-    `Employee: ${args.employeeName}`,
-    `Shift they can't make: ${args.shiftLabel}`,
-  ];
+  const lines = [`Employee: ${args.employeeName}`, `Shift they can't make: ${args.shiftLabel}`];
   if (args.policy !== "hidden" && args.reasonText.trim()) {
     lines.push(`Reason they gave: ${args.reasonText.trim()}`);
   } else {
@@ -147,12 +144,9 @@ export async function confirmSickCall(
 }
 
 /** Deterministic confirmation used when AI is unavailable — never blocks a call-out. */
-export function deterministicConfirmation(
-  args: ConfirmSickCallArgs,
-): SickCallConfirmation {
+export function deterministicConfirmation(args: ConfirmSickCallArgs): SickCallConfirmation {
   const first = args.employeeName.split(" ")[0] || "there";
-  const reason =
-    args.policy !== "hidden" && args.reasonText.trim() ? args.reasonText.trim() : null;
+  const reason = args.policy !== "hidden" && args.reasonText.trim() ? args.reasonText.trim() : null;
   return {
     normalizedReason: reason,
     confirmationMessage: `Thanks for letting us know, ${first}. We've recorded that you can't make your ${args.shiftLabel} shift and notified your manager — we'll work on finding cover.`,
@@ -235,7 +229,11 @@ export async function processSickCall(
     .maybeSingle();
   if (shiftErr) {
     logger.error("sick_call.shift_lookup_failed", { err: shiftErr, employeeId, shiftId });
-    return { ok: false, code: "failed", message: "Couldn't process that just now. Please try again." };
+    return {
+      ok: false,
+      code: "failed",
+      message: "Couldn't process that just now. Please try again.",
+    };
   }
   const shift = shiftRaw as ShiftRow | null;
   if (
@@ -248,7 +246,8 @@ export async function processSickCall(
     return {
       ok: false,
       code: "not_found",
-      message: "We couldn't find that upcoming shift on your schedule. It may already have changed.",
+      message:
+        "We couldn't find that upcoming shift on your schedule. It may already have changed.",
     };
   }
 
@@ -302,7 +301,11 @@ export async function processSickCall(
     .single();
   if (scErr || !scRaw) {
     logger.error("sick_call.insert_failed", { err: scErr, employeeId, shiftId });
-    return { ok: false, code: "failed", message: "Couldn't record that just now. Please try again." };
+    return {
+      ok: false,
+      code: "failed",
+      message: "Couldn't record that just now. Please try again.",
+    };
   }
   const sickCallId = (scRaw as { id: string }).id;
 
@@ -424,7 +427,12 @@ async function openSickCallThread(
 /** Notify every owner/admin of the org (in-app + email). Best-effort. */
 async function notifyManagers(
   admin: SupabaseClient,
-  input: { orgId: string; employeeName: string; shiftLabel: string; normalizedReason: string | null },
+  input: {
+    orgId: string;
+    employeeName: string;
+    shiftLabel: string;
+    normalizedReason: string | null;
+  },
 ): Promise<void> {
   const { data, error } = await admin
     .from("memberships")

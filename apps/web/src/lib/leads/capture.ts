@@ -57,8 +57,8 @@ export async function capturePublicLead(
   input: PublicLeadInput,
   requesterKey: string,
 ): Promise<
-  { ok: true; leadId: string } |
-  { ok: false; reason: "invalid_form" | "rate_limited" | "inactive_plan" }
+  | { ok: true; leadId: string }
+  | { ok: false; reason: "invalid_form" | "rate_limited" | "inactive_plan" }
 > {
   const admin = createAdminClient();
   const { data: formData, error: formError } = await admin
@@ -78,7 +78,9 @@ export async function capturePublicLead(
   // Two atomic buckets: protect one visitor from hammering the endpoint while
   // keeping a separate form-wide circuit breaker for distributed abuse.
   const [requesterLimit, formLimit] = await Promise.all([
-    checkRateLimit(`lead-capture:${form.id}:requester:${requesterKey}`, 10, 600, { failOpen: false }),
+    checkRateLimit(`lead-capture:${form.id}:requester:${requesterKey}`, 10, 600, {
+      failOpen: false,
+    }),
     checkRateLimit(`lead-capture:${form.id}:form`, 120, 60, { failOpen: false }),
   ]);
   if (!requesterLimit.allowed || !formLimit.allowed) {

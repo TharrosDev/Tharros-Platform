@@ -14,8 +14,5 @@ export function leadCaptureRequesterKey(headers: Headers): string {
     "unknown";
   const userAgent = headers.get("user-agent")?.trim().slice(0, 256) || "unknown";
 
-  return createHash("sha256")
-    .update(`${ip}\n${userAgent}`)
-    .digest("hex")
-    .slice(0, 32);
+  return createHash("sha256").update(`${ip}\n${userAgent}`).digest("hex").slice(0, 32);
 }

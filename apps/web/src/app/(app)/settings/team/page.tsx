@@ -3,13 +3,7 @@ import type { Metadata } from "next";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getTeam } from "@/lib/team/queries";
 import { PageHeader } from "@/components/page-header";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InviteForm } from "@/components/team/invite-form";
 import { TeamLists } from "@/components/team/team-lists";
 
@@ -33,10 +27,7 @@ export default async function TeamPage() {
 
   return (
     <>
-      <PageHeader
-        title="Team"
-        description={`Manage who has access to ${team.activeOrg.name}.`}
-      />
+      <PageHeader title="Team" description={`Manage who has access to ${team.activeOrg.name}.`} />
 
       {canManage ? (
         <Card>

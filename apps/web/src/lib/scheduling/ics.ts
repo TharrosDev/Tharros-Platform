@@ -24,7 +24,11 @@ export function icsStamp(iso: string): string {
 
 /** Escape a value for an iCalendar text field (RFC 5545 §3.3.11). */
 function escapeText(v: string): string {
-  return v.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+  return v
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r?\n/g, "\\n");
 }
 
 /** A stable, deterministic DTSTAMP (no Date.now → pure). Uses the first event or epoch. */

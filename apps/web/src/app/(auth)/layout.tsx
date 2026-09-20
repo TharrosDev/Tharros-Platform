@@ -36,7 +36,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         <Link
           href="/"
           aria-label="Tharros home"
-          className="focus-visible:ring-ring/40 relative inline-flex min-h-10 w-fit items-center rounded-md outline-none focus-visible:ring-[3px]"
+          className=" relative inline-flex min-h-10 w-fit items-center rounded-md "
         >
           <TharrosWordmark markClassName="size-7" />
         </Link>
@@ -69,7 +69,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         <Link
           href="/"
           aria-label="Tharros home"
-          className="focus-visible:ring-ring/40 inline-flex min-h-10 items-center rounded-md outline-none focus-visible:ring-[3px] lg:hidden"
+          className=" inline-flex min-h-10 items-center rounded-md lg:hidden"
         >
           <TharrosWordmark markClassName="size-7" />
         </Link>

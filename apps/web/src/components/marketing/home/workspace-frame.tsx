@@ -59,7 +59,11 @@ function WorkspaceFrame({
                       state === "idle" && "bg-card",
                     )}
                   >
-                    {state === "done" ? <Check className="size-3.5" /> : <Icon className="size-3.5" />}
+                    {state === "done" ? (
+                      <Check className="size-3.5" />
+                    ) : (
+                      <Icon className="size-3.5" />
+                    )}
                   </span>
                   {product.label}
                 </li>

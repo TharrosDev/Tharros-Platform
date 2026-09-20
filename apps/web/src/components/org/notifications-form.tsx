@@ -40,10 +40,7 @@ export function NotificationsForm({
 
       <div className="divide-border divide-y">
         {NOTIFICATION_OPTIONS.map((option) => (
-          <div
-            key={option.key}
-            className="flex items-start justify-between gap-4 py-4 first:pt-0"
-          >
+          <div key={option.key} className="flex items-start justify-between gap-4 py-4 first:pt-0">
             <div className="space-y-0.5">
               <Label htmlFor={`notif-${option.key}`}>{option.label}</Label>
               <p className="text-muted-foreground text-sm">{option.hint}</p>
@@ -58,9 +55,7 @@ export function NotificationsForm({
         ))}
       </div>
 
-      {canManage ? (
-        <SaveButton pending={pending}>Save preferences</SaveButton>
-      ) : null}
+      {canManage ? <SaveButton pending={pending}>Save preferences</SaveButton> : null}
     </form>
   );
 }

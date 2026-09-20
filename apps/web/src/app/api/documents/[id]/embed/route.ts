@@ -7,10 +7,7 @@ import { chunkText } from "@/lib/documents/chunk";
 import { embedTexts, toVectorLiteral } from "@/lib/documents/embeddings";
 import { logger } from "@/lib/observability/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
-import {
-  isSameOriginMutation,
-  opaqueRateLimitKey,
-} from "@/lib/security/request";
+import { isSameOriginMutation, opaqueRateLimitKey } from "@/lib/security/request";
 
 // Node runtime: chunking + the embeddings fetch run server-side.
 export const runtime = "nodejs";
@@ -51,8 +48,12 @@ export async function POST(
   }
 
   const [userLimit, orgLimit] = await Promise.all([
-    checkRateLimit(opaqueRateLimitKey("document-embed-user", activeOrg.id, user.id), 20, 3600, { failOpen: false }),
-    checkRateLimit(opaqueRateLimitKey("document-embed-org", activeOrg.id), 120, 3600, { failOpen: false }),
+    checkRateLimit(opaqueRateLimitKey("document-embed-user", activeOrg.id, user.id), 20, 3600, {
+      failOpen: false,
+    }),
+    checkRateLimit(opaqueRateLimitKey("document-embed-org", activeOrg.id), 120, 3600, {
+      failOpen: false,
+    }),
   ]);
   if (!userLimit.allowed || !orgLimit.allowed) {
     return Response.json(
@@ -129,8 +130,11 @@ export async function POST(
     // Re-index safe: drop any existing chunks for this document first.
     await admin.from("document_chunks").delete().eq("document_id", id);
 
-    await admin.from("documents").update({ status: "embedding" }).eq("id", id)
-        .eq("org_id", activeOrg.id);
+    await admin
+      .from("documents")
+      .update({ status: "embedding" })
+      .eq("id", id)
+      .eq("org_id", activeOrg.id);
     const vectors = await embedTexts(chunks.map((c) => c.content));
 
     const rows = chunks.map((c, i) => ({
@@ -150,7 +154,7 @@ export async function POST(
       .from("documents")
       .update({ status: "ready", error: null })
       .eq("id", id)
-        .eq("org_id", activeOrg.id);
+      .eq("org_id", activeOrg.id);
     await finishJob("succeeded");
 
     return Response.json({ status: "ready", chunks: chunks.length });
@@ -161,7 +165,7 @@ export async function POST(
       .from("documents")
       .update({ status: "failed", error: "Couldn't index this document. Please try re-indexing." })
       .eq("id", id)
-        .eq("org_id", activeOrg.id);
+      .eq("org_id", activeOrg.id);
     await finishJob("failed", message);
     return Response.json(
       { status: "failed", error: "Couldn't index this document. Please try re-indexing." },

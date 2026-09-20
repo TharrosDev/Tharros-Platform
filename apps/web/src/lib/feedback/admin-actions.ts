@@ -59,7 +59,10 @@ export async function approveUsageBonus(args: {
     month,
   });
   if (bonusErr) {
-    logger.error("feedback.bonus_insert_failed", { submissionId: args.submissionId, error: bonusErr.message });
+    logger.error("feedback.bonus_insert_failed", {
+      submissionId: args.submissionId,
+      error: bonusErr.message,
+    });
     return { ok: false, message: "Couldn't record the bonus. Please try again." };
   }
 
@@ -73,8 +76,14 @@ export async function approveUsageBonus(args: {
     })
     .eq("id", submission.id);
   if (updateErr) {
-    logger.error("feedback.approve_update_failed", { submissionId: args.submissionId, error: updateErr.message });
-    return { ok: false, message: "Bonus recorded, but the submission didn't update. Refresh and check." };
+    logger.error("feedback.approve_update_failed", {
+      submissionId: args.submissionId,
+      error: updateErr.message,
+    });
+    return {
+      ok: false,
+      message: "Bonus recorded, but the submission didn't update. Refresh and check.",
+    };
   }
 
   revalidatePath(ADMIN_PATH);
@@ -99,7 +108,10 @@ export async function resolveSubmission(args: {
     .update(patch)
     .eq("id", args.submissionId);
   if (error) {
-    logger.error("feedback.resolve_failed", { submissionId: args.submissionId, error: error.message });
+    logger.error("feedback.resolve_failed", {
+      submissionId: args.submissionId,
+      error: error.message,
+    });
     return { ok: false, message: "Couldn't update the submission. Please try again." };
   }
 

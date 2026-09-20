@@ -104,9 +104,7 @@ export function buildCitations(chunks: GroundingChunk[]): Citation[] {
 
   return docs.map((doc) => {
     const chunkIndices = [
-      ...new Set(
-        chunks.filter((c) => c.documentId === doc.documentId).map((c) => c.chunkIndex),
-      ),
+      ...new Set(chunks.filter((c) => c.documentId === doc.documentId).map((c) => c.chunkIndex)),
     ].sort((a, b) => a - b);
     return {
       index: doc.index,

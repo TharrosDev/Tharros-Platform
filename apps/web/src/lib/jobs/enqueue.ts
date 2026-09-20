@@ -39,10 +39,7 @@ export function buildJobRow(input: EnqueueJobInput): Record<string, unknown> {
 }
 
 /** Insert a pending job. Returns the new job id. */
-export async function enqueueJob(
-  admin: SupabaseClient,
-  input: EnqueueJobInput,
-): Promise<string> {
+export async function enqueueJob(admin: SupabaseClient, input: EnqueueJobInput): Promise<string> {
   const { data, error } = await admin.from("jobs").insert(buildJobRow(input)).select("id").single();
   if (error) throw error;
   return (data as { id: string }).id;

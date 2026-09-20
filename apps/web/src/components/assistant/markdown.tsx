@@ -8,11 +8,7 @@ import { FileText } from "lucide-react";
 import type { Citation } from "@/lib/documents/rag-prompt";
 import { splitCitationText } from "@/lib/assistant/citation-markers";
 import { cn } from "@/lib/utils";
-import {
-  PreviewCard,
-  PreviewCardContent,
-  PreviewCardTrigger,
-} from "@/components/ui/preview-card";
+import { PreviewCard, PreviewCardContent, PreviewCardTrigger } from "@/components/ui/preview-card";
 
 /**
  * Day 29 — markdown for assistant turns, mapped to the Workshop type scale.
@@ -120,7 +116,7 @@ function CitationMarker({
       type="button"
       onClick={onClick}
       aria-label={filename ? `Source ${n}: ${filename}` : `Source ${n}`}
-      className="text-primary-soft-foreground bg-primary-soft hover:bg-primary-soft/70 focus-visible:ring-ring/40 inline-flex min-w-[1.1em] items-center justify-center rounded px-1 text-[0.7em] font-semibold tabular-nums outline-none transition-colors focus-visible:ring-2"
+      className="text-primary-soft-foreground bg-primary-soft hover:bg-primary-soft/70 inline-flex min-w-[1.1em] items-center justify-center rounded px-1 text-[0.7em] font-semibold tabular-nums transition-colors "
     >
       {n}
     </button>

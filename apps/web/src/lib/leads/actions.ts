@@ -16,13 +16,10 @@ import { LEAD_STATUSES } from "@/lib/leads/types";
 import { logger } from "@/lib/observability/logger";
 
 const optionalText = (max: number) =>
-  z.preprocess(
-    (value) => {
-      const text = String(value ?? "").trim();
-      return text.length ? text : null;
-    },
-    z.string().max(max).nullable(),
-  );
+  z.preprocess((value) => {
+    const text = String(value ?? "").trim();
+    return text.length ? text : null;
+  }, z.string().max(max).nullable());
 
 const leadSchema = z
   .object({
@@ -206,14 +203,17 @@ export async function toggleCaptureForm(formData: FormData): Promise<void> {
   revalidatePath("/leads");
 }
 
-
 export async function addLeadNote(formData: FormData): Promise<void> {
   const { user, activeOrg } = await requireLeadAccess();
   const leadId = String(formData.get("leadId") ?? "");
   const note = String(formData.get("note") ?? "").trim();
 
   if (!leadId || !note || note.length > 4000) {
-    redirect(leadId ? `/leads/${encodeURIComponent(leadId)}?error=invalid-note` : "/leads?error=invalid-note");
+    redirect(
+      leadId
+        ? `/leads/${encodeURIComponent(leadId)}?error=invalid-note`
+        : "/leads?error=invalid-note",
+    );
   }
 
   const supabase = await createClient();
@@ -242,7 +242,6 @@ export async function addLeadNote(formData: FormData): Promise<void> {
 
   revalidatePath(`/leads/${leadId}`);
 }
-
 
 export async function updateLeadDetails(formData: FormData): Promise<void> {
   const { activeOrg } = await requireLeadAccess();
@@ -360,7 +359,6 @@ export async function sendLeadFollowUp(formData: FormData): Promise<void> {
   redirect(`/leads/${encodeURIComponent(leadId)}?sent=1`);
 }
 
-
 export async function updateCaptureForm(formData: FormData): Promise<void> {
   const { activeOrg } = await requireLeadAccess(true);
   const formId = String(formData.get("formId") ?? "");
@@ -384,8 +382,7 @@ export async function updateCaptureForm(formData: FormData): Promise<void> {
     .update({
       name,
       headline: headline || "Get in touch",
-      success_message:
-        successMessage || "Thanks. We received your message and will be in touch.",
+      success_message: successMessage || "Thanks. We received your message and will be in touch.",
     })
     .eq("id", formId)
     .eq("org_id", activeOrg.id);

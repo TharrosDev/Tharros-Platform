@@ -9,7 +9,11 @@ import type { EditViolation } from "../validation";
  */
 
 function v(severity: "hard" | "soft"): EditViolation {
-  return { rule: severity === "hard" ? "double_booking" : "overtime_threshold", severity, message: "x" };
+  return {
+    rule: severity === "hard" ? "double_booking" : "overtime_threshold",
+    severity,
+    message: "x",
+  };
 }
 
 describe("publishGate", () => {

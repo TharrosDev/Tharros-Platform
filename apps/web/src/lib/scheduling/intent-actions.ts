@@ -18,9 +18,7 @@ import { translateIntent, type IntentTranslation } from "./intent";
  * plus directives it interprets). Meters into `ai_usage_events` like every AI call.
  */
 
-export type IntentState =
-  | { ok: true; result: IntentTranslation }
-  | { ok: false; message: string };
+export type IntentState = { ok: true; result: IntentTranslation } | { ok: false; message: string };
 
 export async function translateSchedulingIntent(text: string): Promise<IntentState> {
   const goals = text.trim();
@@ -50,7 +48,8 @@ export async function translateSchedulingIntent(text: string): Promise<IntentSta
       {
         chat: chatCompletion,
         model: SCHEDULING_MODEL_PRO,
-        onUsage: (model, usage) => recordUsage(activeOrg.id, user.id, model, mapDeepSeekUsage(usage)),
+        onUsage: (model, usage) =>
+          recordUsage(activeOrg.id, user.id, model, mapDeepSeekUsage(usage)),
       },
     );
     return { ok: true, result };

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { matchesQuery, MAX_TAGS, MAX_TAG_LENGTH, normalizeTag, normalizeTags } from "@/lib/documents/tags";
+import {
+  matchesQuery,
+  MAX_TAGS,
+  MAX_TAG_LENGTH,
+  normalizeTag,
+  normalizeTags,
+} from "@/lib/documents/tags";
 
 describe("normalizeTag", () => {
   it("trims, collapses whitespace, and lowercases", () => {

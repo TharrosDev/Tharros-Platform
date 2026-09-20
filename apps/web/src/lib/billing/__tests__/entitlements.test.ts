@@ -22,9 +22,9 @@ describe("entitlementFor", () => {
 
   it("allows active and healthy trial subscriptions", () => {
     expect(entitlementFor(sub({ status: "active" })).allowed).toBe(true);
-    expect(entitlementFor(sub({ status: "trialing", trial_ends_at: daysFromNow(10) })).allowed).toBe(
-      true,
-    );
+    expect(
+      entitlementFor(sub({ status: "trialing", trial_ends_at: daysFromNow(10) })).allowed,
+    ).toBe(true);
   });
 
   it("shows the trial-ending banner within the threshold", () => {

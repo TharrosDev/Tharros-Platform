@@ -79,13 +79,7 @@ export async function isMember(orgId: string, userId: string): Promise<boolean> 
   return (count ?? 0) > 0;
 }
 
-export type SeedStatus =
-  | "trialing"
-  | "active"
-  | "past_due"
-  | "canceled"
-  | "unpaid"
-  | "paused";
+export type SeedStatus = "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "paused";
 
 /**
  * Seed/overwrite the org's subscription row to a given status — the same shape
@@ -257,10 +251,7 @@ export async function cleanup(userIds: string[]): Promise<void> {
   const ids = userIds.filter(Boolean);
   if (!ids.length) return;
 
-  const { data: orgs } = await admin
-    .from("memberships")
-    .select("org_id")
-    .in("user_id", ids);
+  const { data: orgs } = await admin.from("memberships").select("org_id").in("user_id", ids);
   const orgIds = [...new Set((orgs ?? []).map((m) => (m as { org_id: string }).org_id))];
   for (const id of orgIds) {
     await admin.from("organizations").delete().eq("id", id);

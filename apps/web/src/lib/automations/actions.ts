@@ -35,9 +35,10 @@ function parseAutomationForm(formData: FormData) {
   });
 }
 
-function automationConfig(
-  data: z.infer<typeof automationFormSchema>,
-): { triggerConfig: Record<string, unknown>; actionConfig: Record<string, unknown> } {
+function automationConfig(data: z.infer<typeof automationFormSchema>): {
+  triggerConfig: Record<string, unknown>;
+  actionConfig: Record<string, unknown>;
+} {
   const triggerConfig =
     data.triggerType === "lead.status_changed" && data.triggerStatus
       ? { toStatus: data.triggerStatus }
@@ -162,7 +163,6 @@ export async function deleteAutomation(formData: FormData): Promise<void> {
   revalidatePath("/automations");
 }
 
-
 export async function runAutomationNow(formData: FormData): Promise<void> {
   const { user, activeOrg } = await requireAutomationManager();
   const automationId = String(formData.get("automationId") ?? "");
@@ -177,12 +177,7 @@ export async function runAutomationNow(formData: FormData): Promise<void> {
       .eq("id", automationId)
       .eq("org_id", activeOrg.id)
       .maybeSingle(),
-    supabase
-      .from("leads")
-      .select("id")
-      .eq("id", leadId)
-      .eq("org_id", activeOrg.id)
-      .maybeSingle(),
+    supabase.from("leads").select("id").eq("id", leadId).eq("org_id", activeOrg.id).maybeSingle(),
   ]);
 
   if (!automation || !lead) redirect("/automations?error=manual-run");

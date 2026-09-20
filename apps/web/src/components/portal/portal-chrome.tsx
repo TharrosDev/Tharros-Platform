@@ -22,11 +22,7 @@ function PortalShell({ className, children }: React.ComponentProps<"main">) {
 function PortalHeader({ children }: { children?: React.ReactNode }) {
   return (
     <header className="mb-8 flex min-h-12 items-center justify-between gap-4 border-b pb-3">
-      <Link
-        href="/portal"
-        aria-label="Employee portal home"
-        className="focus-visible:ring-ring/40 rounded-md outline-none focus-visible:ring-[3px]"
-      >
+      <Link href="/portal" aria-label="Employee portal home" className=" rounded-md ">
         <TharrosWordmark />
       </Link>
       {children}

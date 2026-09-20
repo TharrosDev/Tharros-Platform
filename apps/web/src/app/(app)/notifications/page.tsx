@@ -5,7 +5,11 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { listNotifications } from "@/lib/notifications/queries";
-import { markAllNotificationsRead, markNotificationRead, dismissNotification } from "@/lib/notifications/actions";
+import {
+  markAllNotificationsRead,
+  markNotificationRead,
+  dismissNotification,
+} from "@/lib/notifications/actions";
 import { formatTimestamp, notificationLink } from "@/lib/notifications/types";
 
 export const metadata: Metadata = { title: "Notifications" };
@@ -27,7 +31,10 @@ export default async function NotificationsPage() {
         actions={
           hasUnread ? (
             <form action={markAllNotificationsRead}>
-              <button type="submit" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+              <button
+                type="submit"
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+              >
                 Mark all as read
               </button>
             </form>
@@ -81,7 +88,7 @@ export default async function NotificationsPage() {
                         <button
                           type="submit"
                           aria-label={`Mark "${n.title}" as read`}
-                          className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/40 rounded-sm text-xs outline-none focus-visible:ring-[3px]"
+                          className="text-muted-foreground hover:text-foreground rounded-sm text-xs "
                         >
                           Mark read
                         </button>
@@ -92,7 +99,7 @@ export default async function NotificationsPage() {
                       <button
                         type="submit"
                         aria-label={`Dismiss "${n.title}"`}
-                        className="text-muted-foreground hover:text-destructive focus-visible:ring-ring/40 rounded-sm text-xs outline-none focus-visible:ring-[3px]"
+                        className="text-muted-foreground hover:text-destructive rounded-sm text-xs "
                       >
                         Dismiss
                       </button>

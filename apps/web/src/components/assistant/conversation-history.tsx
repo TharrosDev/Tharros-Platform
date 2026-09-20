@@ -188,7 +188,7 @@ export function ConversationHistory({
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           aria-label={`Actions for ${c.title}`}
-                          className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-1.5 top-1.5 inline-flex size-7 items-center justify-center rounded-md opacity-0 transition group-focus-within/item:opacity-100 group-hover/item:opacity-100 focus-visible:opacity-100 focus-visible:ring-ring/40 focus-visible:ring-2 outline-none"
+                          className="text-muted-foreground hover:bg-accent hover:text-foreground absolute right-1.5 top-1.5 inline-flex size-7 items-center justify-center rounded-md opacity-0 transition group-focus-within/item:opacity-100 group-hover/item:opacity-100 focus-visible:opacity-100 "
                         >
                           <MoreHorizontal className="size-4" />
                         </DropdownMenuTrigger>
@@ -197,7 +197,10 @@ export function ConversationHistory({
                             <Pencil />
                             Rename
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive" onClick={() => setDeleting(c)}>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => setDeleting(c)}
+                          >
                             <Trash2 />
                             Delete
                           </DropdownMenuItem>
@@ -248,7 +251,12 @@ export function ConversationHistory({
               aria-label="Conversation name"
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setRenaming(null)} disabled={pending}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setRenaming(null)}
+                disabled={pending}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={pending}>

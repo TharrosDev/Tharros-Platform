@@ -10,11 +10,7 @@ import { SCHEDULING_MODEL } from "@/lib/deepseek/models";
 import { createNotification } from "@/lib/notifications/notify";
 import { logger } from "@/lib/observability/logger";
 
-import {
-  findEligibleEmployees,
-  readLaborRules,
-  type EligibilityCandidate,
-} from "./replacement";
+import { findEligibleEmployees, readLaborRules, type EligibilityCandidate } from "./replacement";
 import type { ShiftInput } from "./types";
 import type { PermanentRow, TemporaryRow } from "./queries";
 
@@ -60,7 +56,8 @@ export function resolveTimeOffPolicy(value: unknown): TimeOffPolicy {
   const policy = { ...DEFAULT_TIME_OFF_POLICY };
   if (value && typeof value === "object") {
     const v = value as Record<string, unknown>;
-    if (typeof v.autoApproveLowImpact === "boolean") policy.autoApproveLowImpact = v.autoApproveLowImpact;
+    if (typeof v.autoApproveLowImpact === "boolean")
+      policy.autoApproveLowImpact = v.autoApproveLowImpact;
     if (typeof v.escalateHighImpact === "boolean") policy.escalateHighImpact = v.escalateHighImpact;
   }
   return policy;
@@ -118,7 +115,15 @@ export const timeOffEvaluationSchema = z.object({
   /** A warm, plain-language acknowledgement shown back to the EMPLOYEE. */
   message: z.string(),
   /** A coarse bucket for the manager view (best-effort). */
-  category: z.enum(["vacation", "appointment", "personal", "family", "medical", "other", "unspecified"]),
+  category: z.enum([
+    "vacation",
+    "appointment",
+    "personal",
+    "family",
+    "medical",
+    "other",
+    "unspecified",
+  ]),
 });
 
 export type TimeOffEvaluation = z.infer<typeof timeOffEvaluationSchema>;
@@ -231,7 +236,8 @@ export function timeOffThreadTitle(employeeName: string, range: string): string 
 /* Raw admin reads (auth-light portal — RLS doesn't apply; the caller validated the
  * session). Mirrors the replacement engine's / swaps' direct reads. */
 
-const num = (v: number | string | null): number => (v === null ? 0 : typeof v === "string" ? Number(v) : v);
+const num = (v: number | string | null): number =>
+  v === null ? 0 : typeof v === "string" ? Number(v) : v;
 /** Pad the candidate window a week either side of the leave so labor checks see neighbours. */
 const WINDOW_MS = 8 * 24 * 60 * 60 * 1000;
 
@@ -288,7 +294,9 @@ async function readCandidates(
       .eq("org_id", orgId),
     admin
       .from("availability")
-      .select("id, employee_id, kind, day_of_week, effective_date, end_date, start_time, end_time, is_available")
+      .select(
+        "id, employee_id, kind, day_of_week, effective_date, end_date, start_time, end_time, is_available",
+      )
       .eq("org_id", orgId),
     admin
       .from("shifts")
@@ -429,7 +437,12 @@ export async function assessImpact(
       laborRules,
       excludeEmployeeId: employeeId, // never count the requester as their own cover
     });
-    return { shiftId: s.id, startsAt: s.starts_at, endsAt: s.ends_at, eligibleCount: eligible.length };
+    return {
+      shiftId: s.id,
+      startsAt: s.starts_at,
+      endsAt: s.ends_at,
+      eligibleCount: eligible.length,
+    };
   });
 
   return classifyImpact(conflicts);
@@ -455,7 +468,13 @@ export type ProcessTimeOffDeps = {
 };
 
 export type ProcessTimeOffResult =
-  | { ok: true; message: string; requestId: string; status: "approved" | "pending"; band: ImpactBand }
+  | {
+      ok: true;
+      message: string;
+      requestId: string;
+      status: "approved" | "pending";
+      band: ImpactBand;
+    }
   | { ok: false; code: "inactive" | "invalid_dates" | "failed"; message: string };
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -480,7 +499,11 @@ export async function processTimeOffRequest(
   }
   const todayUtc = new Date().toISOString().slice(0, 10);
   if (startDate < todayUtc) {
-    return { ok: false, code: "invalid_dates", message: "Time off can only be requested for future dates." };
+    return {
+      ok: false,
+      code: "invalid_dates",
+      message: "Time off can only be requested for future dates.",
+    };
   }
 
   // 2. The employee must still be active.
@@ -492,11 +515,19 @@ export async function processTimeOffRequest(
     .maybeSingle();
   if (empErr) {
     logger.error("time_off.employee_lookup_failed", { err: empErr, employeeId });
-    return { ok: false, code: "failed", message: "Couldn't process that just now. Please try again." };
+    return {
+      ok: false,
+      code: "failed",
+      message: "Couldn't process that just now. Please try again.",
+    };
   }
   const emp = empRaw as { id: string; active: boolean } | null;
   if (!emp || !emp.active) {
-    return { ok: false, code: "inactive", message: "This link isn't active anymore. Ask your manager for a fresh one." };
+    return {
+      ok: false,
+      code: "inactive",
+      message: "This link isn't active anymore. Ask your manager for a fresh one.",
+    };
   }
 
   // 3. Assess the staffing impact + read the policy.
@@ -523,7 +554,11 @@ export async function processTimeOffRequest(
   let evaluation: TimeOffEvaluation;
   if (deps.chat) {
     try {
-      evaluation = await evaluateTimeOff(evalArgs, { chat: deps.chat, model: deps.model, onUsage: deps.onUsage });
+      evaluation = await evaluateTimeOff(evalArgs, {
+        chat: deps.chat,
+        model: deps.model,
+        onUsage: deps.onUsage,
+      });
     } catch (err) {
       logger.warn("time_off.evaluate_failed_fallback", { err, employeeId });
       evaluation = deterministicEvaluation(evalArgs);
@@ -553,7 +588,11 @@ export async function processTimeOffRequest(
     .single();
   if (reqErr || !reqRaw) {
     logger.error("time_off.insert_failed", { err: reqErr, employeeId });
-    return { ok: false, code: "failed", message: "Couldn't record that just now. Please try again." };
+    return {
+      ok: false,
+      code: "failed",
+      message: "Couldn't record that just now. Please try again.",
+    };
   }
   const requestId = (reqRaw as { id: string }).id;
 
@@ -585,7 +624,14 @@ export async function processTimeOffRequest(
     actorType: "employee",
     action: "time_off.requested",
     requestId,
-    detail: { startDate, endDate, band, autoApproved: willAutoApprove, category: evaluation.category, threadId },
+    detail: {
+      startDate,
+      endDate,
+      band,
+      autoApproved: willAutoApprove,
+      category: evaluation.category,
+      threadId,
+    },
   });
 
   return { ok: true, message: evaluation.message, requestId, status, band };
@@ -606,7 +652,11 @@ export type TimeOffDecisionResult =
   | { ok: true; outcome: "approved" | "denied" }
   | { ok: false; code: "not_found" | "stale" | "failed"; message: string };
 
-async function loadRequest(admin: SupabaseClient, orgId: string, requestId: string): Promise<TimeOffRow | null> {
+async function loadRequest(
+  admin: SupabaseClient,
+  orgId: string,
+  requestId: string,
+): Promise<TimeOffRow | null> {
   const { data } = await admin
     .from("time_off_requests")
     .select("id, org_id, employee_id, start_date, end_date, status")
@@ -623,7 +673,8 @@ export async function approveTimeOff(
 ): Promise<TimeOffDecisionResult> {
   const req = await loadRequest(admin, input.orgId, input.requestId);
   if (!req) return { ok: false, code: "not_found", message: "That request no longer exists." };
-  if (req.status !== "pending") return { ok: false, code: "stale", message: "That request has already been handled." };
+  if (req.status !== "pending")
+    return { ok: false, code: "stale", message: "That request has already been handled." };
   return decide(admin, { req, reviewerUserId: input.reviewerUserId, to: "approved" });
 }
 
@@ -634,7 +685,8 @@ export async function denyTimeOff(
 ): Promise<TimeOffDecisionResult> {
   const req = await loadRequest(admin, input.orgId, input.requestId);
   if (!req) return { ok: false, code: "not_found", message: "That request no longer exists." };
-  if (req.status !== "pending") return { ok: false, code: "stale", message: "That request has already been handled." };
+  if (req.status !== "pending")
+    return { ok: false, code: "stale", message: "That request has already been handled." };
   return decide(admin, { req, reviewerUserId: input.reviewerUserId, to: "denied" });
 }
 
@@ -648,7 +700,8 @@ export async function reverseTimeOff(
 ): Promise<TimeOffDecisionResult> {
   const req = await loadRequest(admin, input.orgId, input.requestId);
   if (!req) return { ok: false, code: "not_found", message: "That request no longer exists." };
-  if (req.status !== "approved") return { ok: false, code: "stale", message: "Only an approved request can be reversed." };
+  if (req.status !== "approved")
+    return { ok: false, code: "stale", message: "Only an approved request can be reversed." };
   return decide(admin, { req, reviewerUserId: input.reviewerUserId, to: "denied", reversed: true });
 }
 
@@ -669,7 +722,11 @@ async function decide(
     .eq("org_id", req.org_id);
   if (error) {
     logger.error("time_off.decide_failed", { err: error, requestId: req.id, to });
-    return { ok: false, code: "failed", message: "Couldn't update that request. Please try again." };
+    return {
+      ok: false,
+      code: "failed",
+      message: "Couldn't update that request. Please try again.",
+    };
   }
   await writeAudit(admin, {
     orgId: req.org_id,
@@ -702,10 +759,15 @@ export type PendingTimeOff = {
  * Requests for the manager pane: everything pending, plus recently decided ones (so the
  * manager can see / reverse an auto-approval). Joined to the employee name.
  */
-export async function getPendingTimeOff(admin: SupabaseClient, orgId: string): Promise<PendingTimeOff[]> {
+export async function getPendingTimeOff(
+  admin: SupabaseClient,
+  orgId: string,
+): Promise<PendingTimeOff[]> {
   const { data, error } = await admin
     .from("time_off_requests")
-    .select("id, employee_id, start_date, end_date, reason, status, impact_band, recommendation, auto_decided, created_at, employees(name)")
+    .select(
+      "id, employee_id, start_date, end_date, reason, status, impact_band, recommendation, auto_decided, created_at, employees(name)",
+    )
     .eq("org_id", orgId)
     .in("status", ["pending", "approved"])
     .order("created_at", { ascending: false })
@@ -773,7 +835,9 @@ async function openTimeOffThread(
       thread_id: threadId,
       org_id: input.orgId,
       role: "assistant",
-      content: [{ type: "text", text: `${input.message}\n\nManager note: ${input.recommendation}` }],
+      content: [
+        { type: "text", text: `${input.message}\n\nManager note: ${input.recommendation}` },
+      ],
       stop_reason: "end_turn",
     },
   ]);

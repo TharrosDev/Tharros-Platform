@@ -25,7 +25,15 @@ function assign(
 }
 
 function gap(required: number, filled: number, reason = "Coverage met."): GapReportEntry {
-  return { slotId: "s1", date: DAY, roleId: null, required, filled, missing: required - filled, reason };
+  return {
+    slotId: "s1",
+    date: DAY,
+    roleId: null,
+    required,
+    filled,
+    missing: required - filled,
+    reason,
+  };
 }
 
 function result(over: Partial<OptimizeResult> = {}): OptimizeResult {
@@ -46,18 +54,33 @@ const roster = (ranks: Record<string, number | null>): MetricsRosterEntry[] =>
 describe("candidateMetrics", () => {
   it("derives coverage + solver score from the gap report and trace", () => {
     const m = candidateMetrics(
-      result({ gapReport: [gap(3, 2)], covered: false, trace: [{ round: 0, remedy: null, score: 1000, totalMissing: 1 }] }),
+      result({
+        gapReport: [gap(3, 2)],
+        covered: false,
+        trace: [{ round: 0, remedy: null, score: 1000, totalMissing: 1 }],
+      }),
       roster({ a: null }),
       40,
     );
-    expect(m).toMatchObject({ totalRequired: 3, totalFilled: 2, totalMissing: 1, covered: false, solverScore: 1000 });
+    expect(m).toMatchObject({
+      totalRequired: 3,
+      totalFilled: 2,
+      totalMissing: 1,
+      covered: false,
+      solverScore: 1000,
+    });
     expect(m.coverageRatio).toBeCloseTo(2 / 3);
   });
 
   it("computes fairness as the std-dev of per-employee hours across the roster", () => {
     // a + b each work 8h → perfectly fair → stddev 0
     const even = candidateMetrics(
-      result({ schedule: { assignments: [assign("a", "09:00", "17:00"), assign("b", "09:00", "17:00")], shifts: [] } }),
+      result({
+        schedule: {
+          assignments: [assign("a", "09:00", "17:00"), assign("b", "09:00", "17:00")],
+          shifts: [],
+        },
+      }),
       roster({ a: null, b: null }),
       40,
     );
@@ -94,7 +117,12 @@ describe("candidateMetrics", () => {
 
   it("computes the hours-weighted mean seniority rank (ignoring unranked)", () => {
     const m = candidateMetrics(
-      result({ schedule: { assignments: [assign("a", "09:00", "17:00"), assign("b", "09:00", "17:00")], shifts: [] } }),
+      result({
+        schedule: {
+          assignments: [assign("a", "09:00", "17:00"), assign("b", "09:00", "17:00")],
+          shifts: [],
+        },
+      }),
       roster({ a: 1, b: 3 }),
       40,
     );
@@ -111,9 +139,21 @@ describe("candidateMetrics", () => {
   it("excludes open shifts (null employee) from hours and counts escalations", () => {
     const m = candidateMetrics(
       result({
-        schedule: { assignments: [assign("a", "09:00", "17:00"), assign(null, "09:00", "17:00")], shifts: [] },
+        schedule: {
+          assignments: [assign("a", "09:00", "17:00"), assign(null, "09:00", "17:00")],
+          shifts: [],
+        },
         escalations: [
-          { kind: "propose_overtime", slotId: "s1", date: DAY, roleId: null, missing: 1, reason: "x", employeeIds: [], draftMessage: "" },
+          {
+            kind: "propose_overtime",
+            slotId: "s1",
+            date: DAY,
+            roleId: null,
+            missing: 1,
+            reason: "x",
+            employeeIds: [],
+            draftMessage: "",
+          },
         ],
       }),
       roster({ a: null }),

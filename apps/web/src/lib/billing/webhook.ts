@@ -66,9 +66,7 @@ export function subscriptionToRow(sub: Stripe.Subscription): SubscriptionRow | n
   };
 }
 
-export type HandleResult =
-  | { duplicate: true }
-  | { handled: true; type: string };
+export type HandleResult = { duplicate: true } | { handled: true; type: string };
 
 /**
  * Process one verified Stripe event idempotently. Records the event id only
@@ -125,9 +123,7 @@ export async function handleStripeEvent(
         throw new Error("subscription tenant binding mismatch");
       }
 
-      const { error } = await admin
-        .from("subscriptions")
-        .upsert(row, { onConflict: "org_id" });
+      const { error } = await admin.from("subscriptions").upsert(row, { onConflict: "org_id" });
       if (error) throw new Error(`subscriptions upsert failed: ${error.message}`);
       break;
     }

@@ -1,10 +1,4 @@
-import {
-  EmailButton,
-  EmailFallbackLink,
-  EmailHeading,
-  EmailLayout,
-  EmailText,
-} from "./layout";
+import { EmailButton, EmailFallbackLink, EmailHeading, EmailLayout, EmailText } from "./layout";
 
 /**
  * Day 55 — sent to each eligible employee when an open shift needs cover. Carries
@@ -34,8 +28,8 @@ export function ReplacementOfferEmail({
         <strong>{shiftLabel}</strong>
       </EmailText>
       <EmailText>
-        If you can take it, open your schedule and accept it. It&rsquo;s first come,
-        first served — the first person to accept gets the shift.
+        If you can take it, open your schedule and accept it. It&rsquo;s first come, first served —
+        the first person to accept gets the shift.
       </EmailText>
       <EmailButton href={portalUrl}>View &amp; accept</EmailButton>
       <EmailFallbackLink href={portalUrl} />

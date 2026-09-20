@@ -108,8 +108,7 @@ export function DocumentList({
   }
 
   const visibleIds = docs.map((d) => d.id);
-  const allVisibleSelected =
-    visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
 
   function toggleAllVisible() {
     setSelected((prev) => {
@@ -255,8 +254,8 @@ export function DocumentList({
         </span>
         <p className="text-foreground font-semibold">No documents yet</p>
         <p className="text-muted-foreground max-w-sm text-sm">
-          Upload your SOPs, policies, and manuals above. Your AI Assistant will answer
-          from them once processing lands.
+          Upload your SOPs, policies, and manuals above. Your AI Assistant will answer from them
+          once processing lands.
         </p>
       </div>
     );
@@ -289,9 +288,7 @@ export function DocumentList({
                   <Checkbox
                     checked={allVisibleSelected}
                     onCheckedChange={toggleAllVisible}
-                    aria-label={
-                      allVisibleSelected ? "Clear selection" : "Select all documents"
-                    }
+                    aria-label={allVisibleSelected ? "Clear selection" : "Select all documents"}
                   />
                 </TableHead>
                 <TableHead>Document</TableHead>
@@ -304,115 +301,125 @@ export function DocumentList({
             </TableHeader>
             <TableBody>
               <AnimatePresence initial={false}>
-              {docs.map((doc) => {
-                const meta = STATUS_META[doc.status];
-                const busy = busyId === doc.id;
-                return (
-                  <m.tr
-                    key={doc.id}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15, ease: "easeOut" }}
-                    data-selected={selected.has(doc.id) || undefined}
-                    className="border-b border-border/55 transition-colors hover:bg-primary-soft/25 data-[selected]:bg-primary-soft/40"
-                  >
-                    <TableCell>
-                      <Checkbox
-                        checked={selected.has(doc.id)}
-                        onCheckedChange={() => toggleSelected(doc.id)}
-                        aria-label={`Select ${doc.filename}`}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-start gap-2.5">
-                        <FileText className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-                        <div className="min-w-0">
-                          <span className="text-foreground block truncate font-medium" title={doc.filename}>
-                            {doc.filename}
-                          </span>
-                          {doc.tags.length > 0 ? (
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {doc.tags.map((t) => (
-                                <button
-                                  key={t}
-                                  type="button"
-                                  onClick={() => setQuery(t)}
-                                  className="bg-surface-2 text-muted-foreground hover:bg-primary-soft hover:text-primary-soft-foreground rounded-md border border-border/50 px-1.5 py-0.5 text-xs transition-colors"
-                                >
-                                  {t}
-                                </button>
-                              ))}
-                            </div>
+                {docs.map((doc) => {
+                  const meta = STATUS_META[doc.status];
+                  const busy = busyId === doc.id;
+                  return (
+                    <m.tr
+                      key={doc.id}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      data-selected={selected.has(doc.id) || undefined}
+                      className="border-b border-border/55 transition-colors hover:bg-primary-soft/25 data-[selected]:bg-primary-soft/40"
+                    >
+                      <TableCell>
+                        <Checkbox
+                          checked={selected.has(doc.id)}
+                          onCheckedChange={() => toggleSelected(doc.id)}
+                          aria-label={`Select ${doc.filename}`}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-start gap-2.5">
+                          <FileText className="text-muted-foreground mt-0.5 size-4 shrink-0" />
+                          <div className="min-w-0">
+                            <span
+                              className="text-foreground block truncate font-medium"
+                              title={doc.filename}
+                            >
+                              {doc.filename}
+                            </span>
+                            {doc.tags.length > 0 ? (
+                              <div className="mt-1 flex flex-wrap gap-1">
+                                {doc.tags.map((t) => (
+                                  <button
+                                    key={t}
+                                    type="button"
+                                    onClick={() => setQuery(t)}
+                                    className="bg-surface-2 text-muted-foreground hover:bg-primary-soft hover:text-primary-soft-foreground rounded-md border border-border/50 px-1.5 py-0.5 text-xs transition-colors"
+                                  >
+                                    {t}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={busy ? "info" : meta.variant}>
+                            {busy ? "Re-indexing…" : meta.label}
+                          </Badge>
+                          {doc.status === "failed" && !busy ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive h-7 gap-1 px-2"
+                              onClick={() => void runReindex(doc)}
+                            >
+                              <RefreshCw className="size-3.5" />
+                              Retry
+                            </Button>
                           ) : null}
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={busy ? "info" : meta.variant}>
-                          {busy ? "Re-indexing…" : meta.label}
-                        </Badge>
-                        {doc.status === "failed" && !busy ? (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive h-7 gap-1 px-2"
-                            onClick={() => void runReindex(doc)}
+                      </TableCell>
+                      <TableCell
+                        className="text-muted-foreground hidden text-right tabular-nums md:table-cell"
+                        title={
+                          doc.lastCitedAt ? `Last cited ${formatDate(doc.lastCitedAt)}` : undefined
+                        }
+                      >
+                        {doc.citedCount ? doc.citedCount : "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground hidden md:table-cell">
+                        {doc.sizeBytes != null ? formatBytes(doc.sizeBytes) : "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground hidden md:table-cell">
+                        {formatDate(doc.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+                            aria-label={`Actions for ${doc.filename}`}
                           >
-                            <RefreshCw className="size-3.5" />
-                            Retry
-                          </Button>
-                        ) : null}
-                      </div>
-                    </TableCell>
-                    <TableCell
-                      className="text-muted-foreground hidden text-right tabular-nums md:table-cell"
-                      title={doc.lastCitedAt ? `Last cited ${formatDate(doc.lastCitedAt)}` : undefined}
-                    >
-                      {doc.citedCount ? doc.citedCount : "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground hidden md:table-cell">
-                      {doc.sizeBytes != null ? formatBytes(doc.sizeBytes) : "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground hidden md:table-cell">
-                      {formatDate(doc.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
-                          aria-label={`Actions for ${doc.filename}`}
-                        >
-                          <MoreHorizontal className="size-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem onClick={() => setTagDoc(doc)}>
-                            <Tag />
-                            Edit tags
-                          </DropdownMenuItem>
-                          <DropdownMenuItem disabled={busy} onClick={() => void runReindex(doc)}>
-                            <RefreshCw />
-                            Re-index
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setConfirm(doc)}
-                          >
-                            <Trash2 />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </m.tr>
-                );
-              })}
+                            <MoreHorizontal className="size-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => setTagDoc(doc)}>
+                              <Tag />
+                              Edit tags
+                            </DropdownMenuItem>
+                            <DropdownMenuItem disabled={busy} onClick={() => void runReindex(doc)}>
+                              <RefreshCw />
+                              Re-index
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => setConfirm(doc)}
+                            >
+                              <Trash2 />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </m.tr>
+                  );
+                })}
               </AnimatePresence>
             </TableBody>
           </Table>
 
           {cursor ? (
             <div className="flex justify-center pt-2">
-              <Button variant="outline" size="sm" onClick={() => void loadMore()} disabled={loadingMore}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void loadMore()}
+                disabled={loadingMore}
+              >
                 {loadingMore ? "Loading…" : "Load more"}
               </Button>
             </div>
@@ -470,8 +477,8 @@ export function DocumentList({
           <DialogHeader>
             <DialogTitle>Delete {selected.size} documents</DialogTitle>
             <DialogDescription>
-              This removes the files and anything the Assistant learned from them. This
-              can&apos;t be undone.
+              This removes the files and anything the Assistant learned from them. This can&apos;t
+              be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -507,8 +514,8 @@ export function DocumentList({
           <DialogHeader>
             <DialogTitle>Delete document</DialogTitle>
             <DialogDescription>
-              Delete {confirm?.filename}? This removes the file and anything the Assistant
-              learned from it. This can&apos;t be undone.
+              Delete {confirm?.filename}? This removes the file and anything the Assistant learned
+              from it. This can&apos;t be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -585,8 +592,8 @@ function BulkTagBody({
       <DialogHeader>
         <DialogTitle>Add tags to {count} documents</DialogTitle>
         <DialogDescription>
-          These tags are added to each selected document&apos;s existing tags. Press Enter
-          or comma to add one.
+          These tags are added to each selected document&apos;s existing tags. Press Enter or comma
+          to add one.
         </DialogDescription>
       </DialogHeader>
 
@@ -614,7 +621,7 @@ function BulkTagBody({
           onBlur={() => draft && commitDraft()}
           placeholder={tags.length ? "" : "e.g. policy, hr, refunds"}
           aria-label="Add a tag"
-          className="text-foreground min-w-24 flex-1 bg-transparent px-1 py-0.5 text-sm outline-none"
+          className="text-foreground min-w-24 flex-1 bg-transparent px-1 py-0.5 text-sm "
         />
       </div>
 
@@ -727,9 +734,11 @@ function TagEditorBody({
           onKeyDown={onKeyDown}
           onBlur={() => draft && commitDraft()}
           disabled={atLimit}
-          placeholder={atLimit ? `Max ${MAX_TAGS} tags` : tags.length ? "" : "e.g. policy, hr, refunds"}
+          placeholder={
+            atLimit ? `Max ${MAX_TAGS} tags` : tags.length ? "" : "e.g. policy, hr, refunds"
+          }
           aria-label="Add a tag"
-          className="text-foreground min-w-24 flex-1 bg-transparent px-1 py-0.5 text-sm outline-none disabled:opacity-50"
+          className="text-foreground min-w-24 flex-1 bg-transparent px-1 py-0.5 text-sm disabled:opacity-50"
         />
       </div>
 

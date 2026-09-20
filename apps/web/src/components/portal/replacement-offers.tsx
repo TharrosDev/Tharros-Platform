@@ -74,48 +74,50 @@ export function ReplacementOffers({ offers }: { offers: OpenOffer[] }) {
       </h2>
       <ul className="space-y-2">
         <AnimatePresence initial={false}>
-        {visible.map((o) => {
-          const busy = pendingId === o.offerId;
-          return (
-            <m.li
-              key={o.offerId}
-              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="border-primary/30 bg-primary/5 flex flex-col gap-3 overflow-hidden rounded-xl border p-4"
-            >
-              <div className="min-w-0">
-                <p className="text-foreground font-medium tabular-nums">
-                  {offerLabel(o.startsAt, o.endsAt)}
-                </p>
-                {o.roleName ? <p className="text-muted-foreground text-sm">{o.roleName}</p> : null}
-                {o.breakMinutes > 0 ? (
-                  <p className="text-muted-foreground text-xs">{o.breakMinutes} min break</p>
-                ) : null}
-                <p className="text-muted-foreground mt-1 text-xs">First to accept gets it.</p>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => accept(o.offerId)}
-                  disabled={busy}
-                  className="flex-1"
-                >
-                  {busy ? "Working…" : "Accept shift"}
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => decline(o.offerId)}
-                  disabled={busy}
-                >
-                  Decline
-                </Button>
-              </div>
-            </m.li>
-          );
-        })}
+          {visible.map((o) => {
+            const busy = pendingId === o.offerId;
+            return (
+              <m.li
+                key={o.offerId}
+                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="border-primary/30 bg-primary/5 flex flex-col gap-3 overflow-hidden rounded-xl border p-4"
+              >
+                <div className="min-w-0">
+                  <p className="text-foreground font-medium tabular-nums">
+                    {offerLabel(o.startsAt, o.endsAt)}
+                  </p>
+                  {o.roleName ? (
+                    <p className="text-muted-foreground text-sm">{o.roleName}</p>
+                  ) : null}
+                  {o.breakMinutes > 0 ? (
+                    <p className="text-muted-foreground text-xs">{o.breakMinutes} min break</p>
+                  ) : null}
+                  <p className="text-muted-foreground mt-1 text-xs">First to accept gets it.</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => accept(o.offerId)}
+                    disabled={busy}
+                    className="flex-1"
+                  >
+                    {busy ? "Working…" : "Accept shift"}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => decline(o.offerId)}
+                    disabled={busy}
+                  >
+                    Decline
+                  </Button>
+                </div>
+              </m.li>
+            );
+          })}
         </AnimatePresence>
       </ul>
     </section>

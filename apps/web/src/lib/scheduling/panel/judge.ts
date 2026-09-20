@@ -172,5 +172,9 @@ export async function judgeCandidates(
   const winnerLabel = data.winnerLabel as CandidateLabel;
   const ordered = [winnerLabel, ...ranking.filter((l) => l !== winnerLabel)];
 
-  return { winnerLabel, ranking: ordered, rationale: data.rationale.trim() || fallbackVerdict(candidates).rationale };
+  return {
+    winnerLabel,
+    ranking: ordered,
+    rationale: data.rationale.trim() || fallbackVerdict(candidates).rationale,
+  };
 }

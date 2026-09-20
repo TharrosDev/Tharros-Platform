@@ -23,7 +23,9 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SECRET_KEY = process.env.SUPABASE_SECRET_KEY!;
 
 const RUN = Date.now().toString(36);
-const admin = createClient(SUPABASE_URL, SECRET_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+const admin = createClient(SUPABASE_URL, SECRET_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
 const DAY = 24 * 60 * 60 * 1000;
 const isoIn = (days: number) => new Date(Date.now() + days * DAY).toISOString();
@@ -42,7 +44,11 @@ let roleId = "";
  * time-of-day) keeps the shift inside a single UTC day so the whole-day availability
  * grants it deterministically.
  */
-async function shift(employeeId: string, days: number, roleCertId: string | null = null): Promise<string> {
+async function shift(
+  employeeId: string,
+  days: number,
+  roleCertId: string | null = null,
+): Promise<string> {
   const date = dateIn(days);
   const { data, error } = await admin
     .from("shifts")
@@ -62,7 +68,9 @@ async function shift(employeeId: string, days: number, roleCertId: string | null
   return data!.id as string;
 }
 
-async function requestStatus(requestId: string): Promise<{ status: string; band: string | null; auto: boolean }> {
+async function requestStatus(
+  requestId: string,
+): Promise<{ status: string; band: string | null; auto: boolean }> {
   const { data } = await admin
     .from("time_off_requests")
     .select("status, impact_band, auto_decided")
@@ -81,7 +89,12 @@ beforeAll(async () => {
   if (uErr) throw uErr;
   ownerId = u.user.id;
 
-  const { data: m } = await admin.from("memberships").select("org_id").eq("user_id", ownerId).eq("role", "owner").single();
+  const { data: m } = await admin
+    .from("memberships")
+    .select("org_id")
+    .eq("user_id", ownerId)
+    .eq("role", "owner")
+    .single();
   orgA = (m as { org_id: string }).org_id;
 
   const { data: emps, error: eErr } = await admin
@@ -102,7 +115,9 @@ beforeAll(async () => {
     .single();
   roleId = (role as { id: string }).id;
   // Only A holds the role (used for the uncoverable / high-impact case).
-  await admin.from("employee_role_assignments").insert({ org_id: orgA, employee_id: empA, role_certification_id: roleId });
+  await admin
+    .from("employee_role_assignments")
+    .insert({ org_id: orgA, employee_id: empA, role_certification_id: roleId });
 
   const { data: sched } = await admin
     .from("schedules")
@@ -226,20 +241,32 @@ describe("time-off requests", () => {
     expect(mine?.employeeName).toBe("Ada Leave");
 
     // Manager approves.
-    const approved = await approveTimeOff(admin, { orgId: orgA, requestId: res.requestId, reviewerUserId: ownerId });
+    const approved = await approveTimeOff(admin, {
+      orgId: orgA,
+      requestId: res.requestId,
+      reviewerUserId: ownerId,
+    });
     expect(approved).toEqual({ ok: true, outcome: "approved" });
     expect((await requestStatus(res.requestId)).status).toBe("approved");
 
     // Manager reverses the approval.
-    const reversed = await reverseTimeOff(admin, { orgId: orgA, requestId: res.requestId, reviewerUserId: ownerId });
+    const reversed = await reverseTimeOff(admin, {
+      orgId: orgA,
+      requestId: res.requestId,
+      reviewerUserId: ownerId,
+    });
     expect(reversed).toEqual({ ok: true, outcome: "denied" });
     expect((await requestStatus(res.requestId)).status).toBe("denied");
   });
 
   it("keeps a low-impact request pending when the org disables auto-approve", async () => {
-    await admin
-      .from("org_settings")
-      .upsert({ org_id: orgA, time_off_policy: { autoApproveLowImpact: false, escalateHighImpact: true } }, { onConflict: "org_id" });
+    await admin.from("org_settings").upsert(
+      {
+        org_id: orgA,
+        time_off_policy: { autoApproveLowImpact: false, escalateHighImpact: true },
+      },
+      { onConflict: "org_id" },
+    );
 
     const res = await processTimeOffRequest(admin, {
       employeeId: empB,
@@ -254,14 +281,21 @@ describe("time-off requests", () => {
     expect(res.status).toBe("pending");
 
     // Manager denies it.
-    const denied = await denyTimeOff(admin, { orgId: orgA, requestId: res.requestId, reviewerUserId: ownerId });
+    const denied = await denyTimeOff(admin, {
+      orgId: orgA,
+      requestId: res.requestId,
+      reviewerUserId: ownerId,
+    });
     expect(denied).toEqual({ ok: true, outcome: "denied" });
     expect((await requestStatus(res.requestId)).status).toBe("denied");
 
     // Restore the default policy for any later assertions.
     await admin
       .from("org_settings")
-      .upsert({ org_id: orgA, time_off_policy: { autoApproveLowImpact: true, escalateHighImpact: true } }, { onConflict: "org_id" });
+      .upsert(
+        { org_id: orgA, time_off_policy: { autoApproveLowImpact: true, escalateHighImpact: true } },
+        { onConflict: "org_id" },
+      );
   });
 
   it("rejects an invalid date range", async () => {

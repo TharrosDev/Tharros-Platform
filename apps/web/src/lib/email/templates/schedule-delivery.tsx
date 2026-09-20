@@ -1,10 +1,4 @@
-import {
-  EmailButton,
-  EmailFallbackLink,
-  EmailHeading,
-  EmailLayout,
-  EmailText,
-} from "./layout";
+import { EmailButton, EmailFallbackLink, EmailHeading, EmailLayout, EmailText } from "./layout";
 
 /**
  * Day 53 — sent to each assigned employee when a manager publishes a schedule.
@@ -37,9 +31,7 @@ export function ScheduleDeliveryEmail({
         details and add them to your calendar.
       </EmailText>
       <EmailButton href={portalUrl}>View my schedule</EmailButton>
-      <EmailText>
-        This link is personal to you — please don&apos;t forward it.
-      </EmailText>
+      <EmailText>This link is personal to you — please don&apos;t forward it.</EmailText>
       <EmailFallbackLink href={portalUrl} />
     </EmailLayout>
   );

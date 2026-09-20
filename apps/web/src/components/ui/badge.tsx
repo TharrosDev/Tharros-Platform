@@ -4,19 +4,28 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+/*
+  The tab. A strip carries its state in its stock tint and in this tab, never
+  in a pill floated over the content: square, solid, condensed caps, and it
+  carries its own ink pair instead of an alpha wash over whatever sits behind.
+*/
 const badgeVariants = cva(
-  "inline-flex min-h-5.5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap transition-[color,background-color,border-color] [&>svg]:size-3 [&>svg]:pointer-events-none",
+  [
+    "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden",
+    "type-meta border px-1.5 py-px whitespace-nowrap transition-colors",
+    "[&>svg]:size-3 [&>svg]:pointer-events-none",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "border-primary/15 bg-primary-soft text-primary-soft-foreground",
-        solid: "border-transparent bg-primary text-primary-foreground",
-        secondary: "border-transparent bg-secondary text-secondary-foreground",
-        outline: "border-border bg-card text-foreground",
-        success: "border-success/20 bg-success/10 text-success",
-        warning: "border-warning/25 bg-warning/10 text-warning",
-        info: "border-info/20 bg-info/10 text-info",
-        destructive: "border-destructive/20 bg-destructive/10 text-destructive",
+        default: "border-primary-edge/25 bg-primary-soft text-primary-soft-foreground",
+        solid: "border-primary-edge bg-primary text-primary-foreground",
+        secondary: "border-input bg-secondary text-secondary-foreground",
+        outline: "border-input bg-card text-foreground",
+        success: "border-success bg-success text-success-foreground",
+        warning: "border-warning bg-warning text-warning-foreground",
+        info: "border-info bg-info text-info-foreground",
+        destructive: "border-destructive bg-destructive text-destructive-foreground",
       },
     },
     defaultVariants: {

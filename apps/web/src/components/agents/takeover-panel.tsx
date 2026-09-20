@@ -81,10 +81,7 @@ function SingleAction({
   variant,
   extra,
 }: {
-  action: (
-    prev: ConversationActionState,
-    formData: FormData,
-  ) => Promise<ConversationActionState>;
+  action: (prev: ConversationActionState, formData: FormData) => Promise<ConversationActionState>;
   threadId: string;
   label: string;
   pendingLabel: string;
@@ -107,9 +104,7 @@ function SingleAction({
     <form action={formAction}>
       <input type="hidden" name="threadId" value={threadId} />
       {extra
-        ? Object.entries(extra).map(([k, v]) => (
-            <input key={k} type="hidden" name={k} value={v} />
-          ))
+        ? Object.entries(extra).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)
         : null}
       <Button type="submit" disabled={pending} variant={variant}>
         {pending ? pendingLabel : label}

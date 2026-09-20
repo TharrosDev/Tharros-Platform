@@ -45,8 +45,8 @@ export function OrgSwitcher({ orgs, activeOrg }: { orgs: UserOrg[]; activeOrg: U
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            "group bg-card flex min-h-11 w-full items-center gap-2.5 rounded-lg border px-2 py-1.5 text-left shadow-xs outline-none transition-[background-color,border-color]",
-            "hover:border-input hover:bg-accent/50 focus-visible:ring-ring/40 focus-visible:ring-[3px]",
+            "group bg-card flex min-h-11 w-full items-center gap-2.5 rounded-lg border px-2 py-1.5 text-left shadow-xs transition-[background-color,border-color]",
+            "hover:border-input hover:bg-accent/50 ",
             pending && "opacity-60",
           )}
           aria-label="Switch organization"
@@ -55,7 +55,10 @@ export function OrgSwitcher({ orgs, activeOrg }: { orgs: UserOrg[]; activeOrg: U
             <Building2 className="size-3.5" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold leading-tight" title={activeOrg?.name}>
+            <span
+              className="block truncate text-sm font-semibold leading-tight"
+              title={activeOrg?.name}
+            >
               {activeOrg?.name ?? "Select organization"}
             </span>
             {activeOrg ? (

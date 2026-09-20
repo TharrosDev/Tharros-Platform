@@ -11,11 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/observability/logger";
 import { getSubscription } from "@/lib/billing/entitlements";
 import { queryCapFor } from "@/lib/billing/plans";
-import {
-  ACTIVE_STATUSES,
-  type SubscriptionStatus,
-  type Tier,
-} from "@/lib/billing/schemas";
+import { ACTIVE_STATUSES, type SubscriptionStatus, type Tier } from "@/lib/billing/schemas";
 import { capDecision, currentUsagePeriodStart, type CapDecision } from "@/lib/billing/usage-math";
 
 export async function recordUsage(
@@ -71,7 +67,10 @@ export async function getMonthlyBonusQueries(orgId: string): Promise<number> {
     logger.warn("usage.bonus_read_failed", { org_id: orgId, err: error });
     return 0;
   }
-  return ((data ?? []) as Array<{ queries: number }>).reduce((sum, bonus) => sum + bonus.queries, 0);
+  return ((data ?? []) as Array<{ queries: number }>).reduce(
+    (sum, bonus) => sum + bonus.queries,
+    0,
+  );
 }
 
 async function decisionForCap(orgId: string, planCap: number): Promise<CapDecision> {

@@ -16,9 +16,7 @@ export function ForgotPasswordForm() {
   return (
     <AuthCard
       title="Reset your password"
-      description={
-        sent ? undefined : "Enter your email and we'll send you a reset link."
-      }
+      description={sent ? undefined : "Enter your email and we'll send you a reset link."}
       footer={
         <>
           Remembered it?{" "}
@@ -30,8 +28,7 @@ export function ForgotPasswordForm() {
     >
       {sent ? (
         <FormMessage tone="success">
-          If an account exists for that email, a reset link is on its way. Check
-          your inbox.
+          If an account exists for that email, a reset link is on its way. Check your inbox.
         </FormMessage>
       ) : (
         <form action={action} className="space-y-4" noValidate>

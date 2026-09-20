@@ -13,7 +13,7 @@ function NativeSelect({ className, children, ...props }: React.ComponentProps<"s
     <div className={cn("relative w-full", className)}>
       <select
         data-slot="native-select"
-        className="border-input bg-card text-foreground h-10 w-full appearance-none rounded-lg border py-2 pr-9 pl-3 text-sm shadow-xs outline-none transition-[box-shadow,border-color] hover:border-muted-foreground/40 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/25 disabled:cursor-not-allowed disabled:opacity-50"
+        className="border-input bg-card text-foreground h-10 w-full appearance-none rounded-lg border py-2 pr-9 pl-3 text-sm shadow-xs transition-[box-shadow,border-color] hover:border-muted-foreground/40 disabled:cursor-not-allowed disabled:opacity-50"
         {...props}
       >
         {children}

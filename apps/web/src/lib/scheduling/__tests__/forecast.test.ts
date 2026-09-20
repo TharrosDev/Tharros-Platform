@@ -29,7 +29,11 @@ const CONTEXT: ForecastContext = {
     { day_of_week: 1, opens_at: "09:00", closes_at: "17:00", is_closed: false },
     { day_of_week: 0, opens_at: null, closes_at: null, is_closed: true },
   ],
-  roster: { count: 5, roles: ["Barista", "Shift Lead"], employmentMix: { part_time: 4, full_time: 1 } },
+  roster: {
+    count: 5,
+    roles: ["Barista", "Shift Lead"],
+    employmentMix: { part_time: 4, full_time: 1 },
+  },
   manualBaseline: [
     { day_of_week: 1, start_time: "09:00", end_time: "17:00", min_staff: 1, role: null },
   ],

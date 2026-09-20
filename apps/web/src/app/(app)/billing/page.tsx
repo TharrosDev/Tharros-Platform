@@ -10,19 +10,10 @@ export const metadata = { title: "Billing" };
 
 // Statuses where the org has a manageable subscription → show the overview.
 // Anything else (no row, canceled, incomplete*) → show the plan picker.
-const MANAGEABLE = new Set([
-  "active",
-  "trialing",
-  "past_due",
-  "unpaid",
-  "paused",
-]);
+const MANAGEABLE = new Set(["active", "trialing", "past_due", "unpaid", "paused"]);
 
 export default async function BillingPage() {
-  const [{ activeOrg }, subscription] = await Promise.all([
-    getOrgContext(),
-    getSubscription(),
-  ]);
+  const [{ activeOrg }, subscription] = await Promise.all([getOrgContext(), getSubscription()]);
   const isOwner = activeOrg?.role === "owner";
   const subscribed = subscription !== null && MANAGEABLE.has(subscription.status);
 
@@ -39,15 +30,8 @@ export default async function BillingPage() {
 
     return (
       <>
-        <PageHeader
-          title="Billing"
-          description="Your plan, payment method, and invoices."
-        />
-        <BillingOverview
-          subscription={subscription}
-          invoices={invoices}
-          isOwner={isOwner}
-        />
+        <PageHeader title="Billing" description="Your plan, payment method, and invoices." />
+        <BillingOverview subscription={subscription} invoices={invoices} isOwner={isOwner} />
       </>
     );
   }

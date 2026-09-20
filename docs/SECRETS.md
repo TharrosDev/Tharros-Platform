@@ -12,20 +12,20 @@ server-only.
 
 ## Required production values
 
-| Variable | Service | Purpose |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Tharros | canonical public origin |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase | browser/server project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase | RLS-respecting session client |
-| `SUPABASE_SECRET_KEY` | Supabase | server-only privileged operations |
-| `ANTHROPIC_API_KEY` | Anthropic | assistant generation |
-| `OPENAI_API_KEY` | OpenAI | document embeddings |
-| `DEEPSEEK_API_KEY` | DeepSeek | scheduling parsing and judging |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe | Checkout client |
-| `STRIPE_SECRET_KEY` | Stripe | server billing operations |
-| `STRIPE_WEBHOOK_SECRET` | Stripe | webhook signature verification |
-| `RESEND_API_KEY` | Resend | transactional email |
-| `CRON_SECRET` | Tharros jobs worker | authenticates durable-job ticks |
+| Variable                               | Service             | Purpose                           |
+| -------------------------------------- | ------------------- | --------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                 | Tharros             | canonical public origin           |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase            | browser/server project URL        |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase            | RLS-respecting session client     |
+| `SUPABASE_SECRET_KEY`                  | Supabase            | server-only privileged operations |
+| `ANTHROPIC_API_KEY`                    | Anthropic           | assistant generation              |
+| `OPENAI_API_KEY`                       | OpenAI              | document embeddings               |
+| `DEEPSEEK_API_KEY`                     | DeepSeek            | scheduling parsing and judging    |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`   | Stripe              | Checkout client                   |
+| `STRIPE_SECRET_KEY`                    | Stripe              | server billing operations         |
+| `STRIPE_WEBHOOK_SECRET`                | Stripe              | webhook signature verification    |
+| `RESEND_API_KEY`                       | Resend              | transactional email               |
+| `CRON_SECRET`                          | Tharros jobs worker | authenticates durable-job ticks   |
 
 The deployed product should not be treated as ready while any of these is
 missing. `/api/health` reports the shipped runtime configuration as

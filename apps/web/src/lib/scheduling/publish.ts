@@ -20,12 +20,16 @@ export function publishGate(
 ): { allowed: boolean; blockReason?: string } {
   const hard = violations.filter((v) => v.severity === "hard").length;
   if (hard > 0) {
-    return { allowed: false, blockReason: `Fix ${hard} conflict${hard > 1 ? "s" : ""} before publishing.` };
+    return {
+      allowed: false,
+      blockReason: `Fix ${hard} conflict${hard > 1 ? "s" : ""} before publishing.`,
+    };
   }
   const soft = violations.filter((v) => v.severity === "soft").length;
   if ((openShiftCount > 0 || soft > 0) && !override) {
     const parts: string[] = [];
-    if (openShiftCount > 0) parts.push(`${openShiftCount} open shift${openShiftCount > 1 ? "s" : ""}`);
+    if (openShiftCount > 0)
+      parts.push(`${openShiftCount} open shift${openShiftCount > 1 ? "s" : ""}`);
     if (soft > 0) parts.push(`${soft} warning${soft > 1 ? "s" : ""}`);
     return { allowed: false, blockReason: `Confirm to publish with ${parts.join(" and ")}.` };
   }

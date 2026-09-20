@@ -66,9 +66,7 @@ export async function listConversationsPage(
 
   // Keyset: (updated_at, id) strictly before the cursor row, newest-first.
   if (cursor) {
-    q = q.or(
-      `updated_at.lt.${cursor.ts},and(updated_at.eq.${cursor.ts},id.lt.${cursor.id})`,
-    );
+    q = q.or(`updated_at.lt.${cursor.ts},and(updated_at.eq.${cursor.ts},id.lt.${cursor.id})`);
   }
 
   const { data, error } = await q;
@@ -79,7 +77,10 @@ export async function listConversationsPage(
   }
 
   const rows = (data ?? []) as ConversationRow[];
-  const names = await resolveAskerNames(supabase, rows.map((r) => r.user_id));
+  const names = await resolveAskerNames(
+    supabase,
+    rows.map((r) => r.user_id),
+  );
 
   return {
     conversations: rows.map((r) => ({
@@ -108,7 +109,10 @@ export async function getConversation(id: string): Promise<Conversation | null> 
     .maybeSingle();
 
   if (error) {
-    logger.error("assistant.get_conversation_failed", { conversation_id: id, error: error.message });
+    logger.error("assistant.get_conversation_failed", {
+      conversation_id: id,
+      error: error.message,
+    });
     return null;
   }
   if (!data) return null;
@@ -134,12 +138,13 @@ async function resolveAskerNames(
   const names = new Map<string, string>();
   if (ids.length === 0) return names;
 
-  const { data } = await supabase
-    .from("profiles")
-    .select("id, full_name, email")
-    .in("id", ids);
+  const { data } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
 
-  for (const p of (data ?? []) as { id: string; full_name: string | null; email: string | null }[]) {
+  for (const p of (data ?? []) as {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+  }[]) {
     const name = p.full_name?.trim() || p.email || null;
     if (name) names.set(p.id, name);
   }
@@ -270,11 +275,7 @@ export async function appendMessage(
           content: input.content,
         };
 
-  const { data, error } = await writer
-    .from("messages")
-    .insert(payload)
-    .select("id")
-    .single();
+  const { data, error } = await writer.from("messages").insert(payload).select("id").single();
 
   if (error) {
     logger.error("assistant.append_message_failed", {

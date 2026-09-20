@@ -30,10 +30,7 @@ export function canExecuteAutomations(subscription: AutomationSubscription): boo
  * after the durable-job worker's five-minute stale lease has elapsed, preventing
  * overlapping duplicate dispatch jobs from executing the same side effects.
  */
-export function canReclaimAutomationRun(
-  run: AutomationRunLease,
-  now = Date.now(),
-): boolean {
+export function canReclaimAutomationRun(run: AutomationRunLease, now = Date.now()): boolean {
   if (run.status === "failed") return true;
   if (run.status !== "running" || !run.started_at) return false;
 

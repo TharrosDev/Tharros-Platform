@@ -6,11 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getOrgContext } from "@/lib/org/queries";
 import { logger } from "@/lib/observability/logger";
 
-import {
-  roleAssignmentSchema,
-  roleCertificationSchema,
-  type ProfileActionResult,
-} from "./schemas";
+import { roleAssignmentSchema, roleCertificationSchema, type ProfileActionResult } from "./schemas";
 
 /**
  * Day 52 — manage an employee's role/certification assignments + the org catalog.

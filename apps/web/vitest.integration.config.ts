@@ -11,9 +11,7 @@ process.env.SKIP_ENV_VALIDATION ||= "true";
 // collection-time crash rather than a skipped test. CI already gates the job on
 // project reachability; mirror that locally by collecting nothing when the
 // credentials are absent, so `pnpm test` stays runnable without them.
-const LIVE_DB = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY,
-);
+const LIVE_DB = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SECRET_KEY);
 
 if (!LIVE_DB) {
   console.warn(
@@ -38,9 +36,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
-      "server-only": fileURLToPath(
-        new URL("./vitest.server-only.ts", import.meta.url),
-      ),
+      "server-only": fileURLToPath(new URL("./vitest.server-only.ts", import.meta.url)),
     },
   },
   test: {

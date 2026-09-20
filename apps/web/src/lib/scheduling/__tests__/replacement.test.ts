@@ -21,7 +21,10 @@ import {
  * inputs carry an explicit `Z`.
  */
 
-const RULES: LaborRules = { ...defaultLaborRules("org-1", "2026-01-01T00:00:00Z"), max_daily_hours: 8 };
+const RULES: LaborRules = {
+  ...defaultLaborRules("org-1", "2026-01-01T00:00:00Z"),
+  max_daily_hours: 8,
+};
 
 // A 4-hour open shift on Mon Jun 15, 1–5pm.
 const SHIFT: OpenShift = {
@@ -79,7 +82,11 @@ describe("resolveReplacementPolicy", () => {
 
 describe("findEligibleEmployees", () => {
   it("includes a qualified, available, free employee", () => {
-    const res = findEligibleEmployees({ shift: SHIFT, candidates: [candidate()], laborRules: RULES });
+    const res = findEligibleEmployees({
+      shift: SHIFT,
+      candidates: [candidate()],
+      laborRules: RULES,
+    });
     expect(res.eligible).toEqual(["emp-1"]);
     expect(res.rejected).toEqual([]);
   });
@@ -92,7 +99,10 @@ describe("findEligibleEmployees", () => {
       excludeEmployeeId: "emp-1",
     });
     expect(res.eligible).toEqual([]);
-    expect(res.rejected[0]).toMatchObject({ employeeId: "emp-1", reason: "called out of this shift" });
+    expect(res.rejected[0]).toMatchObject({
+      employeeId: "emp-1",
+      reason: "called out of this shift",
+    });
   });
 
   it("rejects an employee who lacks the required role", () => {
@@ -130,7 +140,13 @@ describe("findEligibleEmployees", () => {
       candidates: [
         candidate({
           assignedShifts: [
-            { id: "s9", employeeId: "emp-1", startsAt: "2026-06-15T12:00:00Z", endsAt: "2026-06-15T16:00:00Z", breakMinutes: 0 },
+            {
+              id: "s9",
+              employeeId: "emp-1",
+              startsAt: "2026-06-15T12:00:00Z",
+              endsAt: "2026-06-15T16:00:00Z",
+              breakMinutes: 0,
+            },
           ],
         }),
       ],
@@ -147,7 +163,13 @@ describe("findEligibleEmployees", () => {
       candidates: [
         candidate({
           assignedShifts: [
-            { id: "s-am", employeeId: "emp-1", startsAt: "2026-06-15T05:00:00Z", endsAt: "2026-06-15T11:00:00Z", breakMinutes: 0 },
+            {
+              id: "s-am",
+              employeeId: "emp-1",
+              startsAt: "2026-06-15T05:00:00Z",
+              endsAt: "2026-06-15T11:00:00Z",
+              breakMinutes: 0,
+            },
           ],
         }),
       ],

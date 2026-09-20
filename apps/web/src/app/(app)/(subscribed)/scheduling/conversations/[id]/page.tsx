@@ -67,10 +67,7 @@ export default async function ConversationDetailPage({
           </span>
         }
         actions={
-          <Link
-            href="/scheduling/conversations"
-            className={buttonVariants({ variant: "outline" })}
-          >
+          <Link href="/scheduling/conversations" className={buttonVariants({ variant: "outline" })}>
             All conversations
           </Link>
         }

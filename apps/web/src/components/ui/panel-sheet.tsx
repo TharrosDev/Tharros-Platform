@@ -39,11 +39,12 @@ function PanelSheet({
         {icon}
         {label}
       </SheetTrigger>
-      <SheetContent side="right" className="bg-popover text-popover-foreground w-[28rem] max-w-[92vw]">
+      <SheetContent
+        side="right"
+        className="bg-popover text-popover-foreground w-[28rem] max-w-[92vw]"
+      >
         <div className="border-b px-5 py-4 pr-14">
-          <DialogPrimitive.Title className="text-[1.0625rem] font-semibold tracking-[-0.015em]">
-            {title}
-          </DialogPrimitive.Title>
+          <DialogPrimitive.Title className="type-h2 font-semibold">{title}</DialogPrimitive.Title>
           {description ? (
             <DialogPrimitive.Description className="text-muted-foreground mt-1 text-sm">
               {description}

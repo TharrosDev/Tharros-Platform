@@ -13,9 +13,7 @@ export default async function DangerSettingsPage() {
     return (
       <>
         <PageHeader title="Danger zone" description="Irreversible account actions." />
-        <p className="text-muted-foreground type-body">
-          Select or create an organization first.
-        </p>
+        <p className="text-muted-foreground type-body">Select or create an organization first.</p>
       </>
     );
   }

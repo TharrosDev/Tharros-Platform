@@ -5,11 +5,13 @@
 > **Last updated: 2026-06-02 — after profile + product stubs (all UI passes done; only Obsidian + merge remain).**
 
 ## How to resume (paste this to Claude)
+
 > "Continue the Workshop redesign on the `workshop-redesign` branch. Read
 > `docs/WORKSHOP-REDESIGN.md` for state + remaining tasks, then do the next
 > unchecked task. Use the impeccable skill (product register, Workshop system)."
 
 ## What this is
+
 A ground-up visual reinvention of the Tharros Platform app. The **Maple Pure**
 identity was dropped for **"Workshop"**: warm-graphite chrome (hue ~70), a clean
 cool-neutral canvas (hue ~264), one **cobalt** accent (~264), tight 0.4rem radius.
@@ -19,6 +21,7 @@ Design contract + tokens live in `apps/web/docs/DESIGN.md` and
 `apps/web/src/app/globals.css`. Register guidance: impeccable `product`.
 
 ## Hard constraints (do not break)
+
 - Preserve e2e-asserted contracts: labels **Email / Password / Full name /
   Business name**; buttons **Create account / Sign in / Continue to dashboard /
   Send invite**; headings **Welcome back / Choose your plan / Subscribe to Growth**;
@@ -28,6 +31,7 @@ Design contract + tokens live in `apps/web/docs/DESIGN.md` and
 - All token text pairs must pass **WCAG AA** (`node scripts/contrast-check.mjs`).
 
 ## Done ✅
+
 - **Pass 1 — system + identity + dashboard** (`1e1f43d`): full token rewrite
   (cobalt + warm-graphite + clean canvas, radius 0.4rem), contrast checker synced
   (AA light+dark), new chamfered cobalt logo mark, reinvented dashboard
@@ -59,6 +63,7 @@ Design contract + tokens live in `apps/web/docs/DESIGN.md` and
   what-lives-here line.
 
 ## Remaining 🔧 (do in order)
+
 1. **Merge** `workshop-redesign` → `main` once CI is green (PR #15). (No workflow
    files change here, so plain `git push` works.)
 2. **Update Obsidian memory** — replace old "Maple Pure" UI/build info with
@@ -66,6 +71,7 @@ Design contract + tokens live in `apps/web/docs/DESIGN.md` and
    Vault: `C:\Users\magnu\Downloads\obsidianMemory\Claude Memory\03 Tharros\`.
 
 ## Working conventions
+
 - Per pass: edit → `pnpm typecheck` + `pnpm lint` → `pnpm --filter @tharros/web build`
   → `pnpm test:e2e` (reuses a running `pnpm start`) → screenshot → commit + push →
   **update this doc's date + Done/Remaining**.

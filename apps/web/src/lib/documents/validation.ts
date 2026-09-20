@@ -61,7 +61,10 @@ export function validateUploadFile(file: UploadCandidate): ValidationResult {
  * affects the storage path. Collapses anything outside [A-Za-z0-9._-] to "_".
  */
 export function sanitizeStorageName(filename: string): string {
-  const cleaned = filename.trim().replace(/[^A-Za-z0-9._-]+/g, "_").replace(/^_+|_+$/g, "");
+  const cleaned = filename
+    .trim()
+    .replace(/[^A-Za-z0-9._-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
   return cleaned.length > 0 ? cleaned : "file";
 }
 

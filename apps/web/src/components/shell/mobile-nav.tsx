@@ -24,15 +24,15 @@ function MobileNav({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "icon" }),
-          "size-9 lg:hidden",
-        )}
+        className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-9 lg:hidden")}
         aria-label="Open menu"
       >
         <Menu className="size-5" aria-hidden />
       </SheetTrigger>
-      <SheetContent side="left" className="border-sidebar-border bg-sidebar p-0 text-sidebar-foreground">
+      <SheetContent
+        side="left"
+        className="border-sidebar-border bg-sidebar p-0 text-sidebar-foreground"
+      >
         <Sidebar
           user={user}
           orgs={orgs}

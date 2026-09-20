@@ -44,7 +44,7 @@ New code under `apps/web/src/lib/scheduling/panel/`:
   Day-42 `shiftHours`.
 - **`judge.ts`** — `judgeCandidates(candidates, deps)`: one DeepSeek call
   (`generateStructuredDeepSeek`, `SCHEDULING_MODEL_PRO`) → `{winnerLabel, ranking,
-  rationale}`. Pure + provider-free (injected `chat`). Sanitizes the ranking to the
+rationale}`. Pure + provider-free (injected `chat`). Sanitizes the ranking to the
   provided labels and **falls back to a deterministic ranking** on any model issue;
   short-circuits (no call) for a single candidate.
 - **`panel.ts`** — pure `runCandidatePanel(candidates, {metricsOf, judge})`:
@@ -55,7 +55,7 @@ New code under `apps/web/src/lib/scheduling/panel/`:
   candidate with `validateLaborRules`; `runCandidatePanel` with the DeepSeek judge;
   persist.
 - **`panel-actions.ts`** — `"use server"` `runSchedulePanel({periodStart, periodEnd,
-  agentInputs?})`, owner/admin gated (explicit role check).
+agentInputs?})`, owner/admin gated (explicit role check).
 
 ## The flow
 
@@ -79,9 +79,9 @@ New code under `apps/web/src/lib/scheduling/panel/`:
 - `shifts` (existing): the winner's assignments (open shifts kept, `employee_id null`
   → `status='open'`; assigned → `status='draft'`).
 - **`schedule_versions`** (new): one row per candidate — `id, org_id, schedule_id→
-  schedules (cascade), label, weights jsonb, assignments jsonb, score jsonb (the
-  metrics), gap_report jsonb, covered, total_missing, judge_rank, is_selected, note,
-  created_at`. Indexes on `org_id`, `schedule_id`. RLS **member-read / manager-write**,
+schedules (cascade), label, weights jsonb, assignments jsonb, score jsonb (the
+metrics), gap_report jsonb, covered, total_missing, judge_rank, is_selected, note,
+created_at`. Indexes on `org_id`, `schedule_id`. RLS **member-read / manager-write**,
   mirroring the Day-41 policy loop.
 
 **Client posture (mirrors Day 48):** schedules/shifts/versions write through the

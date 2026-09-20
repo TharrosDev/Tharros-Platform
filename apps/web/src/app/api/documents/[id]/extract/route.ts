@@ -7,10 +7,7 @@ import { extractText } from "@/lib/documents/extract";
 import { DOCUMENTS_BUCKET } from "@/lib/documents/types";
 import { logger } from "@/lib/observability/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
-import {
-  isSameOriginMutation,
-  opaqueRateLimitKey,
-} from "@/lib/security/request";
+import { isSameOriginMutation, opaqueRateLimitKey } from "@/lib/security/request";
 
 // Node runtime: the PDF/DOCX parsers (unpdf/mammoth) need Node, not Edge.
 export const runtime = "nodejs";
@@ -49,8 +46,12 @@ export async function POST(
   }
 
   const [userLimit, orgLimit] = await Promise.all([
-    checkRateLimit(opaqueRateLimitKey("document-extract-user", activeOrg.id, user.id), 20, 3600, { failOpen: false }),
-    checkRateLimit(opaqueRateLimitKey("document-extract-org", activeOrg.id), 120, 3600, { failOpen: false }),
+    checkRateLimit(opaqueRateLimitKey("document-extract-user", activeOrg.id, user.id), 20, 3600, {
+      failOpen: false,
+    }),
+    checkRateLimit(opaqueRateLimitKey("document-extract-org", activeOrg.id), 120, 3600, {
+      failOpen: false,
+    }),
   ]);
   if (!userLimit.allowed || !orgLimit.allowed) {
     return Response.json(
@@ -101,7 +102,13 @@ export async function POST(
   }
   const { data: job } = await admin
     .from("ingestion_jobs")
-    .insert({ document_id: id, org_id: doc.org_id, stage: "extract", status: "running", attempts: 1 })
+    .insert({
+      document_id: id,
+      org_id: doc.org_id,
+      stage: "extract",
+      status: "running",
+      attempts: 1,
+    })
     .select("id")
     .single();
 
@@ -136,7 +143,8 @@ export async function POST(
           char_count: result.charCount,
           page_count: result.pageCount,
           extracted_at: now(),
-          error: "This looks like a scanned PDF — text couldn't be extracted. OCR support is coming.",
+          error:
+            "This looks like a scanned PDF — text couldn't be extracted. OCR support is coming.",
         })
         .eq("id", id)
         .eq("org_id", activeOrg.id);
@@ -155,7 +163,7 @@ export async function POST(
         error: null,
       })
       .eq("id", id)
-        .eq("org_id", activeOrg.id);
+      .eq("org_id", activeOrg.id);
     await finishJob("succeeded");
     return Response.json({
       status: "extracted",
@@ -167,12 +175,18 @@ export async function POST(
     logger.error("documents.extract_failed", { document_id: id, err });
     await admin
       .from("documents")
-      .update({ status: "failed", error: "Couldn't read this file. Try re-uploading or a different format." })
+      .update({
+        status: "failed",
+        error: "Couldn't read this file. Try re-uploading or a different format.",
+      })
       .eq("id", id)
-        .eq("org_id", activeOrg.id);
+      .eq("org_id", activeOrg.id);
     await finishJob("failed", message);
     return Response.json(
-      { status: "failed", error: "Couldn't read this file. Try re-uploading or a different format." },
+      {
+        status: "failed",
+        error: "Couldn't read this file. Try re-uploading or a different format.",
+      },
       { status: 200 },
     );
   }

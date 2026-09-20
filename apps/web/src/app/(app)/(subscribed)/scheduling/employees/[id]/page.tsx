@@ -20,11 +20,7 @@ import { EmployeeProfile } from "@/components/scheduling/employees/employee-prof
 
 export const metadata: Metadata = { title: "Employee profile" };
 
-export default async function EmployeeProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EmployeeProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const [{ activeOrg }, { id }] = await Promise.all([getOrgContext(), params]);
   if (!activeOrg) redirect("/dashboard");
 

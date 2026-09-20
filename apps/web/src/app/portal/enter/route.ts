@@ -1,10 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import {
-  PORTAL_COOKIE,
-  portalCookieOptions,
-  validatePortalToken,
-} from "@/lib/portal/session";
+import { PORTAL_COOKIE, portalCookieOptions, validatePortalToken } from "@/lib/portal/session";
 import { sanitizeNext } from "@/lib/auth/safe-redirect";
 
 /**

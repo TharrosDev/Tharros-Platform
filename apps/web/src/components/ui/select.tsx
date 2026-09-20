@@ -24,9 +24,8 @@ function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "border-input bg-card text-foreground flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm shadow-xs transition-[box-shadow,border-color] outline-none hover:border-muted-foreground/40",
+        "border-input bg-card text-foreground flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-lg border px-3 py-2 text-sm shadow-xs transition-[box-shadow,border-color] hover:border-muted-foreground/40",
         "data-[placeholder]:text-muted-foreground/70",
-        "focus-visible:border-ring focus-visible:ring-ring/25 focus-visible:ring-[3px]",
         "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className,
@@ -60,14 +59,14 @@ function SelectContent({
         align={align}
         side={side}
         alignItemWithTrigger={false}
-        className="z-50"
+        className="z-overlay"
       >
         <SelectPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover max-h-[min(24rem,var(--available-height))] min-w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-y-auto rounded-xl border p-1 outline-none",
+            "bg-popover text-popover-foreground shadow-popover max-h-[min(24rem,var(--available-height))] min-w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-y-auto rounded-xl border p-1 ",
             "transition-all duration-150 ease-out",
-            "data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0",
-            "data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0",
+            "data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0",
+            "data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0",
             className,
           )}
           {...props}
@@ -87,7 +86,7 @@ function SelectItem({
   return (
     <SelectPrimitive.Item
       className={cn(
-        "text-foreground data-[highlighted]:bg-accent data-[selected]:font-semibold relative flex min-h-9 cursor-default select-none items-center gap-2.5 rounded-md py-2 pl-2.5 pr-8 text-sm outline-none transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "text-foreground data-[highlighted]:bg-accent data-[selected]:font-semibold relative flex min-h-9 cursor-default select-none items-center gap-2.5 rounded-md py-2 pl-2.5 pr-8 text-sm transition-colors data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className,
       )}
       {...props}

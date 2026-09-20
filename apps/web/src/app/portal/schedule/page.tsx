@@ -63,7 +63,7 @@ export default async function PortalSchedulePage() {
         <div className="flex flex-1 flex-col">
           <Link
             href="/portal"
-            className="text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-ring/40 mb-4 inline-flex min-h-10 w-fit items-center gap-1 rounded-lg px-2 text-sm outline-none focus-visible:ring-[3px]"
+            className="text-muted-foreground hover:bg-accent hover:text-foreground mb-4 inline-flex min-h-10 w-fit items-center gap-1 rounded-lg px-2 text-sm "
           >
             <ChevronLeft className="size-4" /> Portal
           </Link>
