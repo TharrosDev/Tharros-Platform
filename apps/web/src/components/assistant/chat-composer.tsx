@@ -50,7 +50,7 @@ export function ChatComposer({
       {header ? <div className="mb-2">{header}</div> : null}
       <div
         className={cn(
-          "border-input bg-card shadow-card focus-within:border-ring focus-within:ring-ring/25 relative flex items-end gap-2 border p-2 transition-[box-shadow,border-color] focus-within:ring-[3px]",
+          "border-input bg-card focus-within:border-ring focus-within:ring-ring/25 relative flex items-end gap-2 border p-2 transition-[box-shadow,border-color] focus-within:ring-[3px]",
           disabled && "opacity-60",
         )}
       >

@@ -75,7 +75,7 @@ export default async function SchedulingPage() {
       {canManage ? (
         <Link
           href="/scheduling/approvals"
-          className="group bg-card flex items-center gap-4 rounded-xl border px-4 py-3.5 shadow-card transition-colors hover:bg-accent/40 sm:px-5"
+          className="group bg-card flex items-center gap-4 rounded-xl border px-4 py-3.5 transition-colors hover:bg-accent/40 sm:px-5"
         >
           <span
             aria-hidden
@@ -110,7 +110,7 @@ export default async function SchedulingPage() {
           <h2 id="current-heading" className="type-h2 mb-3">
             Current schedule
           </h2>
-          <div className="bg-card rounded-xl border p-5 shadow-card">
+          <div className="bg-card rounded-xl border p-5">
             {schedule ? (
               <>
                 <div className="flex flex-wrap items-center gap-2">
@@ -162,7 +162,7 @@ export default async function SchedulingPage() {
               Edit
             </Link>
           </div>
-          <dl className="bg-card divide-y rounded-xl border shadow-card">
+          <dl className="bg-card divide-y rounded-xl border">
             {setup.map((row) => (
               <div key={row.label} className="flex items-center justify-between gap-3 px-4 py-2.5">
                 <dt className="text-muted-foreground text-sm">{row.label}</dt>
@@ -192,7 +192,7 @@ export default async function SchedulingPage() {
             No activity yet. Schedule changes and agent decisions will appear here.
           </p>
         ) : (
-          <ul className="bg-card divide-y rounded-xl border shadow-card">
+          <ul className="bg-card divide-y rounded-xl border">
             {recentActivity.map((entry) => (
               <li key={entry.id} className="flex items-baseline gap-3 px-4 py-2.5 text-sm">
                 <span aria-hidden className="bg-primary mt-1.5 size-1.5 shrink-0 self-start " />

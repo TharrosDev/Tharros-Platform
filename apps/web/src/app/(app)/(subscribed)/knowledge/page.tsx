@@ -52,7 +52,7 @@ function FirstDocumentsProgress({ count }: { count: number }) {
   const done = Math.min(count, FIRST_DOCS_TARGET);
   const pct = (done / FIRST_DOCS_TARGET) * 100;
   return (
-    <div className="border-border bg-card shadow-card rounded-xl border p-4">
+    <div className="border-border bg-card rounded-xl border p-4">
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-foreground text-sm font-medium">
           {count === 0

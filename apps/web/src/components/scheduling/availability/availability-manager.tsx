@@ -210,7 +210,7 @@ function WeeklyGrid({
 
       {state?.message && !state.ok ? <FormMessage>{state.message}</FormMessage> : null}
 
-      <div className="bg-card divide-border divide-y border shadow-xs">
+      <div className="bg-card divide-border divide-y border">
         {DAYS.map((d) => {
           const day = grid[d.value];
           return (
@@ -311,7 +311,7 @@ function TemporaryOverrides({
       </div>
 
       {rows.length > 0 ? (
-        <ul className="bg-card divide-border divide-y border shadow-xs">
+        <ul className="bg-card divide-border divide-y border">
           {rows.map((r) => (
             <li key={r.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
               <Badge variant={r.is_available ? "success" : "secondary"}>
@@ -347,7 +347,7 @@ function TemporaryOverrides({
         <form
           ref={formRef}
           action={action}
-          className="bg-card grid gap-3 border p-4 shadow-xs sm:grid-cols-2"
+          className="bg-card grid gap-3 border p-4 sm:grid-cols-2"
         >
           <input type="hidden" name="employeeId" value={employeeId} />
           <Field label="Status">

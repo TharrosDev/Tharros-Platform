@@ -33,7 +33,7 @@ export function TakeoverPanel({
   const isClosed = status === "closed";
 
   return (
-    <div className="bg-card space-y-5 border p-5 shadow-xs">
+    <div className="bg-card space-y-5 border p-5">
       <div className="flex flex-wrap items-center gap-3">
         {isHuman ? (
           <SingleAction

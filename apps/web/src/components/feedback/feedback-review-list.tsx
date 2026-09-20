@@ -109,7 +109,7 @@ function ReviewCard({ submission: s }: { submission: ReviewSubmission }) {
       layout
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="bg-card shadow-card space-y-3 border p-4"
+      className="bg-card space-y-3 border p-4"
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="bg-primary-soft text-primary-soft-foreground flex size-7 items-center justify-center">

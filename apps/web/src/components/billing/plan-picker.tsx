@@ -21,8 +21,8 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
             className={cn(
               "bg-card relative flex flex-col border p-6 transition-[border-color,box-shadow] duration-200",
               plan.highlight
-                ? "border-primary-edge/40 ring-primary/15 shadow-raised ring-2"
-                : "shadow-card hover:border-input",
+                ? "border-primary-edge/40 ring-primary/15 ring-2"
+                : " hover:border-input",
             )}
           >
             {plan.highlight && (

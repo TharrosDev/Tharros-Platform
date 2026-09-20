@@ -174,7 +174,7 @@ export default async function LeadDetailPage({
                 </p>
               </div>
             ) : lead.followUpDraft ? (
-              <article className="bg-card rounded-xl border shadow-card">
+              <article className="bg-card rounded-xl border">
                 <header className="flex flex-wrap items-center justify-between gap-2 border-b px-5 py-3">
                   <div className="min-w-0">
                     <p className="text-muted-foreground text-xs">To {lead.email}</p>
@@ -219,10 +219,7 @@ export default async function LeadDetailPage({
             <h2 id="timeline-heading" className="type-h2 mb-3">
               Activity
             </h2>
-            <form
-              action={addLeadNote}
-              className="bg-card mb-5 space-y-2 rounded-xl border p-3 shadow-card"
-            >
+            <form action={addLeadNote} className="bg-card mb-5 space-y-2 rounded-xl border p-3">
               <input type="hidden" name="leadId" value={lead.id} />
               <Textarea
                 name="note"
@@ -285,10 +282,7 @@ export default async function LeadDetailPage({
         </div>
 
         <aside className="space-y-6 lg:sticky lg:top-20">
-          <section
-            aria-labelledby="status-heading"
-            className="bg-card rounded-xl border p-4 shadow-card"
-          >
+          <section aria-labelledby="status-heading" className="bg-card rounded-xl border p-4">
             <h2 id="status-heading" className="text-sm font-semibold">
               Pipeline
             </h2>
@@ -323,10 +317,7 @@ export default async function LeadDetailPage({
             </dl>
           </section>
 
-          <section
-            aria-labelledby="details-heading"
-            className="bg-card rounded-xl border p-4 shadow-card"
-          >
+          <section aria-labelledby="details-heading" className="bg-card rounded-xl border p-4">
             <h2 id="details-heading" className="text-sm font-semibold">
               Contact details
             </h2>

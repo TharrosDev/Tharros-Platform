@@ -300,7 +300,7 @@ function ApprovalCard({ children, className }: { children: React.ReactNode; clas
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
       className={cn(
-        "bg-card shadow-card flex flex-col gap-3 border p-4 sm:flex-row sm:items-center",
+        "bg-card flex flex-col gap-3 border p-4 sm:flex-row sm:items-center",
         className,
       )}
     >

@@ -101,7 +101,7 @@ export default async function ActivityLogPage({
               className={cn(
                 " rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
                 s.key === source
-                  ? "bg-card text-foreground shadow-xs"
+                  ? "bg-card text-foreground"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -122,7 +122,7 @@ export default async function ActivityLogPage({
           </p>
         </div>
       ) : (
-        <ul className="bg-card shadow-card overflow-hidden rounded-lg border">
+        <ul className="bg-card overflow-hidden rounded-lg border">
           {events.map((e, index) => {
             const badge = CATEGORY_BADGE[e.category];
             const Icon = e.source === "agent" ? Bot : CalendarClock;

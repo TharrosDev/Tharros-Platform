@@ -121,7 +121,7 @@ function ProfileForm({ profile, canManage }: { profile: Profile; canManage: bool
   const disabled = !canManage;
 
   return (
-    <section className="bg-card space-y-4 border p-5 shadow-xs">
+    <section className="bg-card space-y-4 border p-5">
       <h2 className="text-sm font-medium">Employment</h2>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -235,7 +235,7 @@ function ProfileForm({ profile, canManage }: { profile: Profile; canManage: bool
 
 function HoursCard({ hours }: { hours: HoursSummary }) {
   return (
-    <section className="bg-card space-y-3 border p-5 shadow-xs">
+    <section className="bg-card space-y-3 border p-5">
       <div className="flex items-center gap-2">
         <Clock className="text-muted-foreground size-5" />
         <h2 className="text-sm font-medium">Hours worked</h2>
@@ -266,7 +266,7 @@ function AvailabilityCard({
   availableDays: number;
 }) {
   return (
-    <section className="bg-card space-y-3 border p-5 shadow-xs">
+    <section className="bg-card space-y-3 border p-5">
       <div className="flex items-center gap-2">
         <CalendarClock className="text-muted-foreground size-5" />
         <h2 className="text-sm font-medium">Availability</h2>
@@ -290,7 +290,7 @@ function AttendanceCard({ attendance }: { attendance: AttendanceHistory }) {
   const { timeOff, sickCalls, swaps } = attendance;
   const empty = timeOff.length === 0 && sickCalls.length === 0 && swaps.length === 0;
   return (
-    <section className="bg-card space-y-3 border p-5 shadow-xs">
+    <section className="bg-card space-y-3 border p-5">
       <h2 className="text-sm font-medium">Attendance history</h2>
       {empty ? (
         <p className="text-muted-foreground text-sm">

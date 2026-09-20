@@ -74,7 +74,7 @@ export function EmployeeAnalyticsTable({ employees }: { employees: EmployeeAnaly
   }, [employees, sortKey, dir]);
 
   return (
-    <div className="bg-card shadow-card overflow-hidden border">
+    <div className="bg-card overflow-hidden border">
       <Table>
         <TableHeader>
           <TableRow>

@@ -123,7 +123,7 @@ export default async function AutomationsPage({
           {automations.length ? (
             <ul className="space-y-3">
               {automations.map((automation) => (
-                <li key={automation.id} className="bg-card rounded-xl border shadow-card">
+                <li key={automation.id} className="bg-card rounded-xl border">
                   <div className="flex flex-wrap items-center justify-between gap-3 px-4 pt-4 sm:px-5">
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span
@@ -330,7 +330,7 @@ export default async function AutomationsPage({
           <h2 id="new-heading" className="type-h2 mb-3">
             New automation
           </h2>
-          <div className="bg-card rounded-xl border p-4 shadow-card sm:p-5">
+          <div className="bg-card rounded-xl border p-4 sm:p-5">
             {canManage ? (
               <form action={createAutomation} className="space-y-4">
                 <div className="space-y-1.5">

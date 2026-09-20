@@ -307,7 +307,7 @@ export function FeedbackWidget() {
             onClick={() => setOpen(true)}
             aria-expanded={false}
             aria-controls="feedback-panel"
-            className="bg-card text-foreground shadow-raised hover:text-primary-soft-foreground flex size-11 items-center justify-center border transition-colors"
+            className="bg-card text-foreground hover:text-primary-soft-foreground flex size-11 items-center justify-center border transition-colors"
             aria-label="Open help and feedback"
             title="Help & feedback"
           >
@@ -328,7 +328,7 @@ function AgentBubble({ children }: { children: React.ReactNode }) {
       >
         <TharrosMark className="size-3" />
       </span>
-      <div className="bg-surface-2 text-foreground/90 max-w-[85%] rounded-tl-md border border-border/50 px-3.5 py-2.5 text-sm shadow-xs whitespace-pre-wrap">
+      <div className="bg-surface-2 text-foreground/90 max-w-[85%] rounded-tl-md border border-border/50 px-3.5 py-2.5 text-sm whitespace-pre-wrap">
         {children}
       </div>
     </div>

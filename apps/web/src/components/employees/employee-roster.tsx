@@ -71,7 +71,7 @@ export function EmployeeRoster({
   return (
     <section className="space-y-3">
       <h2 className="type-h2">Roster</h2>
-      <div className="bg-card shadow-card overflow-hidden border">
+      <div className="bg-card overflow-hidden border">
         <Table>
           <TableHeader>
             <TableRow>

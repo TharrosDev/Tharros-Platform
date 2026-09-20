@@ -394,7 +394,7 @@ export function ScheduleCalendar({
 
       {/* The judge's rationale: a designed AI panel, not an orphan paragraph. */}
       {schedule.optimizationSummary ? (
-        <div className="bg-card flex gap-3 border px-4 py-3.5 shadow-xs">
+        <div className="bg-card flex gap-3 border px-4 py-3.5">
           <Sparkles className="text-primary-soft-foreground mt-0.5 size-4 shrink-0" aria-hidden />
           <div className="min-w-0">
             <p className="text-sm font-semibold">Why this draft looks the way it does</p>
@@ -421,7 +421,7 @@ export function ScheduleCalendar({
       ) : null}
 
       {/* The grid (hidden on small screens in favour of the day list below) */}
-      <div className="bg-card hidden overflow-x-auto border shadow-xs md:block">
+      <div className="bg-card hidden overflow-x-auto border md:block">
         <div
           className="grid min-w-[64rem]"
           style={{ gridTemplateColumns: `12rem repeat(${WINDOW_DAYS}, minmax(6rem, 1fr))` }}

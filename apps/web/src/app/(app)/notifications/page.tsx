@@ -51,7 +51,7 @@ export default async function NotificationsPage() {
           description="Updates from scheduling, lead capture and automations land here as they happen."
         />
       ) : (
-        <ul className="bg-card divide-y overflow-hidden rounded-xl border shadow-card">
+        <ul className="bg-card divide-y overflow-hidden rounded-xl border">
           {notifications.map((n) => {
             const link = notificationLink(n.data);
             return (

@@ -68,7 +68,7 @@ export default async function SchedulingAnalyticsPage({
             className={cn(
               " rounded-md px-3 py-1.5 text-sm font-medium transition-colors ",
               w === days
-                ? "bg-card text-foreground shadow-xs"
+                ? "bg-card text-foreground"
                 : "text-muted-foreground hover:text-foreground",
             )}
           >

@@ -167,7 +167,7 @@ export function DocumentUploader() {
       >
         <span
           className={cn(
-            "bg-card text-primary-soft-foreground flex size-10 shrink-0 items-center justify-center border shadow-xs [&>svg]:size-5",
+            "bg-card text-primary-soft-foreground flex size-10 shrink-0 items-center justify-center border [&>svg]:size-5",
             dragging && "border-primary-edge/40",
           )}
         >
@@ -207,7 +207,7 @@ export function DocumentUploader() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className="bg-card flex items-center gap-3 border px-3.5 py-2.5 text-sm shadow-xs"
+                className="bg-card flex items-center gap-3 border px-3.5 py-2.5 text-sm"
               >
                 <StatusIcon status={it.status} />
                 <span className="text-foreground min-w-0 flex-1 truncate" title={it.name}>
