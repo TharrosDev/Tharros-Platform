@@ -90,6 +90,24 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, "..", ".."),
   },
+  /*
+    Turbopack's filesystem cache is off for both build and dev.
+
+    Next 16.3 enabled it by default for `next build`. A warm cache can reuse a
+    stale compilation of globals.css after that file changes: on 2026-09-20
+    production shipped the new components on top of the previous design
+    system's stylesheet, because Vercel restored `.next/cache/turbopack` from
+    the prior deploy. The build was green; the site was wrong. The dev cache
+    produced the same stale stylesheet locally.
+
+    A correct stylesheet is worth more than a warm start. scripts/verify-css-
+    build.mjs runs after every build as the backstop, so if this ever comes
+    back through another path the deploy fails instead of shipping.
+  */
+  experimental: {
+    turbopackFileSystemCacheForBuild: false,
+    turbopackFileSystemCacheForDev: false,
+  },
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
