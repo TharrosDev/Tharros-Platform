@@ -6,13 +6,13 @@
 
 /**
  * Default model for product work — the highest tier the customer-facing features
- * (RAG assistant + scheduling agents) use. **Sonnet 4.6 at high effort**: strong
+ * (RAG assistant + scheduling agents) use. **Sonnet 5 at high effort**: strong
  * enough for grounded Q&A and the scheduling agent loop, at a fraction of Opus's
  * cost. Opus is deliberately reserved for later internal integration-management
  * work, not the chatbot/scheduling path (overkill + too expensive there). The
  * "high effort" half lives in `buildRagRequest` (output_config.effort).
  */
-export const DEFAULT_MODEL = "claude-sonnet-4-6";
+export const DEFAULT_MODEL = "claude-sonnet-5";
 
 /**
  * Cheaper model for structured, lower-complexity work where the default's quality

@@ -1,7 +1,7 @@
 # RAG Eval Results
 
 Corpus: 5 fixtures · 20 questions (4 negatives).
-Embeddings: text-embedding-3-small. Answers: claude-opus-4-8. Judge: claude-haiku-4-5.
+Embeddings: text-embedding-3-small. Answers: claude-sonnet-5. Judge: claude-haiku-4-5.
 
 ## Retrieval sweep (chunk × top-k)
 
@@ -23,8 +23,8 @@ Embeddings: text-embedding-3-small. Answers: claude-opus-4-8. Judge: claude-haik
 
 | config   | chunk  | k   | citation acc | cite jaccard | cite coverage | fact-hit | faithfulness | negatives handled |
 | -------- | ------ | --- | ------------ | ------------ | ------------- | -------- | ------------ | ----------------- |
-| baseline | 500/80 | 4   | 100%         | 1.00         | 100%          | 100%     | 0.97         | 75%               |
-| winner   | 300/60 | 4   | 100%         | 1.00         | 100%          | 100%     | 0.94         | 100%              |
+| baseline | 500/80 | 4   | 94%          | 0.97         | 100%          | 100%     | 1.00         | 75%               |
+| winner   | 300/60 | 4   | 94%          | 0.97         | 100%          | 100%     | 1.00         | 75%               |
 
 ## Baseline per-question citations
 
@@ -34,7 +34,7 @@ Embeddings: text-embedding-3-small. Answers: claude-opus-4-8. Judge: claude-haik
 - **hours-saturday** (hours-and-contact.md) → cited [hours-and-contact.md]
 - **hours-phone** (hours-and-contact.md) → cited [hours-and-contact.md]
 - **hours-sunday** (hours-and-contact.md) → cited [hours-and-contact.md]
-- **ship-free-threshold** (shipping-policy.md) → cited [shipping-policy.md]
+- **ship-free-threshold** (shipping-policy.md) → cited [shipping-policy.md, pricing.md]
 - **ship-express-cost** (shipping-policy.md) → cited [shipping-policy.md]
 - **ship-cutoff** (shipping-policy.md) → cited [shipping-policy.md]
 - **price-plus-tier** (pricing.md) → cited [pricing.md]

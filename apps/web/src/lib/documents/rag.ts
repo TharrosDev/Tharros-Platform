@@ -2,12 +2,14 @@ import "server-only";
 
 import type {
   MessageCreateParamsNonStreaming,
+  MessageParam,
   OutputConfig,
   TextBlockParam,
   Usage,
 } from "@anthropic-ai/sdk/resources/messages";
 
-import { anthropic, DEFAULT_MODEL } from "@/lib/anthropic/client";
+import { anthropic, CHEAP_MODEL, DEFAULT_MODEL } from "@/lib/anthropic/client";
+import { buildRewriteRequest } from "@/lib/assistant/history";
 import { searchChunks } from "@/lib/documents/retrieval";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/observability/logger";
@@ -98,7 +100,7 @@ export type RagRequestOptions = {
   instructionLabel?: string;
   /**
    * Override the Claude model (Day 33 routing). Defaults to `DEFAULT_MODEL`
-   * (Sonnet 4.6). Templates pass `CHEAP_MODEL` (Haiku). Caching breakpoints are
+   * (Sonnet 5). Templates pass `CHEAP_MODEL` (Haiku). Caching breakpoints are
    * unchanged — Haiku's minimum cacheable prefix is no larger.
    */
   model?: string;
@@ -108,6 +110,8 @@ export type RagRequestOptions = {
    * it entirely, which the cheap template path does so Haiku stays cheap.
    */
   effort?: OutputConfig["effort"] | null;
+  /** Prior conversation turns (from `buildHistory`), sent before this turn's sources + question. */
+  history?: MessageParam[];
 };
 
 export function buildRagRequest(
@@ -120,6 +124,7 @@ export function buildRagRequest(
     instructionLabel = "Question",
     model = DEFAULT_MODEL,
     effort = "high",
+    history = [],
   } = options;
   const system: TextBlockParam[] = [
     { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
@@ -128,12 +133,29 @@ export function buildRagRequest(
   return {
     model,
     max_tokens: 16000,
-    thinking: { type: "adaptive" },
+    // Haiku 4.5 supports neither adaptive thinking nor effort.
+    ...(model === CHEAP_MODEL ? {} : { thinking: { type: "adaptive" as const } }),
     // High reasoning effort on the default (Sonnet) tier; omitted for the cheap
     // template path (effort: null) so Haiku stays inexpensive.
-    ...(effort ? { output_config: { effort } } : {}),
+    ...(effort && model !== CHEAP_MODEL ? { output_config: { effort } } : {}),
     system,
     messages: [
+      // Cache breakpoint on the last history turn so the growing prefix is reused
+      // turn over turn (system + history + context = 3 of the 4 allowed breakpoints).
+      ...history.map((m, i) =>
+        i === history.length - 1
+          ? {
+              role: m.role,
+              content: [
+                {
+                  type: "text" as const,
+                  text: m.content as string,
+                  cache_control: { type: "ephemeral" as const },
+                },
+              ],
+            }
+          : m,
+      ),
       {
         role: "user",
         content: [
@@ -142,11 +164,43 @@ export function buildRagRequest(
             text: buildContextBlock(chunks),
             cache_control: { type: "ephemeral" },
           },
-          { type: "text", text: `${instructionLabel}: ${instruction}` },
+          {
+            type: "text",
+            // With history, a bare "Question:" after SOURCES gets read as source
+            // text (and ignored as untrusted), so the model re-answers the earlier
+            // turn. Label the latest message explicitly; single-turn is unchanged.
+            text:
+              history.length > 0
+                ? `${instructionLabel} (the user's latest message, not part of the SOURCES; answer this, earlier turns are context only): ${instruction}`
+                : `${instructionLabel}: ${instruction}`,
+          },
         ],
       },
     ],
   };
+}
+
+/**
+ * Rewrite a follow-up into a standalone retrieval query using the conversation.
+ * First turn (no history) skips the call. Any failure falls back to the raw
+ * question — retrieval quality degrades, the answer path never breaks.
+ */
+export async function standaloneQuery(history: MessageParam[], question: string): Promise<string> {
+  if (history.length === 0) return question;
+  try {
+    const res = await anthropic.messages.create(
+      buildRewriteRequest(history, question, CHEAP_MODEL),
+    );
+    const text = res.content
+      .filter((b): b is Extract<typeof b, { type: "text" }> => b.type === "text")
+      .map((b) => b.text)
+      .join("")
+      .trim();
+    return text && res.stop_reason === "end_turn" ? text : question;
+  } catch (err) {
+    logger.warn("rag.rewrite_failed", { err });
+    return question;
+  }
 }
 
 /**
