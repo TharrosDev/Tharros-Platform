@@ -18,26 +18,41 @@ function Avatar({ className, ...props }: React.ComponentProps<"span">) {
   );
 }
 
+/**
+ * The photo sits over the initials and stays invisible until it has actually
+ * loaded. A missing or blocked photo therefore never shows as a broken-image
+ * icon, not even for the moment between server paint and hydration: the
+ * initials are what paints first, and the photo only covers them once it has
+ * pixels.
+ *
+ * An SSR'd image can finish (or fail) before hydration attaches onLoad and
+ * onError, so the element is also checked on mount.
+ */
 function AvatarImage({ className, alt = "", ...props }: React.ComponentProps<"img">) {
-  const [failed, setFailed] = React.useState(false);
+  const [state, setState] = React.useState<"loading" | "loaded" | "failed">("loading");
   const ref = React.useRef<HTMLImageElement>(null);
 
-  // An SSR'd image can fail before hydration attaches onError; catch that too.
   React.useEffect(() => {
     const img = ref.current;
-    if (img && img.complete && img.naturalWidth === 0) setFailed(true);
+    if (!img || !img.complete) return;
+    setState(img.naturalWidth > 0 ? "loaded" : "failed");
   }, [props.src]);
 
-  if (failed || !props.src) return null;
+  if (state === "failed" || !props.src) return null;
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      {...props}
       ref={ref}
       data-slot="avatar-image"
       alt={alt}
-      className={cn("aspect-square size-full object-cover", className)}
-      onError={() => setFailed(true)}
-      {...props}
+      className={cn(
+        "absolute inset-0 size-full object-cover transition-opacity",
+        state === "loaded" ? "opacity-100" : "opacity-0",
+        className,
+      )}
+      onLoad={() => setState("loaded")}
+      onError={() => setState("failed")}
     />
   );
 }
