@@ -7,9 +7,9 @@ import { createClient } from "@/lib/supabase/server";
 import { anthropic, DEFAULT_MODEL, modelForTemplate } from "@/lib/anthropic/client";
 import { getSubscription } from "@/lib/billing/entitlements";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { runAssistantTurn } from "@/lib/assistant/agent";
+import { runAssistantTurn, suggestFollowUps } from "@/lib/assistant/agent";
 import { buildAssistantTools } from "@/lib/assistant/tools";
-import type { ProposalView } from "@/lib/assistant/types";
+import type { DataBlock, ProposalView } from "@/lib/assistant/types";
 import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
 import { buildRagRequest, retrieveGroundingChunks, standaloneQuery } from "@/lib/documents/rag";
 import { buildCitations, NO_CONTEXT_ANSWER, type GroundingChunk } from "@/lib/documents/rag-prompt";
@@ -187,6 +187,8 @@ export async function POST(req: Request): Promise<Response> {
     const sources: GroundingChunk[] = [];
     const proposals: ProposalView[] = [];
     const misses: string[] = [];
+    const steps: string[] = [];
+    const dataBlocks: DataBlock[] = [];
     const admin = createAdminClient();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -213,13 +215,20 @@ export async function POST(req: Request): Promise<Response> {
               proposals.push(p);
               send({ type: "proposal", proposal: p });
             },
+            onData: (block) => {
+              dataBlocks.push(block);
+              send({ type: "data", block });
+            },
           });
           const turn = await runAssistantTurn({
             registry,
             history,
             question,
             onText: (text) => send({ type: "delta", text }),
-            onToolStatus: (label) => send({ type: "status", label }),
+            onToolStatus: (label) => {
+              steps.push(label);
+              send({ type: "status", label });
+            },
           });
           let answer = turn.text;
           if (turn.refused) {
@@ -238,6 +247,7 @@ export async function POST(req: Request): Promise<Response> {
             citations,
             // knowledge_misses: document searches that found nothing (Knowledge gaps view).
             usage: misses.length ? { ...turn.usage, knowledge_misses: misses } : turn.usage,
+            meta: { steps, data: dataBlocks },
           });
           if (messageId && proposals.length > 0) {
             await admin
@@ -251,6 +261,21 @@ export async function POST(req: Request): Promise<Response> {
           await touchConversation(supabase, finalConversationId);
           await recordUsage(orgId, user.id, DEFAULT_MODEL, turn.usage);
           send({ type: "done", messageId: messageId ?? undefined });
+          // After done, so suggestions never delay the answer itself.
+          if (!turn.refused && answer) {
+            const items = await suggestFollowUps(question, answer);
+            if (items.length) {
+              // Persist before sending, so the page reload after a new
+              // conversation is routed shows them too.
+              if (messageId) {
+                await admin
+                  .from("messages")
+                  .update({ meta: { steps, data: dataBlocks, suggestions: items } })
+                  .eq("id", messageId);
+              }
+              send({ type: "suggestions", items });
+            }
+          }
         } catch (err) {
           onError(send, err);
         }

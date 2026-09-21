@@ -11,6 +11,8 @@ import {
 } from "@/lib/assistant/conversations";
 import { PageHeader } from "@/components/page-header";
 import { AssistantChat } from "@/components/assistant/assistant-chat";
+import { getSubscription } from "@/lib/billing/entitlements";
+import { getPlan } from "@/lib/billing/plans";
 import { ConversationHistory } from "@/components/assistant/conversation-history";
 
 export const metadata = { title: "AI Assistant" };
@@ -29,11 +31,14 @@ export default async function AssistantPage({
   // The (app) + (subscribed) layouts already gate auth + org; this is defensive.
   if (!user || !activeOrg) redirect("/login");
 
-  const [convPage, hasDocuments, cap] = await Promise.all([
+  const [convPage, hasDocuments, cap, sub] = await Promise.all([
     listConversationsPage(activeOrg.id),
     hasAnyDocument(activeOrg.id),
     checkQueryCap(activeOrg.id),
+    getSubscription(),
   ]);
+  // Which live-data tools the assistant has, so the empty state suggests them.
+  const products = sub?.tier ? getPlan(sub.tier).products : [];
 
   // Resolve the selected conversation by id (independent of the paginated history
   // list, which may not contain it). An unknown id (deleted, or another org's)
@@ -67,6 +72,7 @@ export default async function AssistantPage({
         hasDocuments={hasDocuments}
         readOnly={readOnly}
         nearLimit={cap.nearLimit}
+        products={products}
       />
     </div>
   );

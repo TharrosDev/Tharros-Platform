@@ -11,7 +11,7 @@ import { buildContextBlock, type GroundingChunk } from "@/lib/documents/rag-prom
 import { getLead, listLeads } from "@/lib/leads/queries";
 import { LEAD_STATUSES } from "@/lib/leads/types";
 import { listAutomationRuns } from "@/lib/automations/queries";
-import type { ProposalView } from "@/lib/assistant/types";
+import type { DataBlock, ProposalView } from "@/lib/assistant/types";
 
 /**
  * Assistant 1C — the tools the assistant can call. Reads go through the RLS
@@ -36,6 +36,8 @@ type Ctx = {
   /** Document searches that found nothing — surfaced to admins as knowledge gaps. */
   misses: string[];
   onProposal: (p: ProposalView) => void;
+  /** Structured results for the UI to render as cards (leads, shifts). */
+  onData: (block: DataBlock) => void;
 };
 
 const json = (v: unknown) => ({ content: JSON.stringify(v) });
@@ -130,6 +132,19 @@ export function buildAssistantTools(ctx: Ctx): ToolRegistry {
         },
         async ({ status, query, limit }) => {
           const leads = await listLeads(ctx.orgId, { status, query, limit: limit ?? 20 });
+          if (leads.length) {
+            ctx.onData({
+              kind: "leads",
+              items: leads.slice(0, 8).map((l) => ({
+                id: l.id,
+                name: l.name,
+                company: l.company,
+                email: l.email,
+                status: l.status,
+                createdAt: l.createdAt,
+              })),
+            });
+          }
           return json(
             leads.map((l) => ({
               id: l.id,
@@ -151,7 +166,21 @@ export function buildAssistantTools(ctx: Ctx): ToolRegistry {
         { properties: { lead_id: { type: "string" } }, required: ["lead_id"] },
         async ({ lead_id }) => {
           const lead = await getLead(ctx.orgId, lead_id);
-          return lead ? json(lead) : bad("Lead not found.");
+          if (!lead) return bad("Lead not found.");
+          ctx.onData({
+            kind: "leads",
+            items: [
+              {
+                id: lead.id,
+                name: lead.name,
+                company: lead.company,
+                email: lead.email,
+                status: lead.status,
+                createdAt: lead.createdAt,
+              },
+            ],
+          });
+          return json(lead);
         },
       ),
       tool(
@@ -223,7 +252,26 @@ export function buildAssistantTools(ctx: Ctx): ToolRegistry {
             .neq("status", "cancelled")
             .order("starts_at")
             .limit(200);
-          return error ? bad("Couldn't read the schedule.") : json(data);
+          if (error) return bad("Couldn't read the schedule.");
+          type Row = {
+            starts_at: string;
+            ends_at: string;
+            status: string;
+            employees: { name: string } | null;
+          };
+          const rows = (data ?? []) as unknown as Row[];
+          if (rows.length) {
+            ctx.onData({
+              kind: "shifts",
+              items: rows.slice(0, 40).map((r) => ({
+                startsAt: r.starts_at,
+                endsAt: r.ends_at,
+                status: r.status,
+                employee: r.employees?.name ?? null,
+              })),
+            });
+          }
+          return json(rows);
         },
       ),
       tool(

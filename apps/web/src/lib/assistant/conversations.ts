@@ -156,8 +156,12 @@ type MessageRow = {
   role: ChatMessage["role"];
   content: string;
   citations: Citation[] | null;
+  meta: MessageMeta | null;
   created_at: string;
 };
+
+/** Per-turn presentation data persisted on assistant messages. */
+export type MessageMeta = Pick<ChatMessage, "steps" | "data" | "suggestions">;
 
 export type MessagePage = {
   /** The most recent page of turns, oldest-first for display. */
@@ -181,7 +185,7 @@ export async function getConversationMessages(
   // Fetch newest-first (limit + 1 to detect older turns), then flip to ascending.
   const { data, error } = await supabase
     .from("messages")
-    .select("id, role, content, citations, created_at")
+    .select("id, role, content, citations, meta, created_at")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: false })
     .order("id", { ascending: false })
@@ -221,6 +225,9 @@ export async function getConversationMessages(
       content: r.content,
       citations: r.citations ?? [],
       proposals: proposalsByMessage.get(r.id),
+      steps: r.meta?.steps,
+      data: r.meta?.data,
+      suggestions: r.meta?.suggestions,
       createdAt: r.created_at,
     })),
     truncated,
@@ -258,6 +265,7 @@ export async function appendMessage(
     content: string;
     citations?: Citation[];
     usage?: unknown;
+    meta?: MessageMeta;
   },
 ): Promise<string | null> {
   // Authenticated clients may insert only plain user turns. Assistant-role
@@ -274,6 +282,7 @@ export async function appendMessage(
     content: string;
     citations?: Citation[];
     usage?: unknown;
+    meta?: MessageMeta | null;
   } =
     input.role === "assistant"
       ? {
@@ -283,6 +292,7 @@ export async function appendMessage(
           content: input.content,
           citations: input.citations ?? [],
           usage: input.usage ?? null,
+          meta: input.meta ?? null,
         }
       : {
           conversation_id: input.conversationId,

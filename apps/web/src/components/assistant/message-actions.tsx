@@ -19,9 +19,12 @@ export function MessageActions({
   content,
   label = "answer",
   messageId,
+  extra,
 }: {
   /** Persisted message id; enables thumbs feedback. */
   messageId?: string;
+  /** Extra toolbar controls (Regenerate on the latest turn). */
+  extra?: React.ReactNode;
   /** The assistant turn's text as persisted/streamed. */
   content: string;
   /** Human label used for the download filename + edit textarea aria-label. */
@@ -124,6 +127,7 @@ export function MessageActions({
             </ActionButton>
           </>
         ) : null}
+        {extra}
       </div>
     </div>
   );
@@ -146,7 +150,7 @@ function ActionButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "hover:bg-accent hover:text-foreground inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium transition-colors ",
+        "hover:bg-accent hover:text-foreground inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors",
         active && "bg-accent text-foreground",
       )}
     >
