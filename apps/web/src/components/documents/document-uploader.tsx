@@ -3,10 +3,14 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, m } from "motion/react";
-import { AlertCircle, CheckCircle2, Loader2, UploadCloud, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, Globe, Loader2, UploadCloud, X } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
-import { createDocumentRecord, deleteDocument } from "@/lib/documents/actions";
+import {
+  createDocumentRecord,
+  deleteDocument,
+  importDocumentFromUrl,
+} from "@/lib/documents/actions";
 import { DOCUMENTS_BUCKET } from "@/lib/documents/types";
 import {
   ACCEPTED_LABEL,
@@ -17,6 +21,8 @@ import {
 } from "@/lib/documents/validation";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type UploadStatus = "uploading" | "done" | "failed";
 
@@ -27,6 +33,20 @@ type UploadItem = {
   status: UploadStatus;
   error?: string;
 };
+
+/** Kick off ingestion (best-effort): extract text, then chunk + embed. Failures
+ * surface as a status badge in the document list, not as an upload failure. */
+async function ingest(id: string): Promise<void> {
+  try {
+    const res = await fetch(`/api/documents/${id}/extract`, { method: "POST" });
+    const extracted = (await res.json().catch(() => null)) as { status?: string } | null;
+    if (extracted?.status === "extracted") {
+      await fetch(`/api/documents/${id}/embed`, { method: "POST" });
+    }
+  } catch {
+    // Network hiccup — the doc stays at its last status; re-index will retry.
+  }
+}
 
 let counter = 0;
 const nextKey = () => `u${++counter}-${Date.now().toString(36)}`;
@@ -71,19 +91,7 @@ export function DocumentUploader() {
         return false;
       }
 
-      // Kick off the ingestion pipeline (best-effort): extract text (Day 25),
-      // then chunk + embed (Day 26). Any failure surfaces as a status badge in
-      // the document list, not as an upload failure.
-      try {
-        const res = await fetch(`/api/documents/${reserved.id}/extract`, { method: "POST" });
-        const extracted = (await res.json().catch(() => null)) as { status?: string } | null;
-        if (extracted?.status === "extracted") {
-          await fetch(`/api/documents/${reserved.id}/embed`, { method: "POST" });
-        }
-      } catch {
-        // Network hiccup — the doc stays at its last status; re-index will retry.
-      }
-
+      await ingest(reserved.id);
       update(key, { status: "done" });
       return true;
     },
@@ -133,6 +141,29 @@ export function DocumentUploader() {
     },
     [router, toast, uploadOne],
   );
+
+  const [url, setUrl] = React.useState("");
+  const [importing, setImporting] = React.useState(false);
+
+  async function importUrl(e: React.FormEvent) {
+    e.preventDefault();
+    const target = url.trim();
+    if (!target || importing) return;
+    const key = nextKey();
+    setImporting(true);
+    setItems((prev) => [{ key, name: target, size: 0, status: "uploading" }, ...prev]);
+    const reserved = await importDocumentFromUrl(target);
+    if ("error" in reserved) {
+      update(key, { status: "failed", error: reserved.error });
+    } else {
+      await ingest(reserved.id);
+      update(key, { status: "done" });
+      setUrl("");
+      router.refresh();
+      toast.add({ title: "Page imported", description: target });
+    }
+    setImporting(false);
+  }
 
   const dismiss = (key: string) => setItems((prev) => prev.filter((it) => it.key !== key));
 
@@ -197,6 +228,28 @@ export function DocumentUploader() {
         />
       </div>
 
+      <form onSubmit={importUrl} className="flex items-center gap-2">
+        <label htmlFor="import-url" className="sr-only">
+          Import a web page
+        </label>
+        <div className="relative min-w-0 flex-1">
+          <Globe className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Input
+            id="import-url"
+            type="url"
+            inputMode="url"
+            placeholder="Or import a public web page: https://…"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Button type="submit" variant="outline" disabled={!url.trim() || importing}>
+          {importing ? <Loader2 className="size-4 animate-spin" /> : null}
+          Import
+        </Button>
+      </form>
+
       {items.length > 0 ? (
         <ul className="space-y-1.5" aria-label="Upload progress">
           <AnimatePresence initial={false}>
@@ -214,7 +267,7 @@ export function DocumentUploader() {
                   {it.name}
                 </span>
                 <span className="text-muted-foreground shrink-0 text-xs">
-                  {it.status === "failed" ? it.error : formatBytes(it.size)}
+                  {it.status === "failed" ? it.error : it.size ? formatBytes(it.size) : null}
                 </span>
                 {it.status !== "uploading" ? (
                   <button

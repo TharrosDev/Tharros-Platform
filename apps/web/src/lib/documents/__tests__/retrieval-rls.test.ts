@@ -108,7 +108,7 @@ beforeAll(async () => {
       document_id: docA2,
       org_id: orgA,
       chunk_index: 0,
-      content: "A-far (axis1)",
+      content: "A-far (axis1) mentions SKU-7731",
       embedding: unitVecLiteral(1),
     },
     {
@@ -168,6 +168,53 @@ describe("match_document_chunks", () => {
   it("filters to a single document when p_document_id is given", async () => {
     const { data } = await clientA.rpc("match_document_chunks", {
       query_embedding: unitVecLiteral(0),
+      p_org: orgA,
+      match_count: 10,
+      p_document_id: docA2,
+    });
+    expect(data).toHaveLength(1);
+    expect(data[0].document_id).toBe(docA2);
+  });
+});
+
+describe("hybrid_match_document_chunks", () => {
+  it("lifts an exact keyword match above a closer vector", async () => {
+    const { data, error } = await clientA.rpc("hybrid_match_document_chunks", {
+      query_embedding: unitVecLiteral(0),
+      query_text: "SKU-7731",
+      p_org: orgA,
+      match_count: 10,
+    });
+    expect(error).toBeNull();
+    expect(data).toHaveLength(2);
+    // A-far ranks 2nd on vectors but 1st on keywords → wins the fused score.
+    expect(data[0].content).toContain("SKU-7731");
+  });
+
+  it("falls back to vector order when no keyword matches", async () => {
+    const { data } = await clientA.rpc("hybrid_match_document_chunks", {
+      query_embedding: unitVecLiteral(0),
+      query_text: "zzzz-nothing",
+      p_org: orgA,
+      match_count: 10,
+    });
+    expect(data[0].content).toContain("A-near");
+  });
+
+  it("never returns another org's chunks", async () => {
+    const { data } = await clientA.rpc("hybrid_match_document_chunks", {
+      query_embedding: unitVecLiteral(0),
+      query_text: "B-near",
+      p_org: orgB,
+      match_count: 10,
+    });
+    expect(data).toEqual([]);
+  });
+
+  it("filters to a single document", async () => {
+    const { data } = await clientA.rpc("hybrid_match_document_chunks", {
+      query_embedding: unitVecLiteral(0),
+      query_text: "A-near",
       p_org: orgA,
       match_count: 10,
       p_document_id: docA2,

@@ -11,6 +11,12 @@ import { logger } from "@/lib/observability/logger";
 import { DOCUMENTS_BUCKET, storagePathFor } from "@/lib/documents/types";
 import { sanitizeStorageName, validateUploadFile } from "@/lib/documents/validation";
 import { normalizeTags } from "@/lib/documents/tags";
+import {
+  fetchPublicPage,
+  importFilename,
+  pageToText,
+  parseImportUrl,
+} from "@/lib/documents/url-import";
 import { listDocumentsPage, type DocumentPage } from "@/lib/documents/queries";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { opaqueRateLimitKey } from "@/lib/security/request";
@@ -94,6 +100,61 @@ export async function createDocumentRecord(input: {
 
   revalidatePath(KNOWLEDGE_PATH);
   return { id, storagePath };
+}
+
+/**
+ * Import a public web page as a knowledge document. Fetches (SSRF-guarded),
+ * reduces HTML to text, then reuses the normal reservation seam and uploads the
+ * text as a Markdown file — so extract → embed runs exactly as for an upload.
+ */
+export async function importDocumentFromUrl(rawUrl: string): Promise<CreateDocumentResult> {
+  const url = parseImportUrl(rawUrl);
+  if (!(url instanceof URL)) return { error: url.error };
+
+  const [user, { activeOrg }] = await Promise.all([getAuthUser(), getOrgContext()]);
+  if (!user || !activeOrg) return { error: "No active organization. Try refreshing the page." };
+
+  const limit = await checkRateLimit(
+    opaqueRateLimitKey("document-url-import", activeOrg.id, user.id),
+    20,
+    3600,
+    { failOpen: false },
+  );
+  if (!limit.allowed) return { error: "Too many page imports. Please try again later." };
+
+  let text: string;
+  let finalUrl: URL;
+  try {
+    const page = await fetchPublicPage(url);
+    text = pageToText(page.body, page.contentType);
+    finalUrl = page.finalUrl;
+  } catch (err) {
+    logger.warn("documents.url_import_fetch_failed", { org_id: activeOrg.id, err });
+    return { error: err instanceof Error ? err.message : "Couldn't fetch that page." };
+  }
+  if (!text) return { error: "That page has no readable text." };
+
+  const content = `Source: ${finalUrl.toString()}\n\n${text}`;
+  const bytes = new TextEncoder().encode(content);
+  const reserved = await createDocumentRecord({
+    filename: importFilename(finalUrl),
+    mimeType: "text/markdown",
+    sizeBytes: bytes.byteLength,
+  });
+  if ("error" in reserved) return reserved;
+
+  const { error } = await createAdminClient()
+    .storage.from(DOCUMENTS_BUCKET)
+    .upload(reserved.storagePath, bytes, { contentType: "text/markdown", upsert: false });
+  if (error) {
+    logger.error("documents.url_import_upload_failed", {
+      org_id: activeOrg.id,
+      error: error.message,
+    });
+    await deleteDocument(reserved.id);
+    return { error: "Could not save the page. Please try again." };
+  }
+  return reserved;
 }
 
 /** Set a document's tags (org members; RLS scopes to the caller's orgs).

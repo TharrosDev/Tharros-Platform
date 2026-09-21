@@ -20,7 +20,7 @@ describe("validateUploadFile", () => {
   });
 
   it("rejects unsupported types", () => {
-    const res = validateUploadFile({ name: "photo.png", size: 1024 });
+    const res = validateUploadFile({ name: "movie.mp4", size: 1024 });
     expect(res.ok).toBe(false);
     if (!res.ok) expect(res.error).toMatch(/Unsupported/);
   });
