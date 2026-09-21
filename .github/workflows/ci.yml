@@ -80,6 +80,8 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_SECRET_KEY: ${{ secrets.TEST_SUPABASE_SECRET_KEY }}
+          # The webhook derives tier from the price id, so its test needs a real one.
+          STRIPE_PRICE_GROWTH: ${{ secrets.STRIPE_TEST_PRICE_GROWTH }}
 
       - name: Record skipped integration suite
         if: steps.supabase.outputs.reachable != 'true'

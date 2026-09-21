@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type Stripe from "stripe";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { getPlan } from "../plans";
 import { handleStripeEvent } from "../webhook";
 
 /**
@@ -47,7 +48,8 @@ function subEvent(type: Stripe.Event.Type, status: string, evtSuffix: string): S
         trial_end: 1_900_000_000,
         metadata: { org_id: orgId, tier: "growth" },
         items: {
-          data: [{ current_period_end: 1_900_500_000, price: { id: "price_x" } }],
+          // Tier is derived from the price id (never metadata), so use Growth's.
+          data: [{ current_period_end: 1_900_500_000, price: { id: getPlan("growth").priceId } }],
         },
       },
     },
@@ -82,6 +84,14 @@ beforeAll(async () => {
     .single();
   if (mErr) throw mErr;
   orgId = m.org_id as string;
+
+  // The webhook only accepts a subscription whose customer matches the one our
+  // checkout flow bound to the org, so bind it the way checkout does.
+  const { error: bindErr } = await admin
+    .from("organizations")
+    .update({ stripe_customer_id: CUSTOMER })
+    .eq("id", orgId);
+  if (bindErr) throw bindErr;
 });
 
 afterAll(async () => {
