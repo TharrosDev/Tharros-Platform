@@ -248,8 +248,8 @@ export function DocumentList({
   const showInitialEmpty = docs.length === 0 && query.trim() === "" && !searching;
   if (showInitialEmpty) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 border border-dashed bg-card/60 px-6 py-12 text-center">
-        <span className="bg-card text-primary-soft-foreground mb-2 flex size-10 items-center justify-center border [&>svg]:size-5">
+      <div className="rounded-xl flex flex-col items-center justify-center gap-2 border border-dashed bg-card/60 px-6 py-12 text-center">
+        <span className="rounded-xl bg-card text-primary-soft-foreground mb-2 flex size-10 items-center justify-center border [&>svg]:size-5">
           <FileText />
         </span>
         <p className="text-foreground font-semibold">No documents yet</p>
@@ -597,7 +597,7 @@ function BulkTagBody({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 border p-2.5">
+      <div className="rounded-xl border-input bg-card/80 flex flex-wrap items-center gap-1.5 border p-2.5">
         {tags.map((t) => (
           <span
             key={t}
@@ -711,7 +711,7 @@ function TagEditorBody({
         </DialogDescription>
       </DialogHeader>
 
-      <div className="border-input bg-card/80 flex flex-wrap items-center gap-1.5 border p-2.5">
+      <div className="rounded-xl border-input bg-card/80 flex flex-wrap items-center gap-1.5 border p-2.5">
         {tags.map((t) => (
           <span
             key={t}

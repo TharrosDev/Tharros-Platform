@@ -23,7 +23,7 @@ function TooltipContent({
       <TooltipPrimitive.Positioner sideOffset={sideOffset} side={side} className="z-overlay">
         <TooltipPrimitive.Popup
           className={cn(
-            "bg-foreground text-background shadow-popover origin-[var(--transform-origin)] px-2.5 py-1.5 text-xs font-medium ",
+            "rounded-lg bg-foreground text-background shadow-popover origin-[var(--transform-origin)] px-2.5 py-1.5 text-xs font-medium ",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0",
             "data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0",

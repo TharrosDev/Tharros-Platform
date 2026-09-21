@@ -4,15 +4,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-/*
-  The tab. A strip carries its state in its stock tint and in this tab, never
-  in a pill floated over the content: square, solid, condensed caps, and it
-  carries its own ink pair instead of an alpha wash over whatever sits behind.
-*/
 const badgeVariants = cva(
   [
     "inline-flex w-fit shrink-0 items-center justify-center gap-1 overflow-hidden",
-    "type-meta border px-1.5 py-px whitespace-nowrap transition-colors",
+    "type-meta rounded-full border px-2.5 py-1 whitespace-nowrap transition-colors",
     "[&>svg]:size-3 [&>svg]:pointer-events-none",
   ].join(" "),
   {

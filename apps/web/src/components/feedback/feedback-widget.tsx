@@ -307,7 +307,7 @@ export function FeedbackWidget() {
             onClick={() => setOpen(true)}
             aria-expanded={false}
             aria-controls="feedback-panel"
-            className="bg-card text-foreground hover:text-primary-soft-foreground flex size-11 items-center justify-center border transition-colors"
+            className="rounded-xl bg-card text-foreground hover:text-primary-soft-foreground flex size-11 items-center justify-center border transition-colors"
             aria-label="Open help and feedback"
             title="Help & feedback"
           >

@@ -53,6 +53,16 @@ describe("robots", () => {
   });
 
   it("indexes only the marketing surfaces", () => {
-    expect(PUBLIC_PATHS).toEqual(["/", "/pricing", "/privacy", "/terms", "/security"]);
+    expect(PUBLIC_PATHS).toEqual([
+      "/",
+      "/pricing",
+      "/privacy",
+      "/terms",
+      "/security",
+      "/products",
+      "/solutions",
+      "/how-it-works",
+      "/contact",
+    ]);
   });
 });

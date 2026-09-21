@@ -21,7 +21,7 @@ function PageHeader({
     <div
       data-slot="page-header"
       className={cn(
-        "border-foreground flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b-2 pb-3",
+        "border-border flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b pb-6",
         className,
       )}
       {...props}

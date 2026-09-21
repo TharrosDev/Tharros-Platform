@@ -19,7 +19,7 @@ function ToastList() {
       key={toast.id}
       toast={toast}
       className={cn(
-        "bg-popover text-popover-foreground shadow-popover relative flex flex-col gap-1 overflow-hidden border p-4 pr-11 ",
+        "rounded-xl bg-popover text-popover-foreground shadow-popover relative flex flex-col gap-1 overflow-hidden border p-4 pr-11 ",
         "transition-all duration-300 ease-out",
         "data-[starting-style]:translate-x-full data-[starting-style]:opacity-0",
         "data-[ending-style]:translate-x-full data-[ending-style]:opacity-0",

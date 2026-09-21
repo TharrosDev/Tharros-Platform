@@ -30,7 +30,7 @@ function DropdownMenuContent({
       >
         <MenuPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover min-w-[13rem] origin-[var(--transform-origin)] border p-1 ",
+            "rounded-xl bg-popover text-popover-foreground shadow-popover min-w-[13rem] origin-[var(--transform-origin)] border p-1 ",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0",
             "data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0",

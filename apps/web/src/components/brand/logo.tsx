@@ -2,14 +2,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/**
- * The Tharros mark: a square cut plate with one chamfered top-right corner and
- * a "T" cut out of it as negative space, so it reads on the rack and on stock
- * alike. The chamfer is the tool-precision tell. Nothing in this system is
- * rounded, and neither is the mark.
- *
- * Single colour: it inherits `currentColor`.
- */
 function TharrosMark({ className, ...props }: React.ComponentProps<"svg">) {
   return (
     <svg
@@ -23,13 +15,12 @@ function TharrosMark({ className, ...props }: React.ComponentProps<"svg">) {
         fill="currentColor"
         fillRule="evenodd"
         clipRule="evenodd"
-        d="M0 0h14.5L24 4.6V24H0V0Zm5.5 6.2v3.3h5.1V18h2.8V9.5h5.1V6.2H5.5Z"
+        d="M6 0h12a6 6 0 0 1 6 6v12a6 6 0 0 1-6 6H6a6 6 0 0 1-6-6V6a6 6 0 0 1 6-6Zm-.5 6.2v3.3h5.1V18h2.8V9.5h5.1V6.2H5.5Z"
       />
     </svg>
   );
 }
 
-/** Mark + wordmark lockup. */
 function TharrosWordmark({
   className,
   markClassName,

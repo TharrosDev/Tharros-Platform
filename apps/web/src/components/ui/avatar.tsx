@@ -4,13 +4,13 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/* An initials plate: square stock, condensed caps, cut to the same grid. */
+/** A circular team portrait with a readable initials fallback. */
 function Avatar({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
       data-slot="avatar"
       className={cn(
-        "border-border bg-muted relative flex h-control-sm w-control-sm shrink-0 overflow-hidden border",
+        "rounded-full border-border bg-muted relative flex h-control-sm w-control-sm shrink-0 overflow-hidden border",
         className,
       )}
       {...props}

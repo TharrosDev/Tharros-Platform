@@ -41,7 +41,7 @@ function PanelSheet({
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="bg-popover text-popover-foreground w-[28rem] max-w-[92vw]"
+        className="rounded-xl bg-popover text-popover-foreground w-[28rem] max-w-[92vw]"
       >
         <div className="border-b px-5 py-4 pr-14">
           <DialogPrimitive.Title className="type-h2 font-semibold">{title}</DialogPrimitive.Title>

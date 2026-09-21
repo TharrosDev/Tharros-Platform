@@ -61,7 +61,7 @@ export function AvailabilityEntry({ employeeName }: { employeeName: string }) {
 
   if (saved?.ok) {
     return (
-      <section className="bg-card flex flex-col items-center gap-3 border px-6 py-12 text-center">
+      <section className="rounded-xl bg-card flex flex-col items-center gap-3 border px-6 py-12 text-center">
         <span className="bg-success/12 text-success flex size-11 items-center justify-center ">
           <CircleCheck className="size-6" aria-hidden />
         </span>

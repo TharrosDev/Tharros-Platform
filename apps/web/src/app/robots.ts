@@ -8,7 +8,17 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tharros.ca";
  * that rather than as a hand-maintained deny list, because the hand-maintained
  * one had drifted: /leads, /automations and /forms were all missing from it.
  */
-const PUBLIC_PATHS = ["/", "/pricing", "/privacy", "/terms", "/security"];
+const PUBLIC_PATHS = [
+  "/",
+  "/pricing",
+  "/privacy",
+  "/terms",
+  "/security",
+  "/products",
+  "/solutions",
+  "/how-it-works",
+  "/contact",
+];
 
 /**
  * Every other top-level route the app serves. Adding a route group or a new

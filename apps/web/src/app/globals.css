@@ -1,107 +1,68 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Light only. `.dark` is never applied, so any stray `dark:` utility stays inert. */
 @custom-variant dark (&:is(.dark *));
-
-/*
-  Tharros design system — The Strip Board.
-
-  Every unit of work is a printed strip in a rack, and its position in the rack
-  is its status: the machine prints the strip, a person initials it, and
-  advancing it writes the record.
-
-  Two grounds, one system:
-    - the RACK is the chrome. Dark anodized olive-graphite. Rails, topbar,
-      engraved labels. It frames; it never holds working data.
-    - the STOCK is the content. Warm printed board and strips. Everything you
-      read and act on sits on stock.
-
-  Rules:
-    1. State lives in the strip's own material, its stock tint and edge mark.
-       Never a coloured badge bolted on top.
-    2. Nothing is rounded. Strips are cut square. `--radius` is 0 and stays 0.
-    3. Hierarchy comes from the grid, printed rule work and condensed caps.
-       There are no cards, so there are no nested cards.
-    4. Safety yellow is the control. Signal red is stop. Procedure cyan is what
-       the system printed itself. None of them decorate.
-
-  Tokens are OKLCH and keep their shadcn names so every primitive inherits.
-  Text pairs are verified to WCAG AA: run `node scripts/contrast-check.mjs`.
-*/
 
 :root {
   color-scheme: light;
 
-  /* --- Rack: the dark anodized chrome ------------------------------------ */
-  --rack: oklch(0.268 0.013 132);
-  --rack-deep: oklch(0.222 0.012 132); /* rail wells and seams */
-  --rack-edge: oklch(0.56 0.018 132); /* machined highlight edge, 3:1 on the rack */
-  --rack-foreground: oklch(0.905 0.01 108); /* engraved label ink */
-  --rack-muted-foreground: oklch(0.695 0.012 108);
+  --rack: oklch(0.975 0.009 250);
+  --rack-deep: oklch(0.945 0.018 250);
+  --rack-edge: oklch(0.6 0.025 250);
+  --rack-foreground: oklch(0.28 0.045 255);
+  --rack-muted-foreground: oklch(0.46 0.033 255);
 
-  /* --- Stock: warm printed board and strips ------------------------------ */
-  --background: oklch(0.945 0.011 86); /* the board the strips lie on */
-  --foreground: oklch(0.205 0.013 80); /* press black */
-  --card: oklch(0.952 0.013 86); /* a strip: printed stock, not white */
-  --card-foreground: oklch(0.205 0.013 80);
-  --popover: oklch(0.985 0.006 86);
-  --popover-foreground: oklch(0.205 0.013 80);
+  --background: oklch(0.985 0.004 250);
+  --foreground: oklch(0.28 0.045 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.28 0.045 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.28 0.045 255);
 
-  --muted: oklch(0.918 0.012 86);
-  --muted-foreground: oklch(0.445 0.015 80);
-  --secondary: oklch(0.918 0.012 86);
-  --secondary-foreground: oklch(0.275 0.015 80);
-  --accent: oklch(0.905 0.016 86); /* hover on stock */
-  --accent-foreground: oklch(0.225 0.015 80);
-  --surface-2: oklch(0.928 0.012 86); /* inset inside a strip */
-  --surface-2-foreground: oklch(0.205 0.013 80);
-  --surface-3: oklch(0.878 0.015 86);
-  --surface-3-foreground: oklch(0.245 0.015 80);
+  --muted: oklch(0.955 0.012 250);
+  --muted-foreground: oklch(0.46 0.033 255);
+  --secondary: oklch(0.95 0.02 250);
+  --secondary-foreground: oklch(0.32 0.04 255);
+  --accent: oklch(0.925 0.025 250);
+  --accent-foreground: oklch(0.28 0.045 255);
+  --surface-2: oklch(0.955 0.016 250);
+  --surface-2-foreground: oklch(0.28 0.045 255);
+  --surface-3: oklch(0.915 0.024 250);
+  --surface-3-foreground: oklch(0.28 0.045 255);
 
-  /* --- Safety yellow: the control ---------------------------------------- */
-  --primary: oklch(0.835 0.152 88);
-  --primary-foreground: oklch(0.235 0.045 90); /* press black on hi-vis */
-  --primary-soft: oklch(0.935 0.07 90);
-  --primary-soft-foreground: oklch(0.415 0.095 75); /* ochre text at any size */
-  /*
-    Hi-vis yellow has almost no edge against warm stock, so a hi-vis control is
-    always struck with a press-black rule. That rule, not the fill, is the
-    component boundary WCAG 1.4.11 measures.
-  */
-  --primary-edge: oklch(0.235 0.045 90);
+  --primary: oklch(0.475 0.17 265);
+  --primary-foreground: oklch(1 0 0);
+  --primary-soft: oklch(0.935 0.029 265);
+  --primary-soft-foreground: oklch(0.42 0.15 265);
 
-  /* --- Semantic state, each with its ink pair ---------------------------- */
-  --destructive: oklch(0.505 0.195 29); /* signal red: stop */
+  --primary-edge: oklch(0.475 0.17 265);
+
+  --destructive: oklch(0.505 0.195 29);
   --destructive-foreground: oklch(0.985 0.008 60);
-  --success: oklch(0.475 0.115 150); /* cleared */
+  --success: oklch(0.475 0.115 150);
   --success-foreground: oklch(0.985 0.008 150);
   --warning: oklch(0.505 0.115 60);
   --warning-foreground: oklch(0.985 0.008 80);
-  --info: oklch(0.495 0.095 228); /* procedure cyan: printed by the system */
+  --info: oklch(0.495 0.095 228);
   --info-foreground: oklch(0.985 0.008 228);
 
-  /* Strip stock tints. State is the paper, not a badge. */
-  --stock-pending: oklch(0.925 0.095 92);
-  --stock-signal: oklch(0.918 0.055 32);
-  --stock-cleared: oklch(0.925 0.05 150);
-  --stock-procedure: oklch(0.925 0.042 228);
+  --stock-pending: oklch(0.96 0.033 80);
+  --stock-signal: oklch(0.95 0.026 30);
+  --stock-cleared: oklch(0.95 0.029 160);
+  --stock-procedure: oklch(0.95 0.025 250);
 
-  /* --- Rule work, fields and focus --------------------------------------- */
-  --border: oklch(0.845 0.015 86); /* printed hairline rule */
-  --input: oklch(0.6 0.02 86); /* field boundary, 3:1 on stock */
-  --ring: oklch(0.5 0.12 78); /* machined ochre, for light stock */
+  --border: oklch(0.88 0.016 250);
+  --input: oklch(0.61 0.03 250);
+  --ring: oklch(0.475 0.17 265);
 
-  /* --- App chrome: the rack rail ----------------------------------------- */
   --sidebar: var(--rack);
   --sidebar-foreground: var(--rack-foreground);
   --sidebar-muted-foreground: var(--rack-muted-foreground);
-  --sidebar-accent: oklch(0.835 0.152 88);
-  --sidebar-accent-foreground: oklch(0.235 0.045 90);
+  --sidebar-accent: oklch(0.91 0.038 265);
+  --sidebar-accent-foreground: oklch(0.36 0.13 265);
   --sidebar-border: var(--rack-edge);
-  --sidebar-ring: oklch(0.845 0.145 88); /* hi-vis ring, for the dark rack */
+  --sidebar-ring: oklch(0.475 0.17 265);
 
-  /* --- Depth: what a strip casts lying in a rail ------------------------- */
   --shadow-xs: 0 1px 1px oklch(0.2 0.01 132 / 0.1);
   --shadow-card: 0 1px 2px oklch(0.2 0.01 132 / 0.1), 0 2px 5px -2px oklch(0.2 0.01 132 / 0.12);
   --shadow-card-hover:
@@ -113,50 +74,44 @@
   --shadow-modal:
     0 4px 10px oklch(0.16 0.01 132 / 0.2), 0 32px 72px -22px oklch(0.16 0.01 132 / 0.46);
 
-  /* --- Geometry. Strips are cut square. ---------------------------------- */
-  --radius: 0rem;
+  --radius: 0.75rem;
   --rule: 1px;
   --rule-heavy: 2px;
   --ring-width: 2px;
-  --notch: 0.125rem; /* the only curve in the system: a tab notch */
+  --notch: 0.125rem;
 
-  /* --- Controls ----------------------------------------------------------- */
-  --control-h-sm: 2rem;
-  --control-h: 2.5rem;
-  --control-h-lg: 2.75rem; /* 44px: the touch floor */
+  --control-h-sm: 2.25rem;
+  --control-h: 2.75rem;
+  --control-h-lg: 3rem;
 
-  /* --- Motion. Only a strip travels. ------------------------------------- */
   --dur-state: 120ms;
   --dur-travel: 220ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* --- Type axes and tracking, one set for the whole system -------------- */
-  --wdth-condensed: 78;
+  --wdth-condensed: 100;
   --wdth-normal: 100;
   --tracking-display: -0.02em;
   --tracking-body: 0em;
   --tracking-data: 0.01em;
-  --tracking-label: 0.08em;
+  --tracking-label: 0.005em;
 
-  /* --- Layout ------------------------------------------------------------- */
-  --rail-w: 15rem;
-  --topbar-h: 3.5rem;
+  --rail-w: 16rem;
+  --topbar-h: 4.5rem;
   --board-max: 88rem;
   --grid-board: repeat(12, minmax(0, 1fr));
-  --grid-strip: minmax(0, 1fr) 7rem 8rem 2.75rem; /* what / when / who / initials */
-  --grid-log: 9rem minmax(0, 1fr) 6rem; /* time / line / source */
+  --grid-strip: minmax(0, 1fr) 7rem 8rem 2.75rem;
+  --grid-log: 9rem minmax(0, 1fr) 6rem;
 }
 
 @theme inline {
-  /* Square by contract. These exist so utilities resolve, not to be varied. */
-  --radius: 0rem;
-  --radius-sm: 0rem;
-  --radius-md: 0rem;
-  --radius-lg: 0rem;
-  --radius-xl: 0rem;
-  --radius-2xl: 0rem;
-  --radius-3xl: 0rem;
-  --radius-4xl: 0rem;
+  --radius: 0.75rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
   --radius-notch: var(--notch);
 
   --color-background: var(--background);
@@ -220,7 +175,6 @@
   --shadow-popover: var(--shadow-popover);
   --shadow-modal: var(--shadow-modal);
 
-  /* Control heights: h-control-sm / h-control / h-control-lg, min-h-control-lg. */
   --spacing-control-sm: var(--control-h-sm);
   --spacing-control: var(--control-h);
   --spacing-control-lg: var(--control-h-lg);
@@ -228,27 +182,15 @@
   --spacing-topbar: var(--topbar-h);
   --spacing-board: var(--board-max);
 
-  /* Tracking: tracking-display / -body / -data / -label. One set, no one-offs. */
   --tracking-display: var(--tracking-display);
   --tracking-body: var(--tracking-body);
   --tracking-data: var(--tracking-data);
   --tracking-label: var(--tracking-label);
 
-  /*
-    Motion defaults. A bare `transition-colors` is already the system's state
-    timing, so no component writes a duration or an easing by hand. Only a
-    strip travelling states its own longer duration.
-  */
   --default-transition-duration: var(--dur-state);
   --default-transition-timing-function: var(--ease-out);
   --ease-travel: var(--ease-out);
 
-  /*
-    Semantic z scale (classes z-subnav, z-topbar, z-widget, z-overlay, z-toast).
-    Never reach for an arbitrary z-40/z-50/z-[999] in app code; the Base UI
-    positioners use z-overlay so a popover inside a dialog orders by contract
-    rather than by DOM luck.
-  */
   --z-index-subnav: 20;
   --z-index-topbar: 30;
   --z-index-widget: 40;
@@ -287,11 +229,7 @@
     text-underline-offset: 0.22em;
     text-decoration-thickness: from-font;
   }
-  /*
-    One focus rule for the whole system. A machined outline, square like
-    everything else, drawn from the ground it sits on: ochre on stock, hi-vis
-    on the rack. Components never hand-roll a focus ring.
-  */
+
   *:focus-visible {
     outline: var(--ring-width) solid var(--ring);
     outline-offset: 2px;
@@ -301,12 +239,12 @@
   .on-rack-deep *:focus-visible {
     outline-color: var(--sidebar-ring);
   }
-  /* Pencil on stock: what you mark stays in the world's ink. */
+
   ::selection {
     background: color-mix(in oklch, var(--primary) 55%, transparent);
     color: var(--foreground);
   }
-  /* The rack has its own ink, its own rules and its own focus ring. */
+
   .on-rack ::selection {
     background: color-mix(in oklch, var(--primary) 45%, transparent);
     color: oklch(0.205 0.013 80);
@@ -314,99 +252,83 @@
 }
 
 @layer components {
-  /*
-    One type system. Condensed caps are rack labels, normal width is strip data,
-    and the display width sits between them. Four weights, four tracking values,
-    nothing else.
-  */
   .type-display {
     font-size: clamp(2.5rem, 4.6vw, 4rem);
-    line-height: 0.98;
-    letter-spacing: var(--tracking-display);
-    font-weight: 700;
-    font-variation-settings: "wdth" 86;
-    text-wrap: balance;
-  }
-  /* Marketing display. Persuade volume; the app never uses this step. */
-  .type-hero {
-    font-size: clamp(3rem, 6.4vw, 5.75rem);
-    line-height: 0.93;
-    letter-spacing: -0.03em;
-    font-weight: 700;
-    font-variation-settings: "wdth" 82;
-    text-wrap: balance;
-  }
-  .type-h1 {
-    font-size: 1.75rem; /* 28px: page titles */
     line-height: 1.1;
     letter-spacing: var(--tracking-display);
     font-weight: 700;
-    font-variation-settings: "wdth" 90;
+    font-variation-settings: "wdth" 100;
+    text-wrap: balance;
+  }
+
+  .type-hero {
+    font-size: clamp(2.75rem, 5.4vw, 5rem);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    font-variation-settings: "wdth" 100;
+    text-wrap: balance;
+  }
+  .type-h1 {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-display);
+    font-weight: 700;
+    font-variation-settings: "wdth" 100;
   }
   .type-h2 {
-    font-size: 1.125rem; /* 18px: section titles */
+    font-size: 1.125rem;
     line-height: 1.3;
     letter-spacing: -0.01em;
     font-weight: 600;
-    font-variation-settings: "wdth" 94;
+    font-variation-settings: "wdth" 100;
   }
   .type-body {
-    font-size: 0.9375rem; /* 15px */
+    font-size: 0.9375rem;
     line-height: 1.6;
     letter-spacing: var(--tracking-body);
   }
   .type-small {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
     line-height: 1.5;
     letter-spacing: var(--tracking-body);
   }
-  /*
-    The rack label: engraved, condensed, tracked out. This is the only
-    uppercase style in the system.
-  */
+
   .type-meta {
-    font-size: 0.75rem; /* 12px */
+    font-size: 0.75rem;
     line-height: 1.35;
     letter-spacing: var(--tracking-label);
     font-weight: 600;
     font-variation-settings: "wdth" var(--wdth-condensed);
-    text-transform: uppercase;
+    text-transform: none;
   }
-  /*
-    A control legend. One step up from a rack label so a button reads as the
-    thing you press rather than as a caption.
-  */
+
   .type-control {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
     line-height: 1.2;
     letter-spacing: var(--tracking-label);
     font-weight: 600;
     font-variation-settings: "wdth" var(--wdth-condensed);
-    text-transform: uppercase;
+    text-transform: none;
   }
-  /* A strip's printed data row: tabular, tight, unambiguous. */
+
   .type-strip {
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.875rem;
     line-height: 1.4;
     letter-spacing: var(--tracking-data);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
-  /* The one large numeral on a board: the count of strips awaiting a person. */
+
   .type-count {
     font-size: clamp(2.75rem, 5vw, 3.75rem);
     line-height: 0.9;
     letter-spacing: var(--tracking-display);
     font-weight: 700;
-    font-variation-settings: "wdth" 88;
+    font-variation-settings: "wdth" 100;
     font-variant-numeric: tabular-nums;
   }
-  /*
-    Reference prose: security, privacy, terms. Read mode, so hierarchy and
-    measure do the work. These are descendant rules because a component class
-    cannot be composed inside an arbitrary variant, which is how the heading
-    style was silently doing nothing.
-  */
+
   .doc-prose {
     font-size: 1rem;
     line-height: 1.7;
@@ -423,7 +345,7 @@
     line-height: 1.3;
     letter-spacing: -0.015em;
     font-weight: 700;
-    font-variation-settings: "wdth" 92;
+    font-variation-settings: "wdth" 100;
     margin-top: 2.5rem;
     padding-top: 1.25rem;
     border-top: var(--rule) solid var(--border);
@@ -452,9 +374,8 @@
     text-underline-offset: 0.22em;
   }
 
-  /* A line the system printed into the record log. */
   .type-log {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
     line-height: 1.55;
     letter-spacing: var(--tracking-data);
     font-weight: 400;
@@ -463,14 +384,12 @@
 }
 
 @layer utilities {
-  /* Tabular figures for any number read in a column. */
   .num {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
     letter-spacing: var(--tracking-data);
   }
 
-  /* Condensed width, for a label that has to hold a narrow column. */
   .wdth-condensed {
     font-variation-settings: "wdth" var(--wdth-condensed);
   }
@@ -478,34 +397,26 @@
     font-variation-settings: "wdth" var(--wdth-normal);
   }
 
-  /*
-    The rack: dark anodized chrome. Frames the board; never holds working data.
-
-    It is a token context, not just a background. Redefining the stock families
-    inside it means every primitive drops into the chrome correctly without a
-    single per-component override, and portalled overlays escape it and stay on
-    stock, which is where they belong.
-  */
   .on-rack,
   .on-rack-deep {
-    --foreground: var(--rack-foreground);
-    --card: var(--rack-deep);
-    --card-foreground: var(--rack-foreground);
-    --muted: color-mix(in oklch, var(--rack-foreground) 8%, transparent);
-    --muted-foreground: var(--rack-muted-foreground);
-    --secondary: color-mix(in oklch, var(--rack-foreground) 10%, transparent);
-    --secondary-foreground: var(--rack-foreground);
-    --accent: color-mix(in oklch, var(--rack-foreground) 12%, transparent);
-    --accent-foreground: var(--rack-foreground);
-    --surface-2: var(--rack-deep);
-    --surface-2-foreground: var(--rack-foreground);
-    --surface-3: color-mix(in oklch, var(--rack-foreground) 14%, transparent);
-    --surface-3-foreground: var(--rack-foreground);
-    --border: var(--rack-edge);
-    --input: var(--rack-edge);
-    --primary-soft: color-mix(in oklch, var(--primary) 20%, transparent);
-    --primary-soft-foreground: var(--primary);
-    --ring: var(--sidebar-ring);
+    --foreground: oklch(0.28 0.045 255);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.28 0.045 255);
+    --muted: oklch(0.955 0.012 250);
+    --muted-foreground: oklch(0.46 0.033 255);
+    --secondary: oklch(0.95 0.02 250);
+    --secondary-foreground: oklch(0.32 0.04 255);
+    --accent: oklch(0.925 0.025 250);
+    --accent-foreground: oklch(0.28 0.045 255);
+    --surface-2: oklch(0.955 0.016 250);
+    --surface-2-foreground: oklch(0.28 0.045 255);
+    --surface-3: oklch(0.915 0.024 250);
+    --surface-3-foreground: oklch(0.28 0.045 255);
+    --border: oklch(0.88 0.016 250);
+    --input: oklch(0.61 0.03 250);
+    --primary-soft: oklch(0.935 0.029 265);
+    --primary-soft-foreground: oklch(0.42 0.15 265);
+    --ring: oklch(0.475 0.17 265);
     color: var(--rack-foreground);
   }
   .on-rack {
@@ -515,45 +426,38 @@
     background-color: var(--rack-deep);
   }
 
-  /*
-    Stock seated inside the rack. The rack context cascades to every
-    descendant, so a light strip nested in dark chrome has to put the stock
-    families back or it prints light ink on light paper.
-  */
   .on-stock {
-    --foreground: oklch(0.205 0.013 80);
-    --card: oklch(0.952 0.013 86);
-    --card-foreground: oklch(0.205 0.013 80);
-    --muted: oklch(0.918 0.012 86);
-    --muted-foreground: oklch(0.445 0.015 80);
-    --secondary: oklch(0.918 0.012 86);
-    --secondary-foreground: oklch(0.275 0.015 80);
-    --accent: oklch(0.905 0.016 86);
-    --accent-foreground: oklch(0.225 0.015 80);
-    --surface-2: oklch(0.928 0.012 86);
-    --surface-2-foreground: oklch(0.205 0.013 80);
-    --surface-3: oklch(0.878 0.015 86);
-    --surface-3-foreground: oklch(0.245 0.015 80);
-    --border: oklch(0.845 0.015 86);
-    --input: oklch(0.6 0.02 86);
-    --primary-soft: oklch(0.935 0.07 90);
-    --primary-soft-foreground: oklch(0.415 0.095 75);
-    --ring: oklch(0.5 0.12 78);
+    --foreground: oklch(0.28 0.045 255);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.28 0.045 255);
+    --muted: oklch(0.955 0.012 250);
+    --muted-foreground: oklch(0.46 0.033 255);
+    --secondary: oklch(0.95 0.02 250);
+    --secondary-foreground: oklch(0.32 0.04 255);
+    --accent: oklch(0.925 0.025 250);
+    --accent-foreground: oklch(0.28 0.045 255);
+    --surface-2: oklch(0.955 0.016 250);
+    --surface-2-foreground: oklch(0.28 0.045 255);
+    --surface-3: oklch(0.915 0.024 250);
+    --surface-3-foreground: oklch(0.28 0.045 255);
+    --border: oklch(0.88 0.016 250);
+    --input: oklch(0.61 0.03 250);
+    --primary-soft: oklch(0.935 0.029 265);
+    --primary-soft-foreground: oklch(0.42 0.15 265);
+    --ring: oklch(0.475 0.17 265);
     color: var(--foreground);
   }
 
-  /* Machined seams. A rack is divided by edges, not by shadow. */
   .seam-t {
-    border-top: var(--rule) solid var(--rack-edge);
+    border-top: var(--rule) solid var(--border);
   }
   .seam-r {
-    border-right: var(--rule) solid var(--rack-edge);
+    border-right: var(--rule) solid var(--border);
   }
   .seam-b {
-    border-bottom: var(--rule) solid var(--rack-edge);
+    border-bottom: var(--rule) solid var(--border);
   }
 
-  /* Printed rule work on stock. */
   .rule-b {
     border-bottom: var(--rule) solid var(--border);
   }
@@ -564,7 +468,6 @@
     border-bottom: var(--rule-heavy) solid var(--foreground);
   }
 
-  /* The board grid, and a strip's own columns. */
   .grid-board {
     display: grid;
     grid-template-columns: var(--grid-board);
@@ -589,15 +492,10 @@
     animation: skeleton-shimmer 1.8s ease-in-out infinite;
   }
 
-  /*
-    A strip settling into its slot. The board's one authored moment: it runs on
-    the lead bay only, staggered, and never section by section down the page.
-  */
   .animate-strip-seat {
     animation: strip-seat 0.26s var(--ease-out) both;
   }
 
-  /* Marketing entrance runs in CSS so the headline paints before hydration (LCP). */
   .animate-fade-up {
     animation: fade-up 0.6s var(--ease-out) both;
   }
@@ -626,13 +524,6 @@
   }
 }
 
-/*
-  Reduced motion. Collapse animations and transitions to a near-instant
-  duration rather than zeroing them: Base UI overlays (dialog, sheet, dropdown,
-  tooltip) drive their unmount on the transition/animation end event, so a true
-  `none` would leave them mounted. ~0.01ms still fires the end event while being
-  imperceptible.
-*/
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

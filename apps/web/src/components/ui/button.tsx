@@ -4,16 +4,9 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-/*
-  A control on the board is a key: square, condensed caps, answering the press
-  with colour and a single pixel of travel. Hi-vis yellow is struck with a
-  press-black rule, because the fill alone has no edge against warm stock.
-  Focus comes from the one base outline rule in globals.css; no variant here
-  draws its own ring.
-*/
 const buttonVariants = cva(
   [
-    "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap",
+    "rounded-lg inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap",
     "transition-colors select-none active:translate-y-px",
     "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-45",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -23,11 +16,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "type-control border-primary-edge bg-primary text-primary-foreground border-2 hover:bg-primary/85",
+          "type-control border-primary-edge bg-primary text-primary-foreground border hover:bg-primary/85",
         soft: "type-control border-primary-edge/30 bg-primary-soft text-primary-soft-foreground border hover:bg-primary-soft/70",
         destructive:
-          "type-control border-primary-edge bg-destructive text-destructive-foreground border-2 hover:bg-destructive/88",
-        outline: "type-control border-input bg-card text-foreground border hover:bg-accent",
+          "type-control border-destructive bg-destructive text-destructive-foreground border hover:bg-destructive/88",
+        outline:
+          "rounded-xl type-control border-input bg-card text-foreground border hover:bg-accent",
         secondary:
           "type-control border-input bg-secondary text-secondary-foreground border hover:bg-surface-3",
         ghost: "type-control text-foreground border border-transparent hover:bg-accent",

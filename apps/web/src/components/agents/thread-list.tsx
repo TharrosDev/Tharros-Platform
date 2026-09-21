@@ -75,7 +75,7 @@ export function ThreadList({ threads }: { threads: ThreadListItem[] }) {
       {visible.length === 0 ? (
         <p className="text-muted-foreground py-10 text-center text-sm">No conversations match.</p>
       ) : (
-        <ul className="divide-border/60 bg-card overflow-hidden border divide-y">
+        <ul className="rounded-xl divide-border/60 bg-card overflow-hidden border divide-y">
           {visible.map((t) => {
             const badge = threadStatusBadge(t);
             return (
