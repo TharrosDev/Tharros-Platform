@@ -4,10 +4,15 @@ import type { Usage } from "@anthropic-ai/sdk/resources/messages";
 import { getAuthUser } from "@/lib/auth/current-user";
 import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
-import { anthropic, modelForTemplate } from "@/lib/anthropic/client";
+import { anthropic, DEFAULT_MODEL, modelForTemplate } from "@/lib/anthropic/client";
+import { getSubscription } from "@/lib/billing/entitlements";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { runAssistantTurn } from "@/lib/assistant/agent";
+import { buildAssistantTools } from "@/lib/assistant/tools";
+import type { ProposalView } from "@/lib/assistant/types";
 import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
 import { buildRagRequest, retrieveGroundingChunks, standaloneQuery } from "@/lib/documents/rag";
-import { buildCitations, NO_CONTEXT_ANSWER } from "@/lib/documents/rag-prompt";
+import { buildCitations, NO_CONTEXT_ANSWER, type GroundingChunk } from "@/lib/documents/rag-prompt";
 import {
   appendMessage,
   conversationTitle,
@@ -158,17 +163,114 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: "Couldn't post to this conversation." }, { status: 403 });
   }
 
-  // Retrieve grounding before opening the stream so the `meta` frame can carry
-  // citations immediately and a retrieval failure is still a graceful empty set.
+  const finalConversationId = conversationId;
+  const encoder = new TextEncoder();
+  const onError = (send: (e: ChatStreamEvent) => void, err: unknown) => {
+    // A rate limit the SDK couldn't retry away surfaces as a 429/529 — tell
+    // the user it's transient rather than implying their answer failed.
+    if (err instanceof Anthropic.APIError && (err.status === 429 || err.status === 529)) {
+      logger.warn("assistant.rate_limited", { org_id: orgId, status: err.status });
+      send({
+        type: "error",
+        message: "The assistant is busy right now. Please try again in a moment.",
+      });
+    } else {
+      logger.error("assistant.stream_failed", { org_id: orgId, err });
+      send({ type: "error", message: "Couldn't generate an answer. Please try again." });
+    }
+  };
+
+  // Plain questions run the agent: it searches documents and reads pipeline /
+  // schedule data through tools, and can propose changes for the user to confirm.
+  if (!template) {
+    const sub = await getSubscription();
+    const sources: GroundingChunk[] = [];
+    const proposals: ProposalView[] = [];
+    const admin = createAdminClient();
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const send = (event: ChatStreamEvent) =>
+          controller.enqueue(encoder.encode(encodeFrame(event)));
+        try {
+          send({
+            type: "meta",
+            conversationId: finalConversationId,
+            citations: [],
+            grounded: false,
+          });
+          const registry = buildAssistantTools({
+            orgId,
+            userId: user.id,
+            conversationId: finalConversationId,
+            tier: sub?.tier ?? null,
+            role: activeOrg.role,
+            supabase,
+            admin,
+            sources,
+            onProposal: (p) => {
+              proposals.push(p);
+              send({ type: "proposal", proposal: p });
+            },
+          });
+          const turn = await runAssistantTurn({
+            registry,
+            history,
+            question,
+            onText: (text) => send({ type: "delta", text }),
+            onToolStatus: (label) => send({ type: "status", label }),
+          });
+          let answer = turn.text;
+          if (turn.refused) {
+            logger.warn("assistant.answer_refused", { org_id: orgId });
+            answer = REFUSAL_ANSWER;
+            send({ type: "delta", text: answer });
+          }
+          const citations = turn.refused ? [] : buildCitations(sources);
+          if (citations.length > 0) send({ type: "sources", citations });
+
+          const messageId = await appendMessage(supabase, {
+            conversationId: finalConversationId,
+            orgId,
+            role: "assistant",
+            content: answer || NO_CONTEXT_ANSWER,
+            citations,
+            usage: turn.usage,
+          });
+          if (messageId && proposals.length > 0) {
+            await admin
+              .from("assistant_proposals")
+              .update({ message_id: messageId })
+              .in(
+                "id",
+                proposals.map((p) => p.id),
+              );
+          }
+          await touchConversation(supabase, finalConversationId);
+          await recordUsage(orgId, user.id, DEFAULT_MODEL, turn.usage);
+          send({ type: "done" });
+        } catch (err) {
+          onError(send, err);
+        }
+        controller.close();
+      },
+    });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "application/x-ndjson; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  }
+
+  // Generation templates keep the single-shot RAG path on the cheap model.
   // Follow-ups ("what about part-timers?") retrieve on a standalone rewrite.
   // ponytail: the ~200-token Haiku rewrite isn't metered — each ai_usage_events
   // row counts as one query toward the plan cap, so a row here would double-bill.
   const retrievalQuery = await standaloneQuery(history, question);
   const grounded = await retrieveGroundingChunks(orgId, retrievalQuery);
   const citations = buildCitations(grounded);
-  const finalConversationId = conversationId;
 
-  const encoder = new TextEncoder();
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: ChatStreamEvent) =>
@@ -184,8 +286,6 @@ export async function POST(req: Request): Promise<Response> {
 
         let answer = "";
         let usage: Usage | null = null;
-        // Day 33 — route the structured generation templates to the cheaper
-        // model; open-ended grounded Q&A runs the default tier (Sonnet, high effort).
         const model = modelForTemplate(template);
 
         if (grounded.length === 0) {
@@ -193,16 +293,14 @@ export async function POST(req: Request): Promise<Response> {
           send({ type: "delta", text: answer });
         } else {
           const claudeStream = anthropic.messages.stream(
-            template
-              ? buildRagRequest(question, grounded, {
-                  systemPrompt: templateSystemPrompt(template),
-                  instructionLabel: "Task",
-                  model,
-                  // Cheap template path (Haiku) — skip the high-effort config.
-                  effort: null,
-                  history,
-                })
-              : buildRagRequest(question, grounded, { model, history }),
+            buildRagRequest(question, grounded, {
+              systemPrompt: templateSystemPrompt(template),
+              instructionLabel: "Task",
+              model,
+              // Cheap template path (Haiku) — skip the high-effort config.
+              effort: null,
+              history,
+            }),
           );
           for await (const event of claudeStream) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
@@ -215,7 +313,6 @@ export async function POST(req: Request): Promise<Response> {
           if (finalMessage.stop_reason === "refusal") {
             logger.warn("assistant.answer_refused", { org_id: orgId });
             answer = REFUSAL_ANSWER;
-            // Overwrite the streamed text on the client with the refusal line.
             send({ type: "delta", text: answer });
           }
         }
@@ -230,28 +327,14 @@ export async function POST(req: Request): Promise<Response> {
           usage,
         });
         await touchConversation(supabase, finalConversationId);
-
-        // Day 33 — meter the spend (best-effort; skips the no-context path where
-        // usage is null). Counts toward the org's monthly cap.
+        // Counts toward the org's monthly cap (skipped on the no-context path).
         await recordUsage(orgId, user.id, model, usage);
 
         send({ type: "done" });
-        controller.close();
       } catch (err) {
-        // A rate limit the SDK couldn't retry away surfaces as a 429/529 — tell
-        // the user it's transient rather than implying their answer failed.
-        if (err instanceof Anthropic.APIError && (err.status === 429 || err.status === 529)) {
-          logger.warn("assistant.rate_limited", { org_id: orgId, status: err.status });
-          send({
-            type: "error",
-            message: "The assistant is busy right now. Please try again in a moment.",
-          });
-        } else {
-          logger.error("assistant.stream_failed", { org_id: orgId, err });
-          send({ type: "error", message: "Couldn't generate an answer. Please try again." });
-        }
-        controller.close();
+        onError(send, err);
       }
+      controller.close();
     },
   });
 

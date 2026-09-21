@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/observability/logger";
 import { PAGE_SIZE, decodeCursor, nextCursorFrom } from "@/lib/pagination";
 import type { Citation } from "@/lib/documents/rag-prompt";
-import type { ChatMessage, Conversation } from "@/lib/assistant/types";
+import type { ChatMessage, Conversation, ProposalView } from "@/lib/assistant/types";
 
 /**
  * Day 29 — read + write data access for assistant chat. Everything goes through
@@ -199,12 +199,28 @@ export async function getConversationMessages(
   const truncated = rows.length > limit;
   const page = (truncated ? rows.slice(0, limit) : rows).slice().reverse();
 
+  // Confirm cards the assistant raised in these turns (RLS: same org only).
+  const { data: proposalRows } = await supabase
+    .from("assistant_proposals")
+    .select("id, message_id, kind, summary, status")
+    .in(
+      "message_id",
+      page.map((r) => r.id),
+    );
+  const proposalsByMessage = new Map<string, ProposalView[]>();
+  for (const p of (proposalRows ?? []) as (ProposalView & { message_id: string })[]) {
+    const list = proposalsByMessage.get(p.message_id) ?? [];
+    list.push({ id: p.id, kind: p.kind, summary: p.summary, status: p.status });
+    proposalsByMessage.set(p.message_id, list);
+  }
+
   return {
     messages: page.map((r) => ({
       id: r.id,
       role: r.role,
       content: r.content,
       citations: r.citations ?? [],
+      proposals: proposalsByMessage.get(r.id),
       createdAt: r.created_at,
     })),
     truncated,

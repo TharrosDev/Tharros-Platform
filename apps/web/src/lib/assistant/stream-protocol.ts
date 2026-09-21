@@ -1,4 +1,5 @@
 import type { Citation } from "@/lib/documents/rag-prompt";
+import type { ProposalView } from "@/lib/assistant/types";
 
 /**
  * Day 29 — the wire protocol between the streaming chat endpoint
@@ -10,6 +11,9 @@ import type { Citation } from "@/lib/documents/rag-prompt";
  *   meta   → once, first: the conversation id + citations (known from retrieval
  *            before generation) + whether the answer is grounded.
  *   delta  → zero or more: a chunk of answer text, in order.
+ *   status → zero or more: a short line about a tool call ("Checking the schedule").
+ *   proposal → zero or more: a change the assistant proposes for the user to confirm.
+ *   sources  → at most once, before done: citations gathered by tool searches.
  *   done   → once, last: the turn finished and was persisted.
  * On failure, a single `error` frame replaces `done`.
  */
@@ -17,6 +21,9 @@ import type { Citation } from "@/lib/documents/rag-prompt";
 export type ChatStreamEvent =
   | { type: "meta"; conversationId: string; citations: Citation[]; grounded: boolean }
   | { type: "delta"; text: string }
+  | { type: "status"; label: string }
+  | { type: "proposal"; proposal: ProposalView }
+  | { type: "sources"; citations: Citation[] }
   | { type: "done" }
   | { type: "error"; message: string };
 

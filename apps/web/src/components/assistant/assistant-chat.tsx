@@ -162,11 +162,25 @@ export function AssistantChat({
               citations = event.citations;
               if (!selectedId) newConversationId = event.conversationId;
             } else if (event.type === "delta") {
-              patch(assistantId, (m) => ({ ...m, content: m.content + event.text }));
+              patch(assistantId, (m) => ({
+                ...m,
+                content: m.content + event.text,
+                statusLabel: undefined,
+              }));
+            } else if (event.type === "status") {
+              patch(assistantId, (m) => ({ ...m, statusLabel: event.label }));
+            } else if (event.type === "proposal") {
+              patch(assistantId, (m) => ({
+                ...m,
+                proposals: [...(m.proposals ?? []), event.proposal],
+              }));
+            } else if (event.type === "sources") {
+              citations = event.citations;
+              patch(assistantId, (m) => ({ ...m, citations }));
             } else if (event.type === "error") {
               throw new Error(event.message);
             } else if (event.type === "done") {
-              patch(assistantId, (m) => ({ ...m, citations }));
+              patch(assistantId, (m) => ({ ...m, citations, statusLabel: undefined }));
             }
           }
         }
