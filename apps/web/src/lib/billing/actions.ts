@@ -113,6 +113,7 @@ export async function createCheckoutClientSecret(tier: Tier): Promise<string> {
   if (!parsedTier.success) throw new CheckoutError("Unknown plan.");
 
   const plan = getPlan(parsedTier.data);
+  if (plan.contactSales) throw new CheckoutError("Contact us to set up this plan.");
   if (!plan.priceId) {
     throw new CheckoutError("This plan isn't available yet. Please contact support.");
   }

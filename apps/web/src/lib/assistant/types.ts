@@ -18,6 +18,8 @@ export type ChatMessage = {
   proposals?: ProposalView[];
   /** Transient, client-only: what the assistant is doing right now ("Checking the schedule"). */
   statusLabel?: string;
+  /** Client-only: the stored id of a turn streamed this session (its `id` is a temp one). */
+  persistedId?: string;
   createdAt: string;
 };
 

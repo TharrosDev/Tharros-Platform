@@ -77,7 +77,10 @@ function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming
             ) : (
               <NotGroundedNote />
             )}
-            <MessageActions content={message.content} />
+            <MessageActions
+              content={message.content}
+              messageId={message.persistedId ?? message.id}
+            />
           </>
         ) : null}
         <SourcesDialog

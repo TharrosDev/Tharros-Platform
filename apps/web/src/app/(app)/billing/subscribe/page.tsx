@@ -19,6 +19,7 @@ export default async function SubscribePage({
   const parsed = tierSchema.safeParse(planParam);
   if (!parsed.success) notFound();
   const plan = getPlan(parsed.data);
+  if (plan.contactSales) redirect("/contact");
 
   // Billing is owner-only — send non-owners back to the plan list.
   const { activeOrg } = await getOrgContext();

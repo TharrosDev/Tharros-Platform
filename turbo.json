@@ -19,6 +19,7 @@
         "STRIPE_PRICE_STARTER",
         "STRIPE_PRICE_GROWTH",
         "STRIPE_PRICE_PRO",
+        "STRIPE_PRICE_ENTERPRISE",
         "RESEND_API_KEY",
         "EMAIL_FROM",
         "STRIPE_WEBHOOK_SECRET",

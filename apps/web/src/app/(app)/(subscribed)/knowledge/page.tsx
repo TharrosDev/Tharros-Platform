@@ -3,6 +3,11 @@ import { countDocuments, listDocumentsPage } from "@/lib/documents/queries";
 import { PageHeader } from "@/components/page-header";
 import { DocumentUploader } from "@/components/documents/document-uploader";
 import { DocumentList } from "@/components/documents/document-list";
+import { CollectionsCard, KnowledgeGapsCard } from "@/components/documents/knowledge-admin";
+import { getKnowledgeGaps } from "@/lib/assistant/insights";
+import { getSubscription } from "@/lib/billing/entitlements";
+import { getEnterpriseSettings, listCollections } from "@/lib/enterprise/queries";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Knowledge" };
 
@@ -19,6 +24,30 @@ export default async function KnowledgePage() {
     ? await Promise.all([listDocumentsPage(activeOrg.id), countDocuments(activeOrg.id)])
     : [{ documents: [], nextCursor: null }, 0];
 
+  const isManager = activeOrg?.role === "owner" || activeOrg?.role === "admin";
+  const enterprise = isManager && (await getSubscription())?.tier === "enterprise";
+  const [gaps, collections, settings, docs] =
+    activeOrg && isManager
+      ? await Promise.all([
+          getKnowledgeGaps(activeOrg.id),
+          enterprise ? listCollections(activeOrg.id) : [],
+          enterprise ? getEnterpriseSettings(activeOrg.id) : null,
+          enterprise
+            ? (await createClient())
+                .from("documents")
+                .select("id, filename, collection_id")
+                .eq("org_id", activeOrg.id)
+                .order("filename")
+                .limit(500)
+                .then(({ data }) =>
+                  (
+                    (data ?? []) as { id: string; filename: string; collection_id: string | null }[]
+                  ).map((d) => ({ id: d.id, filename: d.filename, collectionId: d.collection_id })),
+                )
+            : [],
+        ])
+      : [null, [], null, []];
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -27,6 +56,14 @@ export default async function KnowledgePage() {
       />
       {total < 3 ? <FirstDocumentsProgress count={total} /> : null}
       <DocumentUploader />
+      {gaps ? <KnowledgeGapsCard gaps={gaps} /> : null}
+      {enterprise && settings ? (
+        <CollectionsCard
+          collections={collections}
+          locations={settings.locations}
+          documents={docs}
+        />
+      ) : null}
       <section className="space-y-3">
         <h2 className="type-h2">
           Documents <span className="text-muted-foreground num font-normal">{total}</span>

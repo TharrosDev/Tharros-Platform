@@ -180,7 +180,12 @@ export function AssistantChat({
             } else if (event.type === "error") {
               throw new Error(event.message);
             } else if (event.type === "done") {
-              patch(assistantId, (m) => ({ ...m, citations, statusLabel: undefined }));
+              patch(assistantId, (m) => ({
+                ...m,
+                citations,
+                statusLabel: undefined,
+                persistedId: event.messageId,
+              }));
             }
           }
         }

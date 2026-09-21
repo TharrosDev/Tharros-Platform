@@ -18,6 +18,8 @@ export type Plan = {
   highlight: boolean;
   features: string[];
   monthlyQueryCap: number;
+  /** Sales-led: priced per contract, never sold through self-serve checkout. */
+  contactSales?: boolean;
 };
 
 export const PLANS: readonly Plan[] = [
@@ -79,15 +81,42 @@ export const PLANS: readonly Plan[] = [
   },
 ] as const;
 
+/** Sales-led tier: everything in Pro plus locations, role- and location-scoped
+ * knowledge collections, conversation retention and audit export. The Stripe
+ * price is a custom contract price; the webhook maps it via planByPriceId. */
+export const ENTERPRISE_PLAN: Plan = {
+  tier: "enterprise",
+  name: "Enterprise",
+  priceMonthly: 0,
+  products: ["assistant", "scheduling", "leads", "automations"],
+  lookupKey: "tharros_enterprise_monthly",
+  priceId: env.STRIPE_PRICE_ENTERPRISE,
+  blurb: "For multi-location organizations that need access control, retention and audit.",
+  highlight: false,
+  features: [
+    "Everything in Pro",
+    "Multiple locations",
+    "Knowledge collections scoped by role and location",
+    "Conversation retention policies",
+    "Audit log export",
+    "Up to 100,000 AI queries / month",
+  ],
+  monthlyQueryCap: 100_000,
+  contactSales: true,
+};
+
+/** Every tier, including sales-led ones. PLANS stays the self-serve list. */
+const ALL_PLANS: readonly Plan[] = [...PLANS, ENTERPRISE_PLAN];
+
 export function getPlan(tier: Tier): Plan {
-  const plan = PLANS.find((p) => p.tier === tier);
+  const plan = ALL_PLANS.find((p) => p.tier === tier);
   if (!plan) throw new Error(`Unknown plan tier: ${tier}`);
   return plan;
 }
 
 export function planByPriceId(priceId: string | null | undefined): Plan | undefined {
   if (!priceId) return undefined;
-  return PLANS.find((p) => p.priceId === priceId);
+  return ALL_PLANS.find((p) => p.priceId === priceId);
 }
 
 export function queryCapFor(tier: Tier): number {

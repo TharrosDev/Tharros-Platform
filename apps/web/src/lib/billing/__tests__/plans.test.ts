@@ -16,7 +16,8 @@ import { TIERS } from "../schemas";
 describe("billing plans", () => {
   it("defines exactly the three tiers, in ladder order", () => {
     expect(PLANS.map((p) => p.tier)).toEqual(["starter", "growth", "pro"]);
-    expect(PLANS).toHaveLength(TIERS.length);
+    // PLANS is the self-serve list; Enterprise is sales-led.
+    expect([...PLANS.map((p) => p.tier), "enterprise"]).toEqual([...TIERS]);
   });
 
   it("prices the tiers at the agreed CA$ amounts", () => {
@@ -66,7 +67,14 @@ describe("billing plans", () => {
 
   it("getPlan throws on an unknown tier", () => {
     // @ts-expect-error exercising runtime guard
-    expect(() => getPlan("enterprise")).toThrow();
+    expect(() => getPlan("platinum")).toThrow();
+  });
+
+  it("Enterprise is sales-led with every product", () => {
+    const plan = getPlan("enterprise");
+    expect(plan.contactSales).toBe(true);
+    expect(hasFeature("enterprise", "automations")).toBe(true);
+    expect(PLANS.some((p) => p.tier === "enterprise")).toBe(false);
   });
 
   it("planByPriceId returns undefined for null or unmatched ids", () => {

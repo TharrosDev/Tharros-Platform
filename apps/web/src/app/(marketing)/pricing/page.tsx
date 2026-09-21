@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check } from "lucide-react";
 
-import { PLANS, TRIAL_DAYS, formatMonthly } from "@/lib/billing/plans";
+import { ENTERPRISE_PLAN, PLANS, TRIAL_DAYS, formatMonthly } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { marketingContainer } from "@/components/marketing/marketing-chrome";
@@ -119,12 +119,26 @@ export default function PricingPage() {
       </div>
 
       <div className="scope-note">
-        <h2 className="type-h2">Evaluating for a larger organization?</h2>
-        <p className="mt-3">
-          Choose by workflow and query needs, then review your access, data-handling and procurement
-          requirements before a wider rollout.{" "}
+        <h2 className="type-h2">
+          {ENTERPRISE_PLAN.name}: for larger and multi-location organizations
+        </h2>
+        <p className="mt-3">{ENTERPRISE_PLAN.blurb}</p>
+        <ul className="mt-4 space-y-2">
+          {ENTERPRISE_PLAN.features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2.5">
+              <Check
+                aria-hidden
+                className="text-foreground mt-0.5 size-4 shrink-0"
+                strokeWidth={3}
+              />
+              <span className="type-strip font-normal">{feature}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4">
+          Priced per contract in CAD.{" "}
           <Link href="/contact" className="marketing-text-link">
-            Talk to the Tharros team
+            Contact sales
           </Link>
         </p>
       </div>
