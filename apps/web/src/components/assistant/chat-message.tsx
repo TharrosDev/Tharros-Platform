@@ -7,6 +7,7 @@ import { TharrosMark } from "@/components/brand/logo";
 import { AssistantMarkdown } from "@/components/assistant/markdown";
 import { CitationFooter, NotGroundedNote, SourcesDialog } from "@/components/assistant/citations";
 import { MessageActions } from "@/components/assistant/message-actions";
+import { ProposalCard } from "@/components/assistant/proposal-card";
 
 /**
  * Day 29/30 — one chat turn. User turns sit right in a soft-cobalt bubble (plain
@@ -54,9 +55,18 @@ function AssistantTurn({ message, streaming }: { message: ChatMessage; streaming
             citations={message.citations}
             onCite={setOpenIndex}
           />
-        ) : streaming ? (
+        ) : streaming && !message.statusLabel ? (
           <ThinkingDots />
         ) : null}
+        {streaming && message.statusLabel ? (
+          <p role="status" className="text-muted-foreground mt-1 flex items-center gap-2 text-sm">
+            <span className="bg-primary size-1.5 animate-pulse rounded-full motion-reduce:animate-none" />
+            {message.statusLabel}…
+          </p>
+        ) : null}
+        {message.proposals?.map((p) => (
+          <ProposalCard key={p.id} proposal={p} />
+        ))}
         {streaming && message.content ? (
           <span className="bg-primary ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse align-middle motion-reduce:animate-none" />
         ) : null}

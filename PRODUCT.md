@@ -11,8 +11,11 @@ capabilities take priority over novelty.
 
 Tharros is one operating workspace with four connected product surfaces:
 
-1. **AI Business Assistant** — document ingestion, retrieval, grounded answers,
-   citations and generation over the business knowledge base.
+1. **AI Business Assistant** — multi-turn conversations over the knowledge base
+   (PDF, DOCX, PPTX, XLSX, CSV, text, OCR'd scans/images, imported web pages)
+   with hybrid retrieval and cited answers. It reads the org's leads, schedule
+   and automation runs through tools (only for products on the plan) and can
+   propose changes, which apply only when a person confirms them.
 2. **AI Workforce Scheduling** — setup, availability, schedule generation and
    review, publishing, employee self-service, sick-call coverage, replacements,
    swaps, time off, analytics and activity history.

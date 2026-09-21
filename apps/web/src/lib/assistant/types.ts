@@ -14,7 +14,18 @@ export type ChatMessage = {
   content: string;
   /** Sources for an assistant turn (empty for user turns / ungrounded answers). */
   citations: Citation[];
+  /** Changes the assistant proposed in this turn (confirm cards). */
+  proposals?: ProposalView[];
+  /** Transient, client-only: what the assistant is doing right now ("Checking the schedule"). */
+  statusLabel?: string;
   createdAt: string;
+};
+
+export type ProposalView = {
+  id: string;
+  kind: "lead_status" | "follow_up_draft" | "notify_team";
+  summary: string;
+  status: "pending" | "confirmed" | "dismissed" | "failed";
 };
 
 export type Conversation = {
