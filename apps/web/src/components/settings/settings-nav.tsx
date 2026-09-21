@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Building2, Gauge, TriangleAlert, Users } from "lucide-react";
+import { Bell, Building2, Gauge, ShieldCheck, TriangleAlert, Users } from "lucide-react";
 
 import { SectionNav, type SectionNavItem } from "@/components/shell/section-nav";
 
@@ -9,6 +9,7 @@ const SECTIONS: SectionNavItem[] = [
   { href: "/settings/team", label: "Members", icon: Users },
   { href: "/settings/usage", label: "Usage", icon: Gauge },
   { href: "/settings/notifications", label: "Notifications", icon: Bell },
+  { href: "/settings/enterprise", label: "Enterprise", icon: ShieldCheck },
   { href: "/settings/danger", label: "Danger zone", icon: TriangleAlert, danger: true },
 ];
 

@@ -186,6 +186,7 @@ export async function POST(req: Request): Promise<Response> {
     const sub = await getSubscription();
     const sources: GroundingChunk[] = [];
     const proposals: ProposalView[] = [];
+    const misses: string[] = [];
     const admin = createAdminClient();
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
@@ -207,6 +208,7 @@ export async function POST(req: Request): Promise<Response> {
             supabase,
             admin,
             sources,
+            misses,
             onProposal: (p) => {
               proposals.push(p);
               send({ type: "proposal", proposal: p });
@@ -234,7 +236,8 @@ export async function POST(req: Request): Promise<Response> {
             role: "assistant",
             content: answer || NO_CONTEXT_ANSWER,
             citations,
-            usage: turn.usage,
+            // knowledge_misses: document searches that found nothing (Knowledge gaps view).
+            usage: misses.length ? { ...turn.usage, knowledge_misses: misses } : turn.usage,
           });
           if (messageId && proposals.length > 0) {
             await admin
@@ -247,7 +250,7 @@ export async function POST(req: Request): Promise<Response> {
           }
           await touchConversation(supabase, finalConversationId);
           await recordUsage(orgId, user.id, DEFAULT_MODEL, turn.usage);
-          send({ type: "done" });
+          send({ type: "done", messageId: messageId ?? undefined });
         } catch (err) {
           onError(send, err);
         }
@@ -318,7 +321,7 @@ export async function POST(req: Request): Promise<Response> {
         }
 
         const refused = grounded.length > 0 && answer === REFUSAL_ANSWER;
-        await appendMessage(supabase, {
+        const messageId = await appendMessage(supabase, {
           conversationId: finalConversationId,
           orgId,
           role: "assistant",
@@ -330,7 +333,7 @@ export async function POST(req: Request): Promise<Response> {
         // Counts toward the org's monthly cap (skipped on the no-context path).
         await recordUsage(orgId, user.id, model, usage);
 
-        send({ type: "done" });
+        send({ type: "done", messageId: messageId ?? undefined });
       } catch (err) {
         onError(send, err);
       }

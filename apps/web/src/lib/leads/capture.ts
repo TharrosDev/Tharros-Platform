@@ -30,7 +30,10 @@ async function orgCanCaptureLeads(orgId: string): Promise<boolean> {
   if (error || !data) return false;
   const status = data.status as SubscriptionStatus;
   const tier = data.tier as Tier | null;
-  return ACTIVE_STATUSES.includes(status) && (tier === "growth" || tier === "pro");
+  return (
+    ACTIVE_STATUSES.includes(status) &&
+    (tier === "growth" || tier === "pro" || tier === "enterprise")
+  );
 }
 
 export async function getPublicCaptureForm(token: string): Promise<CaptureForm | null> {

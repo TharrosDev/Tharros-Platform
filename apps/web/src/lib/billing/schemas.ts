@@ -6,8 +6,8 @@ import { z } from "zod";
  * other domain libs (lib/org/schemas.ts, lib/team/schemas.ts).
  */
 
-/** The three subscription tiers. Source of truth for the union is plans.ts. */
-export const TIERS = ["starter", "growth", "pro"] as const;
+/** Subscription tiers. Enterprise is sales-led (no self-serve checkout). */
+export const TIERS = ["starter", "growth", "pro", "enterprise"] as const;
 export type Tier = (typeof TIERS)[number];
 
 export const tierSchema = z.enum(TIERS, { error: "Choose a plan." });

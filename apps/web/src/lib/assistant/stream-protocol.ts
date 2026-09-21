@@ -24,7 +24,7 @@ export type ChatStreamEvent =
   | { type: "status"; label: string }
   | { type: "proposal"; proposal: ProposalView }
   | { type: "sources"; citations: Citation[] }
-  | { type: "done" }
+  | { type: "done"; messageId?: string }
   | { type: "error"; message: string };
 
 /** Encode one event as a single NDJSON line (trailing newline included). */

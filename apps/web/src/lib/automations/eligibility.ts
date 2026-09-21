@@ -21,7 +21,7 @@ export function canExecuteAutomations(subscription: AutomationSubscription): boo
     subscription?.status !== undefined &&
     subscription.status !== null &&
     ACTIVE_STATUSES.includes(subscription.status) &&
-    subscription.tier === "pro"
+    (subscription.tier === "pro" || subscription.tier === "enterprise")
   );
 }
 

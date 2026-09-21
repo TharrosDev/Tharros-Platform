@@ -33,6 +33,8 @@ type Ctx = {
   admin: SupabaseClient;
   /** Every chunk surfaced this turn, in first-seen order — drives citation numbering. */
   sources: GroundingChunk[];
+  /** Document searches that found nothing — surfaced to admins as knowledge gaps. */
+  misses: string[];
   onProposal: (p: ProposalView) => void;
 };
 
@@ -99,7 +101,10 @@ export function buildAssistantTools(ctx: Ctx): ToolRegistry {
       async ({ query }) => {
         const found = await retrieveGroundingChunks(ctx.orgId, query);
         for (const c of found) if (!ctx.sources.some((s) => s.id === c.id)) ctx.sources.push(c);
-        if (found.length === 0) return { content: "No matching documents." };
+        if (found.length === 0) {
+          ctx.misses.push(query);
+          return { content: "No matching documents." };
+        }
         // The full block every time keeps [n] numbering stable across searches.
         return { content: buildContextBlock(ctx.sources) };
       },

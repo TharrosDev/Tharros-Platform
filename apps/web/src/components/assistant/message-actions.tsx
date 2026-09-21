@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Check, Copy, Download, Pencil, X } from "lucide-react";
+import { Check, Copy, Download, Pencil, ThumbsDown, ThumbsUp, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { Textarea } from "@/components/ui/textarea";
 import { draftFilename } from "@/lib/assistant/export";
+import { rateMessage } from "@/lib/assistant/feedback-actions";
 
 /**
  * Day 31 — per-turn toolbar for a finished assistant answer: Copy, Export (a
@@ -17,7 +18,10 @@ import { draftFilename } from "@/lib/assistant/export";
 export function MessageActions({
   content,
   label = "answer",
+  messageId,
 }: {
+  /** Persisted message id; enables thumbs feedback. */
+  messageId?: string;
   /** The assistant turn's text as persisted/streamed. */
   content: string;
   /** Human label used for the download filename + edit textarea aria-label. */
@@ -30,6 +34,25 @@ export function MessageActions({
   // the live `content` until then and pick up edits once made. This turn only
   // mounts after streaming finishes (see chat-message), so `content` is stable.
   const [draft, setDraft] = React.useState<string | null>(null);
+  const [rating, setRating] = React.useState<1 | -1 | null>(null);
+
+  const onRate = React.useCallback(
+    async (value: 1 | -1) => {
+      if (!messageId) return;
+      setRating(value);
+      const res = await rateMessage(messageId, value);
+      if (res.ok && value === -1) {
+        toast.add({
+          title: "Thanks",
+          description: "Your team's admins will see this in Knowledge gaps.",
+        });
+      } else if (!res.ok) {
+        setRating(null);
+        toast.add({ title: "Couldn't save feedback" });
+      }
+    },
+    [messageId, toast],
+  );
 
   const text = draft ?? content;
 
@@ -87,6 +110,20 @@ export function MessageActions({
           {editing ? <X className="size-3.5" /> : <Pencil className="size-3.5" />}
           {editing ? "Done" : "Edit"}
         </ActionButton>
+        {messageId ? (
+          <>
+            <ActionButton onClick={() => void onRate(1)} label="Helpful" active={rating === 1}>
+              <ThumbsUp className="size-3.5" />
+            </ActionButton>
+            <ActionButton
+              onClick={() => void onRate(-1)}
+              label="Not helpful"
+              active={rating === -1}
+            >
+              <ThumbsDown className="size-3.5" />
+            </ActionButton>
+          </>
+        ) : null}
       </div>
     </div>
   );

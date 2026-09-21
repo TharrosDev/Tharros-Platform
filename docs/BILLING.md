@@ -121,3 +121,12 @@ signing secret, and vault `STRIPE_WEBHOOK_SECRET` per environment in Vercel.
 Swap `sk_test_*`/`pk_test_*`/`whsec_*` for live keys, re-run the catalog script
 against the live account, re-add the live registration + portal config, and update
 the three `STRIPE_PRICE_*` env vars to the live Price IDs.
+
+## Enterprise (sales-led)
+
+`enterprise` is a fourth tier with every product, a 100,000 query cap, and the
+Enterprise controls (locations, knowledge collections, retention, audit
+export). It never goes through self-serve checkout (`contactSales`). To
+provision one, create a custom Price in Stripe, set `STRIPE_PRICE_ENTERPRISE`
+to it, and create the subscription for the org's existing Stripe customer; the
+webhook maps the price to the tier.
