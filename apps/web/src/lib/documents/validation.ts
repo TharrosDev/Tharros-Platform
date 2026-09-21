@@ -10,7 +10,22 @@ export const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /** Accepted extensions (lower-case, with dot). The authoritative gate — MIME
  * types are unreliable for .md (often empty/text/plain) and .docx across OSes. */
-export const ACCEPTED_EXTENSIONS = [".pdf", ".docx", ".txt", ".md"] as const;
+export const ACCEPTED_EXTENSIONS = [
+  ".pdf",
+  ".docx",
+  ".txt",
+  ".md",
+  ".csv",
+  ".xlsx",
+  ".pptx",
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".webp",
+] as const;
+
+/** Image uploads go straight to OCR (no text layer to extract). */
+export const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"] as const;
 
 /** MIME types we tag uploads with + advertise via the file input `accept`. */
 export const ACCEPTED_MIME_TYPES = [
@@ -18,13 +33,19 @@ export const ACCEPTED_MIME_TYPES = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "text/plain",
   "text/markdown",
+  "text/csv",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "image/png",
+  "image/jpeg",
+  "image/webp",
 ] as const;
 
 /** `accept` attribute value for the <input type="file"> element. */
 export const FILE_INPUT_ACCEPT = [...ACCEPTED_EXTENSIONS, ...ACCEPTED_MIME_TYPES].join(",");
 
 /** Human-readable list for empty-state / error copy. */
-export const ACCEPTED_LABEL = "PDF, DOCX, TXT, or MD";
+export const ACCEPTED_LABEL = "PDF, DOCX, PPTX, XLSX, CSV, TXT, MD, or an image";
 
 export type UploadCandidate = {
   name: string;

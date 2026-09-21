@@ -2,10 +2,11 @@
 // no secrets, and the Day-25 extract test imports it (server-only throws under
 // Vitest; see gotcha #35). The Node-only libs below keep it server-side in
 // practice; the API route is its only runtime caller.
+import JSZip from "jszip";
 import mammoth from "mammoth";
 import { extractText as unpdfExtractText, getDocumentProxy } from "unpdf";
 
-import { extensionOf } from "@/lib/documents/validation";
+import { extensionOf, IMAGE_EXTENSIONS } from "@/lib/documents/validation";
 
 /**
  * Day 25 — text extraction. Turns uploaded bytes (PDF/DOCX/TXT/MD) into plain
@@ -46,12 +47,23 @@ function toBuffer(bytes: ArrayBuffer | Buffer): Buffer {
   return Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes);
 }
 
+const ZIP_EXTENSIONS = [".docx", ".xlsx", ".pptx"];
+
 function assertExpectedSignature(ext: string, bytes: ArrayBuffer | Buffer): void {
   const buffer = toBuffer(bytes);
   if (ext === ".pdf" && buffer.subarray(0, 5).toString("ascii") !== "%PDF-") {
     throw new Error("File contents do not match the PDF extension.");
   }
-  if (ext === ".docx") {
+  if (ext === ".png" && buffer.subarray(1, 4).toString("ascii") !== "PNG") {
+    throw new Error("File contents do not match the PNG extension.");
+  }
+  if ((ext === ".jpg" || ext === ".jpeg") && !(buffer[0] === 0xff && buffer[1] === 0xd8)) {
+    throw new Error("File contents do not match the JPEG extension.");
+  }
+  if (ext === ".webp" && buffer.subarray(8, 12).toString("ascii") !== "WEBP") {
+    throw new Error("File contents do not match the WEBP extension.");
+  }
+  if (ZIP_EXTENSIONS.includes(ext)) {
     const zipSignature =
       buffer.length >= 4 &&
       buffer[0] === 0x50 &&
@@ -60,7 +72,7 @@ function assertExpectedSignature(ext: string, bytes: ArrayBuffer | Buffer): void
         (buffer[2] === 0x05 && buffer[3] === 0x06) ||
         (buffer[2] === 0x07 && buffer[3] === 0x08));
     if (!zipSignature) {
-      throw new Error("File contents do not match the DOCX extension.");
+      throw new Error(`File contents do not match the ${ext.slice(1).toUpperCase()} extension.`);
     }
   }
 }
@@ -82,6 +94,77 @@ async function extractPdf(
 async function extractDocx(bytes: ArrayBuffer | Buffer): Promise<string> {
   const { value } = await mammoth.extractRawText({ buffer: toBuffer(bytes) });
   return value;
+}
+
+/** Cap on total decompressed XML read from an Office zip — guards against zip bombs. */
+const MAX_ZIP_XML_BYTES = 50 * 1024 * 1024;
+
+function decodeXml(text: string): string {
+  return text
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n: string) => String.fromCodePoint(Number(n)))
+    .replace(/&amp;/g, "&");
+}
+
+/** Numbered zip entries (slide1.xml, sheet2.xml…) in numeric order, size-guarded. */
+async function readNumberedXml(zip: JSZip, pattern: RegExp): Promise<string[]> {
+  const entries = Object.values(zip.files)
+    .filter((f) => pattern.test(f.name))
+    .sort((a, b) => Number(a.name.match(pattern)![1]) - Number(b.name.match(pattern)![1]));
+  let total = 0;
+  const out: string[] = [];
+  for (const f of entries) {
+    // ponytail: jszip exposes uncompressed size only on the private _data; enough for a bomb guard.
+    total +=
+      (f as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize ?? 0;
+    if (total > MAX_ZIP_XML_BYTES) throw new Error("Document is too large to read.");
+    out.push(await f.async("string"));
+  }
+  return out;
+}
+
+async function extractPptx(bytes: ArrayBuffer | Buffer): Promise<string> {
+  const zip = await JSZip.loadAsync(toBuffer(bytes));
+  const slides = await readNumberedXml(zip, /^ppt\/slides\/slide(\d+)\.xml$/);
+  return slides
+    .map((xml, i) => {
+      const paragraphs = xml
+        .split("</a:p>")
+        .map((p) => decodeXml([...p.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map((m) => m[1]).join("")))
+        .filter((p) => p.trim());
+      return `## Slide ${i + 1}\n${paragraphs.join("\n")}`;
+    })
+    .join("\n\n");
+}
+
+async function extractXlsx(bytes: ArrayBuffer | Buffer): Promise<string> {
+  const zip = await JSZip.loadAsync(toBuffer(bytes));
+  const sharedXml = (await zip.file("xl/sharedStrings.xml")?.async("string")) ?? "";
+  const shared = [...sharedXml.matchAll(/<si>([\s\S]*?)<\/si>/g)].map((m) =>
+    decodeXml([...m[1].matchAll(/<t[^>]*>([^<]*)<\/t>/g)].map((t) => t[1]).join("")),
+  );
+  const workbook = (await zip.file("xl/workbook.xml")?.async("string")) ?? "";
+  const names = [...workbook.matchAll(/<sheet [^>]*name="([^"]*)"/g)].map((m) => decodeXml(m[1]));
+  const sheets = await readNumberedXml(zip, /^xl\/worksheets\/sheet(\d+)\.xml$/);
+  return sheets
+    .map((xml, i) => {
+      const rows = [...xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)].map((row) =>
+        [...row[1].matchAll(/<c ([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)]
+          .map(([, attrs, body = ""]) => {
+            const v = body.match(/<v>([^<]*)<\/v>/)?.[1];
+            if (/t="s"/.test(attrs) && v !== undefined) return shared[Number(v)] ?? "";
+            const inline = body.match(/<t[^>]*>([^<]*)<\/t>/)?.[1];
+            return decodeXml(inline ?? v ?? "");
+          })
+          .join(" | "),
+      );
+      const body = rows.filter((r) => r.replace(/[ |]/g, "")).join("\n");
+      return `## ${names[i] ?? `Sheet ${i + 1}`}\n${body}`;
+    })
+    .join("\n\n");
 }
 
 function extractPlain(bytes: ArrayBuffer | Buffer): string {
@@ -110,8 +193,15 @@ export async function extractText(input: {
     pageCount = res.pageCount;
   } else if (ext === ".docx") {
     text = await extractDocx(input.bytes);
-  } else if (ext === ".txt" || ext === ".md") {
+  } else if (ext === ".pptx") {
+    text = await extractPptx(input.bytes);
+  } else if (ext === ".xlsx") {
+    text = await extractXlsx(input.bytes);
+  } else if (ext === ".txt" || ext === ".md" || ext === ".csv") {
     text = extractPlain(input.bytes);
+  } else if ((IMAGE_EXTENSIONS as readonly string[]).includes(ext)) {
+    // No text layer — the caller routes images straight to OCR.
+    return { text: "", charCount: 0, pageCount: 1, needsOcr: true };
   } else {
     throw new Error(`Unsupported file type for extraction: ${ext || "(none)"}`);
   }

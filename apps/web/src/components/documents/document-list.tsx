@@ -55,7 +55,7 @@ const STATUS_META: Record<DocumentStatus, StatusMeta> = {
   chunking: { label: "Indexing", variant: "info" },
   embedding: { label: "Indexing", variant: "info" },
   ready: { label: "Ready", variant: "success" },
-  needs_ocr: { label: "Scanned PDF", variant: "secondary" },
+  needs_ocr: { label: "Scan unreadable", variant: "secondary" },
   failed: { label: "Failed", variant: "destructive" },
 };
 
@@ -225,11 +225,14 @@ export function DocumentList({
     setBusyId(doc.id);
     try {
       const res = await fetch(`/api/documents/${doc.id}/extract`, { method: "POST" });
-      const extracted = (await res.json().catch(() => null)) as { status?: string } | null;
+      const extracted = (await res.json().catch(() => null)) as {
+        status?: string;
+        error?: string;
+      } | null;
       if (extracted?.status === "needs_ocr") {
         toast.add({
           title: "Can't index this file",
-          description: "It looks like a scanned PDF. OCR support is coming.",
+          description: extracted.error ?? "We couldn't read the text in this scan.",
         });
       } else if (extracted?.status === "extracted") {
         await fetch(`/api/documents/${doc.id}/embed`, { method: "POST" });
@@ -351,7 +354,7 @@ export function DocumentList({
                           <Badge variant={busy ? "info" : meta.variant}>
                             {busy ? "Re-indexing…" : meta.label}
                           </Badge>
-                          {doc.status === "failed" && !busy ? (
+                          {(doc.status === "failed" || doc.status === "needs_ocr") && !busy ? (
                             <Button
                               variant="ghost"
                               size="sm"

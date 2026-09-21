@@ -3,7 +3,10 @@ import { getFeatureAccess } from "@/lib/billing/entitlements";
 import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { CHEAP_MODEL } from "@/lib/anthropic/client";
+import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
 import { extractText } from "@/lib/documents/extract";
+import { OCR_MAX_PAGES, ocrDocument } from "@/lib/documents/ocr";
 import { DOCUMENTS_BUCKET } from "@/lib/documents/types";
 import { logger } from "@/lib/observability/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -11,6 +14,8 @@ import { isSameOriginMutation, opaqueRateLimitKey } from "@/lib/security/request
 
 // Node runtime: the PDF/DOCX parsers (unpdf/mammoth) need Node, not Edge.
 export const runtime = "nodejs";
+// Scanned PDFs / images are OCR'd inline by Claude, which can take minutes.
+export const maxDuration = 300;
 
 /**
  * Day 25 — text extraction endpoint. The uploader POSTs here right after a
@@ -72,10 +77,10 @@ export async function POST(
   if (!doc) {
     return Response.json({ error: "Document not found" }, { status: 404 });
   }
-  // Already extracted → let the caller advance to embedding. OCR is terminal
-  // until an OCR pipeline exists. An in-flight stage must never be reclaimed by
-  // an overlapping browser retry.
-  if (doc.status === "extracted" || doc.status === "needs_ocr") {
+  // Already extracted → let the caller advance to embedding. A `needs_ocr` doc
+  // may be re-POSTed to retry OCR. An in-flight stage must never be reclaimed
+  // by an overlapping browser retry.
+  if (doc.status === "extracted") {
     return Response.json({ status: doc.status, skipped: true });
   }
   if (doc.status === "extracting" || doc.status === "chunking" || doc.status === "embedding") {
@@ -136,20 +141,34 @@ export async function POST(
     });
 
     if (result.needsOcr) {
-      await admin
-        .from("documents")
-        .update({
-          status: "needs_ocr",
-          char_count: result.charCount,
-          page_count: result.pageCount,
-          extracted_at: now(),
-          error:
-            "This looks like a scanned PDF — text couldn't be extracted. OCR support is coming.",
-        })
-        .eq("id", id)
-        .eq("org_id", activeOrg.id);
-      await finishJob("succeeded");
-      return Response.json({ status: "needs_ocr" });
+      // OCR is AI work, so it's metered (one query) and blocked at the plan cap.
+      const tooLong = (result.pageCount ?? 1) > OCR_MAX_PAGES;
+      const cap = tooLong ? null : await checkQueryCap(activeOrg.id);
+      const ocr = cap?.allowed ? await ocrDocument(bytes, doc.filename as string) : null;
+      if (ocr?.usage) await recordUsage(activeOrg.id, user.id, CHEAP_MODEL, ocr.usage);
+
+      if (!ocr?.text) {
+        const ocrError = tooLong
+          ? `This scan is longer than ${OCR_MAX_PAGES} pages. Split it into smaller files to read it.`
+          : cap && !cap.allowed
+            ? "This month's AI query limit is reached, so this scan couldn't be read."
+            : "Couldn't read the text in this file.";
+        await admin
+          .from("documents")
+          .update({
+            status: "needs_ocr",
+            char_count: result.charCount,
+            page_count: result.pageCount,
+            extracted_at: now(),
+            error: ocrError,
+          })
+          .eq("id", id)
+          .eq("org_id", activeOrg.id);
+        await finishJob("succeeded");
+        return Response.json({ status: "needs_ocr", error: ocrError });
+      }
+      result.text = ocr.text;
+      result.charCount = ocr.text.length;
     }
 
     await admin

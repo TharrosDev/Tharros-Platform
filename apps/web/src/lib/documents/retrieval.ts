@@ -60,8 +60,11 @@ export async function searchChunks(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("match_document_chunks", {
+  // Hybrid: vector similarity fused with keyword rank, so exact terms (SKUs,
+  // names, codes) the embedding blurs still surface.
+  const { data, error } = await supabase.rpc("hybrid_match_document_chunks", {
     query_embedding: toVectorLiteral(queryEmbedding),
+    query_text: trimmed,
     p_org: orgId,
     match_count: options.limit ?? 4,
     p_document_id: options.documentId ?? null,
