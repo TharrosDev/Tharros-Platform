@@ -1,5 +1,5 @@
 import type { Citation } from "@/lib/documents/rag-prompt";
-import type { ProposalView } from "@/lib/assistant/types";
+import type { DataBlock, ProposalView } from "@/lib/assistant/types";
 
 /**
  * Day 29 — the wire protocol between the streaming chat endpoint
@@ -24,6 +24,8 @@ export type ChatStreamEvent =
   | { type: "status"; label: string }
   | { type: "proposal"; proposal: ProposalView }
   | { type: "sources"; citations: Citation[] }
+  | { type: "data"; block: DataBlock }
+  | { type: "suggestions"; items: string[] }
   | { type: "done"; messageId?: string }
   | { type: "error"; message: string };
 

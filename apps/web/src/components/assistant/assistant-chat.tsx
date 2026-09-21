@@ -6,16 +6,20 @@ import Link from "next/link";
 import {
   Sparkles,
   BookOpen,
-  ArrowUp,
+  ArrowUpRight,
   Mail,
   ClipboardList,
   FileText,
   RefreshCw,
   X,
+  Users,
+  CalendarDays,
+  Workflow,
 } from "lucide-react";
 
 import type { Citation } from "@/lib/documents/rag-prompt";
 import type { ChatMessage } from "@/lib/assistant/types";
+import type { ProductFeature } from "@/lib/billing/plans";
 import { createFrameDecoder } from "@/lib/assistant/stream-protocol";
 import { TEMPLATES, type TemplateId } from "@/lib/assistant/templates";
 import { cn } from "@/lib/utils";
@@ -30,10 +34,18 @@ const TEMPLATE_ICONS: Record<TemplateId, React.ComponentType<{ className?: strin
   summarize_policy: FileText,
 };
 
-const EXAMPLE_PROMPTS = [
-  "What's our refund policy?",
-  "Summarize our employee handbook.",
-  "What are our hours and contact details?",
+/** Starter prompts per product; the empty state shows the ones on the org's plan. */
+const EXAMPLE_PROMPTS: {
+  product: ProductFeature;
+  icon: React.ComponentType<{ className?: string }>;
+  text: string;
+}[] = [
+  { product: "assistant", icon: BookOpen, text: "What's our refund policy?" },
+  { product: "assistant", icon: BookOpen, text: "Summarize our employee handbook." },
+  { product: "leads", icon: Users, text: "Which new leads haven't been contacted yet?" },
+  { product: "scheduling", icon: CalendarDays, text: "Who's working this weekend?" },
+  { product: "scheduling", icon: CalendarDays, text: "Any pending time-off requests?" },
+  { product: "automations", icon: Workflow, text: "Did any automations fail this week?" },
 ];
 
 type Pending = { userId: string; assistantId: string };
@@ -52,7 +64,10 @@ export function AssistantChat({
   readOnly = false,
   nearLimit = false,
   olderTruncated = false,
+  products = [],
 }: {
+  /** Products on the org's plan: decides which live-data prompts to suggest. */
+  products?: readonly ProductFeature[];
   selectedId: string | null;
   initialMessages: ChatMessage[];
   hasDocuments: boolean;
@@ -110,7 +125,7 @@ export function AssistantChat({
       const now = new Date().toISOString();
 
       setMessages((prev) => [
-        ...prev,
+        ...prev.map((m) => (m.suggestions ? { ...m, suggestions: undefined } : m)),
         { id: userId, role: "user", content: question, citations: [], createdAt: now },
         { id: assistantId, role: "assistant", content: "", citations: [], createdAt: now },
       ]);
@@ -168,7 +183,15 @@ export function AssistantChat({
                 statusLabel: undefined,
               }));
             } else if (event.type === "status") {
-              patch(assistantId, (m) => ({ ...m, statusLabel: event.label }));
+              patch(assistantId, (m) => ({
+                ...m,
+                statusLabel: event.label,
+                steps: [...(m.steps ?? []), event.label],
+              }));
+            } else if (event.type === "data") {
+              patch(assistantId, (m) => ({ ...m, data: [...(m.data ?? []), event.block] }));
+            } else if (event.type === "suggestions") {
+              patch(assistantId, (m) => ({ ...m, suggestions: event.items }));
             } else if (event.type === "proposal") {
               patch(assistantId, (m) => ({
                 ...m,
@@ -223,17 +246,28 @@ export function AssistantChat({
     void send(lastAttempt.question, lastAttempt.template);
   }, [lastAttempt, send]);
 
+  // Re-ask the latest question (keeps the earlier answer in the thread).
+  const regenerate = React.useCallback(() => {
+    const lastQuestion = [...messages].reverse().find((m) => m.role === "user");
+    if (lastQuestion) void send(lastQuestion.content);
+  }, [messages, send]);
+
   const showEmpty = messages.length === 0 && !streaming;
 
   return (
     <div className="relative flex min-h-[calc(100dvh-13rem)] flex-col">
       <div className="flex-1">
         {showEmpty ? (
-          <EmptyState hasDocuments={hasDocuments} onPick={send} readOnly={readOnly} />
+          <EmptyState
+            hasDocuments={hasDocuments}
+            onPick={send}
+            readOnly={readOnly}
+            products={products}
+          />
         ) : (
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 py-4">
             {olderTruncated ? (
-              <p className="text-muted-foreground border border-dashed py-2 text-center text-xs">
+              <p className="text-muted-foreground rounded-xl border border-dashed py-2 text-center text-xs">
                 Showing the most recent messages in this conversation.
               </p>
             ) : null}
@@ -242,6 +276,9 @@ export function AssistantChat({
                 <ChatTurn
                   message={m}
                   streaming={streaming && m.role === "assistant" && i === messages.length - 1}
+                  isLast={!streaming && !readOnly && i === messages.length - 1}
+                  onRegenerate={regenerate}
+                  onSuggest={(q) => void send(q)}
                 />
               );
               return i >= initialCount ? (
@@ -293,6 +330,8 @@ export function AssistantChat({
           streaming={streaming}
           disabled={readOnly}
           placeholder={activeMeta?.placeholder}
+          templates={readOnly || hasDocuments === false ? [] : TEMPLATES}
+          onPickTemplate={setActiveTemplate}
           header={
             readOnly ? null : activeMeta ? (
               <ActiveTemplateChip
@@ -317,61 +356,69 @@ function EmptyState({
   hasDocuments,
   onPick,
   readOnly,
+  products,
 }: {
   hasDocuments: boolean;
   onPick: (q: string) => void;
   readOnly: boolean;
+  products: readonly ProductFeature[];
 }) {
+  const liveData = products.some((p) => p !== "assistant");
+  const prompts = EXAMPLE_PROMPTS.filter(
+    (p) => products.includes(p.product) && (p.product !== "assistant" || hasDocuments),
+  ).slice(0, 4);
+
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col px-1 pb-10 pt-8 sm:pt-14">
+    <div className="mx-auto flex w-full max-w-2xl flex-col px-1 pt-8 pb-10 sm:pt-16">
       <span
-        className="rounded-xl bg-card text-primary-soft-foreground flex size-10 items-center justify-center border"
+        className="bg-primary-soft text-primary-soft-foreground flex size-11 items-center justify-center rounded-2xl"
         aria-hidden
       >
         <Sparkles className="size-5" />
       </span>
-      <h2 className="mt-5 text-[1.375rem] font-semibold tracking-[-0.025em]">
-        Ask about your business
+      <h2 className="mt-5 text-[1.625rem] font-bold tracking-[-0.025em] text-balance">
+        What can I help you with today?
       </h2>
-      <p className="text-muted-foreground type-body mt-1.5 max-w-lg">
-        The assistant answers only from the documents in your Knowledge base, and cites the source
-        for every answer.
+      <p className="text-muted-foreground type-body mt-2 max-w-xl text-pretty">
+        {liveData
+          ? "Ask about your documents, leads, schedule or automations. Answers from documents cite their source, and any change I suggest waits for you to confirm it."
+          : "Ask about anything in your Knowledge base. Every answer cites the document it came from."}
       </p>
 
-      {readOnly ? null : hasDocuments ? (
-        <div className="mt-7 w-full">
-          <p className="text-muted-foreground mb-2 text-sm font-medium">Try asking</p>
-          <div className="rounded-xl bg-card divide-y overflow-hidden border">
-            {EXAMPLE_PROMPTS.map((p) => (
+      {readOnly ? null : prompts.length > 0 ? (
+        <ul className="mt-8 grid w-full gap-2 sm:grid-cols-2">
+          {prompts.map(({ text, icon: Icon }) => (
+            <li key={text}>
               <button
-                key={p}
                 type="button"
-                onClick={() => onPick(p)}
-                className="group flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition-colors hover:bg-accent/60 "
+                onClick={() => onPick(text)}
+                className="bg-card hover:border-primary-edge/35 hover:bg-primary-soft/30 focus-visible:ring-ring/40 group flex h-full w-full items-start gap-3 rounded-xl border px-4 py-3.5 text-left text-sm transition-colors outline-none focus-visible:ring-[3px]"
               >
-                <span className="text-foreground">{p}</span>
-                <ArrowUp
-                  className="text-muted-foreground group-hover:text-primary-soft-foreground size-4 shrink-0 rotate-90 transition-colors"
+                <Icon className="text-muted-foreground group-hover:text-primary mt-0.5 size-4 shrink-0 transition-colors" />
+                <span className="text-foreground flex-1">{text}</span>
+                <ArrowUpRight
+                  className="text-muted-foreground group-hover:text-primary size-4 shrink-0 transition-colors"
                   aria-hidden
                 />
               </button>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-xl bg-card mt-7 flex w-full flex-col gap-4 border p-5 text-left">
-          <p className="text-foreground font-semibold">Add your documents to get started</p>
-          <p className="text-muted-foreground text-sm">
-            The assistant answers from what you upload, so it needs a few documents first.
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {!readOnly && !hasDocuments ? (
+        <div className="bg-card mt-6 flex w-full flex-col gap-4 rounded-xl border p-5 text-left">
+          <p className="text-foreground font-semibold">
+            Add documents for policy and how-to answers
           </p>
           <ol className="text-muted-foreground flex flex-col gap-2.5 text-sm">
             {[
-              "Upload your SOPs, policies, price lists, or FAQs.",
+              "Upload your SOPs, policies, price lists or FAQs, or import a web page.",
               "Ask a question in plain language.",
               "Get an answer with the source it came from.",
             ].map((step, i) => (
               <li key={step} className="flex items-start gap-2.5">
-                <span className="bg-primary-soft text-primary-soft-foreground mt-px flex size-5 shrink-0 items-center justify-center text-xs font-semibold">
+                <span className="bg-primary-soft text-primary-soft-foreground mt-px flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
                   {i + 1}
                 </span>
                 <span className="text-foreground">{step}</span>
@@ -386,7 +433,7 @@ function EmptyState({
             Add documents
           </Link>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -434,7 +481,7 @@ function UsageNotice({ tone, children }: { tone: "warning" | "error"; children: 
     <div
       role="status"
       className={cn(
-        "mb-2 border px-3.5 py-2.5 text-sm",
+        "mb-2 rounded-xl border px-3.5 py-2.5 text-sm",
         tone === "error"
           ? "border-destructive/25 bg-destructive/[0.06] text-destructive"
           : "border-warning/25 bg-warning/[0.07] text-foreground",
@@ -448,14 +495,14 @@ function UsageNotice({ tone, children }: { tone: "warning" | "error"; children: 
 /** The chip shown above the composer once a template is selected. */
 function ActiveTemplateChip({ label, onClear }: { label: string; onClear: () => void }) {
   return (
-    <div className="bg-primary-soft text-primary-soft-foreground inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium">
+    <div className="bg-primary-soft text-primary-soft-foreground inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium">
       <Sparkles className="size-3.5" />
       {label}
       <button
         type="button"
         onClick={onClear}
         aria-label="Clear template"
-        className="hover:bg-background/40 -mr-1 ml-0.5 inline-flex size-4 items-center justify-center transition-colors"
+        className="hover:bg-background/40 -mr-1 ml-0.5 inline-flex size-4 items-center justify-center rounded-full transition-colors"
       >
         <X className="size-3" />
       </button>

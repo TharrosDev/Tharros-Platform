@@ -18,10 +18,34 @@ export type ChatMessage = {
   proposals?: ProposalView[];
   /** Transient, client-only: what the assistant is doing right now ("Checking the schedule"). */
   statusLabel?: string;
+  /** Client-only: the tool steps this turn took, in order (the step trail). */
+  steps?: string[];
+  /** Client-only: structured records the tools returned, rendered as cards. */
+  data?: DataBlock[];
+  /** Client-only: suggested follow-up questions for the latest answer. */
+  suggestions?: string[];
   /** Client-only: the stored id of a turn streamed this session (its `id` is a temp one). */
   persistedId?: string;
   createdAt: string;
 };
+
+export type LeadCardData = {
+  id: string;
+  name: string;
+  company: string | null;
+  email: string | null;
+  status: string;
+  createdAt: string;
+};
+export type ShiftCardData = {
+  startsAt: string;
+  endsAt: string;
+  status: string;
+  employee: string | null;
+};
+export type DataBlock =
+  | { kind: "leads"; items: LeadCardData[] }
+  | { kind: "shifts"; items: ShiftCardData[] };
 
 export type ProposalView = {
   id: string;
