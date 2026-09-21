@@ -44,8 +44,8 @@ import { EVAL_QUESTIONS } from "./questions";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const EMBEDDING_MODEL = "text-embedding-3-small";
-// Mirror the shipping config: the default tier is Sonnet 4.6 at high effort.
-const ANSWER_MODEL = "claude-sonnet-4-6";
+// Mirror the shipping config: the default tier is Sonnet 5 at high effort.
+const ANSWER_MODEL = "claude-sonnet-5";
 const JUDGE_MODEL = "claude-haiku-4-5";
 
 const CHUNK_CONFIGS: { label: string; opts: ChunkOptions }[] = [

@@ -24,7 +24,9 @@ export type ModelRates = {
 
 /** USD list prices per 1M tokens. Update if Anthropic's pricing changes. */
 export const MODEL_RATES: Record<string, ModelRates> = {
-  // Sonnet 4.6 — the RAG assistant default. (Scheduling AI runs on DeepSeek — below.)
+  // Sonnet 5 — the assistant + agent default. (Scheduling structured tasks run on DeepSeek — below.)
+  "claude-sonnet-5": { input: 2, output: 10, cacheWrite: 2.5, cacheRead: 0.2 },
+  // Sonnet 4.6 — previous default; kept priced so historical usage rows still estimate.
   "claude-sonnet-4-6": { input: 3, output: 15, cacheWrite: 3.75, cacheRead: 0.3 },
   // Opus 4.8 — reserved for later internal integration-management work; kept
   // priced so any such call still meters correctly.

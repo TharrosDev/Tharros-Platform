@@ -6,14 +6,16 @@ import { getOrgContext } from "@/lib/org/queries";
 import { createClient } from "@/lib/supabase/server";
 import { anthropic, modelForTemplate } from "@/lib/anthropic/client";
 import { checkQueryCap, recordUsage } from "@/lib/billing/usage";
-import { buildRagRequest, retrieveGroundingChunks } from "@/lib/documents/rag";
+import { buildRagRequest, retrieveGroundingChunks, standaloneQuery } from "@/lib/documents/rag";
 import { buildCitations, NO_CONTEXT_ANSWER } from "@/lib/documents/rag-prompt";
 import {
   appendMessage,
   conversationTitle,
   createConversation,
+  getConversationMessages,
   touchConversation,
 } from "@/lib/assistant/conversations";
+import { buildHistory } from "@/lib/assistant/history";
 import { encodeFrame, type ChatStreamEvent } from "@/lib/assistant/stream-protocol";
 import {
   isTemplateId,
@@ -138,6 +140,12 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: "Couldn't start the conversation." }, { status: 500 });
   }
 
+  // Prior turns, read before appending this one. RLS scopes the read; a thread
+  // the caller can't see yields [] and the append below rejects it anyway.
+  const history = conversationIdInput
+    ? buildHistory((await getConversationMessages(conversationId)).messages)
+    : [];
+
   const userMessageId = await appendMessage(supabase, {
     conversationId,
     orgId,
@@ -152,7 +160,11 @@ export async function POST(req: Request): Promise<Response> {
 
   // Retrieve grounding before opening the stream so the `meta` frame can carry
   // citations immediately and a retrieval failure is still a graceful empty set.
-  const grounded = await retrieveGroundingChunks(orgId, question);
+  // Follow-ups ("what about part-timers?") retrieve on a standalone rewrite.
+  // ponytail: the ~200-token Haiku rewrite isn't metered — each ai_usage_events
+  // row counts as one query toward the plan cap, so a row here would double-bill.
+  const retrievalQuery = await standaloneQuery(history, question);
+  const grounded = await retrieveGroundingChunks(orgId, retrievalQuery);
   const citations = buildCitations(grounded);
   const finalConversationId = conversationId;
 
@@ -188,8 +200,9 @@ export async function POST(req: Request): Promise<Response> {
                   model,
                   // Cheap template path (Haiku) — skip the high-effort config.
                   effort: null,
+                  history,
                 })
-              : buildRagRequest(question, grounded, { model }),
+              : buildRagRequest(question, grounded, { model, history }),
           );
           for await (const event of claudeStream) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
