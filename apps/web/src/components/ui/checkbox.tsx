@@ -10,15 +10,13 @@ import { cn } from "@/lib/utils";
  * Checkbox primitive on Base UI. Controlled or uncontrolled; submits via a
  * hidden input when given a name.
  *
- * Drawn as the box you mark on a printed form: square, one rule, and a
- * press-black check struck into hi-vis when it is set.
  */
 function Checkbox({ className, ...props }: React.ComponentProps<typeof CheckboxPrimitive.Root>) {
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center border transition-colors hover:border-foreground/50",
+        "peer rounded-sm border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center border transition-colors hover:border-foreground/50",
         "data-[checked]:bg-primary data-[checked]:border-primary-edge data-[checked]:text-primary-foreground data-[checked]:border-2",
         "disabled:cursor-not-allowed disabled:opacity-45",
         className,

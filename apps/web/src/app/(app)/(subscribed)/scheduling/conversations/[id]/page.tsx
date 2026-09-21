@@ -26,8 +26,11 @@ const VOICE_STYLE: Record<TurnVoice, { align: string; bubble: string }> = {
   employee: { align: "items-start", bubble: "bg-muted text-foreground" },
   agent: { align: "items-start", bubble: "bg-primary-soft/40 text-foreground" },
   manager: { align: "items-end", bubble: "bg-primary text-primary-foreground" },
-  tool: { align: "items-start", bubble: "bg-card text-muted-foreground border border-dashed" },
-  system: { align: "items-start", bubble: "bg-card text-muted-foreground border" },
+  tool: {
+    align: "items-start",
+    bubble: "rounded-xl bg-card text-muted-foreground border border-dashed",
+  },
+  system: { align: "items-start", bubble: "rounded-xl bg-card text-muted-foreground border" },
 };
 
 export default async function ConversationDetailPage({

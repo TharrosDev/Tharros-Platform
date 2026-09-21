@@ -10,6 +10,12 @@ const PUBLIC_PATHS = [
   "/privacy",
   "/terms",
   "/security",
+  "/products",
+  "/solutions",
+  "/how-it-works",
+  "/contact",
+  "/opengraph-image",
+  "/apple-icon",
   "/forms",
   "/forgot-password",
   "/reset-password",
@@ -25,6 +31,8 @@ const PUBLIC_PATHS = [
 
 function isPublicPath(pathname: string): boolean {
   if (pathname === "/") return true;
+  // Next adds a route-group hash to generated public sharing images.
+  if (/^\/opengraph-image-[a-z0-9]+$/.test(pathname)) return true;
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 

@@ -24,7 +24,7 @@ function PublicDocument({
       </p>
       <p className="text-rack-muted-foreground type-meta mt-5">Last updated {updated}</p>
 
-      <div className="on-stock bg-card border-border text-foreground doc-prose mt-12 border p-6 sm:p-10">
+      <div className="on-stock bg-card border-border text-foreground doc-prose mt-12 rounded-xl border p-6 sm:p-10">
         {children}
       </div>
     </article>

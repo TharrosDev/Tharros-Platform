@@ -214,12 +214,12 @@ export default async function DashboardPage() {
   return (
     <>
       {/* Board header: who, where, when. Struck to the top of the board. */}
-      <header className="border-foreground flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b-2 pb-3">
+      <header className="border-border flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b pb-5">
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-1">
           <h1 className="type-h1">{activeOrg.name}</h1>
           <p className="type-meta text-muted-foreground">
             {dayStamp.format(now)} · {timeOfDay.format(now)}
-            {firstName ? ` · ${firstName} on duty` : null}
+            {firstName ? ` · Welcome, ${firstName}` : null}
           </p>
         </div>
         <Link href="/assistant" className={buttonVariants({ variant: "outline", size: "sm" })}>
@@ -229,7 +229,12 @@ export default async function DashboardPage() {
       </header>
 
       <div className="grid gap-x-8 gap-y-8 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <Bay headingId="initials-heading" label="Needs your initials" count={attention.length} lead>
+        <Bay
+          headingId="initials-heading"
+          label="Ready for your review"
+          count={attention.length}
+          lead
+        >
           {attention.length ? (
             attention.map((item, index) => (
               <Strip
@@ -260,7 +265,7 @@ export default async function DashboardPage() {
           )}
         </Bay>
 
-        <Bay headingId="board-heading" label="On the board" count={onTheBoard.length}>
+        <Bay headingId="board-heading" label="Your workspace at a glance" count={onTheBoard.length}>
           {onTheBoard.map((row) => (
             <Strip key={row.label} tone={row.tone ?? "plain"}>
               <Link
@@ -288,7 +293,7 @@ export default async function DashboardPage() {
 
       <RecordLog
         headingId="record-heading"
-        label="The record"
+        label="Recent activity"
         action={
           <Link href="/notifications" className={buttonVariants({ variant: "link", size: "sm" })}>
             Open inbox
@@ -308,7 +313,7 @@ export default async function DashboardPage() {
           ))
         ) : (
           <LogLine time={timeOfDay.format(now)} source="System">
-            Nothing has been recorded yet. Work you and the assistant do will print here.
+            Nothing has been recorded yet. Your team’s recent work will appear here.
           </LogLine>
         )}
       </RecordLog>

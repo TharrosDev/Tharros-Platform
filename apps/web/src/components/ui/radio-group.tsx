@@ -11,8 +11,6 @@ import { cn } from "@/lib/utils";
  * hidden input when the group has a name. RadioGroupItem renders the mark
  * only; compose it with a Label for the option text.
  *
- * Square like everything else on the board: the role, not the silhouette,
- * tells a screen reader this is a radio.
  */
 function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupPrimitive>) {
   return (
@@ -29,14 +27,14 @@ function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof Rad
     <RadioPrimitive.Root
       data-slot="radio-group-item"
       className={cn(
-        "border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center border transition-colors hover:border-foreground/50",
+        "rounded-full border-input bg-card flex size-[1.125rem] shrink-0 cursor-pointer items-center justify-center border transition-colors hover:border-foreground/50",
         "data-[checked]:border-primary-edge data-[checked]:border-2",
         "disabled:cursor-not-allowed disabled:opacity-45",
         className,
       )}
       {...props}
     >
-      <RadioPrimitive.Indicator className="bg-primary size-2.5" />
+      <RadioPrimitive.Indicator className="bg-primary size-2.5 rounded-full" />
     </RadioPrimitive.Root>
   );
 }

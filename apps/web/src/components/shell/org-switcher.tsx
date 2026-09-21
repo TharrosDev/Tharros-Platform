@@ -45,7 +45,7 @@ export function OrgSwitcher({ orgs, activeOrg }: { orgs: UserOrg[]; activeOrg: U
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            "group bg-card flex min-h-11 w-full items-center gap-2.5 border px-2 py-1.5 text-left transition-[background-color,border-color]",
+            "rounded-xl group bg-card flex min-h-11 w-full items-center gap-2.5 border px-2 py-1.5 text-left transition-[background-color,border-color]",
             "hover:border-input hover:bg-accent/50 ",
             pending && "opacity-60",
           )}

@@ -24,8 +24,8 @@ function SelectTrigger({
   return (
     <SelectPrimitive.Trigger
       className={cn(
-        "border-input bg-card text-foreground flex h-10 w-full min-w-0 items-center justify-between gap-2 border px-3 py-2 text-sm transition-[box-shadow,border-color] hover:border-muted-foreground/40",
-        "data-[placeholder]:text-muted-foreground/70",
+        "rounded-lg border-input bg-card text-foreground flex h-control w-full min-w-0 items-center justify-between gap-2 border px-3 py-2 text-sm transition-[box-shadow,border-color] hover:border-muted-foreground/40",
+        "data-[placeholder]:text-muted-foreground",
         "aria-invalid:border-destructive aria-invalid:ring-destructive/20",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className,
@@ -63,7 +63,7 @@ function SelectContent({
       >
         <SelectPrimitive.Popup
           className={cn(
-            "bg-popover text-popover-foreground shadow-popover max-h-[min(24rem,var(--available-height))] min-w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-y-auto border p-1 ",
+            "rounded-xl bg-popover text-popover-foreground shadow-popover max-h-[min(24rem,var(--available-height))] min-w-[var(--anchor-width)] origin-[var(--transform-origin)] overflow-y-auto border p-1 ",
             "transition-all duration-150 ease-out",
             "data-[starting-style]:translate-y-1 data-[starting-style]:opacity-0",
             "data-[ending-style]:translate-y-1 data-[ending-style]:opacity-0",

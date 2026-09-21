@@ -93,7 +93,7 @@ function EmployeeCard({
   onRemove: () => void;
 }) {
   return (
-    <div className="bg-card border p-4">
+    <div className="rounded-xl bg-card border p-4">
       <div className="mb-3 flex items-center justify-between">
         <span className="text-muted-foreground text-xs font-medium tabular-nums">
           Team member {index + 1}
@@ -269,7 +269,10 @@ export function StaffingStep({ state, actions }: { state: WizardState; actions: 
         }
         const row = state.staffing[d.value];
         return (
-          <div key={d.value} className="bg-card flex flex-wrap items-center gap-3 border px-4 py-3">
+          <div
+            key={d.value}
+            className="rounded-xl bg-card flex flex-wrap items-center gap-3 border px-4 py-3"
+          >
             <span className="w-24 text-sm font-medium">{d.label}</span>
             <div className="flex items-center gap-2">
               <Input

@@ -199,7 +199,7 @@ export default async function LeadsPage({
                 className={cn(
                   " inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors ",
                   f.active
-                    ? "bg-card text-foreground border"
+                    ? "rounded-xl bg-card text-foreground border"
                     : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >

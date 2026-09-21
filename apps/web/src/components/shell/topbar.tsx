@@ -61,7 +61,7 @@ function Topbar({
         <button
           type="button"
           onClick={() => setCmdOpen(true)}
-          className="text-muted-foreground hover:text-foreground bg-rack-deep border-rack-edge type-strip h-control-sm hover:border-rack-foreground/40 flex items-center gap-2 border px-2.5 transition-colors lg:w-72"
+          className="text-muted-foreground hover:text-foreground rounded-lg bg-rack-deep border-border type-strip h-control-sm hover:border-rack-foreground/40 flex items-center gap-2 border px-2.5 transition-colors lg:w-72"
           aria-label="Search or jump to"
         >
           <Search className="size-4 shrink-0" aria-hidden />

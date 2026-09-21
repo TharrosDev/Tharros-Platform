@@ -19,7 +19,7 @@ export function PlanPicker({ isOwner }: { isOwner: boolean }) {
           <div
             key={plan.tier}
             className={cn(
-              "bg-card relative flex flex-col border p-6 transition-[border-color,box-shadow] duration-200",
+              "rounded-xl bg-card relative flex flex-col border p-6 transition-[border-color,box-shadow] duration-200",
               plan.highlight
                 ? "border-primary-edge/40 ring-primary/15 ring-2"
                 : " hover:border-input",

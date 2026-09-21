@@ -9,8 +9,9 @@ import { marketingContainer } from "@/components/marketing/marketing-chrome";
 
 export const metadata: Metadata = {
   title: "Pricing",
+  alternates: { canonical: "/pricing" },
   description:
-    "Simple, flat monthly pricing for Canadian small businesses. One predictable number, no per-seat surprises. Start with a 14-day free trial.",
+    "Simple, flat monthly pricing for Canadian businesses and organizations. One predictable number, no per-seat surprises. Start with a 14-day free trial.",
 };
 
 const FAQ = [
@@ -35,11 +36,7 @@ const SHARED = [
   "CAD pricing, tax at checkout",
 ];
 
-/*
-  The plan ladder as three plates seated in the rack, in the order they climb.
-  Growth is the recommended rung, so it is printed on pending stock and carries
-  the one hi-vis key on the page.
-*/
+/* Plans use the billing source of truth. */
 export default function PricingPage() {
   return (
     <section className={cn(marketingContainer, "py-16 sm:py-24")}>
@@ -68,10 +65,68 @@ export default function PricingPage() {
         </ul>
       </div>
 
-      <div className="mt-12 grid items-start gap-px lg:grid-cols-3">
+      <div className="mt-12 grid items-start gap-5 lg:grid-cols-3">
         {PLANS.map((plan) => (
           <Plan key={plan.name} plan={plan} />
         ))}
+      </div>
+
+      <p className="comparison-hint">Swipe to compare all plans.</p>
+      <div
+        className="plan-comparison"
+        tabIndex={0}
+        role="region"
+        aria-label="Plan comparison, scroll horizontally on small screens"
+      >
+        <table>
+          <caption>Compare the work each plan brings together</caption>
+          <thead>
+            <tr>
+              <th scope="col">Included capability</th>
+              {PLANS.map((plan) => (
+                <th scope="col" key={plan.tier}>
+                  {plan.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {(
+              [
+                ["AI Business Assistant", "assistant"],
+                ["Workforce Scheduling & employee portal", "scheduling"],
+                ["Lead Capture & follow-up drafts", "leads"],
+                ["Native Automations", "automations"],
+              ] as const
+            ).map(([label, feature]) => (
+              <tr key={feature}>
+                <th scope="row">{label}</th>
+                {PLANS.map((plan) => (
+                  <td key={plan.tier}>
+                    {plan.products.includes(feature) ? "Included" : "Not included"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <th scope="row">AI queries per month</th>
+              {PLANS.map((plan) => (
+                <td key={plan.tier}>{plan.monthlyQueryCap.toLocaleString("en-CA")}</td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className="scope-note">
+        <h2 className="type-h2">Evaluating for a larger organization?</h2>
+        <p className="mt-3">
+          Choose by workflow and query needs, then review your access, data-handling and procurement
+          requirements before a wider rollout.{" "}
+          <Link href="/contact" className="marketing-text-link">
+            Talk to the Tharros team
+          </Link>
+        </p>
       </div>
 
       <dl className="mt-14 grid gap-x-10 gap-y-8 sm:grid-cols-3">
@@ -103,14 +158,16 @@ function Plan({ plan }: { plan: (typeof PLANS)[number] }) {
   return (
     <div
       className={cn(
-        "on-stock border-border flex min-w-0 flex-col border p-6 sm:p-8",
+        "on-stock rounded-xl border-border flex min-w-0 flex-col border p-6 sm:p-8",
         recommended ? "bg-stock-pending" : "bg-card",
       )}
     >
       <div className="flex items-baseline justify-between gap-3">
         <h2 className="type-h2 text-foreground">{plan.name}</h2>
         {recommended ? (
-          <p className="type-meta text-foreground">Everything in Starter, plus the team surfaces</p>
+          <p className="type-meta text-primary-soft-foreground max-w-36 text-right">
+            Includes scheduling & leads
+          </p>
         ) : null}
       </div>
 

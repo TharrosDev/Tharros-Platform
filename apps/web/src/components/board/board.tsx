@@ -2,16 +2,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/*
-  The board vocabulary.
-
-  A bay is a labelled section of the rack. A strip is one unit of work seated
-  in it, carrying a ruled grid complete enough to read without opening it. The
-  record log is what the system printed for itself.
-
-  Nothing here is a card, so nothing here nests.
-*/
-
 type Tone = "plain" | "pending" | "signal" | "cleared" | "procedure";
 
 const STOCK: Record<Tone, string> = {
@@ -30,10 +20,6 @@ const TAB: Record<Tone, string> = {
   procedure: "bg-info",
 };
 
-/**
- * A labelled bay. `count` is printed beside the label; pass `lead` on the one
- * bay whose count is the page's headline number.
- */
 function Bay({
   label,
   count,
@@ -60,11 +46,11 @@ function Bay({
       <header
         className={cn(
           "flex items-end justify-between gap-3 border-b pb-2",
-          lead ? "border-foreground border-b-2" : "border-border",
+          lead ? "border-primary/25" : "border-border",
         )}
       >
         <div className="flex min-w-0 items-baseline gap-3">
-          <h2 id={headingId} className="type-meta text-foreground">
+          <h2 id={headingId} className="type-h2 text-foreground">
             {label}
           </h2>
           {count !== undefined && !lead ? (
@@ -78,18 +64,11 @@ function Bay({
         <p className="type-count text-foreground pt-3 pb-1 leading-none">{count}</p>
       ) : null}
 
-      <div className="border-border flex flex-col border-x border-b">{children}</div>
+      <div className="mt-4 flex flex-col gap-2">{children}</div>
     </section>
   );
 }
 
-/**
- * One strip in a bay. `tone` sets the stock it is printed on and the colour of
- * its tab; state is the paper and the tab, never a pill floated on top.
- *
- * `seatIndex` staggers the seating entrance for the lead bay. Leave it unset
- * everywhere else: the board settles once, not section by section.
- */
 function Strip({
   tone = "plain",
   seatIndex,
@@ -103,23 +82,19 @@ function Strip({
       data-tone={tone}
       style={seatIndex === undefined ? undefined : { animationDelay: `${seatIndex * 45}ms` }}
       className={cn(
-        "border-border relative flex items-stretch border-b last:border-b-0",
+        "rounded-xl relative flex items-stretch overflow-hidden",
         STOCK[tone],
         seatIndex === undefined ? undefined : "animate-strip-seat",
         className,
       )}
       {...props}
     >
-      <span aria-hidden className={cn("w-1 shrink-0", TAB[tone])} />
+      <span aria-hidden className={cn("absolute left-3 top-4 size-1.5 rounded-full", TAB[tone])} />
       {children}
     </div>
   );
 }
 
-/**
- * The strip's printed grid. Everything a reader needs is here, so the board is
- * legible without opening a single strip.
- */
 function StripBody({
   what,
   detail,
@@ -138,7 +113,7 @@ function StripBody({
   return (
     <div
       className={cn(
-        "min-h-control-lg flex flex-1 flex-wrap items-center gap-x-4 gap-y-1 px-3 py-2.5 sm:flex-nowrap",
+        "min-h-control-lg flex flex-1 flex-wrap items-center gap-x-4 gap-y-1 pr-4 pl-7 py-3.5 sm:flex-nowrap",
         className,
       )}
     >
@@ -157,16 +132,12 @@ function StripBody({
   );
 }
 
-/**
- * The empty box only a person can fill. Every consequential thing the machine
- * produced arrives carrying one of these.
- */
 function InitialsBox({ label, className }: { label: string; className?: string }) {
   return (
     <span
       aria-hidden
       className={cn(
-        "border-foreground/45 bg-card/60 type-meta text-muted-foreground group-hover:border-foreground group-hover:bg-primary group-hover:text-primary-foreground flex h-7 min-w-11 items-center justify-center border px-2 transition-colors",
+        "rounded-xl border-foreground/45 bg-card/60 type-meta text-muted-foreground group-hover:border-foreground group-hover:bg-primary group-hover:text-primary-foreground flex h-7 min-w-11 items-center justify-center border px-2 transition-colors",
         className,
       )}
     >
@@ -175,7 +146,6 @@ function InitialsBox({ label, className }: { label: string; className?: string }
   );
 }
 
-/** The printed record. Continuous ruled lines, not a feed of cards. */
 function RecordLog({
   headingId,
   label,
@@ -201,12 +171,11 @@ function RecordLog({
         </h2>
         {action}
       </header>
-      <ol className="border-border bg-card border-x border-b">{children}</ol>
+      <ol className="border-border bg-card mt-4 overflow-hidden rounded-xl border">{children}</ol>
     </section>
   );
 }
 
-/** One line the system printed into the record. */
 function LogLine({
   time,
   children,

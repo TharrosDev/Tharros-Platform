@@ -57,9 +57,7 @@ function resolveColors(raw) {
       if (target) out.set(name, target);
       return target;
     }
-    const ok = value.match(
-      /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:\/\s*[\d.]+\s*)?\)$/,
-    );
+    const ok = value.match(/^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*(?:\/\s*[\d.]+\s*)?\)$/);
     if (!ok) return null;
     const triple = [Number(ok[1]), Number(ok[2]), Number(ok[3])];
     out.set(name, triple);
@@ -138,12 +136,7 @@ const GROUPS = [
       ["rack-muted-foreground", "rack-deep", AA_TEXT, "secondary label in a rail well"],
       ["sidebar-foreground", "sidebar", AA_TEXT, "nav text on the rail"],
       ["sidebar-muted-foreground", "sidebar", AA_TEXT, "nav secondary on the rail"],
-      [
-        "sidebar-accent-foreground",
-        "sidebar-accent",
-        AA_TEXT,
-        "current page: ink on hi-vis",
-      ],
+      ["sidebar-accent-foreground", "sidebar-accent", AA_TEXT, "current page: ink on hi-vis"],
     ],
   ],
   [
@@ -199,7 +192,7 @@ const GROUPS = [
       ["destructive", "card", AA_NONTEXT, "signal-red fill against a strip"],
       ["success", "card", AA_NONTEXT, "cleared fill against a strip"],
       ["info", "card", AA_NONTEXT, "procedure fill against a strip"],
-      ["foreground", "primary", AA_NONTEXT, "icon ink on a hi-vis control"],
+      ["primary-foreground", "primary", AA_NONTEXT, "icon ink on a primary control"],
       // A stock tint reinforces state; the tab is what carries it. The tab has
       // to clear 3:1 against the tinted strip it sits on, because that is the
       // non-colour-dependent signal a reader actually resolves.
@@ -232,14 +225,10 @@ for (const [heading, pairs] of GROUPS) {
     const value = contrast(fg, bg);
     const ok = value >= min;
     if (!ok) failures += 1;
-    console.log(
-      `  ${value.toFixed(2)}:1  ${ok ? "pass" : "**FAIL**"}  (need ${min})  ${label}`,
-    );
+    console.log(`  ${value.toFixed(2)}:1  ${ok ? "pass" : "**FAIL**"}  (need ${min})  ${label}`);
   }
 }
 
 const problems = failures + missing;
-console.log(
-  `\n${problems === 0 ? "All pairs pass." : `${failures} failing, ${missing} missing.`}`,
-);
+console.log(`\n${problems === 0 ? "All pairs pass." : `${failures} failing, ${missing} missing.`}`);
 process.exit(problems === 0 ? 0 : 1);

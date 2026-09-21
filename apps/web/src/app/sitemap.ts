@@ -4,6 +4,20 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tharros.ca";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
+    ...[
+      "/products",
+      "/products/business-assistant",
+      "/products/workforce-scheduling",
+      "/products/lead-capture",
+      "/products/automations",
+      "/solutions",
+      "/how-it-works",
+      "/contact",
+    ].map((path) => ({
+      url: `${baseUrl}${path}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
     {
       url: baseUrl,
       lastModified: new Date(),

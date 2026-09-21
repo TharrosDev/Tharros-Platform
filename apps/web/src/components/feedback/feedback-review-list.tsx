@@ -63,7 +63,7 @@ export function FeedbackReviewList({ submissions }: { submissions: ReviewSubmiss
             Recently reviewed{" "}
             <span className="text-muted-foreground text-base font-normal">({reviewed.length})</span>
           </h2>
-          <ul className="bg-card divide-border/60 overflow-hidden border divide-y">
+          <ul className="rounded-xl bg-card divide-border/60 overflow-hidden border divide-y">
             {reviewed.map((s) => (
               <li key={s.id} className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-sm">
                 <span className="font-medium">{s.orgName}</span>
@@ -109,7 +109,7 @@ function ReviewCard({ submission: s }: { submission: ReviewSubmission }) {
       layout
       exit={{ opacity: 0, scale: 0.98 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="bg-card space-y-3 border p-4"
+      className="rounded-xl bg-card space-y-3 border p-4"
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="bg-primary-soft text-primary-soft-foreground flex size-7 items-center justify-center">

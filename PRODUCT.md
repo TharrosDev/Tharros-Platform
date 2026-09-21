@@ -2,7 +2,7 @@
 
 ## Users
 
-Tharros is built for non-technical small-business owners and managers in Canada.
+Tharros serves Canadian businesses and organizations, large and small, with owners, managers and teams as its primary users. Larger organizations should evaluate workflow, access, capacity and procurement fit before a wider rollout.
 The product should feel like dependable operating software rather than an AI
 demo. Trust, clarity, tenant isolation and accurate representation of shipped
 capabilities take priority over novelty.
@@ -56,14 +56,7 @@ with this ladder.
 
 ## Design direction
 
-The production design system is The Strip Board. Every unit of work is a
-printed strip in a rack, and its position in the rack is its status: the
-machine prints the strip, a person initials it, and advancing it writes the
-record. A dark anodized rack carries the chrome, warm printed stock carries
-everything you read and act on, safety yellow is the control, signal red is
-stop, and procedure cyan is what the system printed itself. Nothing is
-rounded. The canonical
-implementation guidance lives in `apps/web/docs/DESIGN.md`.
+The production design direction is Common Ground: a bright, welcoming workspace with white and pale-blue surfaces, rounded controls, natural sentence-case typography and a clear blue action colour. Marketing uses mint, peach and lavender regions to distinguish real workflows. The user explicitly requested replacement of the dark, square Strip Board system. Canonical implementation guidance lives in `apps/web/docs/DESIGN.md`.
 
 ## Accessibility
 

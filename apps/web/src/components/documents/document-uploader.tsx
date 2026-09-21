@@ -160,14 +160,14 @@ export function DocumentUploader() {
           if (e.dataTransfer.files?.length) void handleFiles(e.dataTransfer.files);
         }}
         className={cn(
-          "group bg-card/60 relative flex cursor-pointer items-center gap-4 border border-dashed px-4 py-4 text-left transition-colors duration-150 sm:px-5",
+          "rounded-xl group bg-card/60 relative flex cursor-pointer items-center gap-4 border border-dashed px-4 py-4 text-left transition-colors duration-150 sm:px-5",
           "hover:border-primary-edge/40 hover:bg-primary-soft/25 ",
           dragging ? "border-primary-edge bg-primary-soft/50" : "border-input",
         )}
       >
         <span
           className={cn(
-            "bg-card text-primary-soft-foreground flex size-10 shrink-0 items-center justify-center border [&>svg]:size-5",
+            "rounded-xl bg-card text-primary-soft-foreground flex size-10 shrink-0 items-center justify-center border [&>svg]:size-5",
             dragging && "border-primary-edge/40",
           )}
         >
@@ -207,7 +207,7 @@ export function DocumentUploader() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className="bg-card flex items-center gap-3 border px-3.5 py-2.5 text-sm"
+                className="rounded-xl bg-card flex items-center gap-3 border px-3.5 py-2.5 text-sm"
               >
                 <StatusIcon status={it.status} />
                 <span className="text-foreground min-w-0 flex-1 truncate" title={it.name}>

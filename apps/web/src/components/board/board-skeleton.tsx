@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 /** The struck header every board surface opens with. */
 function HeaderSkeleton({ action = true }: { action?: boolean }) {
   return (
-    <div className="border-foreground flex items-end justify-between gap-4 border-b-2 pb-3">
+    <div className="border-foreground flex items-end justify-between gap-4 border-b pb-5">
       <div className="space-y-2">
         <Skeleton className="h-7 w-56" />
         <Skeleton className="h-3.5 w-40" />
