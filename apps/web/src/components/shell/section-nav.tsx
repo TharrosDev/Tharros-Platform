@@ -75,7 +75,7 @@ export function SectionNav({
                 transition={spring.snappy}
                 aria-hidden
                 className={cn(
-                  "absolute inset-x-0 -bottom-px h-0.5",
+                  "absolute inset-x-0 bottom-0 h-0.5",
                   danger ? "bg-destructive" : "bg-foreground",
                   vertical &&
                     cn("lg:inset-0 lg:h-auto", danger ? "lg:bg-destructive/12" : "lg:bg-primary"),

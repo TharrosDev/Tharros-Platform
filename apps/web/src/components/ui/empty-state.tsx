@@ -40,24 +40,24 @@ function EmptyState({
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60 [background-image:repeating-linear-gradient(to_bottom,var(--border)_0,var(--border)_1px,transparent_1px,transparent_2.25rem)]"
       />
-      <span
-        aria-hidden
-        className={cn(
-          "bg-card h-control w-control relative mb-4 flex items-center justify-center border [&>svg]:size-5",
-          tone === "danger"
-            ? "border-destructive text-destructive"
-            : "border-input text-muted-foreground",
-        )}
-      >
-        {icon}
-      </span>
-      <Heading className="type-h2 relative text-balance">{title}</Heading>
-      <p className="text-muted-foreground type-small relative mt-1.5 max-w-sm text-pretty">
-        {description}
-      </p>
-      {action ? (
-        <div className="relative mt-5 flex flex-wrap justify-center gap-2">{action}</div>
-      ) : null}
+      <div className="bg-surface-2 relative flex max-w-md flex-col items-center px-6 py-5">
+        <span
+          aria-hidden
+          className={cn(
+            "bg-card h-control w-control mb-4 flex items-center justify-center border [&>svg]:size-5",
+            tone === "danger"
+              ? "border-destructive text-destructive"
+              : "border-input text-muted-foreground",
+          )}
+        >
+          {icon}
+        </span>
+        <Heading className="type-h2 text-balance">{title}</Heading>
+        <p className="text-muted-foreground type-small mt-1.5 max-w-sm text-pretty">
+          {description}
+        </p>
+        {action ? <div className="mt-5 flex flex-wrap justify-center gap-2">{action}</div> : null}
+      </div>
     </div>
   );
 }

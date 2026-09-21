@@ -46,7 +46,7 @@ const cspHeader = `
   script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://js.stripe.com;
   script-src-attr 'none';
   style-src 'self' 'unsafe-inline';
-  img-src 'self' blob: data:;
+  img-src 'self' blob: data: ${supabaseHttpOrigin};
   font-src 'self';
   media-src 'self' blob:;
   worker-src 'self' blob:;

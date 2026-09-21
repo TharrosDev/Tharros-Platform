@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { m } from "motion/react";
@@ -42,6 +43,22 @@ function Sidebar({
   ns?: string;
   showAdmin?: boolean;
 }) {
+  const navRef = React.useRef<HTMLElement>(null);
+  const pathname = usePathname();
+
+  // Keep the current item inside the rail on screens too short to show it all.
+  // Scrolls the rail itself, never the page.
+  React.useEffect(() => {
+    const nav = navRef.current;
+    const item = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !item) return;
+    const top = item.offsetTop - nav.offsetTop;
+    const bottom = top + item.offsetHeight;
+    if (top < nav.scrollTop || bottom > nav.scrollTop + nav.clientHeight) {
+      nav.scrollTop = Math.max(0, top - nav.clientHeight / 2 + item.offsetHeight / 2);
+    }
+  }, [pathname]);
+
   const sections = showAdmin
     ? [
         ...navSections,
@@ -70,7 +87,11 @@ function Sidebar({
         <OrgSwitcher orgs={orgs} activeOrg={activeOrg} />
       </div>
 
-      <nav aria-label="Main" className="mt-5 flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-4">
+      <nav
+        ref={navRef}
+        aria-label="Main"
+        className="mt-4 flex flex-1 flex-col gap-4 overflow-y-auto px-3 pb-4"
+      >
         {sections.map((section) => (
           <div key={section.label}>
             <p className="type-meta text-rack-muted-foreground px-2 pb-1.5">{section.label}</p>
@@ -110,7 +131,7 @@ function NavLink({ item, ns, onNavigate }: { item: NavItem; ns: string; onNaviga
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "min-h-control-lg relative flex items-center gap-2.5 px-2 transition-colors",
+        "min-h-control-lg relative flex items-center gap-2.5 px-2 transition-colors lg:min-h-9",
         active
           ? "text-sidebar-accent-foreground"
           : "text-rack-muted-foreground hover:bg-accent hover:text-rack-foreground",

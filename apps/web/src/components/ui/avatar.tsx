@@ -20,10 +20,19 @@ function Avatar({ className, ...props }: React.ComponentProps<"span">) {
 
 function AvatarImage({ className, alt = "", ...props }: React.ComponentProps<"img">) {
   const [failed, setFailed] = React.useState(false);
+  const ref = React.useRef<HTMLImageElement>(null);
+
+  // An SSR'd image can fail before hydration attaches onError; catch that too.
+  React.useEffect(() => {
+    const img = ref.current;
+    if (img && img.complete && img.naturalWidth === 0) setFailed(true);
+  }, [props.src]);
+
   if (failed || !props.src) return null;
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      ref={ref}
       data-slot="avatar-image"
       alt={alt}
       className={cn("aspect-square size-full object-cover", className)}

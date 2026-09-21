@@ -20,7 +20,10 @@ function PageHeader({
   return (
     <div
       data-slot="page-header"
-      className={cn("flex flex-wrap items-end justify-between gap-x-6 gap-y-3", className)}
+      className={cn(
+        "border-foreground flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b-2 pb-3",
+        className,
+      )}
       {...props}
     >
       <div className="min-w-0 flex-[1_1_14rem] space-y-1.5">

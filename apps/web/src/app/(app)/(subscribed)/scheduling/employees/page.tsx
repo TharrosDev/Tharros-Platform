@@ -29,7 +29,7 @@ export default async function SchedulingEmployeesPage() {
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Team"
+        title="Employees"
         description="Your scheduling roster. Open a profile to set employment details, role certifications, and availability."
       />
 
